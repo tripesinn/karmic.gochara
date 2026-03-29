@@ -451,9 +451,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 
       <!-- Résultats géocodage -->
       <div id="geo-results" style="display:none;margin-bottom:6px;">
-        <select id="geo-select" style="width:100%;font-family:inherit;font-size:11px;height:22px;border:2px solid;border-color:#808080 #fff #fff #808080;background:#fff;padding:1px 4px;"
-                onchange="selectGeoResult()">
-        </select>
+        <div id="geo-list" style="border:2px solid;border-color:#808080 #fff #fff #808080;background:#fff;max-height:120px;overflow-y:auto;"></div>
       </div>
 
       <!-- Champs lat/lon/tz (remplis auto ou manuellement) -->
@@ -622,7 +620,7 @@ function openProfileModal() {
   document.getElementById("geo-status").textContent = "";
   document.getElementById("geo-status").className = "modal-status";
   document.getElementById("geo-results").style.display = "none";
-  document.getElementById("geo-select").innerHTML = "";
+  document.getElementById("geo-list").innerHTML = "";
 
   document.getElementById("profile-modal").classList.add("open");
 }
@@ -654,47 +652,38 @@ async function geocodeCity() {
       return;
     }
 
-    // Remplir le select
-    const sel = document.getElementById("geo-select");
-    sel.innerHTML = "";
-    list.forEach((item, i) => {
-      const opt = document.createElement("option");
-      opt.value = i;
-      opt.textContent = item.display_name;
-      opt.dataset.lat = item.lat;
-      opt.dataset.lon = item.lon;
-      // Tenter d'extraire le pays pour deviner le fuseau (simpliste)
-      opt.dataset.country = (item.address && item.address.country_code) ? item.address.country_code : "";
-      sel.appendChild(opt);
+    // Boutons mobile-friendly
+    const container = document.getElementById("geo-list");
+    container.innerHTML = "";
+    list.forEach((item) => {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.style.cssText = "display:block;width:100%;text-align:left;padding:8px 10px;font-family:inherit;font-size:11px;background:#fff;border:none;border-bottom:1px solid #c0c0c0;cursor:pointer;line-height:1.4;";
+      btn.textContent = item.display_name;
+      btn.addEventListener("click", () => {
+        const lat = parseFloat(item.lat);
+        const lon = parseFloat(item.lon);
+        document.getElementById("p-lat").value  = lat.toFixed(4);
+        document.getElementById("p-lon").value  = lon.toFixed(4);
+        document.getElementById("p-city").value = item.display_name;
+        guessTimezone(lat, lon);
+        setGeoStatus("OK : " + item.display_name, false);
+        document.getElementById("geo-results").style.display = "none";
+      });
+      container.appendChild(btn);
     });
 
     document.getElementById("geo-results").style.display = "block";
-    setGeoStatus(`${list.length} résultat(s) — sélectionne le bon.`, false);
+    setGeoStatus(list.length + " resultat(s) - touche le bon.", false);
 
   } catch (err) {
     setGeoStatus("Erreur réseau : " + err.message, true);
   }
 }
 
-function selectGeoResult() {
-  const sel = document.getElementById("geo-select");
-  const opt = sel.options[sel.selectedIndex];
-  if (!opt) return;
 
-  const lat = parseFloat(opt.dataset.lat);
-  const lon = parseFloat(opt.dataset.lon);
-  const label = opt.textContent;
 
-  document.getElementById("p-lat").value  = lat.toFixed(4);
-  document.getElementById("p-lon").value  = lon.toFixed(4);
-  document.getElementById("p-city").value = label;
-
-  // Fuseau horaire : on tente via l'API timezonefinder si disponible, sinon suggestion
-  guessTimezone(lat, lon, label);
-  setGeoStatus(`✓ ${label}`, false);
-}
-
-async function guessTimezone(lat, lon, label) {
+async function guessTimezone(lat, lon) {
   // API publique geoplugin / timeapi.io pour deviner le fuseau
   try {
     const res  = await fetch(`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`);
