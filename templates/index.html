@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✦ Gochara Karmique — Jérôme</title>
+<title>✦ Gochara Karmique — {{ natal.name }}</title>
 <style>
 /* ═══════════════════════════════════════════════════════
    WINDOWS 3.1 THEME — Gochara Karmique
@@ -101,6 +101,8 @@ body {
   padding: 4px 13px 2px 15px;
 }
 .btn:disabled { color: #808080; cursor: default; }
+.btn.small { min-width: 0; padding: 2px 8px; font-size: 11px; }
+.btn.danger { color: #800000; }
 
 /* ── Form elements ── */
 input[type="date"],
@@ -116,6 +118,8 @@ input[type="search"] {
   height: 22px;
 }
 input[type="number"] { width: 48px; }
+input[type="text"].wide { width: 180px; }
+input[type="text"].medium { width: 120px; }
 label { font-size: 11px; }
 
 /* ── Table ── */
@@ -173,6 +177,10 @@ tr:nth-child(even) td { background: #dcd8d0; }
   color: #000080;
   margin-bottom: 8px;
   font-style: italic;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px;
 }
 
 /* ── Loading ── */
@@ -192,6 +200,83 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
   background: #c0c0c0;
   border: 2px solid; border-color: #fff #808080 #808080 #fff;
 }
+
+/* ══════════════════════════════════════════════════════
+   MODAL — Profil natal
+══════════════════════════════════════════════════════ */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 1000;
+  align-items: center;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; }
+
+.modal-win {
+  background: #c0c0c0;
+  border: 2px solid;
+  border-color: #fff #808080 #808080 #fff;
+  box-shadow: 3px 3px 0 #000;
+  width: 420px;
+  max-width: 96vw;
+}
+
+.modal-body { padding: 12px; }
+
+.modal-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 7px;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.modal-row label {
+  width: 90px;
+  text-align: right;
+  flex-shrink: 0;
+  font-size: 11px;
+}
+.modal-row input { flex: 1; min-width: 0; }
+
+.modal-hint {
+  font-size: 10px;
+  color: #808080;
+  margin-left: 96px;
+  margin-bottom: 6px;
+}
+.modal-sep { margin: 8px 0 6px; }
+.modal-geocode-row {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 5px;
+  align-items: center;
+}
+.modal-geocode-row input { flex: 1; }
+.modal-status {
+  font-size: 10px;
+  color: #000080;
+  min-height: 14px;
+  margin-bottom: 4px;
+}
+.modal-status.error { color: #800000; }
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-top: 8px;
+  border-top: 1px solid #808080;
+  margin-top: 4px;
+}
+.coords-display {
+  font-size: 10px;
+  color: #505050;
+  font-style: italic;
+  margin-bottom: 6px;
+  margin-left: 96px;
+}
 </style>
 </head>
 <body>
@@ -202,7 +287,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 <div class="win" style="max-width:960px;margin:0 auto;">
 
   <div class="titlebar">
-    <div class="titlebar-title">✦ Gochara Karmique — Jérôme</div>
+    <div class="titlebar-title">✦ Gochara Karmique — <span id="title-name">{{ natal.name }}</span></div>
     <div class="titlebar-btns">
       <button class="tbtn">_</button>
       <button class="tbtn">□</button>
@@ -212,10 +297,17 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 
   <div class="winbody">
 
-    <!-- ── Info natal (lecture seule) ────────────────────────────── -->
+    <!-- ── Info natal (lecture seule + bouton modifier) ───────────── -->
     <div class="natal-info">
       <span class="natal-badge">NATAL</span>
-      31 Oct 1974 · 08h25 · Athis-Mons, France
+      <span id="natal-display">
+        {{ natal.day|string.zfill(2) if natal.day < 10 else natal.day }}
+        {{ ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"][natal.month - 1] }}
+        {{ natal.year }}
+        · {{ "%02d"|format(natal.hour) }}h{{ "%02d"|format(natal.minute) }}
+        · {{ natal.city }}
+      </span>
+      <button class="btn small" onclick="openProfileModal()" title="Modifier le profil natal">✎ Modifier</button>
       &nbsp;|&nbsp;
       <span class="natal-badge">RÉGLAGES</span>
       Ayanamsa : Djwhal Khul &nbsp;·&nbsp; Maisons : Moonrise (Chandra Lagna) &nbsp;·&nbsp; Nœuds : Vrais &nbsp;·&nbsp; Orbe : &lt; 3°
@@ -281,7 +373,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
         <div id="chat-log" class="sunken chat-log">
           <div class="chat-msg chat-ai">
             <strong>Jyotish-AI :</strong>
-            Namaste, Jérôme. Lance un calcul de tes transits, puis pose-moi tes questions sur ton chemin karmique.
+            Namaste, <span id="chat-greeting">{{ natal.name }}</span>. Lance un calcul de tes transits, puis pose-moi tes questions sur ton chemin karmique.
           </div>
         </div>
         <div class="chat-row">
@@ -304,6 +396,97 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 
 </div><!-- /win principale -->
 
+
+<!-- ═══════════════════════════════════════════════════════
+     MODAL — Modifier le profil natal
+═══════════════════════════════════════════════════════ -->
+<div class="modal-overlay" id="profile-modal">
+  <div class="modal-win">
+
+    <div class="titlebar">
+      <div class="titlebar-title">✎ Modifier le profil natal</div>
+      <div class="titlebar-btns">
+        <button class="tbtn" onclick="closeProfileModal()">✕</button>
+      </div>
+    </div>
+
+    <div class="modal-body">
+
+      <!-- Nom -->
+      <div class="modal-row">
+        <label for="p-name">Nom :</label>
+        <input type="text" id="p-name" class="wide" value="{{ natal.name }}" maxlength="60">
+      </div>
+
+      <hr class="modal-sep">
+
+      <!-- Date de naissance -->
+      <div class="modal-row">
+        <label>Naissance :</label>
+        <input type="number" id="p-day"   value="{{ natal.day }}"   min="1" max="31" style="width:44px;" placeholder="JJ">
+        <span style="font-size:11px">/</span>
+        <input type="number" id="p-month" value="{{ natal.month }}" min="1" max="12" style="width:44px;" placeholder="MM">
+        <span style="font-size:11px">/</span>
+        <input type="number" id="p-year"  value="{{ natal.year }}"  min="1900" max="2100" style="width:58px;" placeholder="AAAA">
+      </div>
+
+      <!-- Heure de naissance -->
+      <div class="modal-row">
+        <label>Heure :</label>
+        <input type="number" id="p-hour"   value="{{ natal.hour }}"   min="0" max="23" style="width:44px;">
+        <span style="font-size:11px">h</span>
+        <input type="number" id="p-minute" value="{{ natal.minute }}" min="0" max="59" style="width:44px;">
+        <span style="font-size:11px">min</span>
+      </div>
+
+      <hr class="modal-sep">
+
+      <!-- Géocodage ville -->
+      <div class="group-label" style="margin-bottom:5px;">Lieu de naissance</div>
+      <div class="modal-geocode-row">
+        <input type="text" id="p-city-search" placeholder="Chercher une ville…" class="wide">
+        <button class="btn small" onclick="geocodeCity()">🔍 Chercher</button>
+      </div>
+      <div class="modal-status" id="geo-status"></div>
+
+      <!-- Résultats géocodage -->
+      <div id="geo-results" style="display:none;margin-bottom:6px;">
+        <select id="geo-select" style="width:100%;font-family:inherit;font-size:11px;height:22px;border:2px solid;border-color:#808080 #fff #fff #808080;background:#fff;padding:1px 4px;"
+                onchange="selectGeoResult()">
+        </select>
+      </div>
+
+      <!-- Champs lat/lon/tz (remplis auto ou manuellement) -->
+      <div class="modal-row">
+        <label>Ville :</label>
+        <input type="text" id="p-city" value="{{ natal.city }}" class="wide" placeholder="Ex : Athis-Mons, France">
+      </div>
+      <div class="modal-row">
+        <label>Latitude :</label>
+        <input type="number" id="p-lat" value="{{ natal.lat }}" step="0.0001" style="width:90px;" min="-90" max="90">
+        <label style="width:auto;margin-left:4px;">Longitude :</label>
+        <input type="number" id="p-lon" value="{{ natal.lon }}" step="0.0001" style="width:90px;" min="-180" max="180">
+      </div>
+      <div class="modal-row">
+        <label>Fuseau :</label>
+        <input type="text" id="p-tz" value="{{ natal.tz }}" style="width:160px;" placeholder="Europe/Paris">
+      </div>
+      <div class="modal-hint">Exemples : Europe/Paris, America/New_York, Asia/Kolkata</div>
+
+      <hr class="modal-sep">
+
+      <!-- Actions -->
+      <div class="modal-actions">
+        <button class="btn small danger" onclick="resetProfile()">↺ Réinitialiser</button>
+        <button class="btn small" onclick="closeProfileModal()">Annuler</button>
+        <button class="btn small" id="save-btn" onclick="saveProfile()">✓ Enregistrer</button>
+      </div>
+
+    </div><!-- /modal-body -->
+  </div><!-- /modal-win -->
+</div><!-- /modal-overlay -->
+
+
 <!-- ═══════════════════════════════════════════════════════
      JAVASCRIPT
 ═══════════════════════════════════════════════════════ -->
@@ -312,6 +495,20 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 
 let chartContext = "";
 let chatHistory  = [];
+
+// Données natales courantes (initialisées depuis Jinja)
+let currentNatal = {
+  name:   {{ natal.name | tojson }},
+  year:   {{ natal.year }},
+  month:  {{ natal.month }},
+  day:    {{ natal.day }},
+  hour:   {{ natal.hour }},
+  minute: {{ natal.minute }},
+  lat:    {{ natal.lat }},
+  lon:    {{ natal.lon }},
+  tz:     {{ natal.tz | tojson }},
+  city:   {{ natal.city | tojson }},
+};
 
 /* ── Calcul principal ──────────────────────────────────────────── */
 async function calculateTransits() {
@@ -384,7 +581,7 @@ async function sendChat() {
   const msg   = input.value.trim();
   if (!msg) return;
 
-  addChatMsg("Jérôme", msg, "chat-user");
+  addChatMsg(currentNatal.name, msg, "chat-user");
   input.value = "";
 
   try {
@@ -402,6 +599,206 @@ async function sendChat() {
   } catch (err) {
     addChatMsg("Système", "⚠ " + err.message, "chat-sys");
   }
+}
+
+/* ══════════════════════════════════════════════════════
+   MODAL — Profil natal
+══════════════════════════════════════════════════════ */
+function openProfileModal() {
+  // Pré-remplit les champs avec les valeurs courantes
+  document.getElementById("p-name").value   = currentNatal.name;
+  document.getElementById("p-day").value    = currentNatal.day;
+  document.getElementById("p-month").value  = currentNatal.month;
+  document.getElementById("p-year").value   = currentNatal.year;
+  document.getElementById("p-hour").value   = currentNatal.hour;
+  document.getElementById("p-minute").value = currentNatal.minute;
+  document.getElementById("p-city").value   = currentNatal.city;
+  document.getElementById("p-lat").value    = currentNatal.lat;
+  document.getElementById("p-lon").value    = currentNatal.lon;
+  document.getElementById("p-tz").value     = currentNatal.tz;
+
+  // Reset géocodage
+  document.getElementById("p-city-search").value = "";
+  document.getElementById("geo-status").textContent = "";
+  document.getElementById("geo-status").className = "modal-status";
+  document.getElementById("geo-results").style.display = "none";
+  document.getElementById("geo-select").innerHTML = "";
+
+  document.getElementById("profile-modal").classList.add("open");
+}
+
+function closeProfileModal() {
+  document.getElementById("profile-modal").classList.remove("open");
+}
+
+// Fermer en cliquant sur l'overlay
+document.getElementById("profile-modal").addEventListener("click", function(e) {
+  if (e.target === this) closeProfileModal();
+});
+
+/* ── Géocodage via Nominatim (OpenStreetMap, gratuit, pas de clé) ── */
+async function geocodeCity() {
+  const query = document.getElementById("p-city-search").value.trim();
+  if (!query) { setGeoStatus("Saisis un nom de ville.", true); return; }
+
+  setGeoStatus("Recherche en cours…", false);
+  document.getElementById("geo-results").style.display = "none";
+
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&accept-language=fr`;
+    const res  = await fetch(url, { headers: { "Accept-Language": "fr" } });
+    const list = await res.json();
+
+    if (!list || list.length === 0) {
+      setGeoStatus("Aucun résultat. Essaie un nom plus précis.", true);
+      return;
+    }
+
+    // Remplir le select
+    const sel = document.getElementById("geo-select");
+    sel.innerHTML = "";
+    list.forEach((item, i) => {
+      const opt = document.createElement("option");
+      opt.value = i;
+      opt.textContent = item.display_name;
+      opt.dataset.lat = item.lat;
+      opt.dataset.lon = item.lon;
+      // Tenter d'extraire le pays pour deviner le fuseau (simpliste)
+      opt.dataset.country = (item.address && item.address.country_code) ? item.address.country_code : "";
+      sel.appendChild(opt);
+    });
+
+    document.getElementById("geo-results").style.display = "block";
+    setGeoStatus(`${list.length} résultat(s) — sélectionne le bon.`, false);
+
+  } catch (err) {
+    setGeoStatus("Erreur réseau : " + err.message, true);
+  }
+}
+
+function selectGeoResult() {
+  const sel = document.getElementById("geo-select");
+  const opt = sel.options[sel.selectedIndex];
+  if (!opt) return;
+
+  const lat = parseFloat(opt.dataset.lat);
+  const lon = parseFloat(opt.dataset.lon);
+  const label = opt.textContent;
+
+  document.getElementById("p-lat").value  = lat.toFixed(4);
+  document.getElementById("p-lon").value  = lon.toFixed(4);
+  document.getElementById("p-city").value = label;
+
+  // Fuseau horaire : on tente via l'API timezonefinder si disponible, sinon suggestion
+  guessTimezone(lat, lon, label);
+  setGeoStatus(`✓ ${label}`, false);
+}
+
+async function guessTimezone(lat, lon, label) {
+  // API publique geoplugin / timeapi.io pour deviner le fuseau
+  try {
+    const res  = await fetch(`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`);
+    const data = await res.json();
+    if (data && data.timeZone) {
+      document.getElementById("p-tz").value = data.timeZone;
+    }
+  } catch {
+    // Pas grave — l'utilisateur peut le saisir manuellement
+  }
+}
+
+function setGeoStatus(msg, isError) {
+  const el = document.getElementById("geo-status");
+  el.textContent = msg;
+  el.className = "modal-status" + (isError ? " error" : "");
+}
+
+/* ── Enregistrer le profil ───────────────────────────────────── */
+async function saveProfile() {
+  const btn = document.getElementById("save-btn");
+  btn.disabled = true;
+  btn.textContent = "…";
+
+  const payload = {
+    name:   document.getElementById("p-name").value.trim() || "Utilisateur",
+    day:    parseInt(document.getElementById("p-day").value),
+    month:  parseInt(document.getElementById("p-month").value),
+    year:   parseInt(document.getElementById("p-year").value),
+    hour:   parseInt(document.getElementById("p-hour").value)   || 0,
+    minute: parseInt(document.getElementById("p-minute").value) || 0,
+    lat:    parseFloat(document.getElementById("p-lat").value),
+    lon:    parseFloat(document.getElementById("p-lon").value),
+    city:   document.getElementById("p-city").value.trim(),
+    tz:     document.getElementById("p-tz").value.trim() || "Europe/Paris",
+  };
+
+  try {
+    const res  = await fetch("/update_natal", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+
+    if (data.error) throw new Error(data.error);
+
+    // Mise à jour locale
+    currentNatal = data.natal;
+
+    // Mise à jour de l'affichage sans rechargement
+    updateNatalDisplay(data.natal);
+    closeProfileModal();
+    setStatus(`✓ Profil de ${data.natal.name} enregistré.`);
+
+    // Réinitialiser le chat avec le nouveau prénom
+    document.getElementById("chat-greeting").textContent = data.natal.name;
+
+    // Signaler que le contexte astrologique a changé
+    chartContext = "";
+    chatHistory  = [];
+    setAspectsHTML('<div style="padding:6px;" class="loading">Profil modifié — lance un nouveau calcul.</div>');
+    setSynthesisHTML('<span class="loading">Profil modifié — lance un nouveau calcul.</span>');
+
+  } catch (err) {
+    alert("Erreur : " + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "✓ Enregistrer";
+  }
+}
+
+/* ── Réinitialiser le profil par défaut ─────────────────────── */
+async function resetProfile() {
+  if (!confirm("Réinitialiser le profil aux données de Jérôme ?")) return;
+  const res  = await fetch("/reset_natal", { method: "POST" });
+  const data = await res.json();
+  if (data.ok) {
+    currentNatal = data.natal;
+    updateNatalDisplay(data.natal);
+
+    // Remplir les champs du modal avec les valeurs réinitialisées
+    document.getElementById("p-name").value   = data.natal.name;
+    document.getElementById("p-day").value    = data.natal.day;
+    document.getElementById("p-month").value  = data.natal.month;
+    document.getElementById("p-year").value   = data.natal.year;
+    document.getElementById("p-hour").value   = data.natal.hour;
+    document.getElementById("p-minute").value = data.natal.minute;
+    document.getElementById("p-city").value   = data.natal.city;
+    document.getElementById("p-lat").value    = data.natal.lat;
+    document.getElementById("p-lon").value    = data.natal.lon;
+    document.getElementById("p-tz").value     = data.natal.tz;
+
+    setStatus("Profil réinitialisé.");
+  }
+}
+
+/* ── Mise à jour de l'affichage natal dans le header ─────────── */
+const MONTHS_FR = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
+function updateNatalDisplay(n) {
+  document.getElementById("title-name").textContent = n.name;
+  document.getElementById("natal-display").textContent =
+    `${String(n.day).padStart(2,"0")} ${MONTHS_FR[n.month-1]} ${n.year} · ${pad(n.hour)}h${pad(n.minute)} · ${n.city}`;
+  document.title = `✦ Gochara Karmique — ${n.name}`;
 }
 
 /* ── Helpers ───────────────────────────────────────────────────── */
