@@ -127,6 +127,7 @@ def calculate():
     try:
         year, month, day = map(int, date_str.split("-"))
         result = calculate_transits(natal, TRANSIT_LOC, year, month, day, hour, minute)
+        result["name"] = natal["name"]
         result["synthesis"] = get_synthesis(result)
         result["chart_context"] = build_chart_context(result)
         return jsonify(result)
