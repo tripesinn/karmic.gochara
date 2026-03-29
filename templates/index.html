@@ -403,7 +403,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 
           <div class="win">
             <div class="titlebar gold">
-              <div class="titlebar-title">✦ Carte Karmique — Doctrine @siderealAstro13 (RAM / ROM / Stage)</div>
+              <div class="titlebar-title">✦ Carte Karmique — @siderealAstro13 (RAM / ROM / Stage)</div>
             </div>
             <div class="winbody" style="padding:4px;">
               <div id="karma-map-wrap" style="text-align:center;">
@@ -414,10 +414,10 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
                 </svg>
               </div>
               <div class="karma-legend">
-                <span class="quadrant-badge badge-rom">🔴 ROM — Nœud Sud ☋ (prison karmique)</span>
-                <span class="quadrant-badge badge-ram">🟢 RAM — Chiron ⚷ (Porte Invisible)</span>
-                <span class="quadrant-badge badge-stage">🔵 STAGE — Dharma / Nœud Nord ☊</span>
-                <span class="quadrant-badge badge-trial">🟣 ÉPREUVE — Lilith ⚸ (Karmic Trial)</span>
+                <span class="quadrant-badge badge-rom">🔴 ROM —Karma ☋</span>
+                <span class="quadrant-badge badge-ram">🟢 RAM — ⚷ blessure cachée</span>
+                <span class="quadrant-badge badge-stage">🔵 STAGE — Dharma ☊</span>
+                <span class="quadrant-badge badge-trial">🟣 ÉPREUVE — ⚸ trigger</span>
               </div>
             </div>
           </div>
@@ -425,19 +425,19 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
           <!-- Quadrants détail -->
           <div class="karma-quadrants">
             <div class="karma-q karma-q-rom">
-              <div class="karma-q-title">🔴 ROM — Blocages karmiques (Nœud Sud ☋)</div>
+              <div class="karma-q-title">🔴 ROM — karma ☋</div>
               <div id="kq-rom" class="loading">Calcule pour afficher…</div>
             </div>
             <div class="karma-q karma-q-ram">
-              <div class="karma-q-title">🟢 RAM — Portes ouvertes (Chiron ⚷)</div>
+              <div class="karma-q-title">🟢 RAM — blessure cachée ⚷</div>
               <div id="kq-ram" class="loading">Calcule pour afficher…</div>
             </div>
             <div class="karma-q karma-q-stage">
-              <div class="karma-q-title">🔵 STAGE — Flux dharma actif (Nœud Nord ☊)</div>
+              <div class="karma-q-title">🔵 STAGE — dharma ☊</div>
               <div id="kq-stage" class="loading">Calcule pour afficher…</div>
             </div>
             <div class="karma-q karma-q-trial">
-              <div class="karma-q-title">🟣 ÉPREUVE — Karmic Trial (Lilith ⚸)</div>
+              <div class="karma-q-title">🟣 ÉPREUVE — Karmic Trial ⚸</div>
               <div id="kq-trial" class="loading">Calcule pour afficher…</div>
             </div>
           </div>
@@ -741,7 +741,7 @@ function renderKarmaMap(data) {
   for (let i = 0; i < 12; i++) {
     const a = lonToAngle(i * 30 + 15);
     s += `<text x="${polarX(R_label, a)}" y="${polarY(R_label, a)}" text-anchor="middle"
-          dominant-baseline="middle" font-size="11" fill="#555" font-family="Arial">${SIGN_SYM[i]}</text>`;
+          dominant-baseline="middle" font-size="16" fill="#555" font-family="Arial">${SIGN_SYM[i]}</text>`;
   }
 
   // ── Lignes aspects ──
@@ -784,7 +784,7 @@ function renderKarmaMap(data) {
     const a = lonToAngle(d.lon_raw);
     const r = R_out - 8;
     const sym = PLANET_SYM[name] || name.substring(0, 2);
-    s += `<circle cx="${polarX(r, a)}" cy="${polarY(r, a)}" r="6" fill="#1084d0" fill-opacity="0.8"/>`;
+    s += `<circle cx="${polarX(r, a)}" cy="${polarY(r, a)}" r="14" fill="#1084d0" fill-opacity="0.8"/>`;
     s += `<text x="${polarX(r, a)}" y="${polarY(r, a)}" text-anchor="middle"
           dominant-baseline="middle" font-size="8" fill="white" font-family="Arial">${escHtml(sym)}</text>`;
   });
@@ -797,14 +797,14 @@ function renderKarmaMap(data) {
     const sym = PLANET_SYM[name] || name.substring(0, 2);
     s += `<circle cx="${polarX(r, a)}" cy="${polarY(r, a)}" r="6" fill="#4b0082" fill-opacity="0.8"/>`;
     s += `<text x="${polarX(r, a)}" y="${polarY(r, a)}" text-anchor="middle"
-          dominant-baseline="middle" font-size="8" fill="white" font-family="Arial">${escHtml(sym)}</text>`;
+          dominant-baseline="middle" font-size="16" fill="white" font-family="Arial">${escHtml(sym)}</text>`;
   });
 
   // ── Labels ──
-  s += `<text x="4" y="14" font-size="9" fill="#1084d0" font-family="Arial">● Transit</text>`;
-  s += `<text x="4" y="26" font-size="9" fill="#4b0082" font-family="Arial">● Natal</text>`;
+  s += `<text x="4" y="14" font-size="14" fill="#1084d0" font-family="Arial">● Transit</text>`;
+  s += `<text x="4" y="26" font-size="14" fill="#4b0082" font-family="Arial">● Natal</text>`;
   s += `<text x="${cx}" y="${cy}" text-anchor="middle" dominant-baseline="middle"
-        font-size="10" fill="#404040" font-family="Arial">${data.transit_date || ""}</text>`;
+        font-size="16" fill="#404040" font-family="Arial">${data.transit_date || ""}</text>`;
 
   svg.innerHTML = s;
   updateKarmaQuadrants(data.aspects);
