@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✦ Gochara Karmique — {{ natal.name }}</title>
+<title>✦ Gochara Karmique</title>
 <style>
 /* ═══════════════════════════════════════════════════════
    WINDOWS 3.1 THEME — Gochara Karmique
@@ -19,7 +19,6 @@ body {
   padding: 6px;
 }
 
-/* ── Window ── */
 .win {
   background: #c0c0c0;
   border: 2px solid;
@@ -28,7 +27,6 @@ body {
   margin-bottom: 6px;
 }
 
-/* ── Title bar ── */
 .titlebar {
   background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
   color: #fff;
@@ -44,6 +42,7 @@ body {
 .titlebar.purple { background: linear-gradient(90deg, #4b0082 0%, #800080 100%); }
 .titlebar.green  { background: linear-gradient(90deg, #005000 0%, #228B22 100%); }
 .titlebar.teal   { background: linear-gradient(90deg, #005060 0%, #008080 100%); }
+.titlebar.karma  { background: linear-gradient(90deg, #3a006f 0%, #7b00d4 100%); }
 
 .titlebar-title { display: flex; align-items: center; gap: 5px; }
 .titlebar-btns  { display: flex; gap: 2px; }
@@ -55,10 +54,8 @@ body {
   display: flex; align-items: center; justify-content: center;
 }
 
-/* ── Window body ── */
 .winbody { padding: 8px; }
 
-/* ── Sunken panel (inputs / displays) ── */
 .sunken {
   background: #fff;
   border: 2px solid;
@@ -67,7 +64,6 @@ body {
   overflow-y: auto;
 }
 
-/* ── Raised group box ── */
 .group {
   border: 2px solid;
   border-color: #808080 #fff #fff #808080;
@@ -82,7 +78,6 @@ body {
   color: #000080;
 }
 
-/* ── Buttons ── */
 .btn {
   background: #c0c0c0;
   border: 2px solid;
@@ -101,10 +96,7 @@ body {
   padding: 4px 13px 2px 15px;
 }
 .btn:disabled { color: #808080; cursor: default; }
-.btn.small { min-width: 0; padding: 2px 8px; font-size: 11px; }
-.btn.danger { color: #800000; }
 
-/* ── Form elements ── */
 input[type="date"],
 input[type="number"],
 input[type="text"],
@@ -118,11 +110,8 @@ input[type="search"] {
   height: 22px;
 }
 input[type="number"] { width: 48px; }
-input[type="text"].wide { width: 180px; }
-input[type="text"].medium { width: 120px; }
 label { font-size: 11px; }
 
-/* ── Table ── */
 table { width: 100%; border-collapse: collapse; font-size: 11px; }
 thead tr { background: #000080; color: #fff; }
 th { padding: 3px 6px; text-align: left; font-weight: bold; white-space: nowrap; }
@@ -130,7 +119,6 @@ td { padding: 2px 6px; border-bottom: 1px solid #c0c0c0; }
 tr:nth-child(odd)  td { background: #fff; }
 tr:nth-child(even) td { background: #dcd8d0; }
 
-/* ── Status bar ── */
 .statusbar {
   background: #c0c0c0;
   border-top: 1px solid #808080;
@@ -146,7 +134,6 @@ tr:nth-child(even) td { background: #dcd8d0; }
 }
 .statpanel.fixed { flex: 0 0 auto; }
 
-/* ── Aspect color classes ── */
 .asp-conj  { color: #000080; font-weight: bold; }
 .asp-oppo  { color: #800000; font-weight: bold; }
 .asp-trig  { color: #005500; font-weight: bold; }
@@ -154,7 +141,6 @@ tr:nth-child(even) td { background: #dcd8d0; }
 .asp-sext  { color: #005500; }
 .retro     { color: #800000; font-style: italic; }
 
-/* ── Chat ── */
 .chat-log { height: 190px; overflow-y: auto; }
 .chat-msg { margin-bottom: 5px; font-size: 11px; line-height: 1.5; }
 .chat-user strong { color: #000080; }
@@ -163,7 +149,6 @@ tr:nth-child(even) td { background: #dcd8d0; }
 .chat-row  { display: flex; gap: 4px; margin-top: 5px; }
 .chat-input { flex: 1; }
 
-/* ── Natal header badge ── */
 .natal-badge {
   background: #000080;
   color: #fff;
@@ -177,23 +162,15 @@ tr:nth-child(even) td { background: #dcd8d0; }
   color: #000080;
   margin-bottom: 8px;
   font-style: italic;
-  display: flex;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 4px;
 }
 
-/* ── Loading ── */
 .loading { color: #808080; font-style: italic; }
 
-/* ── Layout grid ── */
 .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
 @media (max-width: 680px) { .grid2 { grid-template-columns: 1fr; } }
 
-/* ── HR ── */
 hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 5px 0; }
 
-/* ── Scrollbar (webkit) ── */
 ::-webkit-scrollbar { width: 14px; }
 ::-webkit-scrollbar-track { background: #c0c0c0; border: 1px solid #808080; }
 ::-webkit-scrollbar-thumb {
@@ -201,93 +178,87 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
   border: 2px solid; border-color: #fff #808080 #808080 #fff;
 }
 
-/* ══════════════════════════════════════════════════════
-   MODAL — Profil natal
-══════════════════════════════════════════════════════ */
-.modal-overlay {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.45);
-  z-index: 1000;
-  align-items: center;
-  justify-content: center;
+/* ── ONGLETS ── */
+.tabs {
+  display: flex;
+  gap: 2px;
+  margin-bottom: -2px;
+  position: relative;
+  z-index: 1;
 }
-.modal-overlay.open { display: flex; }
-
-.modal-win {
+.tab {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #fff #808080 #808080 #fff;
-  box-shadow: 3px 3px 0 #000;
-  width: 420px;
-  max-width: 96vw;
-}
-
-.modal-body { padding: 12px; }
-
-.modal-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 7px;
-  gap: 6px;
-  flex-wrap: wrap;
-}
-.modal-row label {
-  width: 90px;
-  text-align: right;
-  flex-shrink: 0;
+  border-bottom: none;
+  padding: 3px 14px;
+  font-family: inherit;
   font-size: 11px;
+  font-weight: bold;
+  cursor: pointer;
+  color: #000;
 }
-.modal-row input { flex: 1; min-width: 0; }
+.tab.active {
+  background: #c0c0c0;
+  border-bottom: 2px solid #c0c0c0;
+  padding-bottom: 5px;
+  margin-top: -2px;
+}
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
 
-.modal-hint {
-  font-size: 10px;
-  color: #808080;
-  margin-left: 96px;
-  margin-bottom: 6px;
-}
-.modal-sep { margin: 8px 0 6px; }
-.modal-geocode-row {
+/* ── CARTE KARMIQUE ── */
+#carte-svg-wrap {
+  background: #fff;
+  border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
   display: flex;
-  gap: 4px;
-  margin-bottom: 5px;
   align-items: center;
+  justify-content: center;
+  min-height: 520px;
+  position: relative;
 }
-.modal-geocode-row input { flex: 1; }
-.modal-status {
-  font-size: 10px;
-  color: #000080;
-  min-height: 14px;
-  margin-bottom: 4px;
+#carte-svg-wrap svg { max-width: 520px; width: 100%; }
+
+/* Tooltip carte */
+#carte-tooltip {
+  position: absolute;
+  background: #ffffe1;
+  border: 1px solid #808080;
+  padding: 4px 8px;
+  font-size: 11px;
+  pointer-events: none;
+  display: none;
+  z-index: 10;
+  max-width: 200px;
+  box-shadow: 1px 1px 0 #000;
 }
-.modal-status.error { color: #800000; }
-.modal-actions {
+
+/* Légende */
+.carte-legend {
   display: flex;
-  justify-content: flex-end;
+  flex-wrap: wrap;
   gap: 6px;
-  padding-top: 8px;
-  border-top: 1px solid #808080;
-  margin-top: 4px;
-}
-.coords-display {
+  padding: 6px 8px;
   font-size: 10px;
-  color: #505050;
-  font-style: italic;
-  margin-bottom: 6px;
-  margin-left: 96px;
+  border-top: 1px solid #808080;
+  background: #c0c0c0;
+}
+.leg-item { display: flex; align-items: center; gap: 4px; }
+.leg-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  display: inline-block;
+  flex-shrink: 0;
 }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════════════════════════
-     FENÊTRE PRINCIPALE
-═══════════════════════════════════════════════════════ -->
 <div class="win" style="max-width:960px;margin:0 auto;">
 
   <div class="titlebar">
-    <div class="titlebar-title">✦ Gochara Karmique — <span id="title-name">{{ natal.name }}</span></div>
+    <div class="titlebar-title">✦ Gochara Karmique — Jérôme</div>
     <div class="titlebar-btns">
       <button class="tbtn">_</button>
       <button class="tbtn">□</button>
@@ -297,23 +268,16 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 
   <div class="winbody">
 
-    <!-- ── Info natal (lecture seule + bouton modifier) ───────────── -->
+    <!-- Info natal -->
     <div class="natal-info">
       <span class="natal-badge">NATAL</span>
-      <span id="natal-display">
-        {{ natal.day|string.zfill(2) if natal.day < 10 else natal.day }}
-        {{ ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"][natal.month - 1] }}
-        {{ natal.year }}
-        · {{ "%02d"|format(natal.hour) }}h{{ "%02d"|format(natal.minute) }}
-        · {{ natal.city }}
-      </span>
-      <button class="btn small" onclick="openProfileModal()" title="Modifier le profil natal">✎ Modifier</button>
+      31 Oct 1974 · 08h00 · Athis-Mons, France
       &nbsp;|&nbsp;
       <span class="natal-badge">RÉGLAGES</span>
       Ayanamsa : Djwhal Khul &nbsp;·&nbsp; Maisons : Moonrise (Chandra Lagna) &nbsp;·&nbsp; Nœuds : Vrais &nbsp;·&nbsp; Orbe : &lt; 3°
     </div>
 
-    <!-- ── Saisie des transits ────────────────────────────────────── -->
+    <!-- Saisie -->
     <div class="group">
       <div class="group-label">Transits — Date de consultation</div>
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
@@ -335,155 +299,101 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
       </div>
     </div>
 
-    <!-- ── Résultats : aspects + synthèse ────────────────────────── -->
-    <div class="grid2">
-
-      <!-- Aspects -->
-      <div class="win">
-        <div class="titlebar teal">
-          <div class="titlebar-title">☌ Aspects actifs (orbe &lt; 3°)</div>
-        </div>
-        <div class="winbody" style="padding:4px;">
-          <div id="aspects-wrap" class="sunken" style="height:300px;padding:0;">
-            <div style="padding:6px;" class="loading">En attente de calcul…</div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Synthèse IA -->
-      <div class="win">
-        <div class="titlebar purple">
-          <div class="titlebar-title">✦ Synthèse karmique — Jyotish-AI</div>
-        </div>
-        <div class="winbody" style="padding:4px;">
-          <div id="synthesis" class="sunken" style="height:300px;font-size:11px;line-height:1.6;">
-            <span class="loading">En attente de calcul…</span>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /grid2 -->
-
-    <!-- ── Chat ──────────────────────────────────────────────────── -->
-    <div class="win">
-      <div class="titlebar green">
-        <div class="titlebar-title">✉ Dialogue karmique</div>
-      </div>
-      <div class="winbody">
-        <div id="chat-log" class="sunken chat-log">
-          <div class="chat-msg chat-ai">
-            <strong>Jyotish-AI :</strong>
-            Namaste, <span id="chat-greeting">{{ natal.name }}</span>. Lance un calcul de tes transits, puis pose-moi tes questions sur ton chemin karmique.
-          </div>
-        </div>
-        <div class="chat-row">
-          <input type="text" id="chat-input" class="chat-input"
-                 placeholder="Pose ta question sur tes transits karmiques…"
-                 onkeydown="if(event.key==='Enter')sendChat()">
-          <button class="btn" onclick="sendChat()">Envoyer »</button>
-        </div>
-      </div>
+    <!-- ONGLETS -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('gochara')">☌ Gochara</button>
+      <button class="tab" onclick="switchTab('carte')">✦ Carte Karmique</button>
     </div>
 
-  </div><!-- /winbody principale -->
+    <!-- ═══ ONGLET GOCHARA ═══ -->
+    <div id="tab-gochara" class="tab-panel active" style="border:2px solid;border-color:#808080 #fff #fff #808080;padding:6px;background:#c0c0c0;">
 
-  <!-- ── Status bar ──────────────────────────────────────────────── -->
+      <div class="grid2">
+        <div class="win">
+          <div class="titlebar teal">
+            <div class="titlebar-title">☌ Aspects actifs (orbe &lt; 3°)</div>
+          </div>
+          <div class="winbody" style="padding:4px;">
+            <div id="aspects-wrap" class="sunken" style="height:300px;padding:0;">
+              <div style="padding:6px;" class="loading">En attente de calcul…</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="win">
+          <div class="titlebar purple">
+            <div class="titlebar-title">✦ Synthèse karmique — siderealAstro13</div>
+          </div>
+          <div class="winbody" style="padding:4px;">
+            <div id="synthesis" class="sunken" style="height:300px;font-size:11px;line-height:1.6;">
+              <span class="loading">En attente de calcul…</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat -->
+      <div class="win">
+        <div class="titlebar green">
+          <div class="titlebar-title">✉ Dialogue karmique</div>
+        </div>
+        <div class="winbody">
+          <div id="chat-log" class="sunken chat-log">
+            <div class="chat-msg chat-ai">
+              <strong>siderealAstro13-AI :</strong>
+              Namaste, lance un calcul de tes transits, puis pose tes questions — ROM, RAM, Stage, tout est là.
+            </div>
+          </div>
+          <div class="chat-row">
+            <input type="text" id="chat-input" class="chat-input"
+                   placeholder="ROM, RAM, Stage, Épreuve Karmique…"
+                   onkeydown="if(event.key==='Enter')sendChat()">
+            <button class="btn" onclick="sendChat()">Envoyer »</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /tab-gochara -->
+
+    <!-- ═══ ONGLET CARTE KARMIQUE ═══ -->
+    <div id="tab-carte" class="tab-panel" style="border:2px solid;border-color:#808080 #fff #fff #808080;padding:6px;background:#c0c0c0;">
+
+      <div class="win">
+        <div class="titlebar karma">
+          <div class="titlebar-title">✦ Carte Karmique Évolutive — @siderealAstro13</div>
+        </div>
+
+        <div id="carte-svg-wrap">
+          <div id="carte-tooltip"></div>
+          <div id="carte-placeholder" style="color:#808080;font-style:italic;font-size:11px;text-align:center;">
+            Lance d'abord un calcul pour afficher la carte personnalisée.
+          </div>
+          <svg id="karmic-svg" style="display:none;" viewBox="0 0 540 540" xmlns="http://www.w3.org/2000/svg">
+            <!-- Rendu dynamique via JS -->
+          </svg>
+        </div>
+
+        <div class="carte-legend">
+          <div class="leg-item"><span class="leg-dot" style="background:#7b00d4;"></span> Natal natal</div>
+          <div class="leg-item"><span class="leg-dot" style="background:#cc4400;border:2px solid #cc4400;"></span> Transit actif</div>
+          <div class="leg-item"><span class="leg-dot" style="background:#006600;"></span> Porte (Saturne/Uranus)</div>
+          <div class="leg-item"><span style="display:inline-block;width:18px;height:3px;background:#7b00d4;"></span> Axe Karma→Dharma</div>
+          <div class="leg-item"><span style="display:inline-block;width:18px;height:3px;background:#006600;"></span> Axe Wound→Stage</div>
+          <div class="leg-item"><span style="display:inline-block;width:18px;height:3px;background:#cc4400;border-top:2px dashed #cc4400;"></span> Transit activé</div>
+        </div>
+      </div>
+
+    </div><!-- /tab-carte -->
+
+  </div><!-- /winbody -->
+
   <div class="statusbar">
     <div class="statpanel" id="status-msg">Prêt</div>
-    <div class="statpanel fixed">Sidéral · Djwhal Khul · Moonrise</div>
+    <div class="statpanel fixed">Sidéral · Djwhal Khul · Moonrise · siderealAstro13</div>
     <div class="statpanel fixed" id="status-count"></div>
   </div>
 
-</div><!-- /win principale -->
-
-
-<!-- ═══════════════════════════════════════════════════════
-     MODAL — Modifier le profil natal
-═══════════════════════════════════════════════════════ -->
-<div class="modal-overlay" id="profile-modal">
-  <div class="modal-win">
-
-    <div class="titlebar">
-      <div class="titlebar-title">✎ Modifier le profil natal</div>
-      <div class="titlebar-btns">
-        <button class="tbtn" onclick="closeProfileModal()">✕</button>
-      </div>
-    </div>
-
-    <div class="modal-body">
-
-      <!-- Nom -->
-      <div class="modal-row">
-        <label for="p-name">Nom :</label>
-        <input type="text" id="p-name" class="wide" value="{{ natal.name }}" maxlength="60">
-      </div>
-
-      <hr class="modal-sep">
-
-      <!-- Date de naissance -->
-      <div class="modal-row">
-        <label>Naissance :</label>
-        <input type="number" id="p-day"   value="{{ natal.day }}"   min="1" max="31" style="width:44px;" placeholder="JJ">
-        <span style="font-size:11px">/</span>
-        <input type="number" id="p-month" value="{{ natal.month }}" min="1" max="12" style="width:44px;" placeholder="MM">
-        <span style="font-size:11px">/</span>
-        <input type="number" id="p-year"  value="{{ natal.year }}"  min="1900" max="2100" style="width:58px;" placeholder="AAAA">
-      </div>
-
-      <!-- Heure de naissance -->
-      <div class="modal-row">
-        <label>Heure :</label>
-        <input type="number" id="p-hour"   value="{{ natal.hour }}"   min="0" max="23" style="width:44px;">
-        <span style="font-size:11px">h</span>
-        <input type="number" id="p-minute" value="{{ natal.minute }}" min="0" max="59" style="width:44px;">
-        <span style="font-size:11px">min</span>
-      </div>
-
-      <hr class="modal-sep">
-
-      <!-- Géocodage ville -->
-      <div class="group-label" style="margin-bottom:5px;">Lieu de naissance</div>
-      <div class="modal-geocode-row">
-        <input type="text" id="p-city-search" placeholder="Chercher une ville…" class="wide">
-        <button class="btn small" onclick="geocodeCity()">🔍 Chercher</button>
-      </div>
-      <div class="modal-status" id="geo-status"></div>
-
-      <!-- Résultats géocodage -->
-      <div id="geo-results" style="display:none;margin-bottom:6px;">
-        <div id="geo-list" style="border:2px solid;border-color:#808080 #fff #fff #808080;background:#fff;max-height:120px;overflow-y:auto;"></div>
-      </div>
-
-      <!-- Champs lat/lon/tz (remplis auto ou manuellement) -->
-      <div class="modal-row">
-        <label>Ville :</label>
-        <input type="text" id="p-city" value="{{ natal.city }}" class="wide" placeholder="Ex : Athis-Mons, France">
-      </div>
-      <div class="modal-row">
-        <label>Latitude :</label>
-        <input type="number" id="p-lat" value="{{ natal.lat }}" step="0.0001" style="width:90px;" min="-90" max="90">
-        <label style="width:auto;margin-left:4px;">Longitude :</label>
-        <input type="number" id="p-lon" value="{{ natal.lon }}" step="0.0001" style="width:90px;" min="-180" max="180">
-      </div>
-      <div class="modal-row">
-        <label>Fuseau :</label>
-        <input type="text" id="p-tz" value="{{ natal.tz }}" style="width:160px;" placeholder="Europe/Paris">
-      </div>
-      <div class="modal-hint">Exemples : Europe/Paris, America/New_York, Asia/Kolkata</div>
-
-      <hr class="modal-sep">
-
-      <!-- Actions -->
-      <div class="modal-actions">
-        <button class="btn small danger" onclick="resetProfile()">↺ Réinitialiser</button>
-        <button class="btn small" onclick="closeProfileModal()">Annuler</button>
-        <button class="btn small" id="save-btn" onclick="saveProfile()">✓ Enregistrer</button>
-      </div>
-
-    </div><!-- /modal-body -->
-  </div><!-- /modal-win -->
-</div><!-- /modal-overlay -->
-
+</div>
 
 <!-- ═══════════════════════════════════════════════════════
      JAVASCRIPT
@@ -493,22 +403,20 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 
 let chartContext = "";
 let chatHistory  = [];
+let lastChartData = null;
 
-// Données natales courantes (initialisées depuis Jinja)
-let currentNatal = {
-  name:   {{ natal.name | tojson }},
-  year:   {{ natal.year }},
-  month:  {{ natal.month }},
-  day:    {{ natal.day }},
-  hour:   {{ natal.hour }},
-  minute: {{ natal.minute }},
-  lat:    {{ natal.lat }},
-  lon:    {{ natal.lon }},
-  tz:     {{ natal.tz | tojson }},
-  city:   {{ natal.city | tojson }},
-};
+/* ── Onglets ───────────────────────────────────────────────────────────────── */
+function switchTab(name) {
+  document.querySelectorAll(".tab").forEach((t, i) => {
+    const panels = ["gochara", "carte"];
+    t.classList.toggle("active", panels[i] === name);
+  });
+  document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
+  document.getElementById("tab-" + name).classList.add("active");
+  if (name === "carte" && lastChartData) renderKarmicMap(lastChartData);
+}
 
-/* ── Calcul principal ──────────────────────────────────────────── */
+/* ── Calcul principal ──────────────────────────────────────────────────────── */
 async function calculateTransits() {
   const date   = document.getElementById("t-date").value;
   const hour   = parseInt(document.getElementById("t-hour").value)   || 0;
@@ -516,11 +424,11 @@ async function calculateTransits() {
 
   if (!date) { setStatus("⚠ Sélectionne une date."); return; }
 
-  setStatus("Calcul des éphémérides…");
+  setStatus("Calcul des éphémérides sidérales…");
   document.getElementById("calc-btn").disabled = true;
 
   setAspectsHTML('<div style="padding:6px;" class="loading">Calcul sidéral Djwhal Khul…</div>');
-  setSynthesisHTML('<span class="loading">Interprétation karmique védique en cours…</span>');
+  setSynthesisHTML('<span class="loading">Analyse ROM/RAM/Stage en cours…</span>');
 
   try {
     const res  = await fetch("/calculate", {
@@ -529,16 +437,21 @@ async function calculateTransits() {
       body: JSON.stringify({ date, hour, minute }),
     });
     const data = await res.json();
-
     if (data.error) throw new Error(data.error);
 
+    lastChartData = data;
     renderAspects(data.aspects);
     setSynthesisHTML(escapeNl(data.synthesis));
-
     chartContext = data.chart_context || "";
+
     const n = data.aspects.length;
-    setStatus(`✓ ${n} aspect${n > 1 ? "s" : ""} trouvé${n > 1 ? "s" : ""} · ${date} ${pad(hour)}h${pad(minute)}`);
+    setStatus(`✓ ${n} aspect${n > 1 ? "s" : ""} · ${date} ${pad(hour)}h${pad(minute)} — ROM/RAM/Stage calculés`);
     document.getElementById("status-count").textContent = `${n} asp.`;
+
+    // Si l'onglet carte est actif, on affiche directement
+    if (document.getElementById("tab-carte").classList.contains("active")) {
+      renderKarmicMap(data);
+    }
 
   } catch (err) {
     setAspectsHTML(`<div style="padding:6px;color:#800000;">⚠ Erreur : ${escHtml(err.message)}</div>`);
@@ -548,7 +461,7 @@ async function calculateTransits() {
   }
 }
 
-/* ── Rendu du tableau d'aspects ────────────────────────────────── */
+/* ── Rendu table aspects ────────────────────────────────────────────────────── */
 function renderAspects(aspects) {
   if (!aspects || aspects.length === 0) {
     setAspectsHTML('<div style="padding:6px;">Aucun aspect dans l\'orbe de 3°.</div>');
@@ -557,7 +470,6 @@ function renderAspects(aspects) {
   let html = '<table><thead><tr>'
     + '<th>Transit</th><th>Aspect</th><th>Natal</th><th>Orbe</th>'
     + '</tr></thead><tbody>';
-
   aspects.forEach(a => {
     const cls   = aspClass(a.aspect);
     const retro = a.retrograde ? ' <span class="retro">℞</span>' : "";
@@ -568,18 +480,491 @@ function renderAspects(aspects) {
       <td style="text-align:right">${a.orb}°</td>
     </tr>`;
   });
-
   html += "</tbody></table>";
   setAspectsHTML(html);
 }
 
-/* ── Chat ──────────────────────────────────────────────────────── */
+/* ══════════════════════════════════════════════════════════════
+   CARTE KARMIQUE SVG DYNAMIQUE — siderealAstro13
+══════════════════════════════════════════════════════════════ */
+
+const SVG_NS   = "http://www.w3.org/2000/svg";
+const CX       = 270; // centre X
+const CY       = 270; // centre Y
+const R_OUTER  = 240; // anneau zodiaque extérieur
+const R_INNER  = 210; // anneau zodiaque intérieur
+const R_WHEEL  = 185; // roue principale
+const R_PLANET = 155; // orbite des planètes natales
+const R_TRANSIT= 125; // orbite des transits
+const R_CENTER = 80;  // cercle central
+
+// Couleurs thème siderealAstro13
+const COL = {
+  karma:   "#7b00d4",   // violet — Nœud Sud/Karma
+  dharma:  "#7b00d4",   // violet — Nœud Nord/Dharma
+  wound:   "#cc4400",   // rouge-brun — Chiron/Blessure
+  trial:   "#cc4400",   // rouge-brun — Lilith/Épreuve
+  door:    "#006600",   // vert — Portes Saturne/Uranus
+  natal:   "#3a006f",   // violet foncé — planètes natales
+  transit: "#cc4400",   // orange — transits actifs
+  axis_kd: "#7b00d4",   // axe Karma-Dharma
+  axis_ws: "#006600",   // axe Wound-Stage
+  zodiac:  "#555",
+  bg_wheel:"#f8f6ff",
+  grid:    "#ccc",
+};
+
+// Planètes clés pour la carte
+const KARMIC_KEYS = [
+  "Nœud Nord ☊", "Nœud Sud ☋",
+  "Chiron ⚷", "Lilith ⚸",
+  "Saturne ♄", "Uranus ♅",
+  "Soleil ☀", "Lune ☽",
+  "Mars ♂", "Jupiter ♃",
+  "Vénus ♀", "Mercure ☿",
+  "ASC ↑", "MC ↑",
+];
+
+// Symboles courts
+const SYMBOL = {
+  "Nœud Nord ☊": "☊", "Nœud Sud ☋": "☋",
+  "Chiron ⚷": "⚷",   "Lilith ⚸": "⚸",
+  "Saturne ♄": "♄",  "Uranus ♅": "♅",
+  "Soleil ☀": "☀",   "Lune ☽": "☽",
+  "Mars ♂": "♂",     "Jupiter ♃": "♃",
+  "Vénus ♀": "♀",    "Mercure ☿": "☿",
+  "ASC ↑": "Asc",    "MC ↑": "MC",
+  "Neptune ♆": "♆",  "Pluton ♇": "♇",
+};
+
+// Quadrant karmique de chaque planète
+const QUADRANT = {
+  "Nœud Sud ☋":  "KARMA",
+  "Nœud Nord ☊": "DHARMA",
+  "Chiron ⚷":    "WOUND",
+  "Lilith ⚸":    "KARMIC TRIAL",
+  "Saturne ♄":   "PORTE VISIBLE",
+  "Uranus ♅":    "PORTE INVISIBLE",
+};
+
+/**
+ * Longitude sidérale → angle SVG
+ * 0° Bélier = haut (12h), sens anti-horaire (astrologique)
+ */
+function lonToAngle(lon) {
+  // 0° = haut, anti-horaire → on soustrait 90° et on inverse
+  return (90 - lon) * Math.PI / 180;
+}
+
+function polarToXY(angle, r) {
+  return {
+    x: CX + r * Math.cos(angle),
+    y: CY - r * Math.sin(angle),
+  };
+}
+
+function lonToXY(lon, r) {
+  return polarToXY(lonToAngle(lon), r);
+}
+
+function makeSVGEl(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const [k, v] of Object.entries(attrs)) el.setAttribute(k, v);
+  return el;
+}
+
+function makeText(content, x, y, opts = {}) {
+  const t = document.createElementNS(SVG_NS, "text");
+  t.textContent = content;
+  t.setAttribute("x", x);
+  t.setAttribute("y", y);
+  t.setAttribute("text-anchor", opts.anchor || "middle");
+  t.setAttribute("dominant-baseline", "central");
+  t.setAttribute("font-size", opts.size || 11);
+  t.setAttribute("fill", opts.fill || "#333");
+  t.setAttribute("font-weight", opts.weight || "normal");
+  t.setAttribute("font-family", "Arial, sans-serif");
+  if (opts.opacity) t.setAttribute("opacity", opts.opacity);
+  return t;
+}
+
+function renderKarmicMap(data) {
+  const svg = document.getElementById("karmic-svg");
+  const placeholder = document.getElementById("carte-placeholder");
+
+  // Vider
+  while (svg.firstChild) svg.removeChild(svg.firstChild);
+
+  placeholder.style.display = "none";
+  svg.style.display = "block";
+
+  const natal   = data.natal   || {};
+  const transits = data.transits || {};
+  const aspects  = data.aspects  || [];
+
+  // Planètes de transit actives (dans un aspect < 3°)
+  const activeTransitPlanets = new Set(aspects.map(a => a.transit_planet));
+  const activeNatalPlanets   = new Set(aspects.map(a => a.natal_planet));
+
+  // ── DEFS (marker flèche) ──────────────────────────────────────────────────
+  const defs = document.createElementNS(SVG_NS, "defs");
+
+  function makeMarker(id, color) {
+    const m = document.createElementNS(SVG_NS, "marker");
+    m.setAttribute("id", id);
+    m.setAttribute("viewBox", "0 0 10 10");
+    m.setAttribute("refX", "8"); m.setAttribute("refY", "5");
+    m.setAttribute("markerWidth", "6"); m.setAttribute("markerHeight", "6");
+    m.setAttribute("orient", "auto-start-reverse");
+    const p = document.createElementNS(SVG_NS, "path");
+    p.setAttribute("d", "M2 1L8 5L2 9");
+    p.setAttribute("fill", "none");
+    p.setAttribute("stroke", color);
+    p.setAttribute("stroke-width", "1.5");
+    p.setAttribute("stroke-linecap", "round");
+    m.appendChild(p);
+    defs.appendChild(m);
+  }
+
+  makeMarker("arr-purple", COL.axis_kd);
+  makeMarker("arr-green",  COL.axis_ws);
+  makeMarker("arr-orange", COL.transit);
+  svg.appendChild(defs);
+
+  // ── FOND cercles ─────────────────────────────────────────────────────────
+  // Fond roue
+  svg.appendChild(makeSVGEl("circle", {
+    cx: CX, cy: CY, r: R_WHEEL,
+    fill: COL.bg_wheel, stroke: COL.grid, "stroke-width": "1"
+  }));
+
+  // Anneau zodiaque
+  svg.appendChild(makeSVGEl("circle", {
+    cx: CX, cy: CY, r: R_OUTER,
+    fill: "none", stroke: COL.zodiac, "stroke-width": "0.5"
+  }));
+  svg.appendChild(makeSVGEl("circle", {
+    cx: CX, cy: CY, r: R_INNER,
+    fill: "none", stroke: COL.zodiac, "stroke-width": "0.5"
+  }));
+
+  // Cercle central
+  svg.appendChild(makeSVGEl("circle", {
+    cx: CX, cy: CY, r: R_CENTER,
+    fill: "#fff", stroke: COL.grid, "stroke-width": "1"
+  }));
+
+  // Orbites planétaires (pointillés)
+  [R_PLANET, R_TRANSIT].forEach(r => {
+    svg.appendChild(makeSVGEl("circle", {
+      cx: CX, cy: CY, r,
+      fill: "none", stroke: COL.grid,
+      "stroke-width": "0.5", "stroke-dasharray": "3 4"
+    }));
+  });
+
+  // ── SIGNES ZODIACAUX ───────────────────────────────────────────────────────
+  const signSymbols = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
+  for (let i = 0; i < 12; i++) {
+    // Division signe (ligne radiale)
+    const a1 = lonToAngle(i * 30);
+    const p1 = polarToXY(a1, R_INNER);
+    const p2 = polarToXY(a1, R_OUTER);
+    svg.appendChild(makeSVGEl("line", {
+      x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+      stroke: COL.zodiac, "stroke-width": "0.5"
+    }));
+    // Symbole signe au centre de l'anneau
+    const midAngle = lonToAngle(i * 30 + 15);
+    const midR = (R_INNER + R_OUTER) / 2;
+    const pm = polarToXY(midAngle, midR);
+    svg.appendChild(makeText(signSymbols[i], pm.x, pm.y, {
+      size: 12, fill: "#777"
+    }));
+  }
+
+  // ── AXES DES 4 QUADRANTS ───────────────────────────────────────────────────
+  // Croix de base (pointillés fins)
+  [[0, 180], [90, 270]].forEach(([a1, a2]) => {
+    const p1 = lonToXY(a1, R_WHEEL);
+    const p2 = lonToXY(a2, R_WHEEL);
+    svg.appendChild(makeSVGEl("line", {
+      x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y,
+      stroke: COL.grid, "stroke-width": "0.5", "stroke-dasharray": "4 4"
+    }));
+  });
+
+  // ── VECTEURS KARMIQUES DYNAMIQUES ────────────────────────────────────────
+  const nn = natal["Nœud Nord ☊"];
+  const ks = natal["Nœud Sud ☋"];
+  const ch = natal["Chiron ⚷"];
+  const li = natal["Lilith ⚸"];
+  const sa = natal["Saturne ♄"];
+  const ur = natal["Uranus ♅"];
+
+  // Vecteur Karma → Dharma (violet, Nœud Sud → Nœud Nord)
+  if (ks && nn) {
+    const pKarma  = lonToXY(ks.lon, R_PLANET - 15);
+    const pDharma = lonToXY(nn.lon, R_PLANET - 15);
+    svg.appendChild(makeSVGEl("line", {
+      x1: pKarma.x, y1: pKarma.y,
+      x2: pDharma.x, y2: pDharma.y,
+      stroke: COL.axis_kd, "stroke-width": "2",
+      "marker-end": "url(#arr-purple)",
+    }));
+  }
+
+  // Vecteur Wound → Stage (vert, Chiron → MC ou Nœud Nord)
+  const mcPos = natal["MC ↑"];
+  if (ch && mcPos) {
+    const pWound = lonToXY(ch.lon, R_PLANET - 15);
+    const pStage = lonToXY(mcPos.lon, R_PLANET - 15);
+    svg.appendChild(makeSVGEl("line", {
+      x1: pWound.x, y1: pWound.y,
+      x2: pStage.x, y2: pStage.y,
+      stroke: COL.axis_ws, "stroke-width": "2",
+      "marker-end": "url(#arr-green)",
+    }));
+  }
+
+  // Vecteur Porte Invisible → Porte Visible (vert, Uranus → Saturne)
+  if (ur && sa) {
+    const pUranus  = lonToXY(ur.lon, R_TRANSIT - 5);
+    const pSaturne = lonToXY(sa.lon, R_TRANSIT - 5);
+    svg.appendChild(makeSVGEl("line", {
+      x1: pUranus.x,  y1: pUranus.y,
+      x2: pSaturne.x, y2: pSaturne.y,
+      stroke: COL.door, "stroke-width": "1.5",
+      "stroke-dasharray": "6 3",
+    }));
+  }
+
+  // ── LIGNES D'ASPECTS ACTIFS (transit → natal) ──────────────────────────
+  aspects.slice(0, 12).forEach(asp => {
+    const tData = transits[asp.transit_planet];
+    const nData = natal[asp.natal_planet];
+    if (!tData || !nData) return;
+
+    const pT = lonToXY(tData.lon, R_TRANSIT);
+    const pN = lonToXY(nData.lon, R_PLANET);
+
+    let aspColor = "#999";
+    if (asp.aspect.includes("Conjonction")) aspColor = "#000080";
+    else if (asp.aspect.includes("Opposition")) aspColor = "#800000";
+    else if (asp.aspect.includes("Trigone"))    aspColor = "#005500";
+    else if (asp.aspect.includes("Carré"))      aspColor = "#800000";
+    else if (asp.aspect.includes("Sextile"))    aspColor = "#005500";
+
+    const opacity = Math.max(0.15, 1 - asp.orb / 3);
+
+    svg.appendChild(makeSVGEl("line", {
+      x1: pT.x, y1: pT.y, x2: pN.x, y2: pN.y,
+      stroke: aspColor,
+      "stroke-width": "0.8",
+      "stroke-dasharray": "3 3",
+      opacity: opacity.toFixed(2),
+    }));
+  });
+
+  // ── PLANÈTES NATALES ──────────────────────────────────────────────────────
+  const placedNatal = {}; // pour éviter superposition
+  KARMIC_KEYS.forEach(key => {
+    const p = natal[key];
+    if (!p) return;
+
+    let lon = p.lon;
+    // Anti-superposition léger
+    Object.values(placedNatal).forEach(prev => {
+      const diff = Math.abs((lon - prev + 360) % 360);
+      if (diff < 8 && diff > 0) lon += 6;
+    });
+    placedNatal[key] = lon;
+
+    const pos     = lonToXY(lon, R_PLANET);
+    const isActive = activeNatalPlanets.has(key);
+    const isKarmic = ["Nœud Nord ☊","Nœud Sud ☋","Chiron ⚷","Lilith ⚸"].includes(key);
+    const isDoor   = ["Saturne ♄","Uranus ♅"].includes(key);
+
+    let col  = COL.natal;
+    let r    = 13;
+    let sw   = 1.5;
+    if (isKarmic) { col = key.includes("☊") || key.includes("☋") ? COL.karma : COL.wound; r = 15; sw = 2; }
+    if (isDoor)   { col = COL.door; r = 13; }
+    if (isActive) { r += 3; sw = 2.5; }
+
+    // Cercle
+    const circle = makeSVGEl("circle", {
+      cx: pos.x, cy: pos.y, r,
+      fill: isActive ? col : "#fff",
+      stroke: col,
+      "stroke-width": sw,
+      opacity: isActive ? "1" : "0.85",
+      style: "cursor:pointer",
+    });
+
+    // Tooltip
+    const quad  = QUADRANT[key] || "";
+    const label = `${key}\n${p.display}${quad ? "\n→ " + quad : ""}${p.retrograde ? " ℞" : ""}`;
+    circle.addEventListener("mouseover", (e) => showTooltip(e, label));
+    circle.addEventListener("mouseout",  hideTooltip);
+    svg.appendChild(circle);
+
+    // Symbole
+    const sym = makeSVGEl("text", {
+      x: pos.x, y: pos.y,
+      "text-anchor": "middle",
+      "dominant-baseline": "central",
+      "font-size": "11",
+      fill: isActive ? "#fff" : col,
+      "font-family": "Arial, sans-serif",
+      "font-weight": "bold",
+      style: "cursor:pointer",
+    });
+    sym.textContent = SYMBOL[key] || key.slice(0, 2);
+    sym.addEventListener("mouseover", (e) => showTooltip(e, label));
+    sym.addEventListener("mouseout",  hideTooltip);
+    svg.appendChild(sym);
+
+    // Degré (petit)
+    const pLabel = lonToXY(lon, R_PLANET + r + 8);
+    const deg = document.createElementNS(SVG_NS, "text");
+    deg.textContent = `${Math.floor(p.lon % 30)}°`;
+    deg.setAttribute("x", pLabel.x);
+    deg.setAttribute("y", pLabel.y);
+    deg.setAttribute("text-anchor", "middle");
+    deg.setAttribute("dominant-baseline", "central");
+    deg.setAttribute("font-size", "8");
+    deg.setAttribute("fill", col);
+    deg.setAttribute("font-family", "Arial, sans-serif");
+    deg.setAttribute("opacity", "0.7");
+    svg.appendChild(deg);
+  });
+
+  // ── PLANÈTES DE TRANSIT ACTIVES ────────────────────────────────────────
+  const placedTransit = {};
+  activeTransitPlanets.forEach(key => {
+    const p = transits[key];
+    if (!p) return;
+
+    let lon = p.lon;
+    Object.values(placedTransit).forEach(prev => {
+      const diff = Math.abs((lon - prev + 360) % 360);
+      if (diff < 8 && diff > 0) lon += 7;
+    });
+    placedTransit[key] = lon;
+
+    const pos = lonToXY(lon, R_TRANSIT);
+    const col = COL.transit;
+
+    const circle = makeSVGEl("circle", {
+      cx: pos.x, cy: pos.y, r: 12,
+      fill: col, stroke: "#8b2a00", "stroke-width": "1.5",
+      style: "cursor:pointer",
+    });
+
+    const retro = p.retrograde ? " ℞" : "";
+    const label = `T: ${key}${retro}\n${p.display}\n→ Transit actif`;
+    circle.addEventListener("mouseover", (e) => showTooltip(e, label));
+    circle.addEventListener("mouseout",  hideTooltip);
+    svg.appendChild(circle);
+
+    const sym = makeSVGEl("text", {
+      x: pos.x, y: pos.y,
+      "text-anchor": "middle",
+      "dominant-baseline": "central",
+      "font-size": "11",
+      fill: "#fff",
+      "font-family": "Arial, sans-serif",
+      "font-weight": "bold",
+    });
+    sym.textContent = (SYMBOL[key] || key.slice(0, 2)) + (p.retrograde ? "℞" : "");
+    sym.addEventListener("mouseover", (e) => showTooltip(e, label));
+    sym.addEventListener("mouseout",  hideTooltip);
+    svg.appendChild(sym);
+  });
+
+  // ── LABELS QUADRANTS (4 coins intérieurs) ──────────────────────────────
+  const quadLabels = [
+    { text: "DHARMA", sub: "Nœud Nord ☊", x: 370, y: 105, col: COL.karma },
+    { text: "KARMA",  sub: "Nœud Sud ☋",  x: 100, y: 430, col: COL.karma },
+    { text: "WOUND",  sub: "Chiron ⚷",    x: 95,  y: 230, col: COL.wound },
+    { text: "KARMIC", sub: "TRIAL ⚸",     x: 430, y: 350, col: COL.wound },
+  ];
+
+  quadLabels.forEach(q => {
+    const bg = makeSVGEl("rect", {
+      x: q.x - 42, y: q.y - 14,
+      width: 84, height: 28, rx: 3,
+      fill: "#fff", stroke: q.col, "stroke-width": "1.5",
+    });
+    svg.appendChild(bg);
+    svg.appendChild(makeText(q.text, q.x, q.y - 4, { size: 10, fill: q.col, weight: "bold" }));
+    svg.appendChild(makeText(q.sub,  q.x, q.y + 8, { size: 9,  fill: q.col }));
+  });
+
+  // ── LABELS PORTES ───────────────────────────────────────────────────────
+  const doorLabels = [
+    { text: "INVISIBLE DOOR", x: 58, y: 55, col: COL.door },
+    { text: "VISIBLE DOOR",   x: 460, y: 490, col: COL.door },
+  ];
+  doorLabels.forEach(d => {
+    const bg = makeSVGEl("rect", {
+      x: d.x - 55, y: d.y - 12,
+      width: 110, height: 22, rx: 3,
+      fill: "#fff", stroke: d.col, "stroke-width": "1.5",
+    });
+    svg.appendChild(bg);
+    svg.appendChild(makeText(d.text, d.x, d.y, { size: 9, fill: d.col, weight: "bold" }));
+  });
+
+  // ── LABEL CENTRAL ───────────────────────────────────────────────────────
+  svg.appendChild(makeText("@siderealAstro13", CX, CY - 12, {
+    size: 9, fill: "#999"
+  }));
+  svg.appendChild(makeText("RAM ⚷ | ROM ☋", CX, CY + 4, {
+    size: 9, fill: "#aaa"
+  }));
+  svg.appendChild(makeText(data.transit_date || "", CX, CY + 18, {
+    size: 8, fill: "#bbb"
+  }));
+
+  // ── CROIX DE CHIRON (symbole blessure) ─────────────────────────────────
+  if (ch) {
+    const pCh = lonToXY(ch.lon, R_CENTER - 10);
+    svg.appendChild(makeSVGEl("line", {
+      x1: pCh.x - 8, y1: pCh.y,
+      x2: pCh.x + 8, y2: pCh.y,
+      stroke: COL.wound, "stroke-width": "1.5", "stroke-linecap": "round"
+    }));
+    svg.appendChild(makeSVGEl("line", {
+      x1: pCh.x, y1: pCh.y - 8,
+      x2: pCh.x, y2: pCh.y + 4,
+      stroke: COL.wound, "stroke-width": "1.5", "stroke-linecap": "round"
+    }));
+  }
+}
+
+/* ── Tooltip ────────────────────────────────────────────────────────────────── */
+function showTooltip(e, text) {
+  const wrap = document.getElementById("carte-svg-wrap");
+  const tt   = document.getElementById("carte-tooltip");
+  const rect = wrap.getBoundingClientRect();
+  tt.innerHTML = text.replace(/\n/g, "<br>");
+  tt.style.display = "block";
+  tt.style.left = (e.clientX - rect.left + 10) + "px";
+  tt.style.top  = (e.clientY - rect.top  + 10) + "px";
+}
+function hideTooltip() {
+  document.getElementById("carte-tooltip").style.display = "none";
+}
+
+/* ── Chat ──────────────────────────────────────────────────────────────────── */
 async function sendChat() {
   const input = document.getElementById("chat-input");
   const msg   = input.value.trim();
   if (!msg) return;
 
-  addChatMsg(currentNatal.name, msg, "chat-user");
+  addChatMsg("Jérôme", msg, "chat-user");
   input.value = "";
 
   try {
@@ -590,8 +975,8 @@ async function sendChat() {
     });
     const data = await res.json();
     if (data.error) throw new Error(data.error);
-    addChatMsg("Jyotish-AI", data.response, "chat-ai");
-    chatHistory.push({ role: "user",      content: msg          });
+    addChatMsg("siderealAstro13-AI", data.response, "chat-ai");
+    chatHistory.push({ role: "user",      content: msg });
     chatHistory.push({ role: "assistant", content: data.response });
     if (chatHistory.length > 24) chatHistory = chatHistory.slice(-24);
   } catch (err) {
@@ -599,198 +984,7 @@ async function sendChat() {
   }
 }
 
-/* ══════════════════════════════════════════════════════
-   MODAL — Profil natal
-══════════════════════════════════════════════════════ */
-function openProfileModal() {
-  // Pré-remplit les champs avec les valeurs courantes
-  document.getElementById("p-name").value   = currentNatal.name;
-  document.getElementById("p-day").value    = currentNatal.day;
-  document.getElementById("p-month").value  = currentNatal.month;
-  document.getElementById("p-year").value   = currentNatal.year;
-  document.getElementById("p-hour").value   = currentNatal.hour;
-  document.getElementById("p-minute").value = currentNatal.minute;
-  document.getElementById("p-city").value   = currentNatal.city;
-  document.getElementById("p-lat").value    = currentNatal.lat;
-  document.getElementById("p-lon").value    = currentNatal.lon;
-  document.getElementById("p-tz").value     = currentNatal.tz;
-
-  // Reset géocodage
-  document.getElementById("p-city-search").value = "";
-  document.getElementById("geo-status").textContent = "";
-  document.getElementById("geo-status").className = "modal-status";
-  document.getElementById("geo-results").style.display = "none";
-  document.getElementById("geo-list").innerHTML = "";
-
-  document.getElementById("profile-modal").classList.add("open");
-}
-
-function closeProfileModal() {
-  document.getElementById("profile-modal").classList.remove("open");
-}
-
-// Fermer en cliquant sur l'overlay
-document.getElementById("profile-modal").addEventListener("click", function(e) {
-  if (e.target === this) closeProfileModal();
-});
-
-/* ── Géocodage via Nominatim (OpenStreetMap, gratuit, pas de clé) ── */
-async function geocodeCity() {
-  const query = document.getElementById("p-city-search").value.trim();
-  if (!query) { setGeoStatus("Saisis un nom de ville.", true); return; }
-
-  setGeoStatus("Recherche en cours…", false);
-  document.getElementById("geo-results").style.display = "none";
-
-  try {
-    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=5&accept-language=fr`;
-    const res  = await fetch(url, { headers: { "Accept-Language": "fr" } });
-    const list = await res.json();
-
-    if (!list || list.length === 0) {
-      setGeoStatus("Aucun résultat. Essaie un nom plus précis.", true);
-      return;
-    }
-
-    // Boutons mobile-friendly
-    const container = document.getElementById("geo-list");
-    container.innerHTML = "";
-    list.forEach((item) => {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.style.cssText = "display:block;width:100%;text-align:left;padding:8px 10px;font-family:inherit;font-size:11px;background:#fff;border:none;border-bottom:1px solid #c0c0c0;cursor:pointer;line-height:1.4;";
-      btn.textContent = item.display_name;
-      btn.addEventListener("click", () => {
-        const lat = parseFloat(item.lat);
-        const lon = parseFloat(item.lon);
-        document.getElementById("p-lat").value  = lat.toFixed(4);
-        document.getElementById("p-lon").value  = lon.toFixed(4);
-        document.getElementById("p-city").value = item.display_name;
-        guessTimezone(lat, lon);
-        setGeoStatus("OK : " + item.display_name, false);
-        document.getElementById("geo-results").style.display = "none";
-      });
-      container.appendChild(btn);
-    });
-
-    document.getElementById("geo-results").style.display = "block";
-    setGeoStatus(list.length + " resultat(s) - touche le bon.", false);
-
-  } catch (err) {
-    setGeoStatus("Erreur réseau : " + err.message, true);
-  }
-}
-
-
-
-async function guessTimezone(lat, lon) {
-  // API publique geoplugin / timeapi.io pour deviner le fuseau
-  try {
-    const res  = await fetch(`https://timeapi.io/api/TimeZone/coordinate?latitude=${lat}&longitude=${lon}`);
-    const data = await res.json();
-    if (data && data.timeZone) {
-      document.getElementById("p-tz").value = data.timeZone;
-    }
-  } catch {
-    // Pas grave — l'utilisateur peut le saisir manuellement
-  }
-}
-
-function setGeoStatus(msg, isError) {
-  const el = document.getElementById("geo-status");
-  el.textContent = msg;
-  el.className = "modal-status" + (isError ? " error" : "");
-}
-
-/* ── Enregistrer le profil ───────────────────────────────────── */
-async function saveProfile() {
-  const btn = document.getElementById("save-btn");
-  btn.disabled = true;
-  btn.textContent = "…";
-
-  const payload = {
-    name:   document.getElementById("p-name").value.trim() || "Utilisateur",
-    day:    parseInt(document.getElementById("p-day").value),
-    month:  parseInt(document.getElementById("p-month").value),
-    year:   parseInt(document.getElementById("p-year").value),
-    hour:   parseInt(document.getElementById("p-hour").value)   || 0,
-    minute: parseInt(document.getElementById("p-minute").value) || 0,
-    lat:    parseFloat(document.getElementById("p-lat").value),
-    lon:    parseFloat(document.getElementById("p-lon").value),
-    city:   document.getElementById("p-city").value.trim(),
-    tz:     document.getElementById("p-tz").value.trim() || "Europe/Paris",
-  };
-
-  try {
-    const res  = await fetch("/update_natal", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-
-    if (data.error) throw new Error(data.error);
-
-    // Mise à jour locale
-    currentNatal = data.natal;
-
-    // Mise à jour de l'affichage sans rechargement
-    updateNatalDisplay(data.natal);
-    closeProfileModal();
-    setStatus(`✓ Profil de ${data.natal.name} enregistré.`);
-
-    // Réinitialiser le chat avec le nouveau prénom
-    document.getElementById("chat-greeting").textContent = data.natal.name;
-
-    // Signaler que le contexte astrologique a changé
-    chartContext = "";
-    chatHistory  = [];
-    setAspectsHTML('<div style="padding:6px;" class="loading">Profil modifié — lance un nouveau calcul.</div>');
-    setSynthesisHTML('<span class="loading">Profil modifié — lance un nouveau calcul.</span>');
-
-  } catch (err) {
-    alert("Erreur : " + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "✓ Enregistrer";
-  }
-}
-
-/* ── Réinitialiser le profil par défaut ─────────────────────── */
-async function resetProfile() {
-  if (!confirm("Réinitialiser le profil aux données de Jérôme ?")) return;
-  const res  = await fetch("/reset_natal", { method: "POST" });
-  const data = await res.json();
-  if (data.ok) {
-    currentNatal = data.natal;
-    updateNatalDisplay(data.natal);
-
-    // Remplir les champs du modal avec les valeurs réinitialisées
-    document.getElementById("p-name").value   = data.natal.name;
-    document.getElementById("p-day").value    = data.natal.day;
-    document.getElementById("p-month").value  = data.natal.month;
-    document.getElementById("p-year").value   = data.natal.year;
-    document.getElementById("p-hour").value   = data.natal.hour;
-    document.getElementById("p-minute").value = data.natal.minute;
-    document.getElementById("p-city").value   = data.natal.city;
-    document.getElementById("p-lat").value    = data.natal.lat;
-    document.getElementById("p-lon").value    = data.natal.lon;
-    document.getElementById("p-tz").value     = data.natal.tz;
-
-    setStatus("Profil réinitialisé.");
-  }
-}
-
-/* ── Mise à jour de l'affichage natal dans le header ─────────── */
-const MONTHS_FR = ["Jan","Fév","Mar","Avr","Mai","Jun","Jul","Aoû","Sep","Oct","Nov","Déc"];
-function updateNatalDisplay(n) {
-  document.getElementById("title-name").textContent = n.name;
-  document.getElementById("natal-display").textContent =
-    `${String(n.day).padStart(2,"0")} ${MONTHS_FR[n.month-1]} ${n.year} · ${pad(n.hour)}h${pad(n.minute)} · ${n.city}`;
-  document.title = `✦ Gochara Karmique — ${n.name}`;
-}
-
-/* ── Helpers ───────────────────────────────────────────────────── */
+/* ── Helpers ───────────────────────────────────────────────────────────────── */
 function addChatMsg(sender, text, cls) {
   const log = document.getElementById("chat-log");
   const div = document.createElement("div");
