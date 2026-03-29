@@ -122,8 +122,10 @@ def chat_response(message: str, history: list, chart_context: str) -> str:
 # ── Contexte résumé pour le chat ──────────────────────────────────────────────
 def build_chart_context(chart_data: dict) -> str:
     aspects = chart_data.get("aspects", [])
+    name = chart_data.get("name", "Jérôme")   # ← AJOUTER
     if not aspects:
         return f"Gochara du {chart_data.get('transit_date')} — aucun aspect actif."
+    lines = [f"Gochara de {name} du {chart_data.get('transit_date')} à {chart_data.get('transit_time')} :"]  # ← nom dynamique
     lines = [f"Gochara du {chart_data.get('transit_date')} à {chart_data.get('transit_time')} :"]
     for a in aspects[:10]:
         retro = " ℞" if a.get("retrograde") else ""
