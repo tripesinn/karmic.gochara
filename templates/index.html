@@ -3,8 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✦ Gochara Karmique</title>
+<title>✦ Gochara Karmique — @siderealAstro13</title>
 <style>
+/* ═══════════════════════════════════════════════════════════════
+   WINDOWS 3.1 THEME — Gochara Karmique · @siderealAstro13
+═══════════════════════════════════════════════════════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 body {
@@ -16,7 +19,7 @@ body {
   padding: 6px;
 }
 
-/* ── Window ── */
+/* ── Window chrome ── */
 .win {
   background: #c0c0c0;
   border: 2px solid;
@@ -24,703 +27,653 @@ body {
   box-shadow: 1px 1px 0 #000;
   margin-bottom: 6px;
 }
+.winbody { padding: 8px; }
 
-/* ── Title bar ── */
+/* ── Title bars ── */
 .titlebar {
   background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
-  color: #fff;
-  font-weight: bold;
-  font-size: 11px;
+  color: #fff; font-weight: bold; font-size: 11px;
   padding: 3px 5px 3px 7px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  user-select: none;
-  cursor: default;
+  display: flex; align-items: center; justify-content: space-between;
+  user-select: none; cursor: default;
 }
 .titlebar.purple { background: linear-gradient(90deg, #4b0082 0%, #800080 100%); }
 .titlebar.green  { background: linear-gradient(90deg, #005000 0%, #228B22 100%); }
 .titlebar.teal   { background: linear-gradient(90deg, #005060 0%, #008080 100%); }
-
-.titlebar-title { display: flex; align-items: center; gap: 5px; }
-.titlebar-btns  { display: flex; gap: 2px; }
+.titlebar.gold   { background: linear-gradient(90deg, #5a3000 0%, #b8860b 100%); }
+.titlebar-title  { display: flex; align-items: center; gap: 5px; }
+.titlebar-btns   { display: flex; gap: 2px; }
 .tbtn {
-  width: 16px; height: 14px;
-  background: #c0c0c0;
+  width: 16px; height: 14px; background: #c0c0c0;
   border: 1px solid; border-color: #fff #808080 #808080 #fff;
   font-size: 9px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
 
-/* ── Window body ── */
-.winbody { padding: 8px; }
-
-/* ── Sunken panel ── */
+/* ── Sunken input / display ── */
 .sunken {
   background: #fff;
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 5px;
-  overflow-y: auto;
+  border: 2px solid; border-color: #808080 #fff #fff #808080;
+  padding: 3px 5px;
 }
-
-/* ── Group box ── */
-.group {
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 8px;
-  margin-bottom: 6px;
-  background: #c0c0c0;
-}
-.group-label {
-  font-weight: bold;
-  font-size: 11px;
-  margin-bottom: 5px;
-  color: #000080;
+input.sunken, select.sunken {
+  font-family: inherit; font-size: 12px;
+  outline: none; width: 100%;
 }
 
 /* ── Buttons ── */
 .btn {
   background: #c0c0c0;
-  border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
-  padding: 3px 14px;
-  font-family: inherit;
-  font-size: 12px;
-  font-weight: bold;
-  cursor: pointer;
-  box-shadow: 1px 1px 0 #000;
-  min-width: 80px;
+  border: 2px solid; border-color: #fff #808080 #808080 #fff;
+  padding: 3px 12px; font-family: inherit; font-size: 12px;
+  cursor: pointer; white-space: nowrap;
 }
-.btn:active {
-  border-color: #808080 #fff #fff #808080;
-  box-shadow: none;
-  padding: 4px 13px 2px 15px;
-}
-.btn:disabled { color: #808080; cursor: default; }
+.btn:active { border-color: #808080 #fff #fff #808080; }
 .btn.primary {
-  background: #000080;
-  color: #fff;
-  border-color: #4040c0 #000040 #000040 #4040c0;
+  background: #000080; color: #fff; font-weight: bold;
+  border-color: #6666cc #000033 #000033 #6666cc;
+}
+.btn.primary:active { border-color: #000033 #6666cc #6666cc #000033; }
+.btn:disabled { color: #808080; cursor: default; }
+
+/* ── Screens ── */
+.screen { display: none; }
+.screen.visible { display: block; }
+
+/* ── Natal badge ── */
+.natal-badge {
+  display: inline-flex; gap: 6px; flex-wrap: wrap;
+  background: #000080; color: #fff;
+  padding: 2px 8px; font-size: 11px;
+  border: 1px solid #fff; cursor: default;
+}
+.natal-badge span { opacity: .75; }
+.natal-badge strong { opacity: 1; }
+.sep { opacity: .4 !important; }
+
+/* ── Réglages row ── */
+.reglages-badge {
+  display: inline-flex; gap: 4px; flex-wrap: wrap;
+  background: #c0c0c0; color: #000;
+  padding: 2px 8px; font-size: 11px; border: 1px inset #808080;
 }
 
-/* ── Form elements ── */
-input[type="date"],
-input[type="number"],
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"] {
-  background: #fff;
-  border: 2px solid;
+/* ── Toolbar row ── */
+.toolbar {
+  display: flex; align-items: center; gap: 6px;
+  flex-wrap: wrap; padding: 4px 0;
+}
+.toolbar label { white-space: nowrap; }
+.toolbar input[type="date"],
+.toolbar input[type="number"] {
+  font-family: inherit; font-size: 12px;
+  background: #fff; border: 2px solid;
   border-color: #808080 #fff #fff #808080;
   padding: 1px 4px;
-  font-family: inherit;
-  font-size: 11px;
-  height: 22px;
 }
-input[type="number"] { width: 48px; }
-label { font-size: 11px; }
+.toolbar input[type="number"] { width: 46px; }
 
-/* ── Table ── */
-table { width: 100%; border-collapse: collapse; font-size: 11px; }
-thead tr { background: #000080; color: #fff; }
-th { padding: 3px 6px; text-align: left; font-weight: bold; white-space: nowrap; }
-td { padding: 2px 6px; border-bottom: 1px solid #c0c0c0; }
-tr:nth-child(odd)  td { background: #fff; }
-tr:nth-child(even) td { background: #dcd8d0; }
-
-/* ── Status bar ── */
-.statusbar {
+/* ── Tabs ── */
+.tabs-bar {
+  display: flex; gap: 2px; padding: 4px 4px 0;
+  border-bottom: 2px solid #808080; flex-wrap: wrap;
+}
+.tab-btn {
   background: #c0c0c0;
-  border-top: 1px solid #808080;
-  padding: 2px 6px;
-  display: flex; gap: 4px;
-  font-size: 11px;
+  border: 2px solid; border-color: #fff #808080 #808080 #fff;
+  border-bottom: none; padding: 3px 12px;
+  font-family: inherit; font-size: 12px; cursor: pointer;
+  position: relative; top: 2px;
 }
-.statpanel {
-  border: 1px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 1px 6px;
-  flex: 1;
+.tab-btn.active {
+  background: #c0c0c0; border-bottom: 2px solid #c0c0c0;
+  font-weight: bold; top: 2px; z-index: 1;
 }
-.statpanel.fixed { flex: 0 0 auto; }
+.tab-panel { display: none; padding: 6px; }
+.tab-panel.active { display: block; }
 
-/* ── Aspect colors ── */
-.asp-conj  { color: #000080; font-weight: bold; }
-.asp-oppo  { color: #800000; font-weight: bold; }
-.asp-trig  { color: #005500; font-weight: bold; }
-.asp-carr  { color: #800000; }
-.asp-sext  { color: #005500; }
-.retro     { color: #800000; font-style: italic; }
+/* ── Synthesis ── */
+#synthesis {
+  min-height: 300px; max-height: 520px;
+  overflow-y: auto; padding: 8px;
+  background: #fff; border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  line-height: 1.55; white-space: pre-wrap;
+  font-size: 12px;
+}
+
+/* ── Aspects table ── */
+.aspects-wrap {
+  max-height: 420px; overflow-y: auto;
+  background: #fff; border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+}
+.aspects-wrap table {
+  width: 100%; border-collapse: collapse; font-size: 11px;
+}
+.aspects-wrap th {
+  background: #000080; color: #fff;
+  padding: 3px 6px; text-align: left; position: sticky; top: 0;
+}
+.aspects-wrap td { padding: 2px 6px; border-bottom: 1px solid #e0e0e0; }
+.aspects-wrap tr:nth-child(even) td { background: #f4f4f4; }
+.asp-conj { color: #000080; font-weight: bold; }
+.asp-oppo { color: #800000; font-weight: bold; }
+.asp-trig { color: #006000; font-weight: bold; }
+.asp-carr { color: #cc0000; font-weight: bold; }
+.asp-sext { color: #005080; }
+.retro    { color: #800000; font-size: 10px; }
 
 /* ── Chat ── */
-.chat-log { overflow-y: auto; }
-.chat-msg { margin-bottom: 6px; font-size: 11px; line-height: 1.6; }
+.chat-log {
+  height: 380px; overflow-y: auto;
+  background: #fff; border: 2px solid;
+  border-color: #808080 #fff #fff #808080;
+  padding: 6px; margin-bottom: 4px;
+}
+.chat-msg { margin-bottom: 6px; line-height: 1.4; }
 .chat-user strong { color: #000080; }
 .chat-ai   strong { color: #4b0082; }
 .chat-sys  strong { color: #808080; }
-.chat-row  { display: flex; gap: 4px; margin-top: 6px; }
-.chat-input { flex: 1; }
-
-/* ── Badges ── */
-.natal-badge {
-  background: #000080;
-  color: #fff;
-  font-size: 10px;
-  padding: 2px 6px;
-  display: inline-block;
-  margin-right: 4px;
-}
-.natal-info {
-  font-size: 11px;
-  color: #000080;
-  margin-bottom: 8px;
-  font-style: italic;
-}
-
-/* ── Loading ── */
-.loading { color: #808080; font-style: italic; }
-
-/* ── HR ── */
-hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 5px 0; }
-
-/* ── Scrollbar ── */
-::-webkit-scrollbar { width: 14px; }
-::-webkit-scrollbar-track { background: #c0c0c0; border: 1px solid #808080; }
-::-webkit-scrollbar-thumb {
-  background: #c0c0c0;
-  border: 2px solid; border-color: #fff #808080 #808080 #fff;
-}
-
-/* ── TABS ── */
-.tabs-bar {
-  display: flex;
-  gap: 0;
-  padding: 4px 6px 0 6px;
-  background: #c0c0c0;
-  border-bottom: 2px solid #808080;
-  margin-bottom: 0;
-}
-.tab-btn {
-  background: #a8a8a8;
-  border: 2px solid;
-  border-color: #fff #808080 #c0c0c0 #fff;
-  border-bottom: none;
-  padding: 3px 14px;
-  font-family: inherit;
-  font-size: 11px;
-  font-weight: bold;
-  cursor: pointer;
-  margin-right: 2px;
-  position: relative;
-  top: 4px;
-  color: #404040;
-}
-.tab-btn.active {
-  background: #c0c0c0;
-  top: 2px;
-  color: #000080;
-  border-bottom: 2px solid #c0c0c0;
-  z-index: 2;
-}
-.tab-panel { display: none; padding: 8px; background: #c0c0c0; }
-.tab-panel.active { display: block; }
-
-/* ── SCREENS (login / register / app) ── */
-.screen { display: none; }
-.screen.active { display: block; }
-
-/* ── Auth form layout ── */
-.auth-form { max-width: 400px; margin: 40px auto; }
-.auth-field { margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-.auth-field label { width: 110px; text-align: right; flex-shrink: 0; font-size: 11px; }
-.auth-field input { flex: 1; }
-.auth-error { color: #800000; font-size: 11px; margin: 4px 0; min-height: 16px; }
-.auth-link { color: #000080; cursor: pointer; text-decoration: underline; font-size: 11px; }
-
-/* ── Geocode dropdown ── */
-.geo-wrap { position: relative; flex: 1; }
-.geo-results {
-  position: absolute;
-  top: 22px; left: 0; right: 0;
-  background: #fff;
-  border: 2px solid;
+.chat-row  { display: flex; gap: 4px; }
+.chat-input {
+  flex: 1; font-family: inherit; font-size: 12px;
+  background: #fff; border: 2px solid;
   border-color: #808080 #fff #fff #808080;
-  z-index: 100;
-  max-height: 140px;
-  overflow-y: auto;
-  display: none;
+  padding: 3px 5px;
+}
+
+/* ── Carte Karmique SVG ── */
+#karma-map-svg {
+  display: block; margin: 0 auto;
+  max-width: 560px; width: 100%;
+}
+.quadrant-panels {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 6px; margin-top: 8px;
+}
+.quadrant-panel {
+  border: 2px solid; border-color: #808080 #fff #fff #808080;
+  background: #f8f8f8; padding: 4px 8px;
+}
+.quadrant-panel h4 {
+  font-size: 11px; font-weight: bold; margin-bottom: 2px;
+}
+.quadrant-panel ul { list-style: none; padding: 0; margin: 0; font-size: 11px; }
+.quadrant-panel ul li { padding: 1px 0; border-bottom: 1px dotted #ccc; }
+
+/* ── Login screen ── */
+.login-wrap {
+  max-width: 360px; margin: 40px auto;
+}
+.login-logo {
+  text-align: center; padding: 12px;
+  font-size: 22px; font-weight: bold; color: #fff;
+  text-shadow: 1px 1px 0 #000;
+}
+.login-subtitle { text-align: center; color: #c0c0c0; font-size: 11px; margin-bottom: 10px; }
+.login-error {
+  background: #800000; color: #fff;
+  padding: 4px 8px; margin-bottom: 6px;
+  display: none; font-size: 11px;
+}
+
+/* ── Register screen ── */
+.reg-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 4px 10px; align-items: center;
+}
+.reg-grid label { white-space: nowrap; text-align: right; }
+.reg-error {
+  background: #800000; color: #fff;
+  padding: 4px 8px; margin-bottom: 6px;
+  display: none; font-size: 11px;
+}
+.geo-results {
+  background: #fff; border: 1px solid #808080;
+  max-height: 120px; overflow-y: auto;
+  display: none; position: absolute; z-index: 10;
+  width: calc(100% - 2px);
 }
 .geo-item {
-  padding: 3px 6px;
-  font-size: 11px;
-  cursor: pointer;
-  border-bottom: 1px solid #e0e0e0;
+  padding: 3px 6px; cursor: pointer; font-size: 11px;
 }
 .geo-item:hover { background: #000080; color: #fff; }
+.geo-wrap { position: relative; }
+
+/* ── Statusbar ── */
+.statusbar {
+  display: flex; gap: 2px; padding: 2px 4px;
+  border-top: 2px solid #808080; background: #c0c0c0;
+  margin-top: 4px;
+}
+.statpanel {
+  flex: 1; background: #c0c0c0;
+  border: 1px solid; border-color: #808080 #fff #fff #808080;
+  padding: 1px 6px; font-size: 11px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.statpanel.fixed { flex: 0 0 auto; }
+
+/* ── Misc ── */
+.loading { color: #808080; font-style: italic; }
+.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+.hidden { display: none !important; }
 </style>
 </head>
 <body>
 
-<!-- ═══════════════════════════════════
-     SCREEN : LOGIN
-═══════════════════════════════════ -->
-<div class="screen active" id="screen-login">
-<div class="win auth-form">
-  <div class="titlebar">
-    <div class="titlebar-title">✦ Gochara Karmique — Connexion</div>
-    <div class="titlebar-btns"><button class="tbtn">✕</button></div>
-  </div>
-  <div class="winbody">
-    <div style="text-align:center;margin-bottom:12px;font-size:13px;color:#000080;font-weight:bold;">
-      ✦ @siderealAstro13
-    </div>
-    <div class="auth-field">
-      <label>Email :</label>
-      <input type="email" id="login-email" style="width:200px;" placeholder="ton@email.com"
-             onkeydown="if(event.key==='Enter')doLogin()">
-    </div>
-    <div class="auth-error" id="login-error"></div>
-    <hr>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
-      <span class="auth-link" onclick="showScreen('register')">Créer un compte »</span>
-      <button class="btn primary" onclick="doLogin()">Connexion »</button>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ═══════════════════════════════════
-     SCREEN : REGISTER
-═══════════════════════════════════ -->
-<div class="screen" id="screen-register">
-<div class="win" style="max-width:500px;margin:20px auto;">
-  <div class="titlebar">
-    <div class="titlebar-title">✦ Gochara Karmique — Création de profil</div>
-    <div class="titlebar-btns"><button class="tbtn">✕</button></div>
-  </div>
-  <div class="winbody">
-
-    <div class="group">
-      <div class="group-label">Identité</div>
-      <div class="auth-field">
-        <label>Pseudo :</label>
-        <input type="text" id="reg-pseudo" style="width:180px;" placeholder="ton_pseudo">
-      </div>
-      <div class="auth-field">
-        <label>Email :</label>
-        <input type="email" id="reg-email" style="width:180px;" placeholder="ton@email.com">
-      </div>
-      <div class="auth-field">
-        <label>Prénom :</label>
-        <input type="text" id="reg-name" style="width:180px;" placeholder="Ton prénom">
-      </div>
-    </div>
-
-    <div class="group">
-      <div class="group-label">Données natales</div>
-      <div class="auth-field">
-        <label>Date :</label>
-        <input type="number" id="reg-day"   placeholder="JJ" style="width:44px;" min="1" max="31">
-        /
-        <input type="number" id="reg-month" placeholder="MM" style="width:44px;" min="1" max="12">
-        /
-        <input type="number" id="reg-year"  placeholder="AAAA" style="width:60px;" min="1900" max="2010">
-      </div>
-      <div class="auth-field">
-        <label>Heure :</label>
-        <input type="number" id="reg-hour"   style="width:44px;" value="12" min="0" max="23">h
-        <input type="number" id="reg-minute" style="width:44px;" value="0"  min="0" max="59">min
-      </div>
-      <div class="auth-field">
-        <label>Lieu natal :</label>
-        <div class="geo-wrap">
-          <input type="text" id="reg-city-input" style="width:100%;" placeholder="Ville de naissance…"
-                 oninput="geocodeField(this,'reg-geo-results','reg-city','reg-lat','reg-lon','reg-tz')">
-          <div class="geo-results" id="reg-geo-results"></div>
-        </div>
-      </div>
-      <input type="hidden" id="reg-city"> <input type="hidden" id="reg-lat">
-      <input type="hidden" id="reg-lon">  <input type="hidden" id="reg-tz">
-    </div>
-
-    <div class="group">
-      <div class="group-label">Lieu de résidence (transits)</div>
-      <div class="auth-field">
-        <label>Lieu actuel :</label>
-        <div class="geo-wrap">
-          <input type="text" id="reg-tcity-input" style="width:100%;" placeholder="Ville actuelle…"
-                 oninput="geocodeField(this,'reg-tgeo-results','reg-tcity','reg-tlat','reg-tlon','reg-ttz')">
-          <div class="geo-results" id="reg-tgeo-results"></div>
-        </div>
-      </div>
-      <input type="hidden" id="reg-tcity"> <input type="hidden" id="reg-tlat">
-      <input type="hidden" id="reg-tlon">  <input type="hidden" id="reg-ttz">
-    </div>
-
-    <div class="auth-error" id="reg-error"></div>
-    <hr>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;">
-      <span class="auth-link" onclick="showScreen('login')">‹ Retour connexion</span>
-      <button class="btn primary" onclick="doRegister()">Créer mon profil »</button>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- ═══════════════════════════════════
-     SCREEN : APP
-═══════════════════════════════════ -->
-<div class="screen" id="screen-app">
-<div class="win" style="max-width:960px;margin:0 auto;">
-
+<!-- ═══════════════ FENÊTRE PRINCIPALE ═══════════════ -->
+<div class="win" id="main-win">
   <div class="titlebar">
     <div class="titlebar-title">✦ Gochara Karmique</div>
     <div class="titlebar-btns">
-      <button class="tbtn" onclick="doLogout()" title="Déconnexion">✕</button>
+      <div class="tbtn">_</div>
+      <div class="tbtn">□</div>
+      <div class="tbtn">✕</div>
     </div>
   </div>
 
-  <div class="winbody" style="padding:6px;">
-
-    <!-- Info natal -->
-    <div class="natal-info" id="natal-info-bar">
-      <span class="natal-badge">NATAL</span>
-      <span id="natal-summary">—</span>
-      &nbsp;|&nbsp;
-      <span class="natal-badge">RÉGLAGES</span>
-      Ayanamsa : Djwhal Khul &nbsp;·&nbsp; Maisons : Moonrise (Chandra Lagna) &nbsp;·&nbsp; Nœuds : Vrais &nbsp;·&nbsp; Orbe : &lt; 3°
-    </div>
-
-    <!-- Saisie transits -->
-    <div class="group">
-      <div class="group-label">Transits — Date de consultation</div>
-      <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
-        <div>
-          <label>Date :</label>
-          <input type="date" id="t-date" value="">
-        </div>
-        <div>
-          <label>Heure :</label>
-          <input type="number" id="t-hour" value="12" min="0" max="23">h
-          <input type="number" id="t-minute" value="0" min="0" max="59">min
-        </div>
-        <div>
-          <label>Lieu :</label>
-          <input type="text" id="transit-city-display" value="" readonly
-                 style="width:160px;color:#808080;background:#d4d0c8;">
-        </div>
-        <button class="btn" id="calc-btn" onclick="calculateTransits()">✦ Calculer »</button>
-      </div>
-    </div>
-
-<!-- TABS BAR -->
-    <div class="tabs-bar">
-      <button class="tab-btn active" id="tab-btn-gochara"  onclick="switchTab('gochara')">◆ Gochara</button>
-      <button class="tab-btn"        id="tab-btn-aspects"  onclick="switchTab('aspects')">✦ Aspects</button>
-      <button class="tab-btn"        id="tab-btn-carte"    onclick="switchTab('carte')">✦ Carte Karmique</button>
-      <button class="tab-btn"        id="tab-btn-dialogue" onclick="switchTab('dialogue')">✉ Dialogue Karmique</button>
-    </div>
-
-    <!-- ONGLET 1 — SYNTHÈSE -->
-    <div class="tab-panel active" id="tab-gochara">
+  <!-- ════════════ ÉCRAN LOGIN ════════════ -->
+  <div class="screen visible" id="login-screen">
+    <div class="winbody login-wrap">
+      <div class="login-logo">✦ Gochara Karmique</div>
+      <div class="login-subtitle">@siderealAstro13 · Jyotish Sidéral · Chandra Lagna</div>
       <div class="win">
         <div class="titlebar purple">
-          <div class="titlebar-title">✦ Synthèse karmique — @siderealAstro13</div>
-        </div>
-        <div class="winbody" style="padding:4px;">
-          <div id="synthesis" class="sunken"
-               style="min-height:420px;max-height:600px;font-size:11px;line-height:1.7;padding:10px;">
-            <span class="loading">Lance un calcul pour obtenir ta synthèse karmique védique…</span>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ONGLET 2 — ASPECTS -->
-    <div class="tab-panel" id="tab-aspects">
-      <div class="win">
-        <div class="titlebar teal">
-          <div class="titlebar-title">☌ Aspects actifs (orbe &lt; 3°) — Gochara sidéral</div>
-        </div>
-        <div class="winbody" style="padding:4px;">
-          <div id="aspects-wrap" class="sunken" style="min-height:420px;max-height:600px;padding:0;">
-            <div style="padding:8px;" class="loading">Lance un calcul pour voir les aspects actifs…</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ONGLET 3 — CARTE KARMIQUE -->
-    <div class="tab-panel" id="tab-carte">
-      <div class="win">
-        <div class="titlebar" style="background:linear-gradient(90deg,#5a3a00 0%,#a07000 100%);">
-          <div class="titlebar-title">✦ Carte Karmique — Doctrine @siderealAstro13 (RAM / ROM / Stage)</div>
-        </div>
-        <div class="winbody" style="padding:4px;">
-          <div id="carte-wrap" class="sunken" style="min-height:420px;max-height:600px;padding:8px;">
-            <div class="loading">Lance un calcul pour afficher la Carte Karmique…</div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ONGLET 4 — DIALOGUE -->
-    <div class="tab-panel" id="tab-dialogue">
-      <div class="win">
-        <div class="titlebar green">
-          <div class="titlebar-title">✉ Dialogue karmique — Jyotish-AI</div>
+          <div class="titlebar-title">🔐 Connexion</div>
         </div>
         <div class="winbody">
-          <div id="chat-log" class="sunken chat-log" style="height:420px;">
-            <div class="chat-msg chat-ai">
-              <strong>Jyotish-AI :</strong>
-              Namaste ! Lance un calcul de tes transits, puis pose-moi tes questions sur ton chemin karmique.
+          <div class="login-error" id="login-error"></div>
+          <div class="row" style="margin-bottom:6px;">
+            <label for="pseudo-input" style="white-space:nowrap;">Pseudo :</label>
+            <input type="text" id="pseudo-input" class="sunken" placeholder="Ton pseudo…"
+                   style="flex:1;" onkeydown="if(event.key==='Enter')doLogin()">
+          </div>
+          <div class="row" style="justify-content:flex-end; gap:6px;">
+            <button class="btn" onclick="showRegister()">Créer un profil</button>
+            <button class="btn primary" onclick="doLogin()">Connexion »</button>
+          </div>
+          <div id="login-status" style="font-size:11px;color:#808080;margin-top:4px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ ÉCRAN INSCRIPTION ════════════ -->
+  <div class="screen" id="register-screen">
+    <div class="winbody" style="max-width:520px;margin:0 auto;">
+      <div class="win">
+        <div class="titlebar green">
+          <div class="titlebar-title">✦ Créer un profil karmique</div>
+        </div>
+        <div class="winbody">
+          <div class="reg-error" id="reg-error"></div>
+          <div class="reg-grid">
+            <label>Pseudo :</label>
+            <input type="text" id="reg-pseudo" class="sunken" placeholder="pseudo unique">
+
+            <label>Prénom :</label>
+            <input type="text" id="reg-name" class="sunken" placeholder="Prénom">
+
+            <label>Email :</label>
+            <input type="email" id="reg-email" class="sunken" placeholder="email@…">
+
+            <label>Date naissance :</label>
+            <div class="row">
+              <input type="number" id="reg-day"   class="sunken" placeholder="JJ" min="1" max="31" style="width:50px;">
+              <input type="number" id="reg-month" class="sunken" placeholder="MM" min="1" max="12" style="width:50px;">
+              <input type="number" id="reg-year"  class="sunken" placeholder="AAAA" min="1900" max="2099" style="width:70px;">
+            </div>
+
+            <label>Heure naissance :</label>
+            <div class="row">
+              <input type="number" id="reg-hour"   class="sunken" placeholder="HH" min="0" max="23" style="width:50px;">
+              <span>h</span>
+              <input type="number" id="reg-minute" class="sunken" placeholder="MM" min="0" max="59" style="width:50px;">
+            </div>
+
+            <label>Ville naissance :</label>
+            <div class="geo-wrap" style="grid-column:2;">
+              <input type="text" id="reg-city-input" class="sunken"
+                     placeholder="Cherche ta ville…"
+                     oninput="geocodeField(this,'reg-geo-results','reg-natal-city','reg-natal-lat','reg-natal-lon','reg-natal-tz')">
+              <div class="geo-results" id="reg-geo-results"></div>
+              <input type="hidden" id="reg-natal-city">
+              <input type="hidden" id="reg-natal-lat">
+              <input type="hidden" id="reg-natal-lon">
+              <input type="hidden" id="reg-natal-tz">
             </div>
           </div>
-          <div class="chat-row">
-            <input type="text" id="chat-input" class="chat-input"
-                   placeholder="Pose ta question sur tes transits karmiques…"
-                   onkeydown="if(event.key==='Enter')sendChat()">
-            <button class="btn" onclick="sendChat()">Envoyer »</button>
+          <div class="row" style="justify-content:flex-end;gap:6px;margin-top:8px;">
+            <button class="btn" onclick="showLogin()">← Retour</button>
+            <button class="btn primary" onclick="doRegister()">Créer mon profil »</button>
+          </div>
+          <div id="reg-status" style="font-size:11px;color:#808080;margin-top:4px;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ════════════ ÉCRAN APPLICATION ════════════ -->
+  <div class="screen" id="app-screen">
+
+    <!-- Bandeau natal -->
+    <div class="winbody" style="padding-bottom:0;">
+      <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;">
+        <div class="natal-badge" id="natal-badge">
+          <strong id="pseudo-badge">—</strong>
+          <span class="sep">·</span>
+          <span id="natal-summary">—</span>
+        </div>
+        <div class="reglages-badge">
+          RÉGLAGES&nbsp;
+          <span>Ayanamsa : Djwhal Khul</span> ·
+          <span>Maisons : Moonrise (Chandra Lagna)</span> ·
+          <span>Nœuds : Vrais</span> ·
+          <span>Orbe : &lt; 3°</span>
+        </div>
+        <button class="btn" style="margin-left:auto;" onclick="doLogout()">Déconnexion</button>
+      </div>
+    </div>
+
+    <!-- Barre transit -->
+    <div class="winbody" style="padding-top:4px;padding-bottom:0;">
+      <div class="win">
+        <div class="titlebar teal">
+          <div class="titlebar-title">⏱ Transits — Date de consultation</div>
+        </div>
+        <div class="winbody">
+          <div class="toolbar">
+            <label>Date :</label>
+            <input type="date" id="t-date" class="sunken">
+            <label>Heure :</label>
+            <input type="number" id="t-hour" class="sunken" min="0" max="23" value="{{ now_hour }}">
+            <label>h</label>
+            <input type="number" id="t-minute" class="sunken" min="0" max="59" value="{{ now_minute }}">
+            <label>min</label>
+
+            <div class="geo-wrap" style="position:relative;">
+              <input type="text" id="transit-city-display" class="sunken"
+                     placeholder="Lieu de transit…" style="width:180px;"
+                     oninput="geocodeField(this,'transit-geo-results','transit-city-val','transit-lat-val','transit-lon-val','transit-tz-val')">
+              <div class="geo-results" id="transit-geo-results"></div>
+              <input type="hidden" id="transit-city-val">
+              <input type="hidden" id="transit-lat-val">
+              <input type="hidden" id="transit-lon-val">
+              <input type="hidden" id="transit-tz-val">
+            </div>
+
+            <button class="btn primary" id="calc-btn" onclick="calculateTransits()">✦ Calculer »</button>
           </div>
         </div>
       </div>
     </div>
 
-  </div><!-- /winbody principale -->
+    <!-- Onglets -->
+    <div class="winbody" style="padding-top:4px;">
+      <div class="tabs-bar">
+        <button class="tab-btn active" id="tab-btn-gochara"   onclick="switchTab('gochara')">◆ Gochara</button>
+        <button class="tab-btn"        id="tab-btn-aspects"   onclick="switchTab('aspects')">✦ Aspects</button>
+        <button class="tab-btn"        id="tab-btn-carte"     onclick="switchTab('carte')">✦ Carte Karmique</button>
+        <button class="tab-btn"        id="tab-btn-dialogue"  onclick="switchTab('dialogue')">✉ Dialogue Karmique</button>
+      </div>
 
-<!-- ═══════════════════════════════════════════════════════
+      <!-- ── Tab : Gochara ── -->
+      <div class="tab-panel active" id="tab-gochara">
+        <div class="win">
+          <div class="titlebar purple">
+            <div class="titlebar-title">✦ Synthèse karmique — @siderealAstro13</div>
+          </div>
+          <div class="winbody" style="padding:0;">
+            <div id="synthesis"><span class="loading">Lance un calcul pour obtenir ta synthèse karmique védique…</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tab : Aspects ── -->
+      <div class="tab-panel" id="tab-aspects">
+        <div class="win">
+          <div class="titlebar gold">
+            <div class="titlebar-title">✦ Aspects actifs (orbe &lt; 3°)</div>
+          </div>
+          <div class="winbody" style="padding:0;">
+            <div class="aspects-wrap" id="aspects-wrap">
+              <div style="padding:8px;" class="loading">Lance un calcul pour voir les aspects…</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tab : Carte Karmique ── -->
+      <div class="tab-panel" id="tab-carte">
+        <div class="win">
+          <div class="titlebar green">
+            <div class="titlebar-title">✦ Carte Karmique — Zodiaque Sidéral</div>
+          </div>
+          <div class="winbody">
+            <svg id="karma-map-svg" viewBox="0 0 560 560"
+                 xmlns="http://www.w3.org/2000/svg">
+              <circle cx="280" cy="280" r="275" fill="#f8f8f8" stroke="#808080" stroke-width="1"/>
+              <text x="280" y="286" text-anchor="middle" font-size="14" fill="#808080"
+                    font-family="MS Sans Serif, Arial">Lance un calcul…</text>
+            </svg>
+            <div class="quadrant-panels" id="quadrant-panels"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── Tab : Dialogue Karmique ── -->
+      <div class="tab-panel" id="tab-dialogue">
+        <div class="win">
+          <div class="titlebar teal">
+            <div class="titlebar-title">✉ Dialogue Karmique — @siderealAstro13</div>
+          </div>
+          <div class="winbody">
+            <div class="chat-log" id="chat-log">
+              <div class="chat-msg chat-ai">
+                <strong>@siderealAstro13 :</strong>
+                Lance un calcul de tes transits, puis pose-moi tes questions.<br>
+                ROM, RAM, Stage — je lis les portes ouvertes.
+              </div>
+            </div>
+            <div class="chat-row">
+              <input type="text" id="chat-input" class="chat-input"
+                     placeholder="Pose ta question sur tes transits karmiques…"
+                     onkeydown="if(event.key==='Enter')sendChat()">
+              <button class="btn" onclick="sendChat()">Envoyer »</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- /winbody onglets -->
+
+    <!-- ── Status bar ── -->
+    <div class="statusbar">
+      <div class="statpanel" id="status-msg">Prêt</div>
+      <div class="statpanel fixed">Sidéral · Djwhal Khul · Moonrise</div>
+      <div class="statpanel fixed" id="status-count"></div>
+    </div>
+
+  </div><!-- /app-screen -->
+
+</div><!-- /main-win -->
+
+
+<!-- ═══════════════════════════════════════════════════════════════
      JAVASCRIPT
-═══════════════════════════════════════════════════════ -->
+═══════════════════════════════════════════════════════════════ -->
 <script>
 "use strict";
-let currentUser = null;
+
 let chartContext = "";
 let chatHistory  = [];
+let currentPseudo = "";
+let lastChartData = null;
 
-/* ── Tabs ──────────────────────────────────────────────────────── */
+/* ══ UTILS ═══════════════════════════════════════════════════════ */
+function escHtml(s)   { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escapeNl(s)  { return String(s).replace(/\n/g,"<br>"); }
+function pad(n)       { return String(n).padStart(2,"0"); }
+
+function setStatus(txt) {
+  const el = document.getElementById("status-msg");
+  if (el) el.textContent = txt;
+}
+function setCount(txt) {
+  const el = document.getElementById("status-count");
+  if (el) el.textContent = txt;
+}
+function setAspectsHTML(html)   {
+  const el = document.getElementById("aspects-wrap");
+  if (el) el.innerHTML = html;
+}
+function setSynthesisHTML(html) {
+  const el = document.getElementById("synthesis");
+  if (el) el.innerHTML = html;
+}
+
+/* ══ TABS ════════════════════════════════════════════════════════ */
 function switchTab(name) {
-["gochara", "aspects", "carte", "dialogue"].forEach(t => {
-    document.getElementById("tab-" + t).classList.toggle("active", t === name);
-    document.getElementById("tab-btn-" + t).classList.toggle("active", t === name);
+  ["gochara","aspects","carte","dialogue"].forEach(t => {
+    const btn = document.getElementById("tab-btn-" + t);
+    const pan = document.getElementById("tab-" + t);
+    if (btn) btn.classList.toggle("active", t === name);
+    if (pan) pan.classList.toggle("active", t === name);
   });
+  if (name === "carte" && lastChartData) renderKarmaMap(lastChartData);
 }
 
-/* ── Calcul principal ──────────────────────────────────────────── */
-async function calculateTransits() {
-  const date   = document.getElementById("t-date").value;
-  const hour   = parseInt(document.getElementById("t-hour").value)   || 0;
-  const minute = parseInt(document.getElementById("t-minute").value) || 0;
-
-  if (!date) { setStatus("⚠ Sélectionne une date."); return; }
-
-  setStatus("Calcul des éphémérides…");
-  document.getElementById("calc-btn").disabled = true;
-
-  setAspectsHTML('<div style="padding:8px;" class="loading">Calcul sidéral Djwhal Khul…</div>');
-  setSynthesisHTML('<span class="loading">Interprétation karmique védique en cours…</span>');
-
-  // Basculer sur l'onglet Gochara pour voir la synthèse arriver
-  switchTab("gochara");
-
-  try {
-    const res  = await fetch("/calculate", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, hour, minute }),
-    });
-    const data = await res.json();
-
-    if (data.error) throw new Error(data.error);
-
-    renderAspects(data.aspects);
-    setSynthesisHTML(escapeNl(data.synthesis));
-
-    chartContext = data.chart_context || "";
-    const n = data.aspects.length;
-    setStatus(`✓ ${n} aspect${n > 1 ? "s" : ""} trouvé${n > 1 ? "s" : ""} · ${date} ${pad(hour)}h${pad(minute)}`);
-    document.getElementById("status-count").textContent = `${n} asp.`;
-
-  } catch (err) {
-    setAspectsHTML(`<div style="padding:8px;color:#800000;">⚠ Erreur : ${escHtml(err.message)}</div>`);
-    setSynthesisHTML(`<span style="color:#800000;">⚠ Erreur : ${escHtml(err.message)}</span>`);
-    setStatus("Erreur lors du calcul.");
-  } finally {
-    document.getElementById("calc-btn").disabled = false;
-  }
-}
-
-/* ── Rendu du tableau d'aspects ────────────────────────────────── */
-function renderAspects(aspects) {
-  if (!aspects || aspects.length === 0) {
-    setAspectsHTML('<div style="padding:8px;">Aucun aspect dans l\'orbe de 3°.</div>');
-    return;
-  }
-  let html = '<table><thead><tr>'
-    + '<th>Transit</th><th>Aspect</th><th>Natal</th><th>Orbe</th>'
-    + '</tr></thead><tbody>';
-
-  aspects.forEach(a => {
-    const cls   = aspClass(a.aspect);
-    const retro = a.retrograde ? ' <span class="retro">℞</span>' : "";
-    html += `<tr>
-      <td>${escHtml(a.transit_planet)}${retro}<br><small style="color:#404040">${escHtml(a.transit_display)}</small></td>
-      <td><span class="${cls}">${escHtml(a.aspect)}</span></td>
-      <td>${escHtml(a.natal_planet)}<br><small style="color:#404040">${escHtml(a.natal_display)}</small></td>
-      <td style="text-align:right">${a.orb}°</td>
-    </tr>`;
+/* ══ SCREENS ═════════════════════════════════════════════════════ */
+function showLogin()    { _showScreen("login-screen"); }
+function showRegister() { _showScreen("register-screen"); }
+function showApp()      { _showScreen("app-screen"); }
+function _showScreen(id) {
+  ["login-screen","register-screen","app-screen"].forEach(s => {
+    const el = document.getElementById(s);
+    if (el) { el.classList.remove("visible"); }
   });
-
-  html += "</tbody></table>";
-  setAspectsHTML(html);
+  const target = document.getElementById(id);
+  if (target) target.classList.add("visible");
 }
 
-/* ── Chat ──────────────────────────────────────────────────────── */
-async function sendChat() {
-  const input = document.getElementById("chat-input");
-  const msg   = input.value.trim();
-  if (!msg) return;
-
- addChatMsg(currentUser ? currentUser.name : "Moi", msg, "chat-user");
-  input.value = "";
-
-  try {
-    const res  = await fetch("/chat", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ message: msg, history: chatHistory, chart_context: chartContext }),
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    addChatMsg("Jyotish-AI", data.response, "chat-ai");
-    chatHistory.push({ role: "user",      content: msg          });
-    chatHistory.push({ role: "assistant", content: data.response });
-    if (chatHistory.length > 24) chatHistory = chatHistory.slice(-24);
-  } catch (err) {
-    addChatMsg("Système", "⚠ " + err.message, "chat-sys");
-  }
-}
-
-/* ── Helpers ───────────────────────────────────────────────────── */
-function addChatMsg(sender, text, cls) {
-  const log = document.getElementById("chat-log");
-  const div = document.createElement("div");
-  div.className = `chat-msg ${cls}`;
-  div.innerHTML = `<strong>${escHtml(sender)} :</strong> ${escapeNl(escHtml(text))}`;
-  log.appendChild(div);
-  log.scrollTop = log.scrollHeight;
-}
-
-function setAspectsHTML(html)   { document.getElementById("aspects-wrap").innerHTML = html; }
-function setSynthesisHTML(html) { document.getElementById("synthesis").innerHTML = html; }
-function setStatus(txt)         { document.getElementById("status-msg").textContent = txt; }
-function pad(n)                 { return String(n).padStart(2, "0"); }
-function escHtml(s)             { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function escapeNl(s)            { return s.replace(/\n/g,"<br>"); }
-
-function aspClass(asp) {
-  if (asp.includes("Conjonction")) return "asp-conj";
-  if (asp.includes("Opposition"))  return "asp-oppo";
-  if (asp.includes("Trigone"))     return "asp-trig";
-  if (asp.includes("Carr"))        return "asp-carr";
-  if (asp.includes("Sextile"))     return "asp-sext";
-  return "";
-}
-  /* ── Screens ───────────────────────────────────────────────────── */
-function showScreen(name) {
-  ["login", "register", "app"].forEach(s => {
-    document.getElementById("screen-" + s).classList.toggle("active", s === name);
-  });
-}
-
-/* ── Auth ──────────────────────────────────────────────────────── */
+/* ══ LOGIN ═══════════════════════════════════════════════════════ */
 async function doLogin() {
-  const email = document.getElementById("login-email").value.trim();
-  const err   = document.getElementById("login-error");
-  err.textContent = "";
-  if (!email) { err.textContent = "Email requis."; return; }
+  const pseudo = document.getElementById("pseudo-input").value.trim();
+  const errEl  = document.getElementById("login-error");
+  const statEl = document.getElementById("login-status");
+  errEl.style.display = "none";
+  if (!pseudo) { showLoginError("Saisis un pseudo pour continuer."); return; }
+  statEl.textContent = "Connexion…";
   try {
     const res  = await fetch("/login", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({pseudo}),
     });
     const data = await res.json();
-    if (data.error) { err.textContent = data.error; return; }
-    currentUser = data.profile;
-    applyProfile(data.profile);
-    showScreen("app");
-  } catch (e) {
-    err.textContent = "Erreur réseau : " + e.message;
+    if (!data.ok) { showLoginError(data.error || "Connexion refusée."); statEl.textContent=""; return; }
+    currentPseudo = data.pseudo;
+    loadProfile(data.profile);
+    showApp();
+    statEl.textContent = "";
+  } catch (err) {
+    showLoginError("Erreur réseau : " + err.message);
+    statEl.textContent = "";
   }
 }
+function showLoginError(msg) {
+  const el = document.getElementById("login-error");
+  el.textContent = msg; el.style.display = "block";
+}
 
+/* ══ LOGOUT ══════════════════════════════════════════════════════ */
+async function doLogout() {
+  try { await fetch("/logout", {method:"POST"}); } catch(_) {}
+  showLogin();
+}
+
+/* ══ REGISTER ════════════════════════════════════════════════════ */
 async function doRegister() {
-  const err = document.getElementById("reg-error");
-  err.textContent = "";
+  const errEl  = document.getElementById("reg-error");
+  const statEl = document.getElementById("reg-status");
+  errEl.style.display = "none";
+
   const payload = {
-    pseudo: document.getElementById("reg-pseudo").value.trim(),
-    email:  document.getElementById("reg-email").value.trim(),
-    name:   document.getElementById("reg-name").value.trim(),
-    day:    parseInt(document.getElementById("reg-day").value),
-    month:  parseInt(document.getElementById("reg-month").value),
-    year:   parseInt(document.getElementById("reg-year").value),
-    hour:   parseInt(document.getElementById("reg-hour").value),
-    minute: parseInt(document.getElementById("reg-minute").value),
-    city:   document.getElementById("reg-city").value,
-    lat:    parseFloat(document.getElementById("reg-lat").value),
-    lon:    parseFloat(document.getElementById("reg-lon").value),
-    tz:     document.getElementById("reg-tz").value,
-    transit_city: document.getElementById("reg-tcity").value,
-    transit_lat:  parseFloat(document.getElementById("reg-tlat").value),
-    transit_lon:  parseFloat(document.getElementById("reg-tlon").value),
-    transit_tz:   document.getElementById("reg-ttz").value,
+    pseudo:  document.getElementById("reg-pseudo").value.trim(),
+    name:    document.getElementById("reg-name").value.trim(),
+    email:   document.getElementById("reg-email").value.trim(),
+    day:     parseInt(document.getElementById("reg-day").value)   || 0,
+    month:   parseInt(document.getElementById("reg-month").value) || 0,
+    year:    parseInt(document.getElementById("reg-year").value)  || 0,
+    hour:    parseInt(document.getElementById("reg-hour").value)  || 0,
+    minute:  parseInt(document.getElementById("reg-minute").value)|| 0,
+    city:    document.getElementById("reg-natal-city").value,
+    lat:     parseFloat(document.getElementById("reg-natal-lat").value) || 0,
+    lon:     parseFloat(document.getElementById("reg-natal-lon").value) || 0,
+    tz:      document.getElementById("reg-natal-tz").value || "UTC",
   };
-  if (!payload.email || !payload.pseudo) { err.textContent = "Email et pseudo requis."; return; }
+
+  if (!payload.pseudo || !payload.name || !payload.year) {
+    showRegError("Pseudo, prénom et date de naissance sont obligatoires."); return;
+  }
+
+  statEl.textContent = "Création du profil…";
   try {
     const res  = await fetch("/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: {"Content-Type":"application/json"},
       body: JSON.stringify(payload),
     });
     const data = await res.json();
-    if (data.error) { err.textContent = data.error; return; }
-    currentUser = data.profile;
-    applyProfile(data.profile);
-    showScreen("app");
-  } catch (e) {
-    err.textContent = "Erreur réseau : " + e.message;
+    if (!data.ok) { showRegError(data.error || "Erreur lors de la création."); statEl.textContent=""; return; }
+    currentPseudo = data.pseudo;
+    loadProfile(data.profile);
+    showApp();
+    statEl.textContent = "";
+  } catch (err) {
+    showRegError("Erreur réseau : " + err.message);
+    statEl.textContent = "";
   }
 }
-
-async function doLogout() {
-  await fetch("/logout", { method: "POST" });
-  currentUser = null;
-  showScreen("login");
+function showRegError(msg) {
+  const el = document.getElementById("reg-error");
+  el.textContent = msg; el.style.display = "block";
 }
 
-function applyProfile(p) {
-  const city = p.transit_city || p.city || "—";
+/* ══ LOAD PROFILE UI ═════════════════════════════════════════════ */
+function loadProfile(p) {
+  document.getElementById("pseudo-badge").textContent = "👤 " + (p.pseudo || p.name || "—");
   document.getElementById("natal-summary").textContent =
-    `${p.pseudo || p.name} · ${p.day}/${p.month}/${p.year} ${p.hour}h${String(p.minute).padStart(2,"0")} · ${p.city}`;
-  document.getElementById("transit-city-display").value = city;
-  const today = new Date();
-  document.getElementById("t-date").value =
-    today.toISOString().split("T")[0];
-  document.getElementById("t-hour").value   = today.getHours();
-  document.getElementById("t-minute").value = today.getMinutes();
+    `${p.day}/${p.month}/${p.year} ${pad(p.hour||0)}h${pad(p.minute||0)} · ${p.city||""}`;
+
+  // Pré-remplir date/heure transits avec maintenant
+  const now = new Date();
+  const todayIso = now.toFullYear
+    ? `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`
+    : "{{ today_iso }}";
+  document.getElementById("t-date").value   = todayIso;
+  document.getElementById("t-hour").value   = now.getHours();
+  document.getElementById("t-minute").value = now.getMinutes();
+
+  // Pré-remplir lieu transit avec lieu natal
+  if (p.city) {
+    document.getElementById("transit-city-display").value = p.city;
+    document.getElementById("transit-city-val").value     = p.city;
+  }
+  if (p.lat) document.getElementById("transit-lat-val").value = p.lat;
+  if (p.lon) document.getElementById("transit-lon-val").value = p.lon;
+  if (p.tz)  document.getElementById("transit-tz-val").value  = p.tz;
 }
 
-/* ── Geocode ───────────────────────────────────────────────────── */
-let geoTimer = null;
-function geocodeField(input, resultsId, cityId, latId, lonId, tzId) {
-  clearTimeout(geoTimer);
-  const q = input.value.trim();
+/* ══ GÉOCODAGE ═══════════════════════════════════════════════════ */
+let _geoTimer = null;
+function geocodeField(inputEl, resultsId, cityId, latId, lonId, tzId) {
+  clearTimeout(_geoTimer);
+  const q   = inputEl.value.trim();
   const box = document.getElementById(resultsId);
   if (q.length < 2) { box.style.display = "none"; return; }
-  geoTimer = setTimeout(async () => {
+
+  _geoTimer = setTimeout(async () => {
     try {
       const res  = await fetch("/geocode?q=" + encodeURIComponent(q));
       const data = await res.json();
@@ -728,20 +681,19 @@ function geocodeField(input, resultsId, cityId, latId, lonId, tzId) {
       box.innerHTML = "";
       data.forEach(item => {
         const div = document.createElement("div");
-        div.className = "geo-item";
+        div.className   = "geo-item";
         div.textContent = item.display_name;
         div.onclick = async () => {
-          input.value = item.display_name;
+          inputEl.value = item.display_name;
           document.getElementById(cityId).value = item.display_name;
           document.getElementById(latId).value  = item.lat;
           document.getElementById(lonId).value  = item.lon;
           box.style.display = "none";
-          // Timezone
           try {
-            const tzRes  = await fetch(
+            const tz = await fetch(
               `https://timeapi.io/api/timezone/coordinate?latitude=${item.lat}&longitude=${item.lon}`
             );
-            const tzData = await tzRes.json();
+            const tzData = await tz.json();
             document.getElementById(tzId).value = tzData.timeZone || "UTC";
           } catch { document.getElementById(tzId).value = "UTC"; }
         };
@@ -751,7 +703,265 @@ function geocodeField(input, resultsId, cityId, latId, lonId, tzId) {
     } catch { box.style.display = "none"; }
   }, 400);
 }
-const _origSendChat = sendChat;
+
+/* ══ CALCUL TRANSITS ═════════════════════════════════════════════ */
+async function calculateTransits() {
+  const date   = document.getElementById("t-date").value;
+  const hour   = parseInt(document.getElementById("t-hour").value)   || 0;
+  const minute = parseInt(document.getElementById("t-minute").value) || 0;
+  const lat    = parseFloat(document.getElementById("transit-lat-val").value);
+  const lon    = parseFloat(document.getElementById("transit-lon-val").value);
+  const city   = document.getElementById("transit-city-val").value;
+  const tz     = document.getElementById("transit-tz-val").value || "UTC";
+
+  if (!date) { setStatus("⚠ Sélectionne une date."); return; }
+  if (isNaN(lat) || isNaN(lon)) {
+    setStatus("⚠ Sélectionne un lieu de transit dans la liste.");
+    return;
+  }
+
+  setStatus("Calcul des éphémérides…");
+  document.getElementById("calc-btn").disabled = true;
+
+  setAspectsHTML('<div style="padding:8px;" class="loading">Calcul sidéral Djwhal Khul…</div>');
+  setSynthesisHTML('<span class="loading">Interprétation karmique védique en cours…</span>');
+  switchTab("gochara");
+
+  try {
+    const res  = await fetch("/calculate", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ date, hour, minute, transit_lat: lat, transit_lon: lon,
+                             transit_city: city, transit_tz: tz }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+
+    lastChartData = data;
+    renderAspects(data.aspects);
+    setSynthesisHTML(escapeNl(escHtml(data.synthesis || "—")));
+    chartContext = data.chart_context || "";
+
+    const n = (data.aspects || []).length;
+    setStatus(`✓ ${n} aspect${n!==1?"s":""} actif${n!==1?"s":""}`);
+    setCount(`${n} asp.`);
+  } catch (err) {
+    setStatus("⚠ Erreur : " + err.message);
+    setSynthesisHTML(`<span style="color:#800000;">Erreur : ${escHtml(err.message)}</span>`);
+  } finally {
+    document.getElementById("calc-btn").disabled = false;
+  }
+}
+
+/* ══ ASPECTS TABLE ═══════════════════════════════════════════════ */
+function renderAspects(aspects) {
+  if (!aspects || aspects.length === 0) {
+    setAspectsHTML('<div style="padding:8px;">Aucun aspect dans l\'orbe de 3°.</div>');
+    return;
+  }
+  let html = '<table><thead><tr>'
+    + '<th>Transit</th><th>Aspect</th><th>Natal</th><th>Orbe</th>'
+    + '</tr></thead><tbody>';
+  aspects.forEach(a => {
+    const cls   = aspClass(a.aspect);
+    const retro = a.retrograde ? ' <span class="retro">℞</span>' : "";
+    html += `<tr>
+      <td>${escHtml(a.transit_planet)}${retro}<br>
+          <small style="color:#404040">${escHtml(a.transit_display||"")}</small></td>
+      <td><span class="${cls}">${escHtml(a.aspect)}</span></td>
+      <td>${escHtml(a.natal_planet)}<br>
+          <small style="color:#404040">${escHtml(a.natal_display||"")}</small></td>
+      <td style="text-align:right">${a.orb}°</td>
+    </tr>`;
+  });
+  html += "</tbody></table>";
+  setAspectsHTML(html);
+}
+function aspClass(asp) {
+  if (!asp) return "";
+  if (asp.includes("Conjonction")) return "asp-conj";
+  if (asp.includes("Opposition"))  return "asp-oppo";
+  if (asp.includes("Trigone"))     return "asp-trig";
+  if (asp.includes("Carr"))        return "asp-carr";
+  if (asp.includes("Sextile"))     return "asp-sext";
+  return "";
+}
+
+/* ══ CARTE KARMIQUE SVG ══════════════════════════════════════════ */
+function renderKarmaMap(data) {
+  const svg = document.getElementById("karma-map-svg");
+  if (!svg || !data) return;
+
+  const natal   = data.natal_positions   || {};
+  const transit = data.transit_positions || {};
+  const aspects = data.aspects           || [];
+  const CX = 280, CY = 280;
+  const R_OUTER = 260, R_INNER = 180, R_NATAL = 140, R_POINT = 8;
+
+  // Couleurs quadrants karmiques
+  const quadrantColor = (lon) => {
+    const deg = ((lon % 360) + 360) % 360;
+    if (deg < 90)  return "#4b0082"; // ROM
+    if (deg < 180) return "#800000"; // Lilith
+    if (deg < 270) return "#005000"; // RAM
+    return "#005060";                // Stage
+  };
+
+  const lonToAngle = (lon) => {
+    const deg = ((lon % 360) + 360) % 360;
+    return (deg - 90) * Math.PI / 180;
+  };
+
+  const polarXY = (r, angleDeg) => {
+    const a = (angleDeg - 90) * Math.PI / 180;
+    return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
+  };
+
+  let s = `<circle cx="${CX}" cy="${CY}" r="${R_OUTER}" fill="#f0f0f8" stroke="#808080" stroke-width="1"/>`;
+  s += `<circle cx="${CX}" cy="${CY}" r="${R_INNER}" fill="#f8f8ff" stroke="#c0c0c0" stroke-width="1"/>`;
+  s += `<circle cx="${CX}" cy="${CY}" r="${R_NATAL}" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>`;
+
+  // Séparateurs des 12 signes
+  for (let i = 0; i < 12; i++) {
+    const [x1, y1] = polarXY(R_NATAL - 20, i * 30);
+    const [x2, y2] = polarXY(R_OUTER, i * 30);
+    s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#d0d0d0" stroke-width="1"/>`;
+  }
+
+  // Labels signes
+  const SIGNES = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
+  for (let i = 0; i < 12; i++) {
+    const [x, y] = polarXY(R_OUTER - 18, i * 30 + 15);
+    s += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
+           font-size="13" fill="#606060" font-family="Arial">${SIGNES[i]}</text>`;
+  }
+
+  // Aspects lines
+  const aspColorLine = (asp) => {
+    if (!asp) return "#808080";
+    if (asp.includes("Conjonction")) return "#000080";
+    if (asp.includes("Opposition"))  return "#800000";
+    if (asp.includes("Trigone"))     return "#006000";
+    if (asp.includes("Carr"))        return "#cc0000";
+    if (asp.includes("Sextile"))     return "#005080";
+    return "#808080";
+  };
+
+  aspects.forEach(a => {
+    const tp = transit[a.transit_planet];
+    const np = natal[a.natal_planet];
+    if (!tp || !np) return;
+    const tLon = tp.lon_raw !== undefined ? tp.lon_raw : 0;
+    const nLon = np.lon_raw !== undefined ? np.lon_raw : 0;
+    const tAngle = lonToAngle(tLon) * 180 / Math.PI + 90;
+    const nAngle = lonToAngle(nLon) * 180 / Math.PI + 90;
+    const [tx, ty] = polarXY(R_INNER - 5, tAngle);
+    const [nx, ny] = polarXY(R_NATAL - 5, nAngle);
+    const col = aspColorLine(a.aspect);
+    s += `<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}"
+           stroke="${col}" stroke-width="0.8" opacity="0.5"/>`;
+  });
+
+  // Points transit (anneau extérieur)
+  Object.entries(transit).forEach(([planet, pos]) => {
+    if (pos.lon_raw === undefined) return;
+    const angle = lonToAngle(pos.lon_raw) * 180 / Math.PI + 90;
+    const [x, y] = polarXY((R_INNER + R_OUTER) / 2, angle);
+    const col = quadrantColor(pos.lon_raw);
+    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R_POINT}"
+           fill="${col}" stroke="#fff" stroke-width="1" opacity="0.9"/>`;
+    s += `<text x="${x.toFixed(1)}" y="${(y+1).toFixed(1)}" text-anchor="middle"
+           dominant-baseline="middle" font-size="8" fill="#fff"
+           font-family="Arial">${escHtml(planet.substring(0,2))}</text>`;
+  });
+
+  // Points natal (anneau intérieur)
+  Object.entries(natal).forEach(([planet, pos]) => {
+    if (pos.lon_raw === undefined) return;
+    const angle = lonToAngle(pos.lon_raw) * 180 / Math.PI + 90;
+    const [x, y] = polarXY((R_NATAL + R_INNER) / 2, angle);
+    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R_POINT}"
+           fill="#c0c0c0" stroke="#404040" stroke-width="1"/>`;
+    s += `<text x="${x.toFixed(1)}" y="${(y+1).toFixed(1)}" text-anchor="middle"
+           dominant-baseline="middle" font-size="8" fill="#000"
+           font-family="Arial">${escHtml(planet.substring(0,2))}</text>`;
+  });
+
+  // Légende centre
+  s += `<text x="${CX}" y="${CY-8}" text-anchor="middle" font-size="9" fill="#808080">Natal</text>`;
+  s += `<text x="${CX}" y="${CY+8}" text-anchor="middle" font-size="9" fill="#808080">Transit</text>`;
+
+  svg.innerHTML = s;
+  renderQuadrantLists(aspects);
+}
+
+function renderQuadrantLists(aspects) {
+  const panel = document.getElementById("quadrant-panels");
+  if (!panel) return;
+  const quad = {ROM:[], RAM:[], Stage:[], Lilith:[]};
+  (aspects||[]).forEach(a => {
+    const planet = a.transit_planet || "";
+    if (["Nœud Sud","Ketu"].some(n => planet.includes(n))) quad.ROM.push(a);
+    else if (planet.includes("Chiron")) quad.RAM.push(a);
+    else if (planet.includes("Lilith")) quad.Lilith.push(a);
+    else quad.Stage.push(a);
+  });
+  const colors = {ROM:"#4b0082",RAM:"#005000",Stage:"#005060",Lilith:"#800000"};
+  panel.innerHTML = Object.entries(quad).map(([name, list]) => `
+    <div class="quadrant-panel">
+      <h4 style="color:${colors[name]}">◆ ${name} (${list.length})</h4>
+      <ul>${list.length === 0
+        ? '<li style="color:#808080">—</li>'
+        : list.map(a => `<li>${escHtml(a.transit_planet)} ${escHtml(a.aspect)} ${escHtml(a.natal_planet)}</li>`).join("")
+      }</ul>
+    </div>`).join("");
+}
+
+/* ══ CHAT ════════════════════════════════════════════════════════ */
+async function sendChat() {
+  const input = document.getElementById("chat-input");
+  const msg   = input.value.trim();
+  if (!msg) return;
+
+  const userName = document.getElementById("pseudo-badge").textContent.replace("👤 ","") || "Toi";
+  addChatMsg(userName, msg, "chat-user");
+  input.value = "";
+
+  try {
+    const res  = await fetch("/chat", {
+      method: "POST", headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({message: msg, history: chatHistory, chart_context: chartContext}),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    const reply = data.reply || data.response || "—";
+    addChatMsg("@siderealAstro13", reply, "chat-ai");
+    chatHistory.push({role:"user",      content: msg});
+    chatHistory.push({role:"assistant", content: reply});
+    if (chatHistory.length > 24) chatHistory = chatHistory.slice(-24);
+  } catch (err) {
+    addChatMsg("Système", "⚠ " + err.message, "chat-sys");
+  }
+}
+function addChatMsg(sender, text, cls) {
+  const log = document.getElementById("chat-log");
+  if (!log) return;
+  const div = document.createElement("div");
+  div.className = `chat-msg ${cls}`;
+  div.innerHTML = `<strong>${escHtml(sender)} :</strong> ${escapeNl(escHtml(text))}`;
+  log.appendChild(div);
+  log.scrollTop = log.scrollHeight;
+}
+
+/* ══ INIT ════════════════════════════════════════════════════════ */
+(function init() {
+  // Date par défaut = aujourd'hui (Jinja fallback)
+  const dateEl = document.getElementById("t-date");
+  if (dateEl && !dateEl.value) {
+    const now = new Date();
+    dateEl.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+  }
+})();
 </script>
 </body>
 </html>
