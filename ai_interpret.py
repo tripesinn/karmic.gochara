@@ -75,8 +75,8 @@ Sextile ✶ — opportunité subtile, coopération d'âme
 
 ═══ FORMAT ═══
 Réponds en français. Parle directement à {name} (tutoiement naturel).
-Synthèse : 280-320 mots, narrative poétique mais techniquement précise.
-Chat : 100-150 mots, direct, transformateur.
+Synthèse : 450-550 mots, narrative poétique mais techniquement précise. Développe chaque étape complètement.
+Chat : 150-200 mots, direct, transformateur.
 Ne liste pas mécaniquement — tisse une lecture d'âme cohérente.
 Termine toujours par une Alternative de Conscience actionnable."""
 
@@ -86,7 +86,7 @@ def _aspects_to_text(aspects: list) -> str:
     if not aspects:
         return "Aucun aspect actif dans l'orbe de 3°."
     lines = []
-    for a in aspects[:15]:
+    for a in aspects[:20]:  # 20 aspects max (au lieu de 15)
         retro = " ℞" if a.get("retrograde") else ""
         lines.append(
             f"Transit {a['transit_planet']}{retro} ({a['transit_display']}) "
@@ -110,12 +110,13 @@ def get_synthesis(chart_data: dict, user: dict) -> str:
         f"1. Quel pattern ROM (Ketu/Nœud Sud) est activé ?\n"
         f"2. Quelle blessure RAM (Chiron) est en traitement ?\n"
         f"3. Quelle est l'Épreuve karmique (Lilith) du moment ?\n"
-        f"4. Quelle Alternative de Conscience permet à {name} de se mettre en scène sur son Stage ?"
+        f"4. Quelle Alternative de Conscience permet à {name} de se mettre en scène sur son Stage ?\n\n"
+        f"Développe chaque section complètement. Ne tronque pas l'analyse."
     )
 
     msg = _get_client().messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=700,
+        max_tokens=1200,  # était 700 — augmenté pour synthèse complète
         system=_build_system_prompt(user),
         messages=[{"role": "user", "content": prompt}],
     )
@@ -143,7 +144,7 @@ def chat_response(message: str, history: list, chart_context: str, user: dict) -
 
     msg = _get_client().messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=400,
+        max_tokens=600,  # était 400 — augmenté pour réponses chat développées
         system=_build_system_prompt(user),
         messages=messages,
     )
