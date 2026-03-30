@@ -159,8 +159,8 @@ def calculate():
     try:
         year, month, day = map(int, date_str.split("-"))
         result = calculate_transits(natal, transit_loc, year, month, day, hour, minute)
-        result["synthesis"] = get_synthesis(result)
-        result["chart_context"] = build_chart_context(result)
+        result["synthesis"]     = get_synthesis(result, profile)      # ← FIXÉ
+        result["chart_context"] = build_chart_context(result, profile) # ← FIXÉ
         return jsonify(result)
     except Exception as exc:
         app.logger.error("Erreur calcul : %s", exc, exc_info=True)
@@ -171,7 +171,8 @@ def calculate():
 def chat():
     from ai_interpret import chat_response
 
-    if not session.get("profile"):
+    profile = session.get("profile")
+    if not profile:
         return jsonify({"error": "Non connecté"}), 401
 
     data = request.get_json()
@@ -183,7 +184,7 @@ def chat():
         return jsonify({"error": "Message vide"}), 400
 
     try:
-        response = chat_response(message, history, chart_context)
+        response = chat_response(message, history, chart_context, profile)  # ← FIXÉ
         return jsonify({"response": response})
     except Exception as exc:
         app.logger.error("Erreur chat : %s", exc, exc_info=True)
