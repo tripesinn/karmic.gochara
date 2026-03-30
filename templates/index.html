@@ -415,13 +415,13 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
       </div>
     </div>
 
-    <!-- TABS BAR -->
-<div class="tabs-bar">
-  <button class="tab-btn active" id="tab-btn-gochara"   onclick="switchTab('gochara')">◆ Gochara</button>
-  <button class="tab-btn"        id="tab-btn-aspects"   onclick="switchTab('aspects')">✦ Aspects</button>
-  <button class="tab-btn"        id="tab-btn-carte"     onclick="switchTab('carte')">✦ Carte Karmique</button>
-  <button class="tab-btn"        id="tab-btn-dialogue"  onclick="switchTab('dialogue')">✉ Dialogue Karmique</button>
-</div>
+<!-- TABS BAR -->
+    <div class="tabs-bar">
+      <button class="tab-btn active" id="tab-btn-gochara"  onclick="switchTab('gochara')">◆ Gochara</button>
+      <button class="tab-btn"        id="tab-btn-aspects"  onclick="switchTab('aspects')">✦ Aspects</button>
+      <button class="tab-btn"        id="tab-btn-carte"    onclick="switchTab('carte')">✦ Carte Karmique</button>
+      <button class="tab-btn"        id="tab-btn-dialogue" onclick="switchTab('dialogue')">✉ Dialogue Karmique</button>
+    </div>
 
     <!-- ONGLET 1 — SYNTHÈSE -->
     <div class="tab-panel active" id="tab-gochara">
@@ -439,7 +439,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
     </div>
 
     <!-- ONGLET 2 — ASPECTS -->
-    <div class="tab-panel" id="tab-carte">
+    <div class="tab-panel" id="tab-aspects">
       <div class="win">
         <div class="titlebar teal">
           <div class="titlebar-title">☌ Aspects actifs (orbe &lt; 3°) — Gochara sidéral</div>
@@ -452,7 +452,21 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
       </div>
     </div>
 
-    <!-- ONGLET 3 — DIALOGUE -->
+    <!-- ONGLET 3 — CARTE KARMIQUE -->
+    <div class="tab-panel" id="tab-carte">
+      <div class="win">
+        <div class="titlebar" style="background:linear-gradient(90deg,#5a3a00 0%,#a07000 100%);">
+          <div class="titlebar-title">✦ Carte Karmique — Doctrine @siderealAstro13 (RAM / ROM / Stage)</div>
+        </div>
+        <div class="winbody" style="padding:4px;">
+          <div id="carte-wrap" class="sunken" style="min-height:420px;max-height:600px;padding:8px;">
+            <div class="loading">Lance un calcul pour afficher la Carte Karmique…</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ONGLET 4 — DIALOGUE -->
     <div class="tab-panel" id="tab-dialogue">
       <div class="win">
         <div class="titlebar green">
@@ -475,178 +489,26 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
       </div>
     </div>
 
-  </div><!-- /winbody app -->
+  </div><!-- /winbody principale -->
 
-  <div class="statusbar">
-    <div class="statpanel" id="status-msg">Prêt</div>
-    <div class="statpanel fixed">Sidéral · Djwhal Khul · Moonrise</div>
-    <div class="statpanel fixed" id="status-count"></div>
-  </div>
-
-</div>
-</div><!-- /screen-app -->
-
-<!-- ═══════════════════════════════════
+<!-- ═══════════════════════════════════════════════════════
      JAVASCRIPT
-═══════════════════════════════════ -->
+═══════════════════════════════════════════════════════ -->
 <script>
 "use strict";
-
-let currentUser  = null;
+let currentUser = null;
 let chartContext = "";
 let chatHistory  = [];
-let geoTimers    = {};
 
-/* ── Navigation screens ──────────────────────────────────────── */
-function showScreen(name) {
-  ["login","register","app"].forEach(s => {
-    document.getElementById("screen-"+s).classList.toggle("active", s === name);
-  });
-}
-
-/* ── Login ───────────────────────────────────────────────────── */
-async function doLogin() {
-  const email = document.getElementById("login-email").value.trim();
-  const errEl = document.getElementById("login-error");
-  errEl.textContent = "";
-  if (!email) { errEl.textContent = "⚠ Email requis."; return; }
-
-  try {
-    const res  = await fetch("/login", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({email}),
-    });
-    const data = await res.json();
-    if (!res.ok) { errEl.textContent = "⚠ " + data.error; return; }
-    currentUser = data.profile;
-    onLoginSuccess();
-  } catch(e) {
-    errEl.textContent = "⚠ Erreur réseau.";
-  }
-}
-
-/* ── Register ────────────────────────────────────────────────── */
-async function doRegister() {
-  const errEl = document.getElementById("reg-error");
-  errEl.textContent = "";
-
-  const payload = {
-    pseudo:       document.getElementById("reg-pseudo").value.trim(),
-    email:        document.getElementById("reg-email").value.trim(),
-    name:         document.getElementById("reg-name").value.trim(),
-    day:          parseInt(document.getElementById("reg-day").value)    || 1,
-    month:        parseInt(document.getElementById("reg-month").value)  || 1,
-    year:         parseInt(document.getElementById("reg-year").value)   || 1990,
-    hour:         parseInt(document.getElementById("reg-hour").value)   || 12,
-    minute:       parseInt(document.getElementById("reg-minute").value) || 0,
-    city:         document.getElementById("reg-city").value,
-    lat:          parseFloat(document.getElementById("reg-lat").value)  || 48.8566,
-    lon:          parseFloat(document.getElementById("reg-lon").value)  || 2.3522,
-    tz:           document.getElementById("reg-tz").value || "Europe/Paris",
-    transit_city: document.getElementById("reg-tcity").value,
-    transit_lat:  parseFloat(document.getElementById("reg-tlat").value) || 48.8566,
-    transit_lon:  parseFloat(document.getElementById("reg-tlon").value) || 2.3522,
-    transit_tz:   document.getElementById("reg-ttz").value || "Europe/Paris",
-  };
-
-  if (!payload.pseudo || !payload.email || !payload.name) {
-    errEl.textContent = "⚠ Pseudo, email et prénom requis."; return;
-  }
-  if (!payload.city) {
-    errEl.textContent = "⚠ Sélectionne une ville natale dans la liste."; return;
-  }
-
-  try {
-    const res  = await fetch("/register", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!res.ok) { errEl.textContent = "⚠ " + data.error; return; }
-    currentUser = data.profile;
-    onLoginSuccess();
-  } catch(e) {
-    errEl.textContent = "⚠ Erreur réseau.";
-  }
-}
-
-/* ── Post-login setup ─────────────────────────────────────────── */
-function onLoginSuccess() {
-  const p = currentUser;
-  // Remplir la barre natal
-  document.getElementById("natal-summary").textContent =
-    `${p.name} · ${pad(p.day)}/${pad(p.month)}/${p.year} ${pad(p.hour)}h${pad(p.minute)} · ${p.city}`;
-  // Remplir le lieu transit
-  document.getElementById("transit-city-display").value = p.transit_city || p.city;
-  // Date du jour
-  const now = new Date();
-  document.getElementById("t-date").value = now.toISOString().slice(0,10);
-  document.getElementById("t-hour").value = now.getHours();
-  document.getElementById("t-minute").value = now.getMinutes();
-  showScreen("app");
-}
-
-/* ── Logout ──────────────────────────────────────────────────── */
-async function doLogout() {
-  await fetch("/logout", {method:"POST"});
-  currentUser = null;
-  chartContext = "";
-  chatHistory  = [];
-  showScreen("login");
-}
-
-/* ── Geocoding ───────────────────────────────────────────────── */
-function geocodeField(inputEl, resultsId, cityId, latId, lonId, tzId) {
-  const q = inputEl.value.trim();
-  const resultsEl = document.getElementById(resultsId);
-  clearTimeout(geoTimers[resultsId]);
-  if (q.length < 2) { resultsEl.style.display = "none"; return; }
-
-  geoTimers[resultsId] = setTimeout(async () => {
-    try {
-      const r = await fetch("/geocode?q=" + encodeURIComponent(q));
-      const data = await r.json();
-      if (!Array.isArray(data) || data.length === 0) {
-        resultsEl.style.display = "none"; return;
-      }
-      resultsEl.innerHTML = "";
-      data.slice(0,6).forEach(item => {
-        const div = document.createElement("div");
-        div.className = "geo-item";
-        div.textContent = item.display_name;
-        div.onclick = async () => {
-          inputEl.value = item.display_name;
-          document.getElementById(cityId).value = item.display_name;
-          document.getElementById(latId).value  = item.lat;
-          document.getElementById(lonId).value  = item.lon;
-          // Timezone via timeapi.io
-          try {
-            const tzr = await fetch(
-              `https://timeapi.io/api/timezone/coordinate?latitude=${item.lat}&longitude=${item.lon}`
-            );
-            const tzd = await tzr.json();
-            document.getElementById(tzId).value = tzd.timeZone || "Europe/Paris";
-          } catch { document.getElementById(tzId).value = "Europe/Paris"; }
-          resultsEl.style.display = "none";
-        };
-        resultsEl.appendChild(div);
-      });
-      resultsEl.style.display = "block";
-    } catch { resultsEl.style.display = "none"; }
-  }, 400);
-}
-
-/* ── Tabs ─────────────────────────────────────────────────────── */
+/* ── Tabs ──────────────────────────────────────────────────────── */
 function switchTab(name) {
-  ["gochara","carte","dialogue"].forEach(t => {
-    document.getElementById("tab-"+t).classList.toggle("active", t === name);
-    document.getElementById("tab-btn-"+t).classList.toggle("active", t === name);
+  ["gochara", "carte", "dialogue"].forEach(t => {
+    document.getElementById("tab-" + t).classList.toggle("active", t === name);
+    document.getElementById("tab-btn-" + t).classList.toggle("active", t === name);
   });
 }
 
-/* ── Calcul principal ─────────────────────────────────────────── */
+/* ── Calcul principal ──────────────────────────────────────────── */
 async function calculateTransits() {
   const date   = document.getElementById("t-date").value;
   const hour   = parseInt(document.getElementById("t-hour").value)   || 0;
@@ -656,35 +518,41 @@ async function calculateTransits() {
 
   setStatus("Calcul des éphémérides…");
   document.getElementById("calc-btn").disabled = true;
+
   setAspectsHTML('<div style="padding:8px;" class="loading">Calcul sidéral Djwhal Khul…</div>');
   setSynthesisHTML('<span class="loading">Interprétation karmique védique en cours…</span>');
+
+  // Basculer sur l'onglet Gochara pour voir la synthèse arriver
   switchTab("gochara");
 
   try {
     const res  = await fetch("/calculate", {
       method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({date, hour, minute}),
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ date, hour, minute }),
     });
     const data = await res.json();
+
     if (data.error) throw new Error(data.error);
 
     renderAspects(data.aspects);
     setSynthesisHTML(escapeNl(data.synthesis));
+
     chartContext = data.chart_context || "";
     const n = data.aspects.length;
-    setStatus(`✓ ${n} aspect${n>1?"s":""} trouvé${n>1?"s":""} · ${date} ${pad(hour)}h${pad(minute)}`);
+    setStatus(`✓ ${n} aspect${n > 1 ? "s" : ""} trouvé${n > 1 ? "s" : ""} · ${date} ${pad(hour)}h${pad(minute)}`);
     document.getElementById("status-count").textContent = `${n} asp.`;
-  } catch(err) {
-    setAspectsHTML(`<div style="padding:8px;color:#800000;">⚠ ${escHtml(err.message)}</div>`);
-    setSynthesisHTML(`<span style="color:#800000;">⚠ ${escHtml(err.message)}</span>`);
+
+  } catch (err) {
+    setAspectsHTML(`<div style="padding:8px;color:#800000;">⚠ Erreur : ${escHtml(err.message)}</div>`);
+    setSynthesisHTML(`<span style="color:#800000;">⚠ Erreur : ${escHtml(err.message)}</span>`);
     setStatus("Erreur lors du calcul.");
   } finally {
     document.getElementById("calc-btn").disabled = false;
   }
 }
 
-/* ── Rendu aspects ────────────────────────────────────────────── */
+/* ── Rendu du tableau d'aspects ────────────────────────────────── */
 function renderAspects(aspects) {
   if (!aspects || aspects.length === 0) {
     setAspectsHTML('<div style="padding:8px;">Aucun aspect dans l\'orbe de 3°.</div>');
@@ -693,6 +561,7 @@ function renderAspects(aspects) {
   let html = '<table><thead><tr>'
     + '<th>Transit</th><th>Aspect</th><th>Natal</th><th>Orbe</th>'
     + '</tr></thead><tbody>';
+
   aspects.forEach(a => {
     const cls   = aspClass(a.aspect);
     const retro = a.retrograde ? ' <span class="retro">℞</span>' : "";
@@ -703,47 +572,38 @@ function renderAspects(aspects) {
       <td style="text-align:right">${a.orb}°</td>
     </tr>`;
   });
+
   html += "</tbody></table>";
   setAspectsHTML(html);
 }
 
-/* ── Chat ─────────────────────────────────────────────────────── */
+/* ── Chat ──────────────────────────────────────────────────────── */
 async function sendChat() {
   const input = document.getElementById("chat-input");
   const msg   = input.value.trim();
   if (!msg) return;
 
-  addChatMsg(currentUser ? currentUser.name : "Moi", msg, "chat-user");
+ addChatMsg(currentUser ? currentUser.name : "Moi", msg, "chat-user");
   input.value = "";
 
- try {
-      const res  = await fetch("/chat", {
-        method: "POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify({message: msg, history: chatHistory, chart_context: chartContext}),
-      });
-
-      const text = await res.text();
-      if (!text) throw new Error("Réponse vide du serveur");
-
-      let data;
-      try { data = JSON.parse(text); }
-      catch(e) {
-        console.error("Non-JSON:", text.substring(0, 300));
-        throw new Error("Réponse serveur invalide");
-      }
-
-      if (data.error) throw new Error(data.error);
-      addChatMsg("Jyotish-AI", data.reply, "chat-ai");
-      chatHistory.push({role:"user", content:msg});
-      chatHistory.push({role:"assistant", content:data.reply});
-      if (chatHistory.length > 24) chatHistory = chatHistory.slice(-24);
-    } catch(err) {
-      addChatMsg("Système", "⚠ " + err.message, "chat-sys");
-    }
+  try {
+    const res  = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message: msg, history: chatHistory, chart_context: chartContext }),
+    });
+    const data = await res.json();
+    if (data.error) throw new Error(data.error);
+    addChatMsg("Jyotish-AI", data.response, "chat-ai");
+    chatHistory.push({ role: "user",      content: msg          });
+    chatHistory.push({ role: "assistant", content: data.response });
+    if (chatHistory.length > 24) chatHistory = chatHistory.slice(-24);
+  } catch (err) {
+    addChatMsg("Système", "⚠ " + err.message, "chat-sys");
+  }
 }
 
-/* ── Helpers ──────────────────────────────────────────────────── */
+/* ── Helpers ───────────────────────────────────────────────────── */
 function addChatMsg(sender, text, cls) {
   const log = document.getElementById("chat-log");
   const div = document.createElement("div");
@@ -752,12 +612,14 @@ function addChatMsg(sender, text, cls) {
   log.appendChild(div);
   log.scrollTop = log.scrollHeight;
 }
+
 function setAspectsHTML(html)   { document.getElementById("aspects-wrap").innerHTML = html; }
 function setSynthesisHTML(html) { document.getElementById("synthesis").innerHTML = html; }
 function setStatus(txt)         { document.getElementById("status-msg").textContent = txt; }
-function pad(n)                 { return String(n).padStart(2,"0"); }
+function pad(n)                 { return String(n).padStart(2, "0"); }
 function escHtml(s)             { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
 function escapeNl(s)            { return s.replace(/\n/g,"<br>"); }
+
 function aspClass(asp) {
   if (asp.includes("Conjonction")) return "asp-conj";
   if (asp.includes("Opposition"))  return "asp-oppo";
