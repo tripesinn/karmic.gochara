@@ -50,6 +50,9 @@ def _get_sheet():
     creds_data = json.loads(creds_json)
     creds = Credentials.from_service_account_info(creds_data, scopes=SCOPES)
     gc = gspread.authorize(creds)
+    import logging
+logging.warning("=== SHEET_ID reçu : [%s]", sheet_id)
+logging.warning("=== longueur : %d", len(sheet_id))
     spreadsheet = gc.open_by_key(sheet_id)
 
     # Utilise la première feuille, la crée si besoin
