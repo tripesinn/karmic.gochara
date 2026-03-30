@@ -113,15 +113,15 @@ input.sunken, select.sunken {
 }
 .toolbar input[type="number"] { width: 46px; }
 
-/* ── Tabs ── */
+/* ── Tabs — 2 onglets seulement ── */
 .tabs-bar {
   display: flex; gap: 2px; padding: 4px 4px 0;
-  border-bottom: 2px solid #808080; flex-wrap: wrap;
+  border-bottom: 2px solid #808080;
 }
 .tab-btn {
   background: #c0c0c0;
   border: 2px solid; border-color: #fff #808080 #808080 #fff;
-  border-bottom: none; padding: 3px 12px;
+  border-bottom: none; padding: 3px 14px;
   font-family: inherit; font-size: 12px; cursor: pointer;
   position: relative; top: 2px;
 }
@@ -134,17 +134,17 @@ input.sunken, select.sunken {
 
 /* ── Synthesis ── */
 #synthesis {
-  min-height: 300px; max-height: 520px;
-  overflow-y: auto; padding: 8px;
+  min-height: 300px; max-height: 600px;
+  overflow-y: auto; padding: 10px;
   background: #fff; border: 2px solid;
   border-color: #808080 #fff #fff #808080;
-  line-height: 1.55; white-space: pre-wrap;
+  line-height: 1.6; white-space: pre-wrap;
   font-size: 12px;
 }
 
-/* ── Aspects table ── */
+/* ── Aspects table (sous la carte) ── */
 .aspects-wrap {
-  max-height: 420px; overflow-y: auto;
+  max-height: 320px; overflow-y: auto;
   background: #fff; border: 2px solid;
   border-color: #808080 #fff #fff #808080;
 }
@@ -164,29 +164,10 @@ input.sunken, select.sunken {
 .asp-sext { color: #005080; }
 .retro    { color: #800000; font-size: 10px; }
 
-/* ── Chat ── */
-.chat-log {
-  height: 380px; overflow-y: auto;
-  background: #fff; border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 6px; margin-bottom: 4px;
-}
-.chat-msg { margin-bottom: 6px; line-height: 1.4; }
-.chat-user strong { color: #000080; }
-.chat-ai   strong { color: #4b0082; }
-.chat-sys  strong { color: #808080; }
-.chat-row  { display: flex; gap: 4px; }
-.chat-input {
-  flex: 1; font-family: inherit; font-size: 12px;
-  background: #fff; border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 3px 5px;
-}
-
 /* ── Carte Karmique SVG ── */
 #karma-map-svg {
   display: block; margin: 0 auto;
-  max-width: 560px; width: 100%;
+  max-width: 520px; width: 100%;
 }
 .quadrant-panels {
   display: grid; grid-template-columns: 1fr 1fr;
@@ -410,13 +391,11 @@ input.sunken, select.sunken {
       </div>
     </div>
 
-    <!-- Onglets -->
+    <!-- ── ONGLETS — 2 seulement ── -->
     <div class="winbody" style="padding-top:4px;">
       <div class="tabs-bar">
-        <button class="tab-btn active" id="tab-btn-gochara"   onclick="switchTab('gochara')">◆ Gochara</button>
-        <button class="tab-btn"        id="tab-btn-aspects"   onclick="switchTab('aspects')">✦ Aspects</button>
-        <button class="tab-btn"        id="tab-btn-carte"     onclick="switchTab('carte')">✦ Carte Karmique</button>
-        <button class="tab-btn"        id="tab-btn-dialogue"  onclick="switchTab('dialogue')">✉ Dialogue Karmique</button>
+        <button class="tab-btn active" id="tab-btn-gochara" onclick="switchTab('gochara')">◆ Gochara</button>
+        <button class="tab-btn"        id="tab-btn-carte"   onclick="switchTab('carte')">✦ Carte Karmique</button>
       </div>
 
       <!-- ── Tab : Gochara ── -->
@@ -431,22 +410,10 @@ input.sunken, select.sunken {
         </div>
       </div>
 
-      <!-- ── Tab : Aspects ── -->
-      <div class="tab-panel" id="tab-aspects">
-        <div class="win">
-          <div class="titlebar gold">
-            <div class="titlebar-title">✦ Aspects actifs (orbe &lt; 3°)</div>
-          </div>
-          <div class="winbody" style="padding:0;">
-            <div class="aspects-wrap" id="aspects-wrap">
-              <div style="padding:8px;" class="loading">Lance un calcul pour voir les aspects…</div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <!-- ── Tab : Carte Karmique ── -->
       <div class="tab-panel" id="tab-carte">
+
+        <!-- Roue SVG -->
         <div class="win">
           <div class="titlebar green">
             <div class="titlebar-title">✦ Carte Karmique — Zodiaque Sidéral</div>
@@ -458,34 +425,24 @@ input.sunken, select.sunken {
               <text x="280" y="286" text-anchor="middle" font-size="14" fill="#808080"
                     font-family="MS Sans Serif, Arial">Lance un calcul…</text>
             </svg>
+            <!-- Panneaux quadrants ROM / RAM / Stage / Lilith -->
             <div class="quadrant-panels" id="quadrant-panels"></div>
           </div>
         </div>
-      </div>
 
-      <!-- ── Tab : Dialogue Karmique ── -->
-      <div class="tab-panel" id="tab-dialogue">
+        <!-- Tableau des aspects sous la carte -->
         <div class="win">
-          <div class="titlebar teal">
-            <div class="titlebar-title">✉ Dialogue Karmique — @siderealAstro13</div>
+          <div class="titlebar gold">
+            <div class="titlebar-title">✦ Aspects actifs (orbe &lt; 3°)</div>
           </div>
-          <div class="winbody">
-            <div class="chat-log" id="chat-log">
-              <div class="chat-msg chat-ai">
-                <strong>@siderealAstro13 :</strong>
-                Lance un calcul de tes transits, puis pose-moi tes questions.<br>
-                ROM, RAM, Stage — je lis les portes ouvertes.
-              </div>
-            </div>
-            <div class="chat-row">
-              <input type="text" id="chat-input" class="chat-input"
-                     placeholder="Pose ta question sur tes transits karmiques…"
-                     onkeydown="if(event.key==='Enter')sendChat()">
-              <button class="btn" onclick="sendChat()">Envoyer »</button>
+          <div class="winbody" style="padding:0;">
+            <div class="aspects-wrap" id="aspects-wrap">
+              <div style="padding:8px;" class="loading">Lance un calcul pour voir les aspects…</div>
             </div>
           </div>
         </div>
-      </div>
+
+      </div><!-- /tab-carte -->
 
     </div><!-- /winbody onglets -->
 
@@ -507,15 +464,13 @@ input.sunken, select.sunken {
 <script>
 "use strict";
 
-let chartContext = "";
-let chatHistory  = [];
 let currentPseudo = "";
 let lastChartData = null;
 
 /* ══ UTILS ═══════════════════════════════════════════════════════ */
-function escHtml(s)   { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function escapeNl(s)  { return String(s).replace(/\n/g,"<br>"); }
-function pad(n)       { return String(n).padStart(2,"0"); }
+function escHtml(s)  { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
+function escapeNl(s) { return String(s).replace(/\n/g,"<br>"); }
+function pad(n)      { return String(n).padStart(2,"0"); }
 
 function setStatus(txt) {
   const el = document.getElementById("status-msg");
@@ -525,7 +480,7 @@ function setCount(txt) {
   const el = document.getElementById("status-count");
   if (el) el.textContent = txt;
 }
-function setAspectsHTML(html)   {
+function setAspectsHTML(html) {
   const el = document.getElementById("aspects-wrap");
   if (el) el.innerHTML = html;
 }
@@ -534,9 +489,9 @@ function setSynthesisHTML(html) {
   if (el) el.innerHTML = html;
 }
 
-/* ══ TABS ════════════════════════════════════════════════════════ */
+/* ══ TABS — 2 onglets ════════════════════════════════════════════ */
 function switchTab(name) {
-  ["gochara","aspects","carte","dialogue"].forEach(t => {
+  ["gochara", "carte"].forEach(t => {
     const btn = document.getElementById("tab-btn-" + t);
     const pan = document.getElementById("tab-" + t);
     if (btn) btn.classList.toggle("active", t === name);
@@ -552,7 +507,7 @@ function showApp()      { _showScreen("app-screen"); }
 function _showScreen(id) {
   ["login-screen","register-screen","app-screen"].forEach(s => {
     const el = document.getElementById(s);
-    if (el) { el.classList.remove("visible"); }
+    if (el) el.classList.remove("visible");
   });
   const target = document.getElementById(id);
   if (target) target.classList.add("visible");
@@ -603,11 +558,11 @@ async function doRegister() {
     pseudo:  document.getElementById("reg-pseudo").value.trim(),
     name:    document.getElementById("reg-name").value.trim(),
     email:   document.getElementById("reg-email").value.trim(),
-    day:     parseInt(document.getElementById("reg-day").value)   || 0,
-    month:   parseInt(document.getElementById("reg-month").value) || 0,
-    year:    parseInt(document.getElementById("reg-year").value)  || 0,
-    hour:    parseInt(document.getElementById("reg-hour").value)  || 0,
-    minute:  parseInt(document.getElementById("reg-minute").value)|| 0,
+    day:     parseInt(document.getElementById("reg-day").value)    || 0,
+    month:   parseInt(document.getElementById("reg-month").value)  || 0,
+    year:    parseInt(document.getElementById("reg-year").value)   || 0,
+    hour:    parseInt(document.getElementById("reg-hour").value)   || 0,
+    minute:  parseInt(document.getElementById("reg-minute").value) || 0,
     city:    document.getElementById("reg-natal-city").value,
     lat:     parseFloat(document.getElementById("reg-natal-lat").value) || 0,
     lon:     parseFloat(document.getElementById("reg-natal-lon").value) || 0,
@@ -646,16 +601,12 @@ function loadProfile(p) {
   document.getElementById("natal-summary").textContent =
     `${p.day}/${p.month}/${p.year} ${pad(p.hour||0)}h${pad(p.minute||0)} · ${p.city||""}`;
 
-  // Pré-remplir date/heure transits avec maintenant
   const now = new Date();
-  const todayIso = now.toFullYear
-    ? `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`
-    : "{{ today_iso }}";
+  const todayIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
   document.getElementById("t-date").value   = todayIso;
   document.getElementById("t-hour").value   = now.getHours();
   document.getElementById("t-minute").value = now.getMinutes();
 
-  // Pré-remplir lieu transit avec lieu natal
   if (p.city) {
     document.getElementById("transit-city-display").value = p.city;
     document.getElementById("transit-city-val").value     = p.city;
@@ -740,7 +691,6 @@ async function calculateTransits() {
     lastChartData = data;
     renderAspects(data.aspects);
     setSynthesisHTML(escapeNl(escHtml(data.synthesis || "—")));
-    chartContext = data.chart_context || "";
 
     const n = (data.aspects || []).length;
     setStatus(`✓ ${n} aspect${n!==1?"s":""} actif${n!==1?"s":""}`);
@@ -798,13 +748,12 @@ function renderKarmaMap(data) {
   const CX = 280, CY = 280;
   const R_OUTER = 260, R_INNER = 180, R_NATAL = 140, R_POINT = 8;
 
-  // Couleurs quadrants karmiques
   const quadrantColor = (lon) => {
     const deg = ((lon % 360) + 360) % 360;
-    if (deg < 90)  return "#4b0082"; // ROM
-    if (deg < 180) return "#800000"; // Lilith
-    if (deg < 270) return "#005000"; // RAM
-    return "#005060";                // Stage
+    if (deg < 90)  return "#4b0082";
+    if (deg < 180) return "#800000";
+    if (deg < 270) return "#005000";
+    return "#005060";
   };
 
   const lonToAngle = (lon) => {
@@ -821,14 +770,12 @@ function renderKarmaMap(data) {
   s += `<circle cx="${CX}" cy="${CY}" r="${R_INNER}" fill="#f8f8ff" stroke="#c0c0c0" stroke-width="1"/>`;
   s += `<circle cx="${CX}" cy="${CY}" r="${R_NATAL}" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>`;
 
-  // Séparateurs des 12 signes
   for (let i = 0; i < 12; i++) {
     const [x1, y1] = polarXY(R_NATAL - 20, i * 30);
     const [x2, y2] = polarXY(R_OUTER, i * 30);
     s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#d0d0d0" stroke-width="1"/>`;
   }
 
-  // Labels signes
   const SIGNES = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
   for (let i = 0; i < 12; i++) {
     const [x, y] = polarXY(R_OUTER - 18, i * 30 + 15);
@@ -836,7 +783,6 @@ function renderKarmaMap(data) {
            font-size="13" fill="#606060" font-family="Arial">${SIGNES[i]}</text>`;
   }
 
-  // Aspects lines
   const aspColorLine = (asp) => {
     if (!asp) return "#808080";
     if (asp.includes("Conjonction")) return "#000080";
@@ -862,7 +808,6 @@ function renderKarmaMap(data) {
            stroke="${col}" stroke-width="0.8" opacity="0.5"/>`;
   });
 
-  // Points transit (anneau extérieur)
   Object.entries(transit).forEach(([planet, pos]) => {
     if (pos.lon_raw === undefined) return;
     const angle = lonToAngle(pos.lon_raw) * 180 / Math.PI + 90;
@@ -875,7 +820,6 @@ function renderKarmaMap(data) {
            font-family="Arial">${escHtml(planet.substring(0,2))}</text>`;
   });
 
-  // Points natal (anneau intérieur)
   Object.entries(natal).forEach(([planet, pos]) => {
     if (pos.lon_raw === undefined) return;
     const angle = lonToAngle(pos.lon_raw) * 180 / Math.PI + 90;
@@ -887,7 +831,6 @@ function renderKarmaMap(data) {
            font-family="Arial">${escHtml(planet.substring(0,2))}</text>`;
   });
 
-  // Légende centre
   s += `<text x="${CX}" y="${CY-8}" text-anchor="middle" font-size="9" fill="#808080">Natal</text>`;
   s += `<text x="${CX}" y="${CY+8}" text-anchor="middle" font-size="9" fill="#808080">Transit</text>`;
 
@@ -917,45 +860,8 @@ function renderQuadrantLists(aspects) {
     </div>`).join("");
 }
 
-/* ══ CHAT ════════════════════════════════════════════════════════ */
-async function sendChat() {
-  const input = document.getElementById("chat-input");
-  const msg   = input.value.trim();
-  if (!msg) return;
-
-  const userName = document.getElementById("pseudo-badge").textContent.replace("👤 ","") || "Toi";
-  addChatMsg(userName, msg, "chat-user");
-  input.value = "";
-
-  try {
-    const res  = await fetch("/chat", {
-      method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({message: msg, history: chatHistory, chart_context: chartContext}),
-    });
-    const data = await res.json();
-    if (data.error) throw new Error(data.error);
-    const reply = data.reply || data.response || "—";
-    addChatMsg("@siderealAstro13", reply, "chat-ai");
-    chatHistory.push({role:"user",      content: msg});
-    chatHistory.push({role:"assistant", content: reply});
-    if (chatHistory.length > 24) chatHistory = chatHistory.slice(-24);
-  } catch (err) {
-    addChatMsg("Système", "⚠ " + err.message, "chat-sys");
-  }
-}
-function addChatMsg(sender, text, cls) {
-  const log = document.getElementById("chat-log");
-  if (!log) return;
-  const div = document.createElement("div");
-  div.className = `chat-msg ${cls}`;
-  div.innerHTML = `<strong>${escHtml(sender)} :</strong> ${escapeNl(escHtml(text))}`;
-  log.appendChild(div);
-  log.scrollTop = log.scrollHeight;
-}
-
 /* ══ INIT ════════════════════════════════════════════════════════ */
 (function init() {
-  // Date par défaut = aujourd'hui (Jinja fallback)
   const dateEl = document.getElementById("t-date");
   if (dateEl && !dateEl.value) {
     const now = new Date();
