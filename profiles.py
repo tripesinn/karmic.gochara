@@ -53,7 +53,7 @@ def _get_sheet():
     import logging
 logging.warning("=== SHEET_ID reçu : [%s]", sheet_id)
 logging.warning("=== longueur : %d", len(sheet_id))
-    spreadsheet = gc.open_by_key(sheet_id)
+   spreadsheet = gc.open_by_key(sheet_id)
 
     # Utilise la première feuille, la crée si besoin
     try:
