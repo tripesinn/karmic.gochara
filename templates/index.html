@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✦ Gochara Karmique — {{ natal.name }}</title>
+<title>✦ Gochara Karmique</title>
 <style>
 /* ═══════════════════════════════════════════════════════
    WINDOWS 3.1 THEME — Gochara Karmique
@@ -247,7 +247,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 <div class="win" style="max-width:960px;margin:0 auto;">
 
   <div class="titlebar">
-    <div class="titlebar-title">✦ Gochara Karmique — {{ natal.name }}</div>
+    <div class="titlebar-title">✦ Gochara Karmique</div>
     <div class="titlebar-btns">
       <button class="tbtn">_</button>
       <button class="tbtn">□</button>
@@ -272,16 +272,16 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
       <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
         <div>
           <label>Date :</label>
-          <input type="date" id="t-date" value="{{ today_iso }}">
+          <input type="date" id="t-date" value="">
         </div>
         <div>
           <label>Heure :</label>
-          <input type="number" id="t-hour" value="{{ now_hour }}" min="0" max="23">h
-          <input type="number" id="t-minute" value="{{ now_minute }}" min="0" max="59">min
+          <input type="number" id="t-hour" value="12" min="0" max="23">h
+          <input type="number" id="t-minute" value="0" min="0" max="59">min
         </div>
         <div>
           <label>Lieu :</label>
-          <input type="text" value="{{ transit_city }}" readonly
+          <input type="text" id="transit-city-display" value="" readonly
                  style="width:160px;color:#808080;background:#d4d0c8;">
         </div>
         <button class="btn" id="calc-btn" onclick="calculateTransits()">✦ Calculer »</button>
@@ -348,7 +348,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
           <div id="chat-log" class="sunken chat-log" style="height:420px;">
             <div class="chat-msg chat-ai">
               <strong>Jyotish-AI :</strong>
-              Namaste, {{ natal.name }}. Lance un calcul de tes transits, puis pose-moi tes questions sur ton chemin karmique. ROM, RAM, Stage — je suis là pour lire les portes ouvertes.
+              Namaste ! lance un calcul de tes transits, puis pose-moi tes questions sur ton chemin karmique. ROM, RAM, Stage — je suis là pour lire les portes ouvertes.
             </div>
           </div>
           <div class="chat-row">
@@ -378,7 +378,7 @@ hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff;
 ═══════════════════════════════════════════════════════ -->
 <script>
 "use strict";
-
+let currentUser = null;
 let chartContext = "";
 let chatHistory  = [];
 
@@ -465,7 +465,7 @@ async function sendChat() {
   const msg   = input.value.trim();
   if (!msg) return;
 
-  addChatMsg("{{ natal.name }}", msg, "chat-user");
+ addChatMsg(currentUser ? currentUser.name : "Moi", msg, "chat-user");
   input.value = "";
 
   try {
