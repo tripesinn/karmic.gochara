@@ -6,7 +6,6 @@
 <title>✦ Gochara Karmique — Connexion</title>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
 body {
   background: #008080;
   font-family: "MS Sans Serif", "Segoe UI", Arial, sans-serif;
@@ -16,20 +15,18 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 12px;
+  padding: 16px;
 }
-
 .win {
   background: #c0c0c0;
   border: 2px solid;
   border-color: #fff #808080 #808080 #fff;
   box-shadow: 2px 2px 0 #000;
   width: 100%;
-  max-width: 420px;
+  max-width: 360px;
 }
-
 .titlebar {
-  background: linear-gradient(90deg, #4b0082 0%, #800080 100%);
+  background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
   color: #fff;
   font-weight: bold;
   font-size: 11px;
@@ -47,64 +44,30 @@ body {
   font-size: 9px; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
 }
-
-.winbody { padding: 14px; }
-
-/* Tabs */
-.tabs { display: flex; gap: 2px; margin-bottom: -2px; position: relative; z-index: 1; }
-.tab {
-  background: #c0c0c0;
-  border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
-  border-bottom: none;
-  padding: 3px 16px;
-  font-family: inherit;
-  font-size: 11px;
-  cursor: pointer;
-  font-weight: bold;
-}
-.tab.active {
-  background: #c0c0c0;
-  border-bottom: 2px solid #c0c0c0;
-  padding-bottom: 5px;
-}
-.tab:not(.active) { background: #b0b0b0; margin-top: 2px; }
-
-.panel {
-  border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
-  padding: 12px;
-  display: none;
-}
-.panel.active { display: block; }
-
-/* Form */
-.field { margin-bottom: 8px; }
-.field label { display: block; font-size: 11px; margin-bottom: 2px; font-weight: bold; }
-.field input[type="email"],
-.field input[type="text"],
-.field input[type="date"],
-.field input[type="number"] {
-  width: 100%;
-  background: #fff;
+.winbody { padding: 16px; }
+.group {
   border: 2px solid;
   border-color: #808080 #fff #fff #808080;
-  padding: 2px 5px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: #c0c0c0;
+}
+.group-label { font-weight: bold; font-size: 11px; margin-bottom: 8px; color: #000080; }
+label { font-size: 11px; display: block; margin-bottom: 2px; }
+input[type="text"], input[type="email"] {
+  width: 100%;
+  background: #fff;
+  border: 2px solid; border-color: #808080 #fff #fff #808080;
+  padding: 3px 5px;
   font-family: inherit;
   font-size: 11px;
   height: 22px;
+  margin-bottom: 8px;
 }
-.field input[type="number"] { width: 56px; }
-.field .hint { font-size: 10px; color: #404040; margin-top: 2px; }
-
-.row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.row-time { display: flex; align-items: center; gap: 4px; }
-
 .btn {
   background: #c0c0c0;
-  border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
-  padding: 3px 18px;
+  border: 2px solid; border-color: #fff #808080 #808080 #fff;
+  padding: 4px 16px;
   font-family: inherit;
   font-size: 12px;
   font-weight: bold;
@@ -112,281 +75,94 @@ body {
   box-shadow: 1px 1px 0 #000;
   min-width: 90px;
 }
-.btn:active {
-  border-color: #808080 #fff #fff #808080;
-  box-shadow: none;
-  padding: 4px 17px 2px 19px;
+.btn:active { border-color: #808080 #fff #fff #808080; box-shadow: none; padding: 5px 15px 3px 17px; }
+.btn-row { display: flex; gap: 8px; justify-content: flex-end; margin-top: 4px; }
+.error { color: #800000; font-size: 11px; margin-top: 6px; display: none; }
+.sep { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 10px 0; }
+.logo {
+  text-align: center;
+  font-size: 20px;
+  color: #000080;
+  font-weight: bold;
+  margin-bottom: 4px;
+  letter-spacing: 1px;
 }
-.btn:disabled { color: #808080; cursor: default; }
-.btn-row { display: flex; justify-content: flex-end; margin-top: 10px; gap: 6px; }
-
-.sunken {
-  background: #fff;
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 5px;
-  font-size: 11px;
-  min-height: 22px;
+.sub {
+  text-align: center;
+  font-size: 10px;
+  color: #404040;
+  margin-bottom: 12px;
+  font-style: italic;
 }
-
-.msg-ok  { color: #005000; font-weight: bold; }
-.msg-err { color: #800000; font-weight: bold; }
-
-hr { border: none; border-top: 1px solid #808080; border-bottom: 1px solid #fff; margin: 8px 0; }
-
-.group {
-  border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 8px;
-  margin-bottom: 8px;
-}
-.group-label { font-weight: bold; font-size: 11px; color: #000080; margin-bottom: 6px; }
-
-.city-row { display: flex; gap: 4px; }
-.city-row input { flex: 1; }
-.city-row .btn { min-width: auto; padding: 2px 8px; font-size: 11px; }
-.city-info { font-size: 10px; color: #004080; margin-top: 2px; height: 14px; }
-
-.loading-dot { color: #808080; font-style: italic; }
 </style>
 </head>
 <body>
-
 <div class="win">
-
   <div class="titlebar">
-    <span>✦ Gochara Karmique — Accès</span>
+    <span>✦ Gochara Karmique — Connexion</span>
     <div class="titlebar-btns">
-      <button class="tbtn">_</button>
-      <button class="tbtn">□</button>
-      <button class="tbtn">✕</button>
+      <button class="tbtn">_</button><button class="tbtn">□</button><button class="tbtn">✕</button>
     </div>
   </div>
-
   <div class="winbody">
+    <div class="logo">✦ @siderealAstro13</div>
+    <div class="sub">Astrologie védique karmique sidérale</div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('login')">Connexion</button>
-      <button class="tab" onclick="switchTab('register')">Nouvelle âme</button>
+    <div class="group">
+      <div class="group-label">Identification</div>
+      <label for="email">Email :</label>
+      <input type="email" id="email" placeholder="ton@email.com" autocomplete="email">
+      <label for="pseudo">— ou Pseudo :</label>
+      <input type="text" id="pseudo" placeholder="ton_pseudo">
+      <div id="error-msg" class="error"></div>
     </div>
 
-    <!-- ══ PANNEAU LOGIN ══════════════════════════════════════ -->
-    <div id="panel-login" class="panel active">
-
-      <div class="field" style="margin-top:8px;">
-        <label>Adresse e-mail</label>
-        <input type="email" id="login-email" placeholder="ton@email.com"
-               onkeydown="if(event.key==='Enter')doLogin()">
-      </div>
-
-      <div id="login-msg" class="sunken" style="margin-top:6px;min-height:22px;"></div>
-
-      <div class="btn-row">
-        <button class="btn" id="login-btn" onclick="doLogin()">Entrer »</button>
-      </div>
-
-      <hr>
-      <div style="font-size:10px;color:#404040;text-align:center;">
-        Pas encore inscrit ? Clique sur <strong>Nouvelle âme</strong>.
-      </div>
+    <div class="btn-row">
+      <button class="btn" onclick="goRegister()">Créer un compte</button>
+      <button class="btn" id="login-btn" onclick="doLogin()">Connexion »</button>
     </div>
-
-    <!-- ══ PANNEAU INSCRIPTION ════════════════════════════════ -->
-    <div id="panel-register" class="panel">
-
-      <div style="margin-top:4px;">
-
-        <!-- Identité -->
-        <div class="group">
-          <div class="group-label">✦ Identité</div>
-          <div class="field">
-            <label>E-mail</label>
-            <input type="email" id="reg-email" placeholder="ton@email.com">
-          </div>
-          <div class="field">
-            <label>Prénom</label>
-            <input type="text" id="reg-prenom" placeholder="Ton prénom">
-          </div>
-        </div>
-
-        <!-- Naissance -->
-        <div class="group">
-          <div class="group-label">☽ Thème natal</div>
-          <div class="field">
-            <label>Date de naissance</label>
-            <input type="date" id="reg-birth-date">
-          </div>
-          <div class="field">
-            <label>Heure de naissance</label>
-            <div class="row-time">
-              <input type="number" id="reg-birth-hour" min="0" max="23" value="12" style="width:52px;">h
-              <input type="number" id="reg-birth-minute" min="0" max="59" value="0" style="width:52px;">min
-              <span style="font-size:10px;color:#404040;">(heure locale)</span>
-            </div>
-          </div>
-          <div class="field">
-            <label>Ville de naissance</label>
-            <div class="city-row">
-              <input type="text" id="reg-birth-city" placeholder="Paris, France">
-              <button class="btn" onclick="geocodeCity('birth')">Géo</button>
-            </div>
-            <div id="birth-city-info" class="city-info"></div>
-          </div>
-        </div>
-
-        <!-- Transit -->
-        <div class="group">
-          <div class="group-label">♄ Lieu de transit actuel</div>
-          <div class="field">
-            <label>Ville actuelle</label>
-            <div class="city-row">
-              <input type="text" id="reg-transit-city" placeholder="Lyon, France">
-              <button class="btn" onclick="geocodeCity('transit')">Géo</button>
-            </div>
-            <div id="transit-city-info" class="city-info"></div>
-          </div>
-        </div>
-
-        <!-- Champs cachés coords -->
-        <input type="hidden" id="reg-birth-lat">
-        <input type="hidden" id="reg-birth-lon">
-        <input type="hidden" id="reg-birth-tz">
-        <input type="hidden" id="reg-transit-lat">
-        <input type="hidden" id="reg-transit-lon">
-        <input type="hidden" id="reg-transit-tz">
-
-        <div id="reg-msg" class="sunken" style="min-height:22px;margin-top:4px;"></div>
-
-        <div class="btn-row">
-          <button class="btn" id="reg-btn" onclick="doRegister()">Créer mon profil »</button>
-        </div>
-      </div>
-    </div>
-
-  </div><!-- /winbody -->
-</div><!-- /win -->
+  </div>
+</div>
 
 <script>
 "use strict";
+function goRegister() { window.location.href = "/register"; }
 
-// ── Tabs ──────────────────────────────────────────────────────
-function switchTab(name) {
-  document.querySelectorAll(".tab").forEach((t, i) => {
-    t.classList.toggle("active", (i === 0) === (name === "login"));
-  });
-  document.getElementById("panel-login").classList.toggle("active", name === "login");
-  document.getElementById("panel-register").classList.toggle("active", name === "register");
-}
-
-// ── Login ─────────────────────────────────────────────────────
 async function doLogin() {
-  const email = document.getElementById("login-email").value.trim();
-  const msg = document.getElementById("login-msg");
+  const email  = document.getElementById("email").value.trim();
+  const pseudo = document.getElementById("pseudo").value.trim();
+  const errEl  = document.getElementById("error-msg");
+  errEl.style.display = "none";
 
-  if (!email) { setMsg(msg, "Saisis ton adresse e-mail.", "err"); return; }
+  if (!email && !pseudo) { showError("Entre ton email ou ton pseudo."); return; }
 
   document.getElementById("login-btn").disabled = true;
-  setMsg(msg, "Connexion en cours…", "");
+  document.getElementById("login-btn").textContent = "…";
 
   try {
-    const res = await fetch("/login", {
+    const res  = await fetch("/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email }),
+      body: JSON.stringify({ email, pseudo }),
     });
     const data = await res.json();
-    if (data.error) { setMsg(msg, data.error, "err"); return; }
-    setMsg(msg, `Namaste, ${data.prenom} ✦`, "ok");
-    setTimeout(() => window.location.href = "/", 800);
-  } catch (e) {
-    setMsg(msg, "Erreur réseau : " + e.message, "err");
+    if (!res.ok) { showError(data.error || "Erreur inconnue."); return; }
+    window.location.href = "/";
+  } catch(e) {
+    showError("Erreur réseau : " + e.message);
   } finally {
     document.getElementById("login-btn").disabled = false;
+    document.getElementById("login-btn").textContent = "Connexion »";
   }
 }
 
-// ── Géocodage ─────────────────────────────────────────────────
-async function geocodeCity(type) {
-  const cityInput = document.getElementById(`reg-${type}-city`);
-  const infoEl    = document.getElementById(`${type}-city-info`);
-  const city = cityInput.value.trim();
-  if (!city) { infoEl.textContent = "Saisis une ville d'abord."; return; }
-
-  infoEl.textContent = "Recherche…";
-  try {
-    const res  = await fetch(`/geocode?city=${encodeURIComponent(city)}`);
-    const data = await res.json();
-    if (data.error) { infoEl.textContent = "Introuvable : " + data.error; return; }
-
-    document.getElementById(`reg-${type}-lat`).value = data.lat;
-    document.getElementById(`reg-${type}-lon`).value = data.lon;
-    document.getElementById(`reg-${type}-tz`).value  = data.tz;
-    infoEl.textContent = `✓ ${data.lat.toFixed(4)}, ${data.lon.toFixed(4)} · ${data.tz}`;
-    cityInput.value = data.display.split(",")[0];
-  } catch (e) {
-    infoEl.textContent = "Erreur : " + e.message;
-  }
+function showError(msg) {
+  const el = document.getElementById("error-msg");
+  el.textContent = "⚠ " + msg;
+  el.style.display = "block";
 }
 
-// ── Inscription ───────────────────────────────────────────────
-async function doRegister() {
-  const msg = document.getElementById("reg-msg");
-
-  const email       = document.getElementById("reg-email").value.trim();
-  const prenom      = document.getElementById("reg-prenom").value.trim();
-  const birth_date  = document.getElementById("reg-birth-date").value;
-  const birth_hour  = document.getElementById("reg-birth-hour").value;
-  const birth_minute= document.getElementById("reg-birth-minute").value;
-  const birth_city  = document.getElementById("reg-birth-city").value.trim();
-  const birth_lat   = document.getElementById("reg-birth-lat").value;
-  const birth_lon   = document.getElementById("reg-birth-lon").value;
-  const birth_tz    = document.getElementById("reg-birth-tz").value || "Europe/Paris";
-  const transit_city= document.getElementById("reg-transit-city").value.trim();
-  const transit_lat = document.getElementById("reg-transit-lat").value;
-  const transit_lon = document.getElementById("reg-transit-lon").value;
-  const transit_tz  = document.getElementById("reg-transit-tz").value || "Europe/Paris";
-
-  // Validation rapide
-  if (!email)       { setMsg(msg, "E-mail requis.", "err"); return; }
-  if (!prenom)      { setMsg(msg, "Prénom requis.", "err"); return; }
-  if (!birth_date)  { setMsg(msg, "Date de naissance requise.", "err"); return; }
-  if (!birth_lat)   { setMsg(msg, "Géocode ta ville de naissance (bouton Géo).", "err"); return; }
-  if (!transit_lat) { setMsg(msg, "Géocode ton lieu de transit (bouton Géo).", "err"); return; }
-
-  document.getElementById("reg-btn").disabled = true;
-  setMsg(msg, "Création du profil…", "");
-
-  try {
-    const res = await fetch("/register", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        email, prenom, birth_date,
-        birth_hour: parseInt(birth_hour),
-        birth_minute: parseInt(birth_minute),
-        birth_city, birth_lat: parseFloat(birth_lat),
-        birth_lon: parseFloat(birth_lon), birth_tz,
-        transit_city, transit_lat: parseFloat(transit_lat),
-        transit_lon: parseFloat(transit_lon), transit_tz,
-      }),
-    });
-    const data = await res.json();
-    if (data.error) { setMsg(msg, data.error, "err"); return; }
-    setMsg(msg, `Profil créé. Namaste, ${data.prenom} ✦`, "ok");
-    setTimeout(() => window.location.href = "/", 900);
-  } catch (e) {
-    setMsg(msg, "Erreur réseau : " + e.message, "err");
-  } finally {
-    document.getElementById("reg-btn").disabled = false;
-  }
-}
-
-// ── Helper ────────────────────────────────────────────────────
-function setMsg(el, txt, type) {
-  el.textContent = txt;
-  el.className = "sunken" + (type === "ok" ? " msg-ok" : type === "err" ? " msg-err" : "");
-}
+document.addEventListener("keydown", e => { if (e.key === "Enter") doLogin(); });
 </script>
 </body>
 </html>
