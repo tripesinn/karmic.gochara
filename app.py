@@ -460,7 +460,7 @@ def geocode():
         r = req.get(
             "https://nominatim.openstreetmap.org/search",
             params={"q": q, "format": "json", "limit": 5},
-            headers={"User-Agent": "GocharaKarmique/1.0"},
+            headers={"User-Agent": "Karmic.Gochara/1.0"},
             timeout=5,
         )
         time.sleep(1)
@@ -470,7 +470,7 @@ def geocode():
             r2 = req.get(
                 "https://photon.komoot.io/api/",
                 params={"q": q, "limit": 5},
-                headers={"User-Agent": "GocharaKarmique/1.0"},
+                headers={"User-Agent": "Karmic.Gochara/1.0"},
                 timeout=5,
             )
             features = r2.json().get("features", [])
@@ -605,17 +605,17 @@ def send_synthesis():
 </head>
 <body>
 <div class="container">
-  <h1>✦ Gochara Karmique — @siderealAstro13</h1>
+  <h1>✦ Karmic Gochara — @siderealAstro13</h1>
   <div class="meta">
-    {pseudo} · {date_str} · Jyotish Sidéral · Djwhal Khul · Chandra Lagna
+    {pseudo} · {date_str} · Jyotish · Djwhal Khul · Chandra Lagna · Whole sign
   </div>
   <div class="synthesis">{synthesis}</div>
   <div class="support">
     <a href="https://buymeacoffee.com/PLACEHOLDER">☕ {lang['support_label']}</a>
   </div>
   <div class="footer">
-    Généré par Gochara Karmique · gochara-karmique.onrender.com<br>
-    Ayanamsa Djwhal Khul · Maisons Chandra Lagna · Nœuds Vrais
+    Généré par Karmic Gochara · karmic.gochara.onrender.com<br>
+    Ayanamsa Djwhal Khul · Chandra Lagna · True Nodes · Whole sign
   </div>
 </div>
 </body>
@@ -630,11 +630,12 @@ def send_synthesis():
                 "Authorization": f"Bearer {resend_key}",
                 "Content-Type": "application/json",
             },
-            json={
-                "from":    "Gochara Karmique <noreply@gochara-karmique.onrender.com>",
-                "to":      [email],
-                "subject": f"✦ Synthèse karmique du {date_str} — @siderealAstro13",
-                "html":    html_body,
+           json={
+                "from": "Gochara Karmique <karmic.gochara@astro.jeromemalige.fr>",
+                "reply_to": "astro@jeromemalige.fr",
+                "to": [email],
+                "subject": f"✦ Karmic Gochara Synthesis {date_str}",
+                "html": html_body,
             },
             timeout=10,
         )
