@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ lang.code }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>✦ Gochara Karmique — @siderealAstro13</title>
+<title>✦ {{ lang.title }} — @siderealAstro13</title>
 <style>
 /* ═══════════════════════════════════════════════════════════════
    WINDOWS 3.1 THEME — Gochara Karmique · @siderealAstro13
@@ -113,7 +113,7 @@ input.sunken, select.sunken {
 }
 .toolbar input[type="number"] { width: 46px; }
 
-/* ── Tabs — 2 onglets seulement ── */
+/* ── Tabs ── */
 .tabs-bar {
   display: flex; gap: 2px; padding: 4px 4px 0;
   border-bottom: 2px solid #808080;
@@ -138,9 +138,16 @@ input.sunken, select.sunken {
   overflow-y: auto; padding: 10px;
   background: #fff; border: 2px solid;
   border-color: #808080 #fff #fff #808080;
-  line-height: 1.6; white-space: pre-wrap;
+  line-height: 1.6;
   font-size: 12px;
 }
+/* Markdown rendu dans synthesis */
+#synthesis h1,#synthesis h2 { color:#4b0082; font-size:13px; margin:8px 0 4px; }
+#synthesis h3 { color:#800080; font-size:12px; margin:6px 0 3px; }
+#synthesis strong { color:#000080; }
+#synthesis em { color:#5a3000; }
+#synthesis p { margin-bottom:6px; }
+#synthesis hr { border:none; border-top:1px solid #c0c0c0; margin:8px 0; }
 
 /* ── Aspects table (sous la carte) ── */
 .aspects-wrap {
@@ -236,19 +243,47 @@ input.sunken, select.sunken {
 }
 .statpanel.fixed { flex: 0 0 auto; }
 
+/* ── Sélecteur de langue ── */
+.lang-select {
+  background: #c0c0c0;
+  border: 2px solid; border-color: #fff #808080 #808080 #fff;
+  font-family: inherit; font-size: 11px;
+  padding: 2px 4px; cursor: pointer;
+}
+
+/* ── Bouton flottant Buy me a coffee ── */
+#btn-coffee {
+  position: fixed; bottom: 18px; right: 18px; z-index: 999;
+  background: #d4a017; color: #000;
+  border: 2px solid; border-color: #ffe080 #806000 #806000 #ffe080;
+  padding: 6px 14px; font-family: inherit; font-size: 12px;
+  font-weight: bold; cursor: pointer;
+  box-shadow: 2px 2px 0 #000;
+  text-decoration: none; display: inline-block;
+}
+#btn-coffee:hover { background: #e8b820; }
+
 /* ── Misc ── */
 .loading { color: #808080; font-style: italic; }
 .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
 .hidden { display: none !important; }
 </style>
+<!-- marked.js pour le rendu Markdown -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
 <!-- ═══════════════ FENÊTRE PRINCIPALE ═══════════════ -->
 <div class="win" id="main-win">
   <div class="titlebar">
-    <div class="titlebar-title">✦ Gochara Karmique</div>
-    <div class="titlebar-btns">
+    <div class="titlebar-title">✦ {{ lang.title }}</div>
+    <div class="titlebar-btns" style="align-items:center;gap:6px;">
+      <!-- Sélecteur de langue -->
+      <select class="lang-select" id="lang-selector" onchange="setLang(this.value)">
+        {% for l in all_langs %}
+        <option value="{{ l.code }}" {% if l.code == lang.code %}selected{% endif %}>{{ l.label }}</option>
+        {% endfor %}
+      </select>
       <div class="tbtn">_</div>
       <div class="tbtn">□</div>
       <div class="tbtn">✕</div>
@@ -258,22 +293,22 @@ input.sunken, select.sunken {
   <!-- ════════════ ÉCRAN LOGIN ════════════ -->
   <div class="screen visible" id="login-screen">
     <div class="winbody login-wrap">
-      <div class="login-logo">✦ Gochara Karmique</div>
+      <div class="login-logo">✦ {{ lang.title }}</div>
       <div class="login-subtitle">@siderealAstro13 · Jyotish Sidéral · Chandra Lagna</div>
       <div class="win">
         <div class="titlebar purple">
-          <div class="titlebar-title">🔐 Connexion</div>
+          <div class="titlebar-title">🔐 {{ lang.login }}</div>
         </div>
         <div class="winbody">
           <div class="login-error" id="login-error"></div>
           <div class="row" style="margin-bottom:6px;">
-            <label for="pseudo-input" style="white-space:nowrap;">Pseudo :</label>
-            <input type="text" id="pseudo-input" class="sunken" placeholder="Ton pseudo…"
+            <label for="pseudo-input" style="white-space:nowrap;">{{ lang.pseudo }}</label>
+            <input type="text" id="pseudo-input" class="sunken" placeholder="{{ lang.pseudo_ph }}"
                    style="flex:1;" onkeydown="if(event.key==='Enter')doLogin()">
           </div>
           <div class="row" style="justify-content:flex-end; gap:6px;">
-            <button class="btn" onclick="showRegister()">Créer un profil</button>
-            <button class="btn primary" onclick="doLogin()">Connexion »</button>
+            <button class="btn" onclick="showRegister()">{{ lang.create_profile }}</button>
+            <button class="btn primary" onclick="doLogin()">{{ lang.connect }}</button>
           </div>
           <div id="login-status" style="font-size:11px;color:#808080;margin-top:4px;"></div>
         </div>
@@ -286,38 +321,38 @@ input.sunken, select.sunken {
     <div class="winbody" style="max-width:520px;margin:0 auto;">
       <div class="win">
         <div class="titlebar green">
-          <div class="titlebar-title">✦ Créer un profil karmique</div>
+          <div class="titlebar-title">{{ lang.karmic_profile }}</div>
         </div>
         <div class="winbody">
           <div class="reg-error" id="reg-error"></div>
           <div class="reg-grid">
-            <label>Pseudo :</label>
+            <label>{{ lang.pseudo }}</label>
             <input type="text" id="reg-pseudo" class="sunken" placeholder="pseudo unique">
 
-            <label>Prénom :</label>
+            <label>{{ lang.firstname }}</label>
             <input type="text" id="reg-name" class="sunken" placeholder="Prénom">
 
-            <label>Email :</label>
+            <label>{{ lang.email }}</label>
             <input type="email" id="reg-email" class="sunken" placeholder="email@…">
 
-            <label>Date naissance :</label>
+            <label>{{ lang.birthdate }}</label>
             <div class="row">
               <input type="number" id="reg-day"   class="sunken" placeholder="JJ" min="1" max="31" style="width:50px;">
               <input type="number" id="reg-month" class="sunken" placeholder="MM" min="1" max="12" style="width:50px;">
               <input type="number" id="reg-year"  class="sunken" placeholder="AAAA" min="1900" max="2099" style="width:70px;">
             </div>
 
-            <label>Heure naissance :</label>
+            <label>{{ lang.birthtime }}</label>
             <div class="row">
               <input type="number" id="reg-hour"   class="sunken" placeholder="HH" min="0" max="23" style="width:50px;">
               <span>h</span>
               <input type="number" id="reg-minute" class="sunken" placeholder="MM" min="0" max="59" style="width:50px;">
             </div>
 
-            <label>Ville naissance :</label>
+            <label>{{ lang.birthcity }}</label>
             <div class="geo-wrap" style="grid-column:2;">
               <input type="text" id="reg-city-input" class="sunken"
-                     placeholder="Cherche ta ville…"
+                     placeholder="{{ lang.city_ph }}"
                      oninput="geocodeField(this,'reg-geo-results','reg-natal-city','reg-natal-lat','reg-natal-lon','reg-natal-tz')">
               <div class="geo-results" id="reg-geo-results"></div>
               <input type="hidden" id="reg-natal-city">
@@ -327,8 +362,8 @@ input.sunken, select.sunken {
             </div>
           </div>
           <div class="row" style="justify-content:flex-end;gap:6px;margin-top:8px;">
-            <button class="btn" onclick="showLogin()">← Retour</button>
-            <button class="btn primary" onclick="doRegister()">Créer mon profil »</button>
+            <button class="btn" onclick="showLogin()">{{ lang.back }}</button>
+            <button class="btn primary" onclick="doRegister()">{{ lang.create }}</button>
           </div>
           <div id="reg-status" style="font-size:11px;color:#808080;margin-top:4px;"></div>
         </div>
@@ -348,13 +383,13 @@ input.sunken, select.sunken {
           <span id="natal-summary">—</span>
         </div>
         <div class="reglages-badge">
-          RÉGLAGES&nbsp;
+          {{ lang.settings }}&nbsp;
           <span>Ayanamsa : Djwhal Khul</span> ·
           <span>Maisons : Moonrise (Chandra Lagna)</span> ·
           <span>Nœuds : Vrais</span> ·
           <span>Orbe : &lt; 3°</span>
         </div>
-        <button class="btn" style="margin-left:auto;" onclick="doLogout()">Déconnexion</button>
+        <button class="btn" style="margin-left:auto;" onclick="doLogout()">{{ lang.logout }}</button>
       </div>
     </div>
 
@@ -362,21 +397,21 @@ input.sunken, select.sunken {
     <div class="winbody" style="padding-top:4px;padding-bottom:0;">
       <div class="win">
         <div class="titlebar teal">
-          <div class="titlebar-title">⏱ Transits — Date de consultation</div>
+          <div class="titlebar-title">{{ lang.transit_title }}</div>
         </div>
         <div class="winbody">
           <div class="toolbar">
-            <label>Date :</label>
+            <label>{{ lang.date }}</label>
             <input type="date" id="t-date" class="sunken">
-            <label>Heure :</label>
+            <label>{{ lang.hour }}</label>
             <input type="number" id="t-hour" class="sunken" min="0" max="23" value="{{ now_hour }}">
             <label>h</label>
             <input type="number" id="t-minute" class="sunken" min="0" max="59" value="{{ now_minute }}">
-            <label>min</label>
+            <label>{{ lang.min }}</label>
 
             <div class="geo-wrap" style="position:relative;">
               <input type="text" id="transit-city-display" class="sunken"
-                     placeholder="Lieu de transit…" style="width:180px;"
+                     placeholder="{{ lang.transit_ph }}" style="width:180px;"
                      oninput="geocodeField(this,'transit-geo-results','transit-city-val','transit-lat-val','transit-lon-val','transit-tz-val')">
               <div class="geo-results" id="transit-geo-results"></div>
               <input type="hidden" id="transit-city-val">
@@ -385,68 +420,72 @@ input.sunken, select.sunken {
               <input type="hidden" id="transit-tz-val">
             </div>
 
-            <button class="btn primary" id="calc-btn" onclick="calculateTransits()">✦ Calculer »</button>
+            <button class="btn primary" id="calc-btn" onclick="calculateTransits()">{{ lang.calculate }}</button>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- ── ONGLETS — 2 seulement ── -->
+    <!-- ── ONGLETS ── -->
     <div class="winbody" style="padding-top:4px;">
       <div class="tabs-bar">
-        <button class="tab-btn active" id="tab-btn-gochara" onclick="switchTab('gochara')">◆ Gochara</button>
-        <button class="tab-btn"        id="tab-btn-carte"   onclick="switchTab('carte')">✦ Carte Karmique</button>
+        <button class="tab-btn active" id="tab-btn-gochara" onclick="switchTab('gochara')">{{ lang.tab_gochara }}</button>
+        <button class="tab-btn"        id="tab-btn-carte"   onclick="switchTab('carte')">{{ lang.tab_carte }}</button>
       </div>
 
       <!-- ── Tab : Gochara ── -->
       <div class="tab-panel active" id="tab-gochara">
         <div class="win">
           <div class="titlebar purple">
-            <div class="titlebar-title">✦ Synthèse karmique — @siderealAstro13</div>
+            <div class="titlebar-title">{{ lang.synthesis_title }}</div>
           </div>
           <div class="winbody" style="padding:0;">
-            <div id="synthesis"><span class="loading">Lance un calcul pour obtenir ta synthèse karmique védique…</span></div>
+            <div id="synthesis"><span class="loading">{{ lang.synthesis_wait }}</span></div>
           </div>
+        </div>
+
+        <!-- Barre actions audio + email -->
+        <div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap;">
+          <button id="btnAudio" class="btn" onclick="toggleAudio()">{{ lang.listen }}</button>
+          <input type="range" id="speedSlider" min="0.6" max="1.8" step="0.1" value="1.0"
+            style="width:100px;vertical-align:middle;"
+            oninput="document.getElementById('speedVal').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
+          <span id="speedVal" style="font-size:11px;">1.0x</span>
+
+          <button id="btnEmail" class="btn" onclick="sendSynthesisEmail()" style="margin-left:8px;">
+            {{ lang.send_email }}
+          </button>
+          <span id="email-status" style="font-size:11px;color:#808080;"></span>
         </div>
       </div>
 
-        <!-- ── Bouton audio ── -->
-       <button id="btnAudio" onclick="toggleAudio()" style="margin-top:8px;">
-  ▶ Écouter
-</button>
-<input type="range" id="speedSlider" min="0.6" max="1.8" step="0.1" value="1.0"
-  style="width:100px;vertical-align:middle;" 
-  oninput="document.getElementById('speedVal').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
-<span id="speedVal" style="font-size:11px;">1.0x</span>
-       
       <!-- ── Tab : Carte Karmique ── -->
       <div class="tab-panel" id="tab-carte">
 
         <!-- Roue SVG -->
         <div class="win">
           <div class="titlebar green">
-            <div class="titlebar-title">✦ Carte Karmique — Zodiaque Sidéral</div>
+            <div class="titlebar-title">{{ lang.carte_title }}</div>
           </div>
           <div class="winbody">
             <svg id="karma-map-svg" viewBox="0 0 560 560"
                  xmlns="http://www.w3.org/2000/svg">
               <circle cx="280" cy="280" r="275" fill="#f8f8f8" stroke="#808080" stroke-width="1"/>
               <text x="280" y="286" text-anchor="middle" font-size="14" fill="#808080"
-                    font-family="MS Sans Serif, Arial">Lance un calcul…</text>
+                    font-family="MS Sans Serif, Arial">{{ lang.map_wait }}</text>
             </svg>
-            <!-- Panneaux quadrants ROM / RAM / Stage / Lilith -->
             <div class="quadrant-panels" id="quadrant-panels"></div>
           </div>
         </div>
 
-        <!-- Tableau des aspects sous la carte -->
+        <!-- Tableau des aspects -->
         <div class="win">
           <div class="titlebar gold">
-            <div class="titlebar-title">✦ Aspects actifs (orbe &lt; 3°)</div>
+            <div class="titlebar-title">{{ lang.aspects_title }}</div>
           </div>
           <div class="winbody" style="padding:0;">
             <div class="aspects-wrap" id="aspects-wrap">
-              <div style="padding:8px;" class="loading">Lance un calcul pour voir les aspects…</div>
+              <div style="padding:8px;" class="loading">{{ lang.aspects_wait }}</div>
             </div>
           </div>
         </div>
@@ -457,7 +496,7 @@ input.sunken, select.sunken {
 
     <!-- ── Status bar ── -->
     <div class="statusbar">
-      <div class="statpanel" id="status-msg">Prêt</div>
+      <div class="statpanel" id="status-msg">{{ lang.ready }}</div>
       <div class="statpanel fixed">Sidéral · Djwhal Khul · Moonrise</div>
       <div class="statpanel fixed" id="status-count"></div>
     </div>
@@ -466,6 +505,11 @@ input.sunken, select.sunken {
 
 </div><!-- /main-win -->
 
+<!-- ═══ Buy me a coffee — bouton flottant ═══ -->
+<a id="btn-coffee" href="https://buymeacoffee.com/PLACEHOLDER" target="_blank" rel="noopener">
+  ☕ {{ lang.support_label }}
+</a>
+
 
 <!-- ═══════════════════════════════════════════════════════════════
      JAVASCRIPT
@@ -473,12 +517,29 @@ input.sunken, select.sunken {
 <script>
 "use strict";
 
+/* Labels JS injectés depuis Flask/Jinja2 */
+const L = {
+  ready:          {{ lang.ready | tojson }},
+  no_calc:        {{ lang.no_calc | tojson }},
+  select_transit: {{ lang.select_transit | tojson }},
+  select_date:    {{ lang.select_date | tojson }},
+  calc_ephem:     {{ lang.calc_ephem | tojson }},
+  calc_sideral:   {{ lang.calc_sideral | tojson }},
+  calc_karmic:    {{ lang.calc_karmic | tojson }},
+  listen:         {{ lang.listen | tojson }},
+  stop:           {{ lang.stop | tojson }},
+  sending:        {{ lang.sending | tojson }},
+  sent_ok:        {{ lang.sent_ok | tojson }},
+  sent_err:       {{ lang.sent_err | tojson }},
+};
+
 let currentPseudo = "";
 let lastChartData = null;
+let lastSynthesisText = "";
+let lastTransitDate   = "";
 
 /* ══ UTILS ═══════════════════════════════════════════════════════ */
 function escHtml(s)  { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function escapeNl(s) { return String(s).replace(/\n/g,"<br>"); }
 function pad(n)      { return String(n).padStart(2,"0"); }
 
 function setStatus(txt) {
@@ -493,12 +554,29 @@ function setAspectsHTML(html) {
   const el = document.getElementById("aspects-wrap");
   if (el) el.innerHTML = html;
 }
-function setSynthesisHTML(html) {
+function setSynthesis(text) {
   const el = document.getElementById("synthesis");
-  if (el) el.innerHTML = html;
+  if (!el) return;
+  if (typeof marked !== "undefined" && text && text.trim()) {
+    el.innerHTML = marked.parse(text);
+  } else {
+    el.textContent = text || "";
+  }
 }
 
-/* ══ TABS — 2 onglets ════════════════════════════════════════════ */
+/* ══ LANGUE ══════════════════════════════════════════════════════ */
+async function setLang(code) {
+  try {
+    await fetch("/set_lang", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({lang: code}),
+    });
+    location.reload();
+  } catch(e) { console.error("setLang error", e); }
+}
+
+/* ══ TABS ════════════════════════════════════════════════════════ */
 function switchTab(name) {
   ["gochara", "carte"].forEach(t => {
     const btn = document.getElementById("tab-btn-" + t);
@@ -674,18 +752,20 @@ async function calculateTransits() {
   const city   = document.getElementById("transit-city-val").value;
   const tz     = document.getElementById("transit-tz-val").value || "UTC";
 
-  if (!date) { setStatus("⚠ Sélectionne une date."); return; }
-  if (isNaN(lat) || isNaN(lon)) {
-    setStatus("⚠ Sélectionne un lieu de transit dans la liste.");
-    return;
-  }
+  if (!date)          { setStatus(L.select_date);    return; }
+  if (isNaN(lat) || isNaN(lon)) { setStatus(L.select_transit); return; }
 
-  setStatus("Calcul des éphémérides…");
+  lastTransitDate = date;
+  setStatus(L.calc_ephem);
   document.getElementById("calc-btn").disabled = true;
 
-  setAspectsHTML('<div style="padding:8px;" class="loading">Calcul sidéral Djwhal Khul…</div>');
-  setSynthesisHTML('<span class="loading">Interprétation karmique védique en cours…</span>');
+  setAspectsHTML(`<div style="padding:8px;" class="loading">${L.calc_sideral}</div>`);
+  setSynthesis("");
+  document.getElementById("synthesis").innerHTML = `<span class="loading">${L.calc_karmic}</span>`;
   switchTab("gochara");
+
+  // Reset email status
+  document.getElementById("email-status").textContent = "";
 
   try {
     const res  = await fetch("/calculate", {
@@ -697,18 +777,52 @@ async function calculateTransits() {
     const data = await res.json();
     if (data.error) throw new Error(data.error);
 
-    lastChartData = data;
+    lastChartData      = data;
+    lastSynthesisText  = data.synthesis || "";
     renderAspects(data.aspects);
-    setSynthesisHTML(escapeNl(escHtml(data.synthesis || "—")));
+    setSynthesis(lastSynthesisText);
 
     const n = (data.aspects || []).length;
-    setStatus(`✓ ${n} aspect${n!==1?"s":""} actif${n!==1?"s":""}`);
+    setStatus(`✓ ${n} aspect${n!==1?"s":""}`);
     setCount(`${n} asp.`);
   } catch (err) {
-    setStatus("⚠ Erreur : " + err.message);
-    setSynthesisHTML(`<span style="color:#800000;">Erreur : ${escHtml(err.message)}</span>`);
+    setStatus("⚠ " + err.message);
+    document.getElementById("synthesis").innerHTML =
+      `<span style="color:#800000;">Erreur : ${escHtml(err.message)}</span>`;
   } finally {
     document.getElementById("calc-btn").disabled = false;
+  }
+}
+
+/* ══ EMAIL SYNTHÈSE ══════════════════════════════════════════════ */
+async function sendSynthesisEmail() {
+  const statEl = document.getElementById("email-status");
+  if (!lastSynthesisText) { statEl.textContent = L.no_calc; return; }
+
+  const btn = document.getElementById("btnEmail");
+  btn.disabled = true;
+  statEl.textContent = L.sending;
+
+  try {
+    const res  = await fetch("/send_synthesis", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ synthesis: lastSynthesisText, date: lastTransitDate }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      statEl.style.color = "#006000";
+      statEl.textContent = L.sent_ok;
+    } else {
+      statEl.style.color = "#800000";
+      statEl.textContent = L.sent_err + " : " + (data.error || "");
+    }
+  } catch (err) {
+    statEl.style.color = "#800000";
+    statEl.textContent = L.sent_err + " : " + err.message;
+  } finally {
+    btn.disabled = false;
+    setTimeout(() => { statEl.textContent = ""; statEl.style.color = ""; }, 5000);
   }
 }
 
@@ -868,26 +982,36 @@ function renderQuadrantLists(aspects) {
       }</ul>
     </div>`).join("");
 }
-   let _synth = window.speechSynthesis;
+
+/* ══ AUDIO TTS ═══════════════════════════════════════════════════ */
+let _synth = window.speechSynthesis;
 let _chunks = [], _ci = 0, _playing = false;
 
 function toggleAudio() {
-  if (_playing) { _synth.cancel(); _playing = false; document.getElementById('btnAudio').textContent = '▶ Écouter'; return; }
-  let raw = document.getElementById('synthesis').innerText || '';
-  if (!raw.trim()) { alert('Lance d\'abord un calcul.'); return; }
-  raw = raw.replace(/#{1,3}\s*/g,'').replace(/\*\*/g,'').replace(/---/g,'').trim();
+  const btn = document.getElementById("btnAudio");
+  if (_playing) {
+    _synth.cancel(); _playing = false;
+    btn.textContent = L.listen; return;
+  }
+  let raw = document.getElementById("synthesis").innerText || "";
+  if (!raw.trim()) { alert(L.no_calc); return; }
+  raw = raw.replace(/#{1,3}\s*/g,"").replace(/\*\*/g,"").replace(/---/g,"").trim();
   _chunks = raw.match(/[^.!?]+[.!?]+/g) || [raw];
   _ci = 0; _playing = true;
-  document.getElementById('btnAudio').textContent = '■ Stop';
+  btn.textContent = L.stop;
   _speakNext();
 }
 function _speakNext() {
-  if (_ci >= _chunks.length || !_playing) { _playing = false; document.getElementById('btnAudio').textContent = '▶ Écouter'; return; }
-  let u = new SpeechSynthesisUtterance(_chunks[_ci]);
-  u.lang = 'fr-FR';
-  u.rate = parseFloat(document.getElementById('speedSlider').value);
-  let v = _synth.getVoices().filter(v => v.lang.startsWith('fr'));
-  if (v.length) u.voice = v[0];
+  if (_ci >= _chunks.length || !_playing) {
+    _playing = false;
+    document.getElementById("btnAudio").textContent = L.listen; return;
+  }
+  const u = new SpeechSynthesisUtterance(_chunks[_ci]);
+  const langCode = document.documentElement.lang || "fr";
+  u.lang = langCode + "-" + langCode.toUpperCase();
+  u.rate = parseFloat(document.getElementById("speedSlider").value);
+  const voices = _synth.getVoices().filter(v => v.lang.startsWith(langCode));
+  if (voices.length) u.voice = voices[0];
   u.onend = () => { _ci++; _speakNext(); };
   _synth.speak(u);
 }
