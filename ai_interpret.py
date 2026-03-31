@@ -237,8 +237,3 @@ Développe chaque section en lecture d'âme cohérente, narrative, sans liste m�
         system=_build_system_prompt(user),
         messages=[{"role": "user", "content": prompt}],
     )
-    return msg.content[0].text
-
-        )
-
-    return "\n".join(lines) + natal_bloc
