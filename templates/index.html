@@ -873,7 +873,7 @@ let _chunks = [], _ci = 0, _playing = false;
 
 function toggleAudio() {
   if (_playing) { _synth.cancel(); _playing = false; document.getElementById('btnAudio').textContent = '▶ Écouter'; return; }
-  let raw = document.getElementById('synthesisDiv').innerText || '';
+  let raw = document.getElementById('synthesis').innerText || '';
   if (!raw.trim()) { alert('Lance d\'abord un calcul.'); return; }
   raw = raw.replace(/#{1,3}\s*/g,'').replace(/\*\*/g,'').replace(/---/g,'').trim();
   _chunks = raw.match(/[^.!?]+[.!?]+/g) || [raw];
