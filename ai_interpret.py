@@ -1,598 +1,377 @@
 """
-ai_interpret.py — Interprétation karmique védique via Claude API
-Gochara Karmique — @siderealAstro13 • Architecture multi-utilisateurs
+ai_interpret.py — Gochara Karmique
+Intelligence siderealAstro13 | Astrologie védique sidérale (Chandra Lagna)
+Doctrine : Mémoire karmique/Blessure/Stage + Axe des Portes (Castanier) + Nakshatras + Cycles Nodaux
 """
 
-import os
 import anthropic
+import os
 
+# ── Client singleton ──────────────────────────────────────────────────────────
 _client = None
-
 
 def _get_client():
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
+        _client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
     return _client
 
 
-# ── Base de connaissances Nakshatras (planètes karmiquement critiques) ────────
-NAKSHATRA_KARMA = {
-    # ── KETU / NŒUD SUD (ROM) ─────────────────────────────────────────────
-    "Ashwini": {
-        "regent": "Ketu", "element": "Feu",
-        "rom_theme": "Sauveur compulsif, guérison impulsive, héroïsme automatique",
-        "ram_activation": "Chiron ici : blessure du sauvetage — tu guéris les autres pour éviter ta propre blessure",
-        "ketu_ici": "ROM en mode guerrier-guérisseur : patterns d'urgence des vies passées",
-        "rahu_ici": "Dharma d'incarnation lente, patience, recevoir avant de donner",
-        "saturne_ici": "Karma d'action précipitée — ralentir EST la leçon",
-        "chiron_ici": "Blessure de l'impuissance au moment critique — transmuter en présence calme",
-        "stage": "Agir depuis le centre, pas depuis l'urgence",
-    },
-    "Bharani": {
-        "regent": "Vénus", "element": "Feu",
-        "rom_theme": "Porteur du poids des autres, sacrifice chronique, retenue du désir",
-        "ram_activation": "Chiron ici : blessure de ce qui ne peut pas naître — deuil d'un potentiel",
-        "ketu_ici": "ROM de la mort et renaissance : patterns de retenue créatrice accumulée",
-        "rahu_ici": "Dharma d'assumer pleinement sa créativité sans culpabilité",
-        "saturne_ici": "Karma de responsabilité excessive — apprendre à déléguer le poids",
-        "chiron_ici": "Blessure du porteur : tu portes ce qui ne t'appartient pas",
-        "stage": "Créer depuis la joie, pas depuis l'obligation",
-    },
-    "Krittika": {
-        "regent": "Soleil", "element": "Feu",
-        "rom_theme": "Critique intérieure acérée, perfection punitive, autorité blessée",
-        "ram_activation": "Chiron ici : blessure de l'autorité paternelle — le juge intérieur",
-        "ketu_ici": "ROM du discernement tranchant : vies de prêtres, juges, chirurgiens",
-        "rahu_ici": "Dharma de brûler l'inauthentique avec douceur",
-        "saturne_ici": "Karma de jugement — la sévérité se retourne contre soi",
-        "chiron_ici": "Blessure de la lumière coupée — potentiel solaire réprimé",
-        "stage": "Illuminer sans brûler — discerner sans trancher",
-    },
-    "Rohini": {
-        "regent": "Lune", "element": "Terre",
-        "rom_theme": "Attachement sensuel, fixation sur la beauté, possession affective",
-        "ram_activation": "Chiron ici : blessure de l'abondance refusée ou perdue",
-        "ketu_ici": "ROM de la fertilité : vies d'artistes, agriculteurs, mères",
-        "rahu_ici": "Dharma de créer sans s'accrocher à la forme",
-        "saturne_ici": "Karma d'abondance bloquée — restriction des plaisirs comme leçon",
-        "chiron_ici": "Blessure de l'enracinement : tu ne te permets pas de fleurir",
-        "stage": "S'ancrer dans le présent matériel sans y être emprisonné",
-    },
-    "Mrigashira": {
-        "regent": "Mars", "element": "Terre",
-        "rom_theme": "Chercheur éternel, fuite vers le prochain horizon, insatisfaction chronique",
-        "ram_activation": "Chiron ici : blessure de la quête — chercher ce qui est déjà là",
-        "ketu_ici": "ROM du chasseur : vies de nomades, explorateurs, chercheurs de sens",
-        "rahu_ici": "Dharma d'habiter pleinement un lieu, une voie, une relation",
-        "saturne_ici": "Karma de dispersion — la discipline de la profondeur",
-        "chiron_ici": "Blessure de l'incomplétude : jamais assez loin, jamais assez",
-        "stage": "Trouver le sacré dans l'immobile",
-    },
-    "Ardra": {
-        "regent": "Rahu", "element": "Terre",
-        "rom_theme": "Tempête émotionnelle, destruction créatrice, chaos comme refuge",
-        "ram_activation": "Chiron ici : blessure de la tempête intérieure non intégrée",
-        "ketu_ici": "ROM du chaos transformateur : vies de révolutionnaires, chamans de crise",
-        "rahu_ici": "Dharma de canaliser la tempête en innovation",
-        "saturne_ici": "Karma de la destruction non maîtrisée — apprendre à reconstruire",
-        "chiron_ici": "Blessure du radical : tu détruis avant qu'on te détruise",
-        "stage": "Être l'œil du cyclone, pas le vent lui-même",
-    },
-    "Punarvasu": {
-        "regent": "Jupiter", "element": "Eau",
-        "rom_theme": "Retour compulsif, renaissance sans intégration, optimisme défensif",
-        "ram_activation": "Chiron ici : blessure du retour — peur que ce qui était ne revienne jamais",
-        "ketu_ici": "ROM de l'éternel recommencement : maître de la renaissance cyclique",
-        "rahu_ici": "Dharma de l'expansion sans régression",
-        "saturne_ici": "Karma des cycles répétés — identifier et clore la boucle",
-        "chiron_ici": "Blessure de l'exil : tu cherches un foyer que tu portes en toi",
-        "stage": "Revenir à soi-même comme acte de dharma",
-    },
-    "Pushya": {
-        "regent": "Saturne", "element": "Eau",
-        "rom_theme": "Nourrisseur compulsif, auto-sacrifice, besoin d'être nécessaire",
-        "ram_activation": "Chiron ici : blessure du soin — donner sans jamais recevoir",
-        "ketu_ici": "ROM du gardien : vies de prêtres, parents, gardiens communautaires",
-        "rahu_ici": "Dharma de recevoir et permettre à l'autre de donner",
-        "saturne_ici": "Karma de la responsabilité nourricière — épuisement comme signal",
-        "chiron_ici": "Blessure de la faim spirituelle : tu nourris tout sauf ton âme",
-        "stage": "Se nourrir soi-même pour nourrir juste",
-    },
-    "Ashlesha": {
-        "regent": "Mercure", "element": "Eau",
-        "rom_theme": "Contrôle subtil, manipulation inconsciente, intelligence défensive",
-        "ram_activation": "Chiron ici : blessure de la trahison — intelligence utilisée pour se protéger",
-        "ketu_ici": "ROM du serpent : vies de magiciens, guérisseurs de venin, diplomates",
-        "rahu_ici": "Dharma d'utiliser la sagesse du serpent au service de l'éveil",
-        "saturne_ici": "Karma du contrôle — lâcher-prise comme acte courageux",
-        "chiron_ici": "Blessure du non-dit : la vérité tue ou guérit — tu choisis la silence",
-        "stage": "Parler depuis le cœur, pas depuis la stratégie",
-    },
-    "Magha": {
-        "regent": "Ketu", "element": "Feu",
-        "rom_theme": "Royauté ancestrale cristallisée, ego de lignée, autorité héritée non questionnée",
-        "ram_activation": "Chiron ici : blessure du trône — l'autorité qu'on n'ose pas incarner ou qu'on incarne mal",
-        "ketu_ici": "ROM maximal : salle des ancêtres activée — ketu dissout l'ego de lignée pour spiritualiser la royauté intérieure. Vies de rois, prêtres royaux, gardiens du sacré",
-        "rahu_ici": "Dharma d'incarner une nouvelle forme de royauté — grâce expansive, non héritage rigide",
-        "saturne_ici": "Karma du pouvoir : la déposition comme leçon — le trône n'est pas identité",
-        "chiron_ici": "Blessure de la destitution : la royauté intérieure blessée cherche validation externe",
-        "stage": "Honorer l'ancêtre sans lui obéir — clôturer le ROM pour saisir le dharma Jupiter",
-        "transit_note": "ACTIF 29/03/2026–05/12/2026 : Ketu transit Magha — activation maximale du lignage. Patterns de pouvoir, d'autorité, peut-être de déposition remontent. Ce n'est pas personnel, c'est du lignage.",
-    },
-    "Purva Phalguni": {
-        "regent": "Vénus", "element": "Feu",
-        "rom_theme": "Plaisir comme refuge, créativité sans engagement, charme défensif",
-        "ram_activation": "Chiron ici : blessure du plaisir interdit ou honteux",
-        "ketu_ici": "ROM de l'artiste : vies de poètes, courtisans, artisans du beau",
-        "rahu_ici": "Dharma de créer une œuvre qui dure au-delà du plaisir immédiat",
-        "saturne_ici": "Karma du divertissement — la légèreté comme fuite ou comme don",
-        "chiron_ici": "Blessure de la joie : tu te permets de briller mais pas d'être vu vraiment",
-        "stage": "Créer depuis l'amour de soi, pas depuis le besoin d'approbation",
-    },
-    "Uttara Phalguni": {
-        "regent": "Soleil", "element": "Feu",
-        "rom_theme": "Contrat social rigide, obligations sans amour, service comme prison",
-        "ram_activation": "Chiron ici : blessure du contrat — ce qu'on a signé sans consentement véritable",
-        "ketu_ici": "ROM du serviteur royal : vies de ministres, serviteurs loyaux, greffiers",
-        "rahu_ici": "Dharma de créer des alliances librement choisies",
-        "saturne_ici": "Karma de l'obligation — distinguer devoir choisi et devoir imposé",
-        "chiron_ici": "Blessure de la loyauté : tu restes quand partir serait dharma",
-        "stage": "S'engager depuis la liberté, pas depuis la peur d'abandonner",
-    },
-    "Hasta": {
-        "regent": "Lune", "element": "Terre",
-        "rom_theme": "Habileté manuelle comme refuge, perfectionnisme des détails, anxiété de production",
-        "ram_activation": "Chiron ici : blessure de l'artisan — les mains qui guérissent mais ne savent pas recevoir",
-        "ketu_ici": "ROM de l'artisan : vies de guérisseurs par les mains, artisans, accoucheurs",
-        "rahu_ici": "Dharma de lâcher le contrôle des détails pour voir le grand dessein",
-        "saturne_ici": "Karma du travail sans reconnaissance — l'humilité comme dignité",
-        "chiron_ici": "Blessure des mains : ce que tu crées n'est jamais assez bien",
-        "stage": "Offrir son œuvre sans s'y accrocher",
-    },
-    "Chitra": {
-        "regent": "Mars", "element": "Feu",
-        "rom_theme": "Perfectionnisme esthétique, identité de façade, brillance sans profondeur",
-        "ram_activation": "Chiron ici : blessure de l'image — la beauté extérieure cache une fissure intérieure",
-        "ketu_ici": "ROM de l'architecte : vies d'artistes, bâtisseurs de temples, joailliers",
-        "rahu_ici": "Dharma de créer une œuvre qui reflète l'âme, pas seulement l'ego",
-        "saturne_ici": "Karma de la structure belle mais vide — substance avant forme",
-        "chiron_ici": "Blessure du miroitement : tu te construis pour être vu, pas pour être",
-        "stage": "Construire depuis l'intérieur vers l'extérieur",
-    },
-    "Swati": {
-        "regent": "Rahu", "element": "Eau",
-        "rom_theme": "Indépendance compulsive, errance comme identité, peur de l'ancrage",
-        "ram_activation": "Chiron ici : blessure de la solitude choisie — liberté comme fuite",
-        "ketu_ici": "ROM du vent : vies de marchands, diplomates, médiateurs entre mondes",
-        "rahu_ici": "Dharma d'une indépendance enracinée — libre ET ancré",
-        "saturne_ici": "Karma de la flottaison — choisir un sol et y rester",
-        "chiron_ici": "Blessure de l'appartenance : tu pars avant qu'on te quitte",
-        "stage": "Danser dans le vent sans perdre ses racines",
-    },
-    "Vishakha": {
-        "regent": "Jupiter", "element": "Feu",
-        "rom_theme": "Ambition obsessionnelle, but unique sans joie, jalousie du succès d'autrui",
-        "ram_activation": "Chiron ici : blessure du but — atteindre sans jamais arriver",
-        "ketu_ici": "ROM du conquérant : vies de militaires, révolutionnaires, compétiteurs acharnés",
-        "rahu_ici": "Dharma de la patience — le fruit mûrit à son heure",
-        "saturne_ici": "Karma de l'ambition : le succès trop tôt ou trop tard comme leçon",
-        "chiron_ici": "Blessure de l'arrivée : tu ne sais pas habiter le succès",
-        "stage": "Viser haut ET savourer le chemin",
-    },
-    "Anuradha": {
-        "regent": "Saturne", "element": "Eau",
-        "rom_theme": "Dévotion aveugle, amitié sacrificielle, loyauté comme identité",
-        "ram_activation": "Chiron ici : blessure de l'amitié trahie — se donner entièrement et être abandonné",
-        "ketu_ici": "ROM du dévot : vies de disciples, amis fidèles, compagnons de route",
-        "rahu_ici": "Dharma de construire des relations mutuelles et équilibrées",
-        "saturne_ici": "Karma de la dévotion unilatérale — apprendre la réciprocité",
-        "chiron_ici": "Blessure du compagnon : tu suis, tu soutiens, tu n'oses pas mener",
-        "stage": "Être fidèle à soi-même d'abord",
-    },
-    "Jyeshtha": {
-        "regent": "Mercure", "element": "Eau",
-        "rom_theme": "Aîné protecteur compulsif, pouvoir sur les autres comme identité, isolement du sage",
-        "ram_activation": "Chiron ici : blessure de la responsabilité — porter le clan seul",
-        "ketu_ici": "ROM de l'ancien : vies de chefs de clan, aînés, gardiens des secrets",
-        "rahu_ici": "Dharma de partager le pouvoir et d'enseigner",
-        "saturne_ici": "Karma de l'autorité solitaire — le leadership comme service",
-        "chiron_ici": "Blessure du patriarche/matriarche : tu protèges ce qui t'étouffe",
-        "stage": "Guider sans dominer — transmettre sans accaparer",
-    },
-    "Mula": {
-        "regent": "Ketu", "element": "Feu",
-        "rom_theme": "Destructeur de fondations, recherche de vérité sans compromis, nihilisme spirituel",
-        "ram_activation": "Chiron ici : blessure du déracinement — tout arracher pour trouver la racine",
-        "ketu_ici": "ROM du destructeur sacré : vies de chercheurs de vérité radicaux, moines errants",
-        "rahu_ici": "Dharma de reconstruire sur des fondations vraies",
-        "saturne_ici": "Karma du radical : destruction qui précède la structure durable",
-        "chiron_ici": "Blessure des racines : tu ne sais pas d'où tu viens, donc tu ne sais pas où aller",
-        "stage": "Déraciner le faux pour planter le vrai",
-    },
-    "Purva Ashadha": {
-        "regent": "Vénus", "element": "Feu",
-        "rom_theme": "Victoire prématurée, invincibilité défensive, entêtement comme protection",
-        "ram_activation": "Chiron ici : blessure de la défaite non intégrée — l'invincible qui a connu l'écrasement",
-        "ketu_ici": "ROM du guerrier victorieux : vies de conquérants, marins intrépides",
-        "rahu_ici": "Dharma d'une victoire intérieure, sans domination externe",
-        "saturne_ici": "Karma de la persévérance — la défaite comme enseignante",
-        "chiron_ici": "Blessure de la capitulation : tu ne peux pas perdre sans te briser",
-        "stage": "Vaincre sa propre résistance intérieure",
-    },
-    "Uttara Ashadha": {
-        "regent": "Soleil", "element": "Terre",
-        "rom_theme": "Victoire permanente comme fardeau, responsabilité sans fin, succès solitaire",
-        "ram_activation": "Chiron ici : blessure du gagnant — la victoire isole",
-        "ketu_ici": "ROM du roi éternel : vies de dirigeants responsables, législateurs",
-        "rahu_ici": "Dharma de partager la victoire et de déléguer",
-        "saturne_ici": "Karma de la charge du succès — apprendre à célébrer",
-        "chiron_ici": "Blessure du sommet : plus tu réussis, plus tu te sens seul",
-        "stage": "Réussir EN RELATION, pas malgré elle",
-    },
-    "Shravana": {
-        "regent": "Lune", "element": "Eau",
-        "rom_theme": "Écoute compulsive, absorption des problèmes d'autrui, identité du thérapeute",
-        "ram_activation": "Chiron ici : blessure de l'auditeur — entendre tout, être entendu par personne",
-        "ketu_ici": "ROM de l'écouteur : vies de conseillers, confesseurs, détenteurs de secrets",
-        "rahu_ici": "Dharma d'apprendre à parler sa propre vérité",
-        "saturne_ici": "Karma du silence — quand se taire est sagesse et quand c'est fuite",
-        "chiron_ici": "Blessure de la voix : tu entends tout mais ta voix est inaudible",
-        "stage": "Écouter ET être entendu — l'équilibre du son",
-    },
-    "Dhanishtha": {
-        "regent": "Mars", "element": "Feu",
-        "rom_theme": "Abondance matérielle comme identité, rythme compulsif, richesse comme armure",
-        "ram_activation": "Chiron ici : blessure du rythme — désynchronisé du temps naturel",
-        "ketu_ici": "ROM du prospère : vies de marchands riches, musiciens, maîtres du rythme",
-        "rahu_ici": "Dharma d'une abondance partagée et rythmée",
-        "saturne_ici": "Karma de l'accumulation — apprendre à circuler, donner, recevoir",
-        "chiron_ici": "Blessure du tempo : tu cours dans un rythme qui n'est pas le tien",
-        "stage": "Trouver son propre battement et y inviter les autres",
-    },
-    "Shatabhisha": {
-        "regent": "Rahu", "element": "Eau",
-        "rom_theme": "Guérisseur solitaire, secret comme protection, connaissance sans partage",
-        "ram_activation": "Chiron ici : blessure du guérisseur — soigner les autres pour éviter d'être soigné",
-        "ketu_ici": "ROM du médecin mystique : vies de guérisseurs solitaires, chamans, alchimistes",
-        "rahu_ici": "Dharma de partager la guérison — créer une école, non garder le secret",
-        "saturne_ici": "Karma de l'isolement du sage — la solitude choisie vs subie",
-        "chiron_ici": "Blessure du soignant non soigné : tu sais guérir tout sauf toi-même",
-        "stage": "Recevoir la guérison que tu offres aux autres",
-    },
-    "Purva Bhadrapada": {
-        "regent": "Jupiter", "element": "Feu",
-        "rom_theme": "Ascèse punitive, sacrifier le corps pour l'esprit, dualité non intégrée",
-        "ram_activation": "Chiron ici : blessure du dualisme — le feu intérieur mal canalisé",
-        "ketu_ici": "ROM de l'ascète : vies de moines, fakirs, chercheurs de transcendance radicale",
-        "rahu_ici": "Dharma d'intégrer le spirituel ET le matériel",
-        "saturne_ici": "Karma de la pénitence — distinguer discipline et auto-punition",
-        "chiron_ici": "Blessure du feu mal dirigé : ton intensité te consume avant les obstacles",
-        "stage": "Être le pont entre les deux mondes, non le martyr de l'un",
-    },
-    "Uttara Bhadrapada": {
-        "regent": "Saturne", "element": "Eau",
-        "rom_theme": "Sagesse de l'abîme, profondeur sans retour, immobilité comme refuge",
-        "ram_activation": "Chiron ici : blessure de la profondeur — trop voir, trop savoir, trop lourd",
-        "ketu_ici": "ROM du sage des eaux profondes : vies de mystiques, ermites, voyants",
-        "rahu_ici": "Dharma de remonter à la surface et d'enseigner ce qu'on a vu",
-        "saturne_ici": "Karma de la sagesse ensevelie — partager est leçon karmique",
-        "chiron_ici": "Blessure de la vision : tu vois tout mais tu te sens incompris de tous",
-        "stage": "Témoigner de la profondeur sans s'y noyer",
-    },
-    "Revati": {
-        "regent": "Mercure", "element": "Eau",
-        "rom_theme": "Fin de cycle, nostalgie chronique, attachement au paradis perdu",
-        "ram_activation": "Chiron ici : blessure de la clôture — deuil d'un monde révolu",
-        "ketu_ici": "ROM de la fin : vies de gardiens des fins de cycles, passeurs d'âmes",
-        "rahu_ici": "Dharma d'inaugurer un nouveau cycle sans regarder en arrière",
-        "saturne_ici": "Karma du deuil — intégrer la fin pour permettre le début",
-        "chiron_ici": "Blessure de l'adieu : tu ne sais pas clôturer sans te perdre",
-        "stage": "Bénir ce qui fut et traverser le seuil",
-    },
-}
+# ══════════════════════════════════════════════════════════════════════════════
+# PROMPT SYSTÈME — siderealAstro13
+# ══════════════════════════════════════════════════════════════════════════════
 
-
-def _get_nakshatra_context(planet_name: str, nakshatra: str, is_transit: bool = True) -> str:
-    """Retourne le contexte karmique d'un nakshatra pour une planète donnée."""
-    data = NAKSHATRA_KARMA.get(nakshatra)
-    if not data:
-        return ""
-
-    context = f"[{nakshatra} — Régent: {data['regent']}]\n"
-    context += f"  Thème ROM: {data['rom_theme']}\n"
-
-    p = planet_name.split()[0].lower()
-
-    if "ketu" in p or "nœud sud" in p:
-        context += f"  Ketu ici: {data['ketu_ici']}\n"
-    elif "rahu" in p or "nœud nord" in p:
-        context += f"  Rahu ici: {data['rahu_ici']}\n"
-    elif "saturne" in p:
-        context += f"  Saturne ici: {data['saturne_ici']}\n"
-    elif "chiron" in p:
-        context += f"  Chiron ici: {data['chiron_ici']}\n"
-    else:
-        context += f"  RAM activation: {data['ram_activation']}\n"
-
-    context += f"  Stage: {data['stage']}\n"
-
-    if is_transit and "transit_note" in data:
-        context += f"  ⚡ ACTUALITÉ: {data['transit_note']}\n"
-
-    return context
-
-
-# ── Détection des cycles nodaux ───────────────────────────────────────────────
-def _detect_nodal_cycles(chart_data: dict, natal: dict) -> str:
-    cycles = []
-
-    transits       = chart_data.get("transits", {})
-    natal_planets  = chart_data.get("natal", {})
-
-    nn_transit     = transits.get("Nœud Nord ☊", {})
-    nn_transit_nak = nn_transit.get("nakshatra", "")
-
-    aspects = chart_data.get("aspects", [])
-    for asp in aspects:
-        t_planet = asp.get("transit_planet", "")
-        n_planet = asp.get("natal_planet", "")
-        asp_type = asp.get("aspect", "")
-        orb      = asp.get("orb", 99)
-
-        if "Nœud Nord ☊" in t_planet and "Nœud Nord ☊" in n_planet:
-            if "Conjonction" in asp_type and orb <= 3:
-                cycles.append(
-                    f"🔄 RETOUR NODAL ACTIF (orbe {orb}°) — Savepoint karmique majeur.\n"
-                    f"   Cycle ~18.6 ans : REBOOT complet du cycle ROM/DHARMA.\n"
-                    f"   Ce moment exige un choix de conscience radical pour éviter la boucle ROM.\n"
-                    f"   Nœud Nord transit en {nn_transit_nak} → retour au point de départ du dharma."
-                )
-            elif "Carré" in asp_type and orb <= 3:
-                cycles.append(
-                    f"⚡ CARRÉ NODAL ACTIF (orbe {orb}°) — Checkpoint karmique intermédiaire.\n"
-                    f"   Cycle ~9.3 ans : tension entre BOUCLE ROM et mise à jour du dharma.\n"
-                    f"   Un choix de conscience majeur est requis maintenant — pas demain.\n"
-                    f"   Nœud Nord transit en {nn_transit_nak} forme carré au Nœud natal."
-                )
-
-        if "Ketu" in t_planet or "Nœud Sud" in t_planet:
-            if "Nœud Nord ☊" in n_planet and "Conjonction" in asp_type and orb <= 3:
-                cycles.append(
-                    f"☋ KETU TRANSIT SUR NŒUD NORD NATAL — Inversion karmique.\n"
-                    f"   Le ROM engloutit temporairement le dharma.\n"
-                    f"   Risque de régression dans les patterns ancestraux.\n"
-                    f"   Alternative : utiliser la mémoire ancestrale comme sagesse, non comme prison."
-                )
-
-    return "\n".join(cycles) if cycles else ""
-
-
-# ── Construction des nakshatras actifs ───────────────────────────────────────
-def _build_nakshatra_context(chart_data: dict) -> str:
-    transits = chart_data.get("transits", {})
-    lines    = ["═══ NAKSHATRAS DES PLANÈTES EN TRANSIT (contexte karmique) ═══"]
-
-    priority_planets = [
-        "Nœud Sud ☋", "Nœud Nord ☊", "Chiron ⚷",
-        "Saturne ♄", "Lilith ⚸", "Jupiter ♃",
-        "Pluton ♇", "Uranus ♅",
-    ]
-
-    found = False
-    for pname in priority_planets:
-        pdata = transits.get(pname)
-        if not pdata:
-            continue
-        nak  = pdata.get("nakshatra")
-        pada = pdata.get("pada")
-        if not nak:
-            continue
-        retro = " ℞" if pdata.get("retrograde") else ""
-        lines.append(f"\n{pname}{retro} en {nak} (Pada {pada}) :")
-        ctx = _get_nakshatra_context(pname, nak, is_transit=True)
-        if ctx:
-            lines.append(ctx)
-            found = True
-
-    if not found:
-        return ""
-
-    return "\n".join(lines)
-
-
-# ── Positions planétaires brutes ──────────────────────────────────────────────
-def _build_positions_summary(chart_data: dict) -> str:
-    natal    = chart_data.get("natal", {})
-    transits = chart_data.get("transits", {})
-
-    lines = ["═══ POSITIONS PLANÉTAIRES ═══"]
-
-    lines.append("\nNATAL :")
-    key_natal = [
-        "Soleil ☀", "Lune ☽", "Nœud Nord ☊", "Nœud Sud ☋",
-        "Chiron ⚷", "Lilith ⚸", "Saturne ♄", "Jupiter ♃",
-        "ASC ↑", "MC ↑",
-    ]
-    for k in key_natal:
-        p = natal.get(k)
-        if p:
-            nak    = p.get("nakshatra", "")
-            pada   = p.get("pada", "")
-            retro  = " ℞" if p.get("retrograde") else ""
-            nak_str = f" | {nak} Pd{pada}" if nak else ""
-            lines.append(f"  {k}{retro} : {p['display']}{nak_str}")
-
-    lines.append("\nTRANSIT :")
-    key_transit = [
-        "Soleil ☀", "Lune ☽", "Nœud Nord ☊", "Nœud Sud ☋",
-        "Chiron ⚷", "Lilith ⚸", "Saturne ♄", "Jupiter ♃",
-        "Mars ♂", "Vénus ♀",
-    ]
-    for k in key_transit:
-        p = transits.get(k)
-        if p:
-            nak    = p.get("nakshatra", "")
-            pada   = p.get("pada", "")
-            retro  = " ℞" if p.get("retrograde") else ""
-            nak_str = f" | {nak} Pd{pada}" if nak else ""
-            lines.append(f"  {k}{retro} : {p['display']}{nak_str}")
-
-    return "\n".join(lines)
-
-
-# ── Prompt système dynamique ──────────────────────────────────────────────────
 def _build_system_prompt(user: dict) -> str:
-    name = user.get("name", "l'utilisateur")
-    return f"""Tu es @siderealAstro13, maître en astrologie védique karmique (Jyotish sidéral).
-Tu analyses le Gochara (transits) du thème natal de {name} avec une lecture d'âme profonde.
+    """
+    Construit le prompt système complet, personnalisé pour l'utilisateur.
+    user = dict issu de session["profile"] : name, birth_*, natal_*, chandra_lagna, etc.
+    """
 
-═══ DOCTRINE @siderealAstro13 — CADRE RAM / ROM / STAGE ═══
+    name      = user.get("name", "l'utilisateur")
+    cl_sign   = user.get("chandra_lagna_sign", "")      # ex: "Bélier"
+    cl_deg    = user.get("chandra_lagna_deg", "")        # ex: "27°30'"
+    ketu_sign = user.get("ketu_sign", "")                # ex: "Vierge"
+    ketu_h    = user.get("ketu_house", "")               # ex: "6"
+    rahu_sign = user.get("rahu_sign", "")                # ex: "Poissons"
+    rahu_h    = user.get("rahu_house", "")               # ex: "12"
+    pv_sign   = user.get("porte_visible_sign", "")       # ex: "Gémeaux"
+    pv_deg    = user.get("porte_visible_deg", "")        # ex: "13°15'"
+    pv_h      = user.get("porte_visible_house", "")      # ex: "3"
+    pi_sign   = user.get("porte_invisible_sign", "")     # ex: "Sagittaire"
+    pi_deg    = user.get("porte_invisible_deg", "")      # ex: "13°15'"
+    pi_h      = user.get("porte_invisible_house", "")    # ex: "9"
+    chiron_sign = user.get("chiron_sign", "")            # ex: "Poissons"
+    chiron_h    = user.get("chiron_house", "")           # ex: "12"
+    lilith_sign = user.get("lilith_sign", "")            # ex: "Scorpion"
+    lilith_h    = user.get("lilith_house", "")           # ex: "8"
+    saturn_sign = user.get("saturn_sign", "")
+    saturn_h    = user.get("saturn_house", "")
+    jupiter_sign = user.get("jupiter_sign", "")
+    jupiter_h    = user.get("jupiter_house", "")
 
-ROM (Nœud Sud ☋ / Ketu) — Mémoire karmique fixe des vies antérieures.
-  Sagesse cristallisée, patterns répétitifs, boucles automatiques.
-  Risque : s'y réfugier plutôt qu'évoluer.
+    # Bloc natal si disponible (fallback gracieux si champs absents)
+    natal_bloc = ""
+    if cl_sign:
+        natal_bloc = f"""
+## THÈME NATAL DE {name.upper()} (Chandra Lagna sidéral DK)
 
-RAM (Chiron ⚷) — Porte Invisible. Traitement actif des blessures et patterns actuels.
-  Là où la douleur devient mission. Interface entre ROM et Stage.
-  Risque : rester bloqué dans la blessure sans la transmuter.
+- **Identité (H1)** : {cl_sign}
+- **Mémoire karmique — Ketu** : Maison {ketu_h}  → schémas de moindre résistance, talon d'Achille
+- **Dharma — Rahu** : Maison {rahu_h}  → direction de l'âme, but de l'incarnation
+- **Voie de libération (Porte Visible)** : Maison {pv_h}  → lieu de guérison consciente, sortie du karma
+- **Prison inconsciente (Porte Invisible)** : Maison {pi_h}  → lieu du refoulement, automatismes défensifs
+- **Blessure originelle — Chiron** : Maison {chiron_h}  → traitement actif de la mémoire blessée
+- **Épreuve karmique — Lilith** : Maison {lilith_h}  → test de vérité radicale, déclencheur du Dharma
+- **Saturne** : Maison {saturn_h}  → architecte des contraintes, dettes karmiques
+- **Jupiter** : Maison {jupiter_h}  → porteur de cadeaux, expansion du Dharma
 
-STAGE — Scène du moment présent où karma et dharma s'intersectent.
-  C'est ici que {name} agit, choisit, incarne.
+Utilise TOUJOURS ce thème natal comme référence de base pour toute lecture de transit.
+"""
 
-LILITH ⚸ — Épreuve karmique. Test entre les pôles ROM et RAM.
-  Ce qui résiste à l'intégration. La puissance ombre à réintégrer.
+    return f"""Tu es l'intelligence astrologique **siderealAstro13**.
 
-PORTE VISIBLE (Saturne ♄ / Uranus ♅) — Structure karmique manifeste, leçons tangibles.
-PORTE INVISIBLE (Chiron ⚷) — Passage intérieur, transmutation subtile.
+Ton expertise : Jyotish sidéral (ayanamsa Centre Galactique Djwhal Khul), système de maisons Chandra Lagna, Axe des Portes (Catherine Castanier).
 
-═══ CYCLES NODAUX — SAVEPOINTS KARMIQUES ═══
-Retour Nodal (~18.6 ans) :
-  Reboot COMPLET du cycle ROM/DHARMA.
-  Moment où un choix de conscience majeur est exigé pour éviter la boucle ROM.
-  Signal : Nœud Nord transit revient sur le Nœud Nord natal.
+Tu t'adresses à **{name}** en tutoiement direct, style précis et transformateur.
+{natal_bloc}
+---
 
-Carré Nodal (~9.3 ans) :
-  Checkpoint intermédiaire — tension maximale entre boucle et mise à jour.
-  La résistance au changement coûte cher ici.
-  Signal : Nœud Nord transit forme carré aux Nœuds natals.
+## DOCTRINE FONDAMENTALE
 
-Demi-Retour Nodal (~9.3 ans) :
-  Ketu transit sur Nœud Nord natal — le ROM teste la solidité du dharma.
-  Moment de bascule : régression ou intégration.
+### 1. Architecture mémorielle — Axe Nodal
 
-═══ CONSCIENCE DU NAKSHATRA ═══
-Chaque planète en transit active un nakshatra précis. Le nakshatra module
-COMMENT la planète exprime son énergie. Ketu en Magha n'est pas le même
-Ketu qu'en Mula. Saturne en Pushya n'est pas le même Saturne qu'en Anuradha.
-Toujours nommer et intégrer le nakshatra dans la lecture karmique.
+**Mémoire karmique (Ketu)** = talon d'Achille et sable mouvant. Habitudes accumulées, événements non résolus de toutes les vies antérieures. S'y attarder = figer l'âme dans ses schémas de moindre résistance.
 
-═══ ZOOM TEMPOREL — LECTURE MULTI-ÉCHELLE ═══
-Selon la question, tu analyses à l'échelle appropriée :
+**Dharma (Rahu)** = but spirituel et leçon majeure de l'incarnation. Direction vers laquelle l'âme est magnétiquement attirée. L'objectif est de fusionner harmonieusement les deux pôles.
 
-COURT TERME (1-30 jours) :
-  Lune, Soleil, Mars, Mercure, Vénus — transits rapides.
-  Aspect du moment, fenêtre d'activation précise.
+**Régents karmiques** : les maîtres des maisons de Ketu et Rahu sont les leviers d'action concrets.
 
-MOYEN TERME (1-6 mois) :
-  Jupiter, Saturne, Nœuds, Chiron — transits de saison.
+### 2. Axe des Portes (Saturne/Uranus — Castanier)
 
-LONG TERME (1 an et plus) :
-  Nœuds (18 mois par signe), Saturne (2.5 ans), Chiron (cycles 50 ans).
-  Cycles de vie, Savepoints nodaux.
+**Voie de libération (Porte Visible)** = mi-point du petit arc Saturne→Uranus. Lieu de guérison consciente, point où l'originalité libératrice s'incarne de manière structurée. C'est la sortie du karma.
 
-Si la question ne précise pas d'horizon : commence par le zoom le plus
-pertinent selon les aspects actifs, puis élargis si nécessaire.
+**Prison inconsciente (Porte Invisible)** = opposée exacte de la Voie de libération. Mémoires karmiques lourdes, structures rigides, automatismes défensifs. L'individu y explique au lieu d'être.
 
-═══ PLANÈTES VÉDIQUES ═══
-RAHU ☊ — désirs karmiques, leçons d'éveil, surexpansion possible
-KETU ☋ — ROM, sagesse antérieure, dissolution, spiritualisation
-SATURNE ♄ — Porte Visible, karma, discipline, dettes d'âme
-CHIRON ⚷ — RAM, Porte Invisible, blessure → mission
-LILITH ⚸ — Épreuve karmique, ombre à intégrer
-SOLEIL ☀ — dharma solaire, Âtman, autorité intérieure
-LUNE ☽ — manas, mémoire émotionnelle, karma ancestral
-JUPITER ♃ — grâce divine, guru, expansion de conscience
-MARS ♂ — karma d'action, courage ou violence
-VÉNUS ♀ — karma relationnel, attachements subtils
-MERCURE ☿ — karma intellectuel, parole créatrice
-ASC ↑ (Chandra Lagna) — corps d'incarnation, 1ère maison
-MC ↑ — vocation karmique, mission visible
+**Maître de la Voie de libération** = véhicule de guérison — l'activer = avancer.
+**Maître de la Prison inconsciente** = polluant potentiel — en rétrograde, incite à rester dans la blessure.
 
-═══ ASPECTS ═══
-Conjonction ☌ — fusion karmique intense, activation maximale
-Opposition ☍ — miroir karmique, tension polaire à intégrer
-Trigone △ — grâce, talents d'âme qui se manifestent
-Carré □ — friction évolutive, action requise
-Sextile ✶ — opportunité subtile, coopération d'âme
+### 3. Dynamiseurs de conscience
 
-═══ STRUCTURE DE LECTURE (4 étapes) ═══
-1. Diagnostic ROM — Pattern karmique actif + nakshatra + durée du transit
-2. Diagnostic RAM — Blessure Chiron en traitement + nakshatra actif
-3. Épreuve karmique Lilith — Quel est le test du moment ?
-4. Alternative de Conscience + mise en scène sur le Stage
+**Chiron (Blessure originelle)** = clé pour déverrouiller l'inconscient. Identifie la blessure centrale de l'incarnation et permet sa transmutation par l'auto-pardon.
 
-═══ FORMAT ═══
-Réponds en français. Parle directement à {name} (tutoiement naturel).
-Synthèse : 700-900 mots, narrative poétique mais techniquement précise.
-  → Nomme toujours le nakshatra et son impact spécifique.
-  → Si cycle nodal actif, le traiter en priorité absolue.
-  → Adapte le zoom temporel à la durée réelle des transits.
-  → Développe CHAQUE étape des 4 sections — ne tronque pas.
-  → Termine par une Alternative de Conscience actionnable, concrète, incarnée.
-Ne liste pas mécaniquement — tisse une lecture d'âme cohérente."""
+**Lilith (Épreuve karmique)** = force de vérité radicale, refus de tout compromis. Rend le confinement dans la Prison inconsciente insupportable, propulse vers le Dharma.
+
+### 4. Seigneurs de l'âme
+
+**Saturne** = architecte des contraintes, dettes karmiques, cadre pour "atterrir" dans la vie présente.
+**Jupiter** = porteur de cadeaux karmiques, talents hérités, opportunités d'expansion.
+**Maison 12** = réservoir ultime du subconscient, archive des vies antérieures.
+
+### 5. Cycles Nodaux — Savepoints karmiques
+
+**Retour nodal (~18.6 ans)** = reboot complet de la mémoire karmique et du Dharma. Moment de choix majeur.
+**Carré nodal (~9.3 ans)** = checkpoint intermédiaire. Tension entre la boucle et la mise à jour. Fenêtre d'ajustement conscient.
+
+Identifie toujours si l'utilisateur traverse un cycle nodal.
+
+---
+
+## PROTOCOLE D'ANALYSE EN 4 ÉTAPES
+
+### Étape 1 — La mémoire karmique (Où est le piège ?)
+Identifie quels transits activent la mémoire karmique ou renforcent les schémas de moindre résistance.
+Décris ce que l'âme FAIT quand elle est dans ce piège — en langage narratif, sans jargon technique.
+
+### Étape 2 — La blessure en traitement (Qu'est-ce qui se transforme ?)
+Identifie les transits qui activent Chiron ou l'Axe des Portes.
+Décris le mouvement en cours — la Prison inconsciente est-elle sous pression ? La Voie de libération est-elle activée ?
+
+### Étape 3 — L'épreuve karmique (Quel est le test ?)
+Identifie le rôle de Lilith dans les transits actuels.
+Qu'est-ce que l'épreuve rend insupportable ? Vers quoi elle propulse ?
+Dans cette section uniquement, tu peux nommer les planètes et le type d'aspect (ex : "Lilith en transit face à Lilith natal") — c'est la seule section où un peu de technique est bienvenue pour créer le désir d'aller voir sa carte.
+
+### Étape 4 — Alternative de Conscience + mise en scène
+Formule une bascule intérieure concrète — pas un conseil de vie, une action de conscience.
+- Nomme ce que l'âme doit cesser (côté Prison inconsciente / mémoire karmique)
+- Nomme ce que l'âme doit activer (côté Voie de libération / Dharma)
+- Centre sur la maison de la Voie de libération comme lieu de manifestation juste
+- Termine par UNE SEULE PHRASE DE CONCLUSION, directe et actionnable, sans jargon.
+  Cette phrase résume l'essentiel en une ligne — elle doit pouvoir servir d'accroche d'email.
+  Format : "[Verbe d'action] + [ce que ça change]" — ex : "Transmets ce que tu sais, et tu cesses de le porter seul."
+
+---
+
+## NAKSHATRA — COUCHE DE PRÉCISION
+
+Si les données nakshatra sont disponibles, traduis leurs thèmes en langage narratif :
+- Nakshatra de Ketu = nature de la mémoire karmique
+- Nakshatra de Rahu = nature du Dharma
+- Nakshatra de Chiron = type de blessure originelle
+- Nakshatra de Lilith = modalité de l'épreuve
+Pas de nom sanskrit brut dans la synthèse — traduis en thème vécu.
+
+---
+
+## RÈGLES DE STYLE ABSOLUES
+
+**INTERDIT dans toute la synthèse :**
+ROM, RAM, Nœud Sud, Nœud Nord, PV, PI, orbe, degrés, signes zodiacaux (Gémeaux, Vierge, etc.)
+
+**AUTORISÉ :**
+Mémoire karmique, Ketu, Rahu, Dharma, Chiron, Lilith, Saturne, Jupiter, Voie de libération,
+Prison inconsciente, Blessure originelle, Épreuve karmique, numéros de maison (H3, H9, etc.)
+Dans la section épreuve uniquement : noms de planètes + type d'aspect
+
+**Format synthèse :**
+- 300-400 mots, 4 sections titrées, narrative tissée — pas de liste mécanique
+- Terminer par UNE phrase de conclusion seule (accroche email), directe et actionnable
+- Ne jamais tronquer
+
+**Format chat :**
+- 120-200 mots, ciblé, terminer sur l'Alternative de Conscience ou une question vers le Stage
+
+**Toujours :**
+- Tutoiement direct avec {name}
+- Lecture chirurgicale : nommer l'ombre sans ménagement, ouvrir la porte sans angélisme
+- Pas de formules creuses ("les étoiles te disent", "l'univers t'envoie")
+"""
 
 
-# ── Helpers ───────────────────────────────────────────────────────────────────
-def _aspects_to_text(aspects: list) -> str:
+# ══════════════════════════════════════════════════════════════════════════════
+# HELPERS
+# ══════════════════════════════════════════════════════════════════════════════
+
+def _aspects_to_text(aspects: list, max_aspects: int = 20) -> str:
+    """Formate la liste des aspects transit→natal pour le prompt."""
     if not aspects:
         return "Aucun aspect actif dans l'orbe de 3°."
     lines = []
-    for a in aspects[:20]:
+    for a in aspects[:max_aspects]:
         retro = " ℞" if a.get("retrograde") else ""
-        t_nak = f" [{a['transit_nak']}]" if a.get("transit_nak") else ""
-        n_nak = f" [{a['natal_nak']}]" if a.get("natal_nak") else ""
+        t_nak = f" [{a['transit_nakshatra']}]" if a.get("transit_nakshatra") else ""
+        n_nak = f" [{a['natal_nakshatra']}]"   if a.get("natal_nakshatra")   else ""
         lines.append(
-            f"Transit {a['transit_planet']}{retro} ({a['transit_display']}{t_nak}) "
-            f"{a['aspect']} Natal {a['natal_planet']} ({a['natal_display']}{n_nak}) "
+            f"T.{a['transit_planet']}{retro} ({a.get('transit_display','')}{t_nak}) "
+            f"{a['aspect']} "
+            f"N.{a['natal_planet']} ({a.get('natal_display','')}{n_nak}) "
             f"[orbe {a['orb']}°]"
         )
     return "\n".join(lines)
 
 
-# ── Synthèse automatique ──────────────────────────────────────────────────────
-def get_synthesis(chart_data: dict, user: dict) -> str:
-    name         = user.get("name", "l'utilisateur")
-    aspects_text = _aspects_to_text(chart_data.get("aspects", []))
-    date         = chart_data.get("transit_date", "")
-    time         = chart_data.get("transit_time", "")
+def _build_natal_context(user: dict) -> str:
+    """Bloc de contexte natal compact pour le prompt de synthèse."""
+    lines = []
+    fields = [
+        ("Chandra Lagna H1",       "chandra_lagna_sign", "chandra_lagna_deg"),
+        ("Mémoire karmique (Ketu)","ketu_sign",           "ketu_house"),
+        ("Dharma (Rahu)",          "rahu_sign",           "rahu_house"),
+        ("Voie de libération",     "porte_visible_sign",  "porte_visible_house"),
+        ("Prison inconsciente",    "porte_invisible_sign","porte_invisible_house"),
+        ("Blessure originelle (Chiron)", "chiron_sign",   "chiron_house"),
+        ("Épreuve karmique (Lilith)",    "lilith_sign",   "lilith_house"),
+        ("Saturne",                "saturn_sign",         "saturn_house"),
+        ("Jupiter",                "jupiter_sign",        "jupiter_house"),
+    ]
+    for label, key1, key2 in fields:
+        v1 = user.get(key1, "")
+        v2 = user.get(key2, "")
+        if v1:
+            lines.append(f"  {label}: {v1} {'H'+str(v2) if v2 else ''}")
+    return "\n".join(lines) if lines else ""
 
-    positions_ctx = _build_positions_summary(chart_data)
-    nakshatra_ctx = _build_nakshatra_context(chart_data)
-    nodal_ctx     = _detect_nodal_cycles(chart_data, user)
 
-    nodal_section = ""
-    if nodal_ctx:
-        nodal_section = f"\n\n⚡ CYCLES NODAUX ACTIFS :\n{nodal_ctx}"
+def _detect_nodal_cycle(user: dict, chart_data: dict) -> str:
+    """Détecte si un cycle nodal est actif et retourne un commentaire."""
+    # Utilise la distance entre Nœud Nord transit et Nœud Nord natal
+    nn_transit = chart_data.get("transit_positions", {}).get("true_node_lon")
+    nn_natal   = chart_data.get("natal_positions", {}).get("true_node_lon")
+    if nn_transit is None or nn_natal is None:
+        return ""
+    diff = abs(nn_transit - nn_natal) % 360
+    if diff > 180:
+        diff = 360 - diff
+    if diff <= 10:
+        return "\n⚡ CYCLE NODAL ACTIF : Retour nodal (~18.6 ans). Reboot complet de la mémoire karmique et du Dharma. Savepoint majeur — moment de choix irréversible."
+    if abs(diff - 90) <= 10:
+        return "\n⚡ CYCLE NODAL ACTIF : Carré nodal (~9.3 ans). Checkpoint intermédiaire. Tension entre la boucle karmique et la mise à jour. Fenêtre d'ajustement conscient ouverte."
+    if abs(diff - 180) <= 10:
+        return "\n⚡ CYCLE NODAL ACTIF : Opposition nodale. Tension maximale entre mémoire karmique et Dharma. Basculement possible maintenant."
+    return ""
 
-    prompt = (
-        f"Analyse karmique védique des transits de {name} — {date} à {time}.\n\n"
-        f"{positions_ctx}\n\n"
-        f"Aspects actifs (orbe < 3°) :\n{aspects_text}\n\n"
-        f"{nakshatra_ctx}"
-        f"{nodal_section}\n\n"
-        f"Applique le cadre RAM/ROM/Stage de @siderealAstro13 :\n"
-        f"1. Quel pattern ROM (Ketu/Nœud Sud) est activé — nakshatra, durée, profondeur ?\n"
-        f"2. Quelle blessure RAM (Chiron) est en traitement — nakshatra actif, comment se manifeste-t-elle ?\n"
-        f"3. Quelle est l'Épreuve karmique Lilith du moment — quelle ombre résiste ?\n"
-        f"4. Quelle Alternative de Conscience concrète permet à {name} de se mettre en scène sur son Stage ?\n"
-        f"Intègre le zoom temporel approprié. Développe CHAQUE section complètement sans tronquer."
-    )
+
+# ══════════════════════════════════════════════════════════════════════════════
+# SYNTHÈSE AUTOMATIQUE
+# ══════════════════════════════════════════════════════════════════════════════
+
+def get_synthesis(chart_data: dict, user: dict = None) -> str:
+    """
+    Génère la synthèse karmique automatique (onglet Gochara).
+    chart_data : dict retourné par calculate_transits()
+    user       : dict du profil utilisateur (session["profile"])
+    """
+    if user is None:
+        user = {}
+
+    aspects_text  = _aspects_to_text(chart_data.get("aspects", []))
+    natal_context = _build_natal_context(user)
+    nodal_cycle   = _detect_nodal_cycle(user, chart_data)
+    date          = chart_data.get("transit_date", "")
+    time          = chart_data.get("transit_time", "")
+    name          = user.get("name", "l'utilisateur")
+
+    natal_bloc = f"\nThème natal de référence :\n{natal_context}\n" if natal_context else ""
+    nodal_bloc = nodal_cycle if nodal_cycle else ""
+
+    prompt = f"""Analyse siderealAstro13 des transits de {name} — {date} à {time}.
+{natal_bloc}{nodal_bloc}
+
+Aspects actifs :
+{aspects_text}
+
+Applique le protocole en 4 étapes :
+
+1. LA MÉMOIRE KARMIQUE — Quels transits activent les schémas de moindre résistance ? Décris ce que l'âme fait quand elle est dans ce piège, en langage narratif direct.
+
+2. LA BLESSURE EN TRAITEMENT — Quels transits activent Chiron ou l'Axe des Portes ? La Prison inconsciente est-elle sous pression ? La Voie de libération est-elle activée ? Décris le mouvement, pas la mécanique.
+
+3. L'ÉPREUVE KARMIQUE — Quel est le test de Lilith en cours ? Qu'est-ce qu'il rend insupportable ? Vers quoi il propulse ? Tu peux nommer ici les planètes et aspects pour créer le désir d'aller voir la carte.
+
+4. ALTERNATIVE DE CONSCIENCE + MISE EN SCÈNE — Formule la bascule intérieure. Ce que l'âme doit cesser. Ce qu'elle doit activer. La maison de la Voie de libération comme lieu de manifestation. Termine par UNE seule phrase directe et actionnable qui peut servir d'accroche email.
+
+Développe chaque section en lecture d'âme cohérente, narrative, sans liste mécanique. Minimum 300 mots. Ne pas tronquer."""
 
     msg = _get_client().messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=1800,
+        max_tokens=1500,
         system=_build_system_prompt(user),
         messages=[{"role": "user", "content": prompt}],
     )
     return msg.content[0].text
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CHAT — Dialogue Karmique
+# ══════════════════════════════════════════════════════════════════════════════
+
+def chat_response(message: str, history: list, chart_data: dict, user: dict = None) -> str:
+    """
+    Gère une réponse de chat dans le Dialogue Karmique.
+    message    : message de l'utilisateur
+    history    : liste de dicts {"role": "user"|"assistant", "content": "..."}
+    chart_data : dict du calcul en cours
+    user       : dict du profil utilisateur
+    """
+    if user is None:
+        user = {}
+
+    name = user.get("name", "l'utilisateur")
+
+    # Contexte Gochara compact
+    chart_context = build_chart_context(chart_data, user)
+
+    messages = []
+
+    # Injection du contexte natal + Gochara en amorce
+    if chart_context:
+        messages.append({
+            "role": "user",
+            "content": f"Contexte Gochara en cours pour {name} :\n{chart_context}"
+        })
+        messages.append({
+            "role": "assistant",
+            "content": (
+                f"Thème de {name} intégré. "
+                "Mémoire karmique, Blessure, Épreuve, Voie de libération — configuration active. "
+                "Qu'est-ce que tu veux explorer ?"
+            )
+        })
+
+    # Historique de conversation (limité à 12 derniers tours)
+    for h in history[-12:]:
+        messages.append(h)
+
+    # Message actuel
+    messages.append({"role": "user", "content": message})
+
+    msg = _get_client().messages.create(
+        model="claude-sonnet-4-6",
+        max_tokens=700,
+        system=_build_system_prompt(user),
+        messages=messages,
+    )
+    return msg.content[0].text
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CONTEXTE RÉSUMÉ (pour injection chat)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def build_chart_context(chart_data: dict, user: dict = None) -> str:
+    """
+    Construit un résumé compact du Gochara pour l'injection en amorce du chat.
+    """
+    if user is None:
+        user = {}
+
+    aspects = chart_data.get("aspects", [])
+    name    = user.get("name", "l'utilisateur")
+    date    = chart_data.get("transit_date", "")
+    time    = chart_data.get("transit_time", "")
+
+    natal_ctx = _build_natal_context(user)
+    natal_bloc = f"\nThème natal :\n{natal_ctx}" if natal_ctx else ""
+
+    if not aspects:
+        return f"Gochara de {name} — {date} {time} — aucun aspect actif.{natal_bloc}"
+
+    lines = [f"Gochara de {name} — {date} à {time} :"]
+    for a in aspects[:12]:
+        retro = " ℞" if a.get("retrograde") else ""
+        lines.append(
+            f"  • T.{a['transit_planet']}{retro} {a['aspect']} N.{a['natal_planet']} "
+            f"(orbe {a['orb']}°)"
+        )
+
+    return "\n".join(lines) + natal_bloc
