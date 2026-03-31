@@ -410,6 +410,15 @@ input.sunken, select.sunken {
         </div>
       </div>
 
+        <!-- ── Bouton audio ── -->
+       <button id="btnAudio" onclick="toggleAudio()" style="margin-top:8px;">
+  ▶ Écouter
+</button>
+<input type="range" id="speedSlider" min="0.6" max="1.8" step="0.1" value="1.0"
+  style="width:100px;vertical-align:middle;" 
+  oninput="document.getElementById('speedVal').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
+<span id="speedVal" style="font-size:11px;">1.0x</span>
+       
       <!-- ── Tab : Carte Karmique ── -->
       <div class="tab-panel" id="tab-carte">
 
@@ -858,6 +867,29 @@ function renderQuadrantLists(aspects) {
         : list.map(a => `<li>${escHtml(a.transit_planet)} ${escHtml(a.aspect)} ${escHtml(a.natal_planet)}</li>`).join("")
       }</ul>
     </div>`).join("");
+}
+   let _synth = window.speechSynthesis;
+let _chunks = [], _ci = 0, _playing = false;
+
+function toggleAudio() {
+  if (_playing) { _synth.cancel(); _playing = false; document.getElementById('btnAudio').textContent = '▶ Écouter'; return; }
+  let raw = document.getElementById('synthesisDiv').innerText || '';
+  if (!raw.trim()) { alert('Lance d\'abord un calcul.'); return; }
+  raw = raw.replace(/#{1,3}\s*/g,'').replace(/\*\*/g,'').replace(/---/g,'').trim();
+  _chunks = raw.match(/[^.!?]+[.!?]+/g) || [raw];
+  _ci = 0; _playing = true;
+  document.getElementById('btnAudio').textContent = '■ Stop';
+  _speakNext();
+}
+function _speakNext() {
+  if (_ci >= _chunks.length || !_playing) { _playing = false; document.getElementById('btnAudio').textContent = '▶ Écouter'; return; }
+  let u = new SpeechSynthesisUtterance(_chunks[_ci]);
+  u.lang = 'fr-FR';
+  u.rate = parseFloat(document.getElementById('speedSlider').value);
+  let v = _synth.getVoices().filter(v => v.lang.startsWith('fr'));
+  if (v.length) u.voice = v[0];
+  u.onend = () => { _ci++; _speakNext(); };
+  _synth.speak(u);
 }
 
 /* ══ INIT ════════════════════════════════════════════════════════ */
