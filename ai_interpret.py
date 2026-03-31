@@ -193,7 +193,7 @@ def _detect_nodal_cycle(user: dict, chart_data: dict) -> str:
 # SYNTHÈSE AUTOMATIQUE
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_synthesis(chart_data: dict, user: dict = None) -> str:
+def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr") -> str:
     """
     Génère la synthèse karmique automatique (onglet Gochara).
     chart_data : dict retourné par calculate_transits()
