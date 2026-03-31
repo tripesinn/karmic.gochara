@@ -213,6 +213,7 @@ def get_synthesis(chart_data: dict, user: dict = None) -> str:
     nodal_bloc = nodal_cycle if nodal_cycle else ""
 
     prompt = f"""Analyse siderealAstro13 des transits de {name} — {date} à {time}.
+CONSIGNE : commence directement par "## 1. LA MÉMOIRE KARMIQUE". Aucune note préalable, aucun récapitulatif des positions natales, aucune introduction.
 {natal_bloc}{nodal_bloc}
 
 Aspects actifs (avec thèmes nakshatra si disponibles) :
@@ -232,90 +233,12 @@ Développe chaque section en lecture d'âme cohérente, narrative, sans liste m�
 
     msg = _get_client().messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=1500,
+        max_tokens=2500,
         system=_build_system_prompt(user),
         messages=[{"role": "user", "content": prompt}],
     )
     return msg.content[0].text
 
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CHAT — Dialogue Karmique
-# ══════════════════════════════════════════════════════════════════════════════
-
-def chat_response(message: str, history: list, chart_data: dict, user: dict = None) -> str:
-    """
-    Gère une réponse de chat dans le Dialogue Karmique.
-    message    : message de l'utilisateur
-    history    : liste de dicts {"role": "user"|"assistant", "content": "..."}
-    chart_data : dict du calcul en cours
-    user       : dict du profil utilisateur
-    """
-    if user is None:
-        user = {}
-
-    name = user.get("name", "l'utilisateur")
-
-    chart_context = build_chart_context(chart_data, user)
-
-    messages = []
-
-    if chart_context:
-        messages.append({
-            "role": "user",
-            "content": f"Contexte Gochara en cours pour {name} :\n{chart_context}"
-        })
-        messages.append({
-            "role": "assistant",
-            "content": (
-                f"Thème de {name} intégré. "
-                "Mémoire karmique, Blessure, Épreuve, Voie de libération — configuration active. "
-                "Qu'est-ce que tu veux explorer ?"
-            )
-        })
-
-    for h in history[-12:]:
-        messages.append(h)
-
-    messages.append({"role": "user", "content": message})
-
-    msg = _get_client().messages.create(
-        model="claude-sonnet-4-6",
-        max_tokens=700,
-        system=_build_system_prompt(user),
-        messages=messages,
-    )
-    return msg.content[0].text
-
-
-# ══════════════════════════════════════════════════════════════════════════════
-# CONTEXTE RÉSUMÉ (pour injection chat)
-# ══════════════════════════════════════════════════════════════════════════════
-
-def build_chart_context(chart_data: dict, user: dict = None) -> str:
-    """
-    Construit un résumé compact du Gochara pour l'injection en amorce du chat.
-    """
-    if user is None:
-        user = {}
-
-    aspects = chart_data.get("aspects", [])
-    name    = user.get("name", "l'utilisateur")
-    date    = chart_data.get("transit_date", "")
-    time    = chart_data.get("transit_time", "")
-
-    natal_ctx  = _build_natal_context(user)
-    natal_bloc = f"\nThème natal :\n{natal_ctx}" if natal_ctx else ""
-
-    if not aspects:
-        return f"Gochara de {name} — {date} {time} — aucun aspect actif.{natal_bloc}"
-
-    lines = [f"Gochara de {name} — {date} à {time} :"]
-    for a in aspects[:12]:
-        retro = " ℞" if a.get("retrograde") else ""
-        lines.append(
-            f"  • T.{a['transit_planet']}{retro} {a['aspect']} N.{a['natal_planet']} "
-            f"(orbe {a['orb']}°)"
         )
 
     return "\n".join(lines) + natal_bloc
