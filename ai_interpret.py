@@ -326,7 +326,7 @@ Développe chaque section en lecture d'âme cohérente, narrative, sans liste m�
 
     msg = _get_client().messages.create(
         model="claude-sonnet-4-6",
-        max_tokens=3000,
+        max_tokens=4000,
         system=_build_system_prompt(user),
         messages=[{"role": "user", "content": prompt}],
     )
