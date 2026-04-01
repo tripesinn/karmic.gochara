@@ -752,19 +752,16 @@ async function calculateTransits() {
   const city   = document.getElementById("transit-city-val").value;
   const tz     = document.getElementById("transit-tz-val").value || "UTC";
 
-  if (!date)          { setStatus(L.select_date);    return; }
+  if (!date)                    { setStatus(L.select_date);    return; }
   if (isNaN(lat) || isNaN(lon)) { setStatus(L.select_transit); return; }
 
   lastTransitDate = date;
   setStatus(L.calc_ephem);
   document.getElementById("calc-btn").disabled = true;
-
   setAspectsHTML(`<div style="padding:8px;" class="loading">${L.calc_sideral}</div>`);
   setSynthesis("");
   document.getElementById("synthesis").innerHTML = `<span class="loading">${L.calc_karmic}</span>`;
   switchTab("gochara");
-
-  // Reset email status
   document.getElementById("email-status").textContent = "";
 
   try {
@@ -775,16 +772,34 @@ async function calculateTransits() {
                              transit_city: city, transit_tz: tz }),
     });
     const data = await res.json();
-    if (data.error) throw new Error(data.error);
 
-    lastChartData      = data;
-    lastSynthesisText  = data.synthesis || "";
+    // ── Quota dépassé ─────────────────────────────────────────────
+    if (res.status === 429) {
+      const msg = data.message || "Limite mensuelle atteinte.";
+      const url = data.upgrade_url || "";
+      document.getElementById("synthesis").innerHTML =
+        `<div style="color:#800000;padding:12px;line-height:1.8;">
+          🔒 <strong>${escHtml(msg)}</strong><br><br>
+          Pour continuer à consulter l'oracle, passe au plan Premium.<br><br>
+          ${url ? `<a href="${escHtml(url)}" target="_blank"><button class="btn">✦ Plan Premium</button></a>` : ""}
+        </div>`;
+      setStatus("🔒 Quota mensuel atteint");
+      return;
+    }
+    // ──────────────────────────────────────────────────────────────
+
+    if (data.error) throw new Error(data.error);
+    lastChartData     = data;
+    lastSynthesisText = data.synthesis || "";
     renderAspects(data.aspects);
     setSynthesis(lastSynthesisText);
-
     const n = (data.aspects || []).length;
-    setStatus(`✓ ${n} aspect${n!==1?"s":""}`);
+    const rem = typeof data.remaining === "number"
+      ? ` — ${data.remaining} synthèse${data.remaining !== 1 ? "s" : ""} restante${data.remaining !== 1 ? "s" : ""} ce mois`
+      : "";
+    setStatus(`✓ ${n} aspect${n !== 1 ? "s" : ""}${rem}`);
     setCount(`${n} asp.`);
+
   } catch (err) {
     const raw = err.message || "";
     let friendly = raw;
@@ -799,40 +814,9 @@ async function calculateTransits() {
     document.getElementById("synthesis").innerHTML =
       `<div style="color:#800000;padding:8px;line-height:1.6;">${escHtml(friendly)}<br><br>
        <button class="btn" onclick="calculateTransits()" style="margin-top:4px;">↺ Réessayer</button></div>`;
+
   } finally {
     document.getElementById("calc-btn").disabled = false;
-  }
-}
-
-/* ══ EMAIL SYNTHÈSE ══════════════════════════════════════════════ */
-async function sendSynthesisEmail() {
-  const statEl = document.getElementById("email-status");
-  if (!lastSynthesisText) { statEl.textContent = L.no_calc; return; }
-
-  const btn = document.getElementById("btnEmail");
-  btn.disabled = true;
-  statEl.textContent = L.sending;
-
-  try {
-    const res  = await fetch("/send_synthesis", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ synthesis: lastSynthesisText, date: lastTransitDate }),
-    });
-    const data = await res.json();
-    if (data.ok) {
-      statEl.style.color = "#006000";
-      statEl.textContent = L.sent_ok;
-    } else {
-      statEl.style.color = "#800000";
-      statEl.textContent = L.sent_err + " : " + (data.error || "");
-    }
-  } catch (err) {
-    statEl.style.color = "#800000";
-    statEl.textContent = L.sent_err + " : " + err.message;
-  } finally {
-    btn.disabled = false;
-    setTimeout(() => { statEl.textContent = ""; statEl.style.color = ""; }, 5000);
   }
 }
 
