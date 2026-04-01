@@ -1010,6 +1010,35 @@ function _speakNext() {
   _synth.speak(u);
 }
 
+/* ══ EMAIL SYNTHÈSE ══════════════════════════════════════════════ */
+async function sendSynthesisEmail() {
+  if (!lastSynthesisText) { alert(L.no_calc); return; }
+  const btn    = document.getElementById("btnEmail");
+  const status = document.getElementById("email-status");
+  btn.disabled = true;
+  status.textContent = L.sending;
+  try {
+    const res  = await fetch("/send_synthesis", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({ synthesis: lastSynthesisText, date: lastTransitDate }),
+    });
+    const data = await res.json();
+    if (data.ok) {
+      status.textContent = L.sent_ok;
+      status.style.color = "#006000";
+    } else {
+      status.textContent = L.sent_err + " — " + (data.error || "");
+      status.style.color = "#800000";
+    }
+  } catch (err) {
+    status.textContent = L.sent_err;
+    status.style.color = "#800000";
+  } finally {
+    btn.disabled = false;
+  }
+}
+   
 /* ══ INIT ════════════════════════════════════════════════════════ */
 (function init() {
   const dateEl = document.getElementById("t-date");
