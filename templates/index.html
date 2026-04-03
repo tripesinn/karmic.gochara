@@ -1,38 +1,21 @@
 <!DOCTYPE html>
-<html lang="{{ lang.code }}">
+<html lang="fr">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<!-- PWA -->
-<link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#0a0a08">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="Karmic Gochara">
-<link rel="apple-touch-icon" href="/static/icons/icon-192.png">
-<title>✦ Karmic Gochara — @siderealAstro13</title>
+<title>Karmic Gochara — Ton Profil Karmique</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;600&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
 <style>
 :root {
-  --bg: #0a0a08;
-  --bg2: #111110;
-  --bg3: #1a1a17;
+  --ink: #0c0a08;
+  --parchment: #f5f0e8;
   --gold: #c9a84c;
-  --gold-dim: #8a6f2e;
-  --gold-light: #e8c97a;
-  --text: #e8e4d8;
-  --text-dim: #8a8678;
-  --text-muted: #4a4840;
-  --border: #2a2820;
-  --border-gold: rgba(201,168,76,0.2);
-  --serif: 'Cormorant Garamond', Georgia, serif;
-  --display: 'Cinzel', serif;
-  --body: 'EB Garamond', Georgia, serif;
-  --radius: 2px;
+  --gold-dim: #8a6f30;
+  --rust: #8b3a2a;
+  --void: #1a1410;
+  --mist: rgba(201,168,76,0.08);
+  --glyph: rgba(201,168,76,0.18);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -40,791 +23,489 @@
 html { scroll-behavior: smooth; }
 
 body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--body);
+  background: var(--ink);
+  color: var(--parchment);
+  font-family: 'Cormorant Garamond', Georgia, serif;
   font-size: 18px;
   line-height: 1.7;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* ── NOISE OVERLAY ── */
+/* ── Background ── */
 body::before {
   content: '';
   position: fixed;
   inset: 0;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  background:
+    radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%),
+    radial-gradient(ellipse 40% 30% at 80% 80%, rgba(139,58,42,0.08) 0%, transparent 60%);
   pointer-events: none;
   z-index: 0;
-  opacity: 0.4;
 }
 
-/* ── HEADER ── */
-header {
+/* Grain texture overlay */
+body::after {
+  content: '';
   position: fixed;
-  top: 0; left: 0; right: 0;
-  z-index: 100;
-  padding: 1rem 1.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: linear-gradient(to bottom, rgba(10,10,8,0.95), transparent);
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  opacity: 0.4;
+  pointer-events: none;
+  z-index: 0;
 }
 
-.header-brand {
-  font-family: var(--display);
-  font-size: 0.75rem;
-  letter-spacing: 0.2em;
-  color: var(--gold);
-  text-transform: uppercase;
+/* ── Layout ── */
+.container {
+  position: relative;
+  z-index: 1;
+  max-width: 680px;
+  margin: 0 auto;
+  padding: 0 28px;
 }
 
-.header-tag {
-  font-family: var(--serif);
-  font-size: 0.7rem;
-  color: var(--text-dim);
-  letter-spacing: 0.1em;
-}
-
-/* ── LANG SELECT ── */
-#lang-select {
-  background: transparent;
-  border: 1px solid var(--border-gold);
-  color: var(--gold);
-  font-family: var(--display);
-  font-size: 0.65rem;
-  letter-spacing: 0.15em;
-  padding: 0.3rem 0.6rem;
-  cursor: pointer;
-  border-radius: var(--radius);
-  appearance: none;
-}
-#lang-select option { background: var(--bg2); }
-
-/* ── HERO ── */
-.hero {
-  min-height: 100svh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
+/* ── Header / Hero ── */
+header {
+  padding: 80px 0 60px;
   text-align: center;
-  padding: 6rem 2rem 4rem;
   position: relative;
 }
 
-.hero-sigil {
-  width: 80px;
-  height: 80px;
-  margin-bottom: 2rem;
+.sigil {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 32px;
   opacity: 0;
-  animation: fadeUp 1s ease forwards 0.2s;
+  animation: fadeUp 1s ease 0.2s forwards;
 }
 
-.hero-eyebrow {
-  font-family: var(--display);
-  font-size: 0.6rem;
-  letter-spacing: 0.3em;
-  color: var(--gold-dim);
+.eyebrow {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.22em;
   text-transform: uppercase;
-  margin-bottom: 1.5rem;
+  color: var(--gold-dim);
   opacity: 0;
-  animation: fadeUp 1s ease forwards 0.4s;
+  animation: fadeUp 1s ease 0.4s forwards;
 }
 
-.hero-title {
-  font-family: var(--display);
-  font-size: clamp(2rem, 8vw, 3.5rem);
+h1 {
+  font-family: 'Cinzel', serif;
+  font-size: clamp(32px, 7vw, 52px);
   font-weight: 400;
-  line-height: 1.1;
-  letter-spacing: 0.05em;
-  color: var(--text);
-  margin-bottom: 0.5rem;
+  letter-spacing: 0.04em;
+  line-height: 1.15;
+  color: var(--parchment);
+  margin: 16px 0 8px;
   opacity: 0;
-  animation: fadeUp 1s ease forwards 0.6s;
+  animation: fadeUp 1s ease 0.6s forwards;
 }
 
-.hero-title em {
-  font-family: var(--serif);
+h1 em {
   font-style: italic;
   color: var(--gold);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.05em;
   font-weight: 300;
 }
 
-.hero-sub {
-  font-family: var(--serif);
+.subtitle {
+  font-size: 19px;
+  font-weight: 300;
   font-style: italic;
-  font-size: 1rem;
-  color: var(--text-dim);
-  margin-bottom: 2.5rem;
+  color: rgba(245,240,232,0.6);
+  margin-top: 12px;
   opacity: 0;
-  animation: fadeUp 1s ease forwards 0.8s;
+  animation: fadeUp 1s ease 0.8s forwards;
 }
 
-.hero-divider {
+.gold-rule {
   width: 60px;
   height: 1px;
-  background: var(--gold-dim);
-  margin: 0 auto 2.5rem;
+  background: var(--gold);
+  margin: 32px auto;
   opacity: 0;
-  animation: fadeUp 1s ease forwards 1s;
+  animation: fadeUp 1s ease 1s forwards;
 }
 
-.hero-doctrine {
-  font-family: var(--serif);
+/* ── Hook block ── */
+.hook {
+  text-align: center;
+  padding: 0 0 52px;
+  opacity: 0;
+  animation: fadeUp 1s ease 1.1s forwards;
+}
+
+.hook p {
+  font-size: 20px;
   font-style: italic;
-  font-size: 1rem;
-  color: var(--text-dim);
-  line-height: 2;
-  opacity: 0;
-  animation: fadeUp 1s ease forwards 1.2s;
+  color: rgba(245,240,232,0.8);
+  max-width: 520px;
+  margin: 0 auto 10px;
 }
 
-.hero-doctrine span { color: var(--gold); }
-
-/* ── LOGIN SECTION ── */
-#login-section {
-  padding: 4rem 1.5rem 6rem;
-  max-width: 420px;
-  margin: 0 auto;
-  opacity: 0;
-  animation: fadeUp 1s ease forwards 1.4s;
+.hook strong {
+  color: var(--gold);
+  font-weight: 400;
 }
 
-.login-card {
-  border: 1px solid var(--border-gold);
-  border-radius: var(--radius);
-  padding: 2.5rem 2rem;
-  background: rgba(17,17,16,0.8);
-  backdrop-filter: blur(10px);
+/* ── Pillars (3 columns) ── */
+.pillars {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+  padding: 0 0 52px;
 }
 
-.login-label {
-  font-family: var(--display);
-  font-size: 0.6rem;
-  letter-spacing: 0.25em;
-  color: var(--gold-dim);
+@media (max-width: 540px) {
+  .pillars { grid-template-columns: 1fr; }
+}
+
+.pillar {
+  border: 1px solid var(--glyph);
+  border-top: 2px solid var(--gold-dim);
+  padding: 24px 20px;
+  position: relative;
+  background: rgba(201,168,76,0.03);
+  transition: border-color 0.3s, background 0.3s;
+}
+
+.pillar:hover {
+  border-color: var(--gold);
+  background: rgba(201,168,76,0.06);
+}
+
+.pillar-glyph {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.2em;
   text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 10px;
   display: block;
-  margin-bottom: 0.75rem;
 }
 
-.login-input {
-  width: 100%;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.85rem 1rem;
-  color: var(--text);
-  font-family: var(--serif);
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s;
-  margin-bottom: 1.5rem;
+.pillar h3 {
+  font-family: 'Cinzel', serif;
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+  color: var(--parchment);
+  margin-bottom: 8px;
 }
-.login-input:focus { border-color: var(--gold-dim); }
-.login-input::placeholder { color: var(--text-muted); }
 
-.btn-row {
+.pillar p {
+  font-size: 15px;
+  font-style: italic;
+  color: rgba(245,240,232,0.55);
+  line-height: 1.5;
+}
+
+/* ── CTA Section ── */
+.cta-section {
+  text-align: center;
+  padding: 0 0 80px;
+}
+
+.cta-label {
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  margin-bottom: 24px;
+}
+
+.form-card {
+  border: 1px solid var(--glyph);
+  padding: 40px 36px;
+  background: rgba(201,168,76,0.04);
+  position: relative;
+}
+
+.form-card::before {
+  content: '';
+  position: absolute;
+  top: -1px; left: 40px; right: 40px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+}
+
+.form-intro {
+  font-size: 18px;
+  font-style: italic;
+  color: rgba(245,240,232,0.7);
+  margin-bottom: 28px;
+}
+
+.field-group {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+
+@media (max-width: 480px) {
+  .field-group { grid-template-columns: 1fr; }
+  .form-card { padding: 28px 20px; }
+}
+
+.field {
   display: flex;
-  gap: 0.75rem;
+  flex-direction: column;
+  gap: 6px;
 }
+
+.field.full { grid-column: 1 / -1; }
+
+label {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+}
+
+input, select {
+  background: rgba(12,10,8,0.6);
+  border: 1px solid rgba(201,168,76,0.2);
+  color: var(--parchment);
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 16px;
+  padding: 11px 14px;
+  outline: none;
+  transition: border-color 0.25s;
+  width: 100%;
+  -webkit-appearance: none;
+  border-radius: 0;
+}
+
+input::placeholder { color: rgba(245,240,232,0.25); font-style: italic; }
+
+input:focus, select:focus {
+  border-color: var(--gold);
+  background: rgba(12,10,8,0.8);
+}
+
+select option { background: #1a1410; }
 
 .btn-primary {
-  flex: 1;
-  background: var(--gold);
-  color: var(--bg);
-  border: none;
-  padding: 0.85rem 1rem;
-  font-family: var(--display);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: background 0.2s, opacity 0.2s;
-}
-.btn-primary:hover { background: var(--gold-light); }
-
-.btn-secondary {
-  flex: 1;
-  background: transparent;
-  color: var(--text-dim);
-  border: 1px solid var(--border);
-  padding: 0.85rem 1rem;
-  font-family: var(--display);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: border-color 0.2s, color 0.2s;
-}
-.btn-secondary:hover { border-color: var(--gold-dim); color: var(--gold); }
-
-#login-error {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 0.85rem;
-  color: #c97a6b;
-  text-align: center;
-  margin-top: 1rem;
-  min-height: 1.4em;
-}
-
-/* ── MAIN APP ── */
-#app-section { display: none; padding: 5rem 0 4rem; }
-
-/* ── USER BAR ── */
-.user-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 1.5rem 2rem;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 2rem;
-}
-
-.user-name {
-  font-family: var(--display);
-  font-size: 0.65rem;
-  letter-spacing: 0.2em;
-  color: var(--gold);
-  text-transform: uppercase;
-}
-
-.btn-logout {
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-muted);
-  font-family: var(--display);
-  font-size: 0.55rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  padding: 0.4rem 0.8rem;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: all 0.2s;
-}
-.btn-logout:hover { border-color: var(--gold-dim); color: var(--gold); }
-
-/* ── DATE PICKER ── */
-.date-section {
-  padding: 0 1.5rem 2rem;
-}
-
-.section-label {
-  font-family: var(--display);
-  font-size: 0.6rem;
-  letter-spacing: 0.25em;
-  color: var(--gold-dim);
-  text-transform: uppercase;
-  margin-bottom: 1rem;
   display: block;
-}
-
-.date-input {
   width: 100%;
-  background: var(--bg2);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 0.85rem 1rem;
-  color: var(--text);
-  font-family: var(--serif);
-  font-size: 1rem;
-  outline: none;
-  transition: border-color 0.3s;
-  color-scheme: dark;
-  margin-bottom: 1rem;
-}
-.date-input:focus { border-color: var(--gold-dim); }
-
-.btn-calculate {
-  width: 100%;
+  margin-top: 20px;
+  padding: 16px 24px;
   background: transparent;
-  border: 1px solid var(--border-gold);
+  border: 1px solid var(--gold);
   color: var(--gold);
-  padding: 1rem;
-  font-family: var(--display);
-  font-size: 0.65rem;
-  letter-spacing: 0.25em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: var(--radius);
-  transition: all 0.3s;
-}
-.btn-calculate:hover { background: rgba(201,168,76,0.08); }
-
-/* ── SYNTHESIS ── */
-.synthesis-section {
-  padding: 0 1.5rem;
-}
-
-#accroche-box {
-  display: none;
-  border-left: 2px solid var(--gold);
-  padding: 1.5rem;
-  margin-bottom: 2rem;
-  background: rgba(201,168,76,0.04);
-  border-radius: 0 var(--radius) var(--radius) 0;
-  animation: fadeIn 0.8s ease;
-}
-
-.accroche-text {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 1.1rem;
-  color: var(--gold-light);
-  line-height: 1.8;
-}
-
-#synthesis-box {
-  display: none;
-  animation: fadeIn 0.8s ease;
-}
-
-.synthesis-content {
-  font-family: var(--body);
-  font-size: 1rem;
-  color: var(--text);
-  line-height: 1.9;
-}
-
-.synthesis-content h1,
-.synthesis-content h2,
-.synthesis-content h3 {
-  font-family: var(--display);
+  font-family: 'Cinzel', serif;
+  font-size: 13px;
   font-weight: 400;
-  letter-spacing: 0.1em;
-  color: var(--gold);
-  margin: 2rem 0 1rem;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-}
-
-.synthesis-content p { margin-bottom: 1.2rem; }
-
-.synthesis-content strong { color: var(--gold-light); font-weight: 400; }
-
-.synthesis-content em { font-style: italic; color: var(--text-dim); }
-
-/* ── ACTIONS ── */
-.action-row {
-  display: none;
-  gap: 0.75rem;
-  padding: 2rem 1.5rem;
-  flex-direction: column;
-}
-
-.btn-action {
-  width: 100%;
-  background: transparent;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  padding: 0.85rem 1rem;
-  font-family: var(--display);
-  font-size: 0.6rem;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.18em;
   text-transform: uppercase;
   cursor: pointer;
-  border-radius: var(--radius);
-  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s;
 }
-.btn-action:hover { border-color: var(--gold-dim); color: var(--gold); }
 
-/* ── LOADING ── */
-#loading-overlay {
-  display: none;
-  position: fixed;
+.btn-primary::before {
+  content: '';
+  position: absolute;
   inset: 0;
-  background: rgba(10,10,8,0.85);
-  z-index: 200;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 1.5rem;
-  backdrop-filter: blur(4px);
-}
-
-.loading-sigil {
-  width: 60px;
-  height: 60px;
-  animation: rotateSlow 8s linear infinite;
-}
-
-.loading-text {
-  font-family: var(--display);
-  font-size: 0.65rem;
-  letter-spacing: 0.3em;
-  color: var(--gold-dim);
-  text-transform: uppercase;
-}
-
-/* ── STATUS ── */
-#status-msg {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  text-align: center;
-  padding: 1rem 1.5rem;
-  min-height: 1.5em;
-}
-
-/* ── FOOTER ── */
-footer {
-  text-align: center;
-  padding: 3rem 1.5rem;
-  border-top: 1px solid var(--border);
-  margin-top: 2rem;
-}
-
-.footer-brand {
-  font-family: var(--display);
-  font-size: 0.6rem;
-  letter-spacing: 0.25em;
-  color: var(--gold-dim);
-  text-transform: uppercase;
-  margin-bottom: 0.5rem;
-}
-
-.footer-sub {
-  font-family: var(--serif);
-  font-style: italic;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-/* ── BMC ── */
-.bmc-btn {
-  position: fixed;
-  bottom: 1.5rem;
-  right: 1.5rem;
-  z-index: 50;
   background: var(--gold);
-  color: var(--bg);
-  border: none;
-  padding: 0.6rem 1rem;
-  font-family: var(--display);
-  font-size: 0.6rem;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-  cursor: pointer;
-  border-radius: 2rem;
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  box-shadow: 0 4px 20px rgba(201,168,76,0.2);
-  transition: opacity 0.2s;
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.35s ease;
 }
-.bmc-btn:hover { opacity: 0.85; }
 
-/* ── ANIMATIONS ── */
+.btn-primary:hover { color: var(--ink); }
+.btn-primary:hover::before { transform: scaleX(1); }
+.btn-primary span { position: relative; z-index: 1; }
+
+.disclaimer {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  color: rgba(245,240,232,0.3);
+  letter-spacing: 0.1em;
+  margin-top: 16px;
+}
+
+/* ── Testimonial / quote ── */
+.oracle-quote {
+  border-left: 2px solid var(--gold-dim);
+  padding: 20px 24px;
+  margin: 0 0 52px;
+  background: rgba(201,168,76,0.03);
+}
+
+.oracle-quote p {
+  font-size: 20px;
+  font-style: italic;
+  color: rgba(245,240,232,0.75);
+  margin-bottom: 8px;
+}
+
+.oracle-quote cite {
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--gold-dim);
+  font-style: normal;
+}
+
+/* ── Footer ── */
+footer {
+  border-top: 1px solid rgba(201,168,76,0.12);
+  padding: 28px 0;
+  text-align: center;
+}
+
+.footer-logo {
+  font-family: 'Cinzel', serif;
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+footer a {
+  color: var(--gold-dim);
+  text-decoration: none;
+  font-family: 'DM Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 0.14em;
+  transition: color 0.2s;
+}
+footer a:hover { color: var(--gold); }
+
+/* ── Animations ── */
 @keyframes fadeUp {
-  from { opacity: 0; transform: translateY(20px); }
+  from { opacity: 0; transform: translateY(18px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-@keyframes fadeIn {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+
+.reveal {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.8s ease, transform 0.8s ease;
 }
-@keyframes rotateSlow {
-  from { transform: rotate(0deg); }
-  to   { transform: rotate(360deg); }
+.reveal.visible { opacity: 1; transform: none; }
+
+/* ── Success state ── */
+.success-msg {
+  display: none;
+  padding: 24px;
+  border: 1px solid rgba(201,168,76,0.3);
+  background: rgba(201,168,76,0.06);
+  text-align: center;
 }
 
-/* ── SW ── */
+.success-msg.show { display: block; }
+.success-msg p { font-style: italic; color: var(--gold); font-size: 18px; }
+
+/* Zodiac bg glyph */
+.zodiac-bg {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 320px;
+  height: 320px;
+  opacity: 0.03;
+  pointer-events: none;
+}
 </style>
 </head>
 <body>
 
-<header>
-  <div>
-    <div class="header-brand">Karmic Gochara</div>
-    <div class="header-tag">@siderealAstro13</div>
-  </div>
-  <select id="lang-select" onchange="setLang(this.value)">
-    {% for code, label in langs.items() %}
-    <option value="{{ code }}" {% if code == lang.code %}selected{% endif %}>{{ label }}</option>
-    {% endfor %}
-  </select>
-</header>
+<div class="container">
 
-<!-- LOADING -->
-<div id="loading-overlay">
-  <svg class="loading-sigil" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="40" cy="40" r="36" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="4 6" opacity="0.4"/>
-    <circle cx="40" cy="40" r="26" stroke="#c9a84c" stroke-width="0.8" opacity="0.6"/>
-    <circle cx="40" cy="40" r="16" stroke="#c9a84c" stroke-width="0.8" opacity="0.8"/>
-    <line x1="40" y1="4" x2="40" y2="76" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
-    <line x1="4" y1="40" x2="76" y2="40" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
-    <circle cx="40" cy="4" r="2" fill="#c9a84c"/>
-    <circle cx="40" cy="76" r="2" fill="#c9a84c" opacity="0.4"/>
-    <circle cx="4" cy="40" r="2" fill="#c9a84c" opacity="0.4"/>
-    <circle cx="76" cy="40" r="2" fill="#c9a84c"/>
-  </svg>
-  <div class="loading-text">{{ ui.calculating if ui else 'Lecture des astres…' }}</div>
-</div>
-
-<!-- HERO + LOGIN -->
-<div id="hero-section">
-  <section class="hero">
+  <!-- Header -->
+  <header>
     <!-- Sigil SVG -->
-    <svg class="hero-sigil" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
-      <circle cx="40" cy="40" r="36" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="4 8" opacity="0.5"/>
-      <circle cx="40" cy="40" r="26" stroke="#c9a84c" stroke-width="0.8" opacity="0.7"/>
-      <line x1="40" y1="14" x2="40" y2="66" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
-      <line x1="14" y1="40" x2="66" y2="40" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
-      <circle cx="40" cy="40" r="3" fill="#c9a84c" opacity="0.9"/>
-      <circle cx="40" cy="14" r="1.5" fill="#c9a84c" opacity="0.6"/>
-      <circle cx="40" cy="66" r="1.5" fill="#c9a84c" opacity="0.4"/>
+    <svg class="sigil" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="32" cy="32" r="30" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
+      <circle cx="32" cy="32" r="22" stroke="#c9a84c" stroke-width="0.4" opacity="0.4"/>
+      <circle cx="32" cy="32" r="3" fill="#c9a84c" opacity="0.8"/>
+      <line x1="32" y1="2" x2="32" y2="62" stroke="#c9a84c" stroke-width="0.4" opacity="0.3"/>
+      <line x1="2" y1="32" x2="62" y2="32" stroke="#c9a84c" stroke-width="0.4" opacity="0.3"/>
+      <line x1="10.5" y1="10.5" x2="53.5" y2="53.5" stroke="#c9a84c" stroke-width="0.3" opacity="0.2"/>
+      <line x1="53.5" y1="10.5" x2="10.5" y2="53.5" stroke="#c9a84c" stroke-width="0.3" opacity="0.2"/>
+      <path d="M32 10 L36 22 L32 19 L28 22 Z" fill="#c9a84c" opacity="0.7"/>
     </svg>
 
-    <div class="hero-eyebrow">@siderealAstro13 · Doctrine Évolutive Synthétique</div>
+    <p class="eyebrow">@siderealAstro13 · Doctrine Évolutive Synthétique</p>
+    <h1>Ton <em>Karma</em><br>écrit dans les étoiles</h1>
+    <p class="subtitle">Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa</p>
+    <div class="gold-rule"></div>
+  </header>
 
-    <h1 class="hero-title">Ton <em>Karma</em><br>écrit dans les étoiles</h1>
+  <!-- Hook -->
+  <div class="hook">
+    <p>Ton <strong>Ketu</strong> révèle la prison de mémoires passées.<br>
+    Ton <strong>Chiron</strong> est la clé qui ouvre la porte.<br>
+    Ton <strong>Stage</strong> est la scène qui t'attend.</p>
+    <p style="margin-top:18px; font-size:16px; color:rgba(245,240,232,0.4);">
+      Une synthèse générée par IA, ancrée dans la doctrine sidérale la plus précise qui soit.
+    </p>
+  </div>
 
-    <p class="hero-sub">Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa</p>
-
-    <div class="hero-divider"></div>
-
-    <div class="hero-doctrine">
-      Ton <span>Ketu</span> révèle la prison de mémoires passées.<br>
-      Ton <span>Chiron</span> est la clé qui ouvre la porte.<br>
-      Ton <span>Stage</span> est la scène qui t'attend.
+  <!-- Pillars -->
+  <div class="pillars reveal">
+    <div class="pillar">
+      <span class="pillar-glyph">☋ ROM</span>
+      <h3>Mémoire Karmique</h3>
+      <p>Nœud Sud · blessures passées · schémas de résistance</p>
     </div>
-  </section>
-
-  <!-- LOGIN -->
-  <section id="login-section">
-    <div class="login-card">
-      <label class="login-label" for="pseudo-input">{{ ui.pseudo_label if ui else 'Ton pseudo' }}</label>
-      <input
-        id="pseudo-input"
-        class="login-input"
-        type="text"
-        placeholder="{{ ui.pseudo_placeholder if ui else 'Entre ton pseudo…' }}"
-        autocomplete="username"
-        autofocus
-      >
-      <div class="btn-row">
-        <button class="btn-primary" onclick="login()">{{ ui.login if ui else 'Connexion' }}</button>
-        <button class="btn-secondary" onclick="createProfile()">{{ ui.create if ui else 'Créer un profil' }}</button>
-      </div>
-      <div id="login-error"></div>
+    <div class="pillar">
+      <span class="pillar-glyph">⚷ RAM</span>
+      <h3>Porte Invisible</h3>
+      <p>Chiron · blessure active · transmutation par l'autopardon</p>
     </div>
-  </section>
+    <div class="pillar">
+      <span class="pillar-glyph">☉ Stage</span>
+      <h3>Mise en Scène</h3>
+      <p>Dharma · lieu de libération · action incarnée</p>
+    </div>
+  </div>
+
+  <!-- Oracle quote -->
+  <div class="oracle-quote reveal">
+    <p>« Le transit n'arrive pas à toi — il arrive <em>à travers</em> toi. La question est de savoir si tu es la victime ou l'auteur. »</p>
+    <cite>Doctrine Évolutive Synthétique · Pilier 3</cite>
+  </div>
+
+  <!-- CTA -->
+  <div class="cta-section reveal">
+    <p class="cta-label">Accès à ta synthèse personnalisée</p>
+    <div class="form-card">
+      <p class="form-intro">Entre ta date de naissance.<br>Découvre ton axe karmique complet.</p>
+      <a href="https://karmic-gochara.onrender.com" class="btn-primary" style="text-decoration:none; display:block; text-align:center;">
+        <span>Accéder à l'app →</span>
+      </a>
+      <p class="disclaimer" style="margin-top:20px;">Gratuit · Propulsé par Claude · Ayanamsa Djwhal Khul</p>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer>
+    <p class="footer-logo">Karmic Gochara</p>
+    <a href="https://buymeacoffee.com/jerome6">☕ Soutenir le projet</a>
+    &nbsp;·&nbsp;
+    <a href="https://karmic-gochara.onrender.com">Accéder à l'app</a>
+  </footer>
+
 </div>
-
-<!-- APP -->
-<div id="app-section">
-  <div class="user-bar">
-    <div class="user-name" id="display-pseudo"></div>
-    <button class="btn-logout" onclick="logout()">{{ ui.logout if ui else 'Déconnexion' }}</button>
-  </div>
-
-  <div class="date-section">
-    <label class="section-label" for="transit-date">{{ ui.transit_date if ui else 'Date de transit' }}</label>
-    <input type="date" id="transit-date" class="date-input">
-    <button class="btn-calculate" onclick="calculate()">
-      ✦ {{ ui.calculate if ui else 'Lire les transits' }}
-    </button>
-  </div>
-
-  <div id="status-msg"></div>
-
-  <div class="synthesis-section">
-    <div id="accroche-box">
-      <div class="accroche-text" id="accroche-content"></div>
-    </div>
-    <div id="synthesis-box">
-      <div class="synthesis-content" id="synthesis-content"></div>
-    </div>
-  </div>
-
-  <div class="action-row" id="action-row">
-    <button class="btn-action" onclick="sendEmail()">✉ {{ ui.send_email if ui else 'Recevoir par email' }}</button>
-  </div>
-</div>
-
-<footer>
-  <div class="footer-brand">Karmic Gochara</div>
-  <div class="footer-sub">@siderealAstro13 · Doctrine Évolutive Synthétique</div>
-</footer>
-
-<a class="bmc-btn" href="https://buymeacoffee.com/jerome6" target="_blank" rel="noopener">
-  ☕ Buy me a coffee
-</a>
 
 <script>
-let lastSynthesisText = '';
-let lastTransitDate = '';
-let currentUser = null;
-
-// ── LANG ──
-function setLang(code) {
-  fetch('/set_lang', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({lang: code})
-  }).then(() => location.reload());
-}
-
-// ── LOGIN ──
-function login() {
-  const pseudo = document.getElementById('pseudo-input').value.trim();
-  if (!pseudo) return;
-  showLoading(true);
-  fetch('/calculate', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({pseudo: pseudo, action: 'login'})
-  })
-  .then(r => r.json())
-  .then(data => {
-    showLoading(false);
-    if (data.error) {
-      document.getElementById('login-error').textContent = data.error;
-    } else {
-      currentUser = pseudo;
-      showApp(pseudo);
-    }
-  })
-  .catch(() => { showLoading(false); });
-}
-
-function createProfile() {
-  const pseudo = document.getElementById('pseudo-input').value.trim();
-  if (!pseudo) return;
-  showLoading(true);
-  fetch('/calculate', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({pseudo: pseudo, action: 'create'})
-  })
-  .then(r => r.json())
-  .then(data => {
-    showLoading(false);
-    if (data.error) {
-      document.getElementById('login-error').textContent = data.error;
-    } else if (data.redirect) {
-      window.location.href = data.redirect;
-    } else {
-      currentUser = pseudo;
-      showApp(pseudo);
-    }
-  })
-  .catch(() => { showLoading(false); });
-}
-
-function logout() {
-  fetch('/logout', {method: 'POST'}).then(() => {
-    currentUser = null;
-    document.getElementById('hero-section').style.display = '';
-    document.getElementById('app-section').style.display = 'none';
-    document.getElementById('pseudo-input').value = '';
-    document.getElementById('login-error').textContent = '';
-    document.getElementById('synthesis-box').style.display = 'none';
-    document.getElementById('accroche-box').style.display = 'none';
-    document.getElementById('action-row').style.display = 'none';
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
   });
-}
-
-function showApp(pseudo) {
-  document.getElementById('hero-section').style.display = 'none';
-  document.getElementById('app-section').style.display = 'block';
-  document.getElementById('display-pseudo').textContent = pseudo;
-  const today = new Date().toISOString().split('T')[0];
-  document.getElementById('transit-date').value = today;
-}
-
-// ── CALCULATE ──
-function calculate() {
-  const date = document.getElementById('transit-date').value;
-  if (!date) return;
-  lastTransitDate = date;
-  showLoading(true);
-  setStatus('');
-
-  fetch('/calculate', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({pseudo: currentUser, date: date, action: 'gochara'})
-  })
-  .then(r => r.json())
-  .then(data => {
-    showLoading(false);
-    if (data.error) {
-      setStatus(data.error);
-    } else {
-      if (data.accroche) {
-        document.getElementById('accroche-content').textContent = data.accroche;
-        document.getElementById('accroche-box').style.display = 'block';
-      }
-      if (data.synthesis || data.reply) {
-        const text = data.synthesis || data.reply;
-        lastSynthesisText = text;
-        document.getElementById('synthesis-content').innerHTML = marked.parse(text);
-        document.getElementById('synthesis-box').style.display = 'block';
-        document.getElementById('action-row').style.display = 'flex';
-      }
-    }
-  })
-  .catch(e => { showLoading(false); setStatus('Erreur réseau.'); });
-}
-
-// ── EMAIL ──
-function sendEmail() {
-  if (!lastSynthesisText) return;
-  showLoading(true);
-  fetch('/send_synthesis', {
-    method: 'POST',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      pseudo: currentUser,
-      synthesis: lastSynthesisText,
-      date: lastTransitDate
-    })
-  })
-  .then(r => r.json())
-  .then(data => {
-    showLoading(false);
-    setStatus(data.message || data.error || '');
-  })
-  .catch(() => { showLoading(false); });
-}
-
-// ── UTILS ──
-function showLoading(show) {
-  document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
-}
-
-function setStatus(msg) {
-  document.getElementById('status-msg').textContent = msg;
-}
-
-// ── SESSION CHECK ──
-{% if session_user %}
-currentUser = "{{ session_user }}";
-showApp(currentUser);
-{% endif %}
-
-// ── SW ──
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/static/sw.js')
-      .catch(e => console.log('SW error', e));
-  });
-}
-
-// ── ENTER KEY ──
-document.addEventListener('keydown', e => {
-  if (e.key === 'Enter') {
-    if (document.getElementById('hero-section').style.display !== 'none') login();
-  }
-});
+}, { threshold: 0.1 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 </script>
 </body>
 </html>
