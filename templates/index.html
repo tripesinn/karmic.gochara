@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="fr">
+<html lang="{{ lang.code }}">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -506,6 +506,14 @@ const observer = new IntersectionObserver(entries => {
   });
 }, { threshold: 0.1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+</script>
+  <script>
+// Vérification de la session au chargement
+{% if session_user %}
+  const currentUser = "{{ session_user }}";
+  // Ici, assure-toi d'appeler la fonction qui affiche ton app
+  console.log("Utilisateur connecté :", currentUser);
+{% endif %}
 </script>
 </body>
 </html>
