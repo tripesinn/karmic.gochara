@@ -390,9 +390,10 @@ def index():
         now_hour=now.hour,
         now_minute=now.minute,
         lang=lang,
-        all_langs=list(LANGS.values()),
+        ui=lang,  # On utilise 'lang' pour remplir 'ui'
+        langs=LANGS,  # On envoie le dictionnaire complet pour la boucle for
+        session_user=session.get('pseudo', '')
     )
-
 
 @app.route("/set_lang", methods=["POST"])
 def set_lang():
