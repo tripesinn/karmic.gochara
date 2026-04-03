@@ -2,6 +2,25 @@
 <html lang="{{ lang.code }}">
 <head>
 <meta charset="UTF-8">
+<!-- PWA -->
+<link rel="manifest" href="/static/manifest.json">
+<meta name="theme-color" content="#1a1a2e">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Karmic Gochara">
+<link rel="apple-touch-icon" href="/static/icons/icon-192.png">
+
+<!-- SW registration -->
+<script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/static/sw.js')
+        .then(r => console.log('SW registered'))
+        .catch(e => console.log('SW error', e));
+    });
+  }
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✦ Karmic Gochara — @siderealAstro13</title>
 <style>
