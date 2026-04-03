@@ -2,1155 +2,829 @@
 <html lang="{{ lang.code }}">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- PWA -->
 <link rel="manifest" href="/static/manifest.json">
-<meta name="theme-color" content="#1a1a2e">
+<meta name="theme-color" content="#0a0a08">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="Karmic Gochara">
 <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
-
-<!-- SW registration -->
-<script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('/static/sw.js')
-        .then(r => console.log('SW registered'))
-        .catch(e => console.log('SW error', e));
-    });
-  }
-</script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>✦ Karmic Gochara — @siderealAstro13</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
-/* ═══════════════════════════════════════════════════════════════
-   WINDOWS 3.1 THEME — Gochara Karmique · @siderealAstro13
-═══════════════════════════════════════════════════════════════ */
+:root {
+  --bg: #0a0a08;
+  --bg2: #111110;
+  --bg3: #1a1a17;
+  --gold: #c9a84c;
+  --gold-dim: #8a6f2e;
+  --gold-light: #e8c97a;
+  --text: #e8e4d8;
+  --text-dim: #8a8678;
+  --text-muted: #4a4840;
+  --border: #2a2820;
+  --border-gold: rgba(201,168,76,0.2);
+  --serif: 'Cormorant Garamond', Georgia, serif;
+  --display: 'Cinzel', serif;
+  --body: 'EB Garamond', Georgia, serif;
+  --radius: 2px;
+}
+
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
+html { scroll-behavior: smooth; }
+
 body {
-  background: #008080;
-  font-family: "MS Sans Serif", "Segoe UI", Arial, sans-serif;
-  font-size: 12px;
-  color: #000;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--body);
+  font-size: 18px;
+  line-height: 1.7;
   min-height: 100vh;
-  padding: 6px;
+  overflow-x: hidden;
 }
 
-/* ── Window chrome ── */
-.win {
-  background: #c0c0c0;
-  border: 2px solid;
-  border-color: #fff #808080 #808080 #fff;
-  box-shadow: 1px 1px 0 #000;
-  margin-bottom: 6px;
-}
-.winbody { padding: 8px; }
-
-/* ── Title bars ── */
-.titlebar {
-  background: linear-gradient(90deg, #000080 0%, #1084d0 100%);
-  color: #fff; font-weight: bold; font-size: 11px;
-  padding: 3px 5px 3px 7px;
-  display: flex; align-items: center; justify-content: space-between;
-  user-select: none; cursor: default;
-}
-.titlebar.purple { background: linear-gradient(90deg, #4b0082 0%, #800080 100%); }
-.titlebar.green  { background: linear-gradient(90deg, #005000 0%, #228B22 100%); }
-.titlebar.teal   { background: linear-gradient(90deg, #005060 0%, #008080 100%); }
-.titlebar.gold   { background: linear-gradient(90deg, #5a3000 0%, #b8860b 100%); }
-.titlebar-title  { display: flex; align-items: center; gap: 5px; }
-.titlebar-btns   { display: flex; gap: 2px; }
-.tbtn {
-  width: 16px; height: 14px; background: #c0c0c0;
-  border: 1px solid; border-color: #fff #808080 #808080 #fff;
-  font-size: 9px; cursor: pointer;
-  display: flex; align-items: center; justify-content: center;
+/* ── NOISE OVERLAY ── */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.4;
 }
 
-/* ── Sunken input / display ── */
-.sunken {
-  background: #fff;
-  border: 2px solid; border-color: #808080 #fff #fff #808080;
-  padding: 3px 5px;
-}
-input.sunken, select.sunken {
-  font-family: inherit; font-size: 12px;
-  outline: none; width: 100%;
-}
-
-/* ── Buttons ── */
-.btn {
-  background: #c0c0c0;
-  border: 2px solid; border-color: #fff #808080 #808080 #fff;
-  padding: 3px 12px; font-family: inherit; font-size: 12px;
-  cursor: pointer; white-space: nowrap;
-}
-.btn:active { border-color: #808080 #fff #fff #808080; }
-.btn.primary {
-  background: #000080; color: #fff; font-weight: bold;
-  border-color: #6666cc #000033 #000033 #6666cc;
-}
-.btn.primary:active { border-color: #000033 #6666cc #6666cc #000033; }
-.btn:disabled { color: #808080; cursor: default; }
-
-/* ── Screens ── */
-.screen { display: none; }
-.screen.visible { display: block; }
-
-/* ── Natal badge ── */
-.natal-badge {
-  display: inline-flex; gap: 6px; flex-wrap: wrap;
-  background: #000080; color: #fff;
-  padding: 2px 8px; font-size: 11px;
-  border: 1px solid #fff; cursor: default;
-}
-.natal-badge span { opacity: .75; }
-.natal-badge strong { opacity: 1; }
-.sep { opacity: .4 !important; }
-
-/* ── Réglages row ── */
-.reglages-badge {
-  display: inline-flex; gap: 4px; flex-wrap: wrap;
-  background: #c0c0c0; color: #000;
-  padding: 2px 8px; font-size: 11px; border: 1px inset #808080;
+/* ── HEADER ── */
+header {
+  position: fixed;
+  top: 0; left: 0; right: 0;
+  z-index: 100;
+  padding: 1rem 1.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(to bottom, rgba(10,10,8,0.95), transparent);
 }
 
-/* ── Toolbar row ── */
-.toolbar {
-  display: flex; align-items: center; gap: 6px;
-  flex-wrap: wrap; padding: 4px 0;
-}
-.toolbar label { white-space: nowrap; }
-.toolbar input[type="date"],
-.toolbar input[type="number"] {
-  font-family: inherit; font-size: 12px;
-  background: #fff; border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  padding: 1px 4px;
-}
-.toolbar input[type="number"] { width: 46px; }
-
-/* ── Tabs ── */
-.tabs-bar {
-  display: flex; gap: 2px; padding: 4px 4px 0;
-  border-bottom: 2px solid #808080;
-}
-.tab-btn {
-  background: #c0c0c0;
-  border: 2px solid; border-color: #fff #808080 #808080 #fff;
-  border-bottom: none; padding: 3px 14px;
-  font-family: inherit; font-size: 12px; cursor: pointer;
-  position: relative; top: 2px;
-}
-.tab-btn.active {
-  background: #c0c0c0; border-bottom: 2px solid #c0c0c0;
-  font-weight: bold; top: 2px; z-index: 1;
-}
-.tab-panel { display: none; padding: 6px; }
-.tab-panel.active { display: block; }
-
-/* ── Synthesis ── */
-#synthesis {
-  min-height: 300px; max-height: 600px;
-  overflow-y: auto; padding: 10px;
-  background: #fff; border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-  line-height: 1.6;
-  font-size: 12px;
-}
-#synthesis h1,#synthesis h2 { color:#4b0082; font-size:13px; margin:8px 0 4px; }
-#synthesis h3 { color:#800080; font-size:12px; margin:6px 0 3px; }
-#synthesis strong { color:#000080; }
-#synthesis em { color:#5a3000; }
-#synthesis p { margin-bottom:6px; }
-#synthesis hr { border:none; border-top:1px solid #c0c0c0; margin:8px 0; }
-
-/* ── Loading indicator ── */
-@keyframes win-blink { 0%,100%{opacity:1} 50%{opacity:.3} }
-@keyframes win-bar   { 0%{width:0%} 100%{width:100%} }
-@keyframes spin      { to{transform:rotate(360deg)} }
-
-#loading-indicator { display:none; padding:16px 10px; text-align:center; }
-#loading-indicator.visible { display:block; }
-.load-title { color:#4b0082; font-weight:bold; font-size:12px; margin-bottom:10px; }
-.load-bar-wrap {
-  background:#808080; border:2px solid;
-  border-color:#808080 #fff #fff #808080;
-  height:16px; margin-bottom:10px; overflow:hidden;
-}
-.load-bar-inner {
-  height:100%; background:linear-gradient(90deg,#000080,#800080);
-  animation:win-bar 3s ease-in-out infinite alternate;
-}
-.load-steps { display:flex; flex-direction:column; gap:4px; }
-.load-step {
-  font-size:11px; color:#808080; opacity:.4; transition:all .3s;
-  display:flex; align-items:center; gap:6px;
-}
-.load-step.active  { color:#000080; opacity:1; font-weight:bold; }
-.load-step.done    { color:#005000; opacity:.7; }
-.load-step::before { content:"○"; font-size:10px; }
-.load-step.active::before { content:"►"; animation:win-blink .8s infinite; }
-.load-step.done::before   { content:"✓"; }
-.load-spinner {
-  display:inline-block; width:10px; height:10px;
-  border:2px solid #c0c0c0; border-top-color:#000080;
-  border-radius:50%; animation:spin .6s linear infinite; margin-left:4px;
+.header-brand {
+  font-family: var(--display);
+  font-size: 0.75rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
 }
 
-/* ── Aspects table ── */
-.aspects-wrap {
-  max-height: 320px; overflow-y: auto;
-  background: #fff; border: 2px solid;
-  border-color: #808080 #fff #fff #808080;
-}
-.aspects-wrap table {
-  width: 100%; border-collapse: collapse; font-size: 11px;
-}
-.aspects-wrap th {
-  background: #000080; color: #fff;
-  padding: 3px 6px; text-align: left; position: sticky; top: 0;
-}
-.aspects-wrap td { padding: 2px 6px; border-bottom: 1px solid #e0e0e0; }
-.aspects-wrap tr:nth-child(even) td { background: #f4f4f4; }
-.asp-conj { color: #000080; font-weight: bold; }
-.asp-oppo { color: #800000; font-weight: bold; }
-.asp-trig { color: #006000; font-weight: bold; }
-.asp-carr { color: #cc0000; font-weight: bold; }
-.asp-sext { color: #005080; }
-.retro    { color: #800000; font-size: 10px; }
-
-/* ── Carte Karmique SVG ── */
-#karma-map-svg {
-  display: block; margin: 0 auto;
-  max-width: 520px; width: 100%;
-}
-.quadrant-panels {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 6px; margin-top: 8px;
-}
-.quadrant-panel {
-  border: 2px solid; border-color: #808080 #fff #fff #808080;
-  background: #f8f8f8; padding: 4px 8px;
-}
-.quadrant-panel h4 {
-  font-size: 11px; font-weight: bold; margin-bottom: 2px;
-}
-.quadrant-panel ul { list-style: none; padding: 0; margin: 0; font-size: 11px; }
-.quadrant-panel ul li { padding: 1px 0; border-bottom: 1px dotted #ccc; }
-
-/* ── Login screen ── */
-.login-wrap {
-  max-width: 360px; margin: 40px auto;
-}
-.login-logo {
-  text-align: center; padding: 12px;
-  font-size: 22px; font-weight: bold; color: #fff;
-  text-shadow: 1px 1px 0 #000;
-}
-.login-subtitle { text-align: center; color: #c0c0c0; font-size: 11px; margin-bottom: 10px; }
-.login-error {
-  background: #800000; color: #fff;
-  padding: 4px 8px; margin-bottom: 6px;
-  display: none; font-size: 11px;
+.header-tag {
+  font-family: var(--serif);
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  letter-spacing: 0.1em;
 }
 
-/* ── Register screen ── */
-.reg-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 4px 10px; align-items: center;
+/* ── LANG SELECT ── */
+#lang-select {
+  background: transparent;
+  border: 1px solid var(--border-gold);
+  color: var(--gold);
+  font-family: var(--display);
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  padding: 0.3rem 0.6rem;
+  cursor: pointer;
+  border-radius: var(--radius);
+  appearance: none;
 }
-.reg-grid label { white-space: nowrap; text-align: right; }
-.reg-error {
-  background: #800000; color: #fff;
-  padding: 4px 8px; margin-bottom: 6px;
-  display: none; font-size: 11px;
-}
-.geo-results {
-  background: #fff; border: 1px solid #808080;
-  max-height: 120px; overflow-y: auto;
-  display: none; position: absolute; z-index: 10;
-  width: calc(100% - 2px);
-}
-.geo-item {
-  padding: 3px 6px; cursor: pointer; font-size: 11px;
-}
-.geo-item:hover { background: #000080; color: #fff; }
-.geo-wrap { position: relative; }
+#lang-select option { background: var(--bg2); }
 
-/* ── Statusbar ── */
-.statusbar {
-  display: flex; gap: 2px; padding: 2px 4px;
-  border-top: 2px solid #808080; background: #c0c0c0;
-  margin-top: 4px;
-}
-.statpanel {
-  flex: 1; background: #c0c0c0;
-  border: 1px solid; border-color: #808080 #fff #fff #808080;
-  padding: 1px 6px; font-size: 11px;
-  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-}
-.statpanel.fixed { flex: 0 0 auto; }
-
-/* ── Sélecteur de langue ── */
-.lang-select {
-  background: #c0c0c0;
-  border: 2px solid; border-color: #fff #808080 #808080 #fff;
-  font-family: inherit; font-size: 11px;
-  padding: 2px 4px; cursor: pointer;
+/* ── HERO ── */
+.hero {
+  min-height: 100svh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6rem 2rem 4rem;
+  position: relative;
 }
 
-/* ── Bouton flottant Buy me a coffee ── */
-#btn-coffee {
-  position: fixed; bottom: 18px; right: 18px; z-index: 999;
-  background: #d4a017; color: #000;
-  border: 2px solid; border-color: #ffe080 #806000 #806000 #ffe080;
-  padding: 6px 14px; font-family: inherit; font-size: 12px;
-  font-weight: bold; cursor: pointer;
-  box-shadow: 2px 2px 0 #000;
-  text-decoration: none; display: inline-block;
+.hero-sigil {
+  width: 80px;
+  height: 80px;
+  margin-bottom: 2rem;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 0.2s;
 }
-#btn-coffee:hover { background: #e8b820; }
 
-/* ── Misc ── */
-.loading { color: #808080; font-style: italic; }
-.row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
-.hidden { display: none !important; }
+.hero-eyebrow {
+  font-family: var(--display);
+  font-size: 0.6rem;
+  letter-spacing: 0.3em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 1.5rem;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 0.4s;
+}
+
+.hero-title {
+  font-family: var(--display);
+  font-size: clamp(2rem, 8vw, 3.5rem);
+  font-weight: 400;
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+  color: var(--text);
+  margin-bottom: 0.5rem;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 0.6s;
+}
+
+.hero-title em {
+  font-family: var(--serif);
+  font-style: italic;
+  color: var(--gold);
+  font-weight: 300;
+}
+
+.hero-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-dim);
+  margin-bottom: 2.5rem;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 0.8s;
+}
+
+.hero-divider {
+  width: 60px;
+  height: 1px;
+  background: var(--gold-dim);
+  margin: 0 auto 2.5rem;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 1s;
+}
+
+.hero-doctrine {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1rem;
+  color: var(--text-dim);
+  line-height: 2;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 1.2s;
+}
+
+.hero-doctrine span { color: var(--gold); }
+
+/* ── LOGIN SECTION ── */
+#login-section {
+  padding: 4rem 1.5rem 6rem;
+  max-width: 420px;
+  margin: 0 auto;
+  opacity: 0;
+  animation: fadeUp 1s ease forwards 1.4s;
+}
+
+.login-card {
+  border: 1px solid var(--border-gold);
+  border-radius: var(--radius);
+  padding: 2.5rem 2rem;
+  background: rgba(17,17,16,0.8);
+  backdrop-filter: blur(10px);
+}
+
+.login-label {
+  font-family: var(--display);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  display: block;
+  margin-bottom: 0.75rem;
+}
+
+.login-input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+  margin-bottom: 1.5rem;
+}
+.login-input:focus { border-color: var(--gold-dim); }
+.login-input::placeholder { color: var(--text-muted); }
+
+.btn-row {
+  display: flex;
+  gap: 0.75rem;
+}
+
+.btn-primary {
+  flex: 1;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  padding: 0.85rem 1rem;
+  font-family: var(--display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.2s, opacity 0.2s;
+}
+.btn-primary:hover { background: var(--gold-light); }
+
+.btn-secondary {
+  flex: 1;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  padding: 0.85rem 1rem;
+  font-family: var(--display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: border-color 0.2s, color 0.2s;
+}
+.btn-secondary:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+#login-error {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: #c97a6b;
+  text-align: center;
+  margin-top: 1rem;
+  min-height: 1.4em;
+}
+
+/* ── MAIN APP ── */
+#app-section { display: none; padding: 5rem 0 4rem; }
+
+/* ── USER BAR ── */
+.user-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 1.5rem 2rem;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2rem;
+}
+
+.user-name {
+  font-family: var(--display);
+  font-size: 0.65rem;
+  letter-spacing: 0.2em;
+  color: var(--gold);
+  text-transform: uppercase;
+}
+
+.btn-logout {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-family: var(--display);
+  font-size: 0.55rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.8rem;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+.btn-logout:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+/* ── DATE PICKER ── */
+.date-section {
+  padding: 0 1.5rem 2rem;
+}
+
+.section-label {
+  font-family: var(--display);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+  display: block;
+}
+
+.date-input {
+  width: 100%;
+  background: var(--bg2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.85rem 1rem;
+  color: var(--text);
+  font-family: var(--serif);
+  font-size: 1rem;
+  outline: none;
+  transition: border-color 0.3s;
+  color-scheme: dark;
+  margin-bottom: 1rem;
+}
+.date-input:focus { border-color: var(--gold-dim); }
+
+.btn-calculate {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border-gold);
+  color: var(--gold);
+  padding: 1rem;
+  font-family: var(--display);
+  font-size: 0.65rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.3s;
+}
+.btn-calculate:hover { background: rgba(201,168,76,0.08); }
+
+/* ── SYNTHESIS ── */
+.synthesis-section {
+  padding: 0 1.5rem;
+}
+
+#accroche-box {
+  display: none;
+  border-left: 2px solid var(--gold);
+  padding: 1.5rem;
+  margin-bottom: 2rem;
+  background: rgba(201,168,76,0.04);
+  border-radius: 0 var(--radius) var(--radius) 0;
+  animation: fadeIn 0.8s ease;
+}
+
+.accroche-text {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 1.1rem;
+  color: var(--gold-light);
+  line-height: 1.8;
+}
+
+#synthesis-box {
+  display: none;
+  animation: fadeIn 0.8s ease;
+}
+
+.synthesis-content {
+  font-family: var(--body);
+  font-size: 1rem;
+  color: var(--text);
+  line-height: 1.9;
+}
+
+.synthesis-content h1,
+.synthesis-content h2,
+.synthesis-content h3 {
+  font-family: var(--display);
+  font-weight: 400;
+  letter-spacing: 0.1em;
+  color: var(--gold);
+  margin: 2rem 0 1rem;
+  font-size: 0.9rem;
+  text-transform: uppercase;
+}
+
+.synthesis-content p { margin-bottom: 1.2rem; }
+
+.synthesis-content strong { color: var(--gold-light); font-weight: 400; }
+
+.synthesis-content em { font-style: italic; color: var(--text-dim); }
+
+/* ── ACTIONS ── */
+.action-row {
+  display: none;
+  gap: 0.75rem;
+  padding: 2rem 1.5rem;
+  flex-direction: column;
+}
+
+.btn-action {
+  width: 100%;
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 0.85rem 1rem;
+  font-family: var(--display);
+  font-size: 0.6rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: all 0.2s;
+}
+.btn-action:hover { border-color: var(--gold-dim); color: var(--gold); }
+
+/* ── LOADING ── */
+#loading-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(10,10,8,0.85);
+  z-index: 200;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 1.5rem;
+  backdrop-filter: blur(4px);
+}
+
+.loading-sigil {
+  width: 60px;
+  height: 60px;
+  animation: rotateSlow 8s linear infinite;
+}
+
+.loading-text {
+  font-family: var(--display);
+  font-size: 0.65rem;
+  letter-spacing: 0.3em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+}
+
+/* ── STATUS ── */
+#status-msg {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  text-align: center;
+  padding: 1rem 1.5rem;
+  min-height: 1.5em;
+}
+
+/* ── FOOTER ── */
+footer {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border-top: 1px solid var(--border);
+  margin-top: 2rem;
+}
+
+.footer-brand {
+  font-family: var(--display);
+  font-size: 0.6rem;
+  letter-spacing: 0.25em;
+  color: var(--gold-dim);
+  text-transform: uppercase;
+  margin-bottom: 0.5rem;
+}
+
+.footer-sub {
+  font-family: var(--serif);
+  font-style: italic;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* ── BMC ── */
+.bmc-btn {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  z-index: 50;
+  background: var(--gold);
+  color: var(--bg);
+  border: none;
+  padding: 0.6rem 1rem;
+  font-family: var(--display);
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  cursor: pointer;
+  border-radius: 2rem;
+  text-decoration: none;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  box-shadow: 0 4px 20px rgba(201,168,76,0.2);
+  transition: opacity 0.2s;
+}
+.bmc-btn:hover { opacity: 0.85; }
+
+/* ── ANIMATIONS ── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes rotateSlow {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
+}
+
+/* ── SW ── */
 </style>
-<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
 
-<!-- ═══════════════ FENÊTRE PRINCIPALE ═══════════════ -->
-<div class="win" id="main-win">
-  <div class="titlebar">
-    <div class="titlebar-title">✦ {{ lang.title }}</div>
-    <div class="titlebar-btns" style="align-items:center;gap:6px;">
-      <select class="lang-select" id="lang-selector" onchange="setLang(this.value)">
-        {% for l in all_langs %}
-        <option value="{{ l.code }}" {% if l.code == lang.code %}selected{% endif %}>{{ l.label }}</option>
-        {% endfor %}
-      </select>
-      <div class="tbtn">_</div>
-      <div class="tbtn">□</div>
-      <div class="tbtn">✕</div>
+<header>
+  <div>
+    <div class="header-brand">Karmic Gochara</div>
+    <div class="header-tag">@siderealAstro13</div>
+  </div>
+  <select id="lang-select" onchange="setLang(this.value)">
+    {% for code, label in langs.items() %}
+    <option value="{{ code }}" {% if code == lang.code %}selected{% endif %}>{{ label }}</option>
+    {% endfor %}
+  </select>
+</header>
+
+<!-- LOADING -->
+<div id="loading-overlay">
+  <svg class="loading-sigil" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="40" cy="40" r="36" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="4 6" opacity="0.4"/>
+    <circle cx="40" cy="40" r="26" stroke="#c9a84c" stroke-width="0.8" opacity="0.6"/>
+    <circle cx="40" cy="40" r="16" stroke="#c9a84c" stroke-width="0.8" opacity="0.8"/>
+    <line x1="40" y1="4" x2="40" y2="76" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+    <line x1="4" y1="40" x2="76" y2="40" stroke="#c9a84c" stroke-width="0.5" opacity="0.3"/>
+    <circle cx="40" cy="4" r="2" fill="#c9a84c"/>
+    <circle cx="40" cy="76" r="2" fill="#c9a84c" opacity="0.4"/>
+    <circle cx="4" cy="40" r="2" fill="#c9a84c" opacity="0.4"/>
+    <circle cx="76" cy="40" r="2" fill="#c9a84c"/>
+  </svg>
+  <div class="loading-text">{{ ui.calculating if ui else 'Lecture des astres…' }}</div>
+</div>
+
+<!-- HERO + LOGIN -->
+<div id="hero-section">
+  <section class="hero">
+    <!-- Sigil SVG -->
+    <svg class="hero-sigil" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="40" cy="40" r="36" stroke="#c9a84c" stroke-width="0.8" stroke-dasharray="4 8" opacity="0.5"/>
+      <circle cx="40" cy="40" r="26" stroke="#c9a84c" stroke-width="0.8" opacity="0.7"/>
+      <line x1="40" y1="14" x2="40" y2="66" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
+      <line x1="14" y1="40" x2="66" y2="40" stroke="#c9a84c" stroke-width="0.5" opacity="0.4"/>
+      <circle cx="40" cy="40" r="3" fill="#c9a84c" opacity="0.9"/>
+      <circle cx="40" cy="14" r="1.5" fill="#c9a84c" opacity="0.6"/>
+      <circle cx="40" cy="66" r="1.5" fill="#c9a84c" opacity="0.4"/>
+    </svg>
+
+    <div class="hero-eyebrow">@siderealAstro13 · Doctrine Évolutive Synthétique</div>
+
+    <h1 class="hero-title">Ton <em>Karma</em><br>écrit dans les étoiles</h1>
+
+    <p class="hero-sub">Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa</p>
+
+    <div class="hero-divider"></div>
+
+    <div class="hero-doctrine">
+      Ton <span>Ketu</span> révèle la prison de mémoires passées.<br>
+      Ton <span>Chiron</span> est la clé qui ouvre la porte.<br>
+      Ton <span>Stage</span> est la scène qui t'attend.
+    </div>
+  </section>
+
+  <!-- LOGIN -->
+  <section id="login-section">
+    <div class="login-card">
+      <label class="login-label" for="pseudo-input">{{ ui.pseudo_label if ui else 'Ton pseudo' }}</label>
+      <input
+        id="pseudo-input"
+        class="login-input"
+        type="text"
+        placeholder="{{ ui.pseudo_placeholder if ui else 'Entre ton pseudo…' }}"
+        autocomplete="username"
+        autofocus
+      >
+      <div class="btn-row">
+        <button class="btn-primary" onclick="login()">{{ ui.login if ui else 'Connexion' }}</button>
+        <button class="btn-secondary" onclick="createProfile()">{{ ui.create if ui else 'Créer un profil' }}</button>
+      </div>
+      <div id="login-error"></div>
+    </div>
+  </section>
+</div>
+
+<!-- APP -->
+<div id="app-section">
+  <div class="user-bar">
+    <div class="user-name" id="display-pseudo"></div>
+    <button class="btn-logout" onclick="logout()">{{ ui.logout if ui else 'Déconnexion' }}</button>
+  </div>
+
+  <div class="date-section">
+    <label class="section-label" for="transit-date">{{ ui.transit_date if ui else 'Date de transit' }}</label>
+    <input type="date" id="transit-date" class="date-input">
+    <button class="btn-calculate" onclick="calculate()">
+      ✦ {{ ui.calculate if ui else 'Lire les transits' }}
+    </button>
+  </div>
+
+  <div id="status-msg"></div>
+
+  <div class="synthesis-section">
+    <div id="accroche-box">
+      <div class="accroche-text" id="accroche-content"></div>
+    </div>
+    <div id="synthesis-box">
+      <div class="synthesis-content" id="synthesis-content"></div>
     </div>
   </div>
 
-  <!-- ════════════ ÉCRAN LOGIN ════════════ -->
-  <div class="screen visible" id="login-screen">
-    <div class="winbody login-wrap">
-      <div class="login-logo">✦ Karmic Gochara</div>
-      <div class="login-subtitle">@siderealAstro13 · Jyotish · Chandra Lagna</div>
-      <div class="win">
-        <div class="titlebar purple">
-          <div class="titlebar-title">✦ Karmic Gochara</div>
-        </div>
-        <div class="winbody">
-          <div class="login-error" id="login-error"></div>
-          <div class="row" style="margin-bottom:6px;">
-            <label for="pseudo-input" style="white-space:nowrap;">{{ lang.pseudo }}</label>
-            <input type="text" id="pseudo-input" class="sunken" placeholder="{{ lang.pseudo_ph }}"
-                   style="flex:1;" onkeydown="if(event.key==='Enter')doLogin()">
-          </div>
-          <div class="row" style="justify-content:flex-end; gap:6px;">
-            <button class="btn" onclick="showRegister()">{{ lang.create_profile }}</button>
-            <button class="btn primary" onclick="doLogin()">{{ lang.connect }}</button>
-          </div>
-          <div id="login-status" style="font-size:11px;color:#808080;margin-top:4px;"></div>
-        </div>
-      </div>
-    </div>
+  <div class="action-row" id="action-row">
+    <button class="btn-action" onclick="sendEmail()">✉ {{ ui.send_email if ui else 'Recevoir par email' }}</button>
   </div>
+</div>
 
-  <!-- ════════════ ÉCRAN INSCRIPTION ════════════ -->
-  <div class="screen" id="register-screen">
-    <div class="winbody" style="max-width:520px;margin:0 auto;">
-      <div class="win">
-        <div class="titlebar green">
-          <div class="titlebar-title">{{ lang.karmic_profile }}</div>
-        </div>
-        <div class="winbody">
-          <div class="reg-error" id="reg-error"></div>
-          <div class="reg-grid">
-            <label>{{ lang.pseudo }}</label>
-            <input type="text" id="reg-pseudo" class="sunken" placeholder="pseudo unique">
+<footer>
+  <div class="footer-brand">Karmic Gochara</div>
+  <div class="footer-sub">@siderealAstro13 · Doctrine Évolutive Synthétique</div>
+</footer>
 
-            <label>{{ lang.firstname }}</label>
-            <input type="text" id="reg-name" class="sunken" placeholder="Prénom">
-
-            <label>{{ lang.email }}</label>
-            <input type="email" id="reg-email" class="sunken" placeholder="email@…">
-
-            <label>{{ lang.birthdate }}</label>
-            <div class="row">
-              <input type="number" id="reg-day"   class="sunken" placeholder="JJ" min="1" max="31" style="width:50px;">
-              <input type="number" id="reg-month" class="sunken" placeholder="MM" min="1" max="12" style="width:50px;">
-              <input type="number" id="reg-year"  class="sunken" placeholder="AAAA" min="1900" max="2099" style="width:70px;">
-            </div>
-
-            <label>{{ lang.birthtime }}</label>
-            <div class="row">
-              <input type="number" id="reg-hour"   class="sunken" placeholder="HH" min="0" max="23" style="width:50px;">
-              <span>h</span>
-              <input type="number" id="reg-minute" class="sunken" placeholder="MM" min="0" max="59" style="width:50px;">
-            </div>
-
-            <label>{{ lang.birthcity }}</label>
-            <div class="geo-wrap" style="grid-column:2;">
-              <input type="text" id="reg-city-input" class="sunken"
-                     placeholder="{{ lang.city_ph }}"
-                     oninput="geocodeField(this,'reg-geo-results','reg-natal-city','reg-natal-lat','reg-natal-lon','reg-natal-tz')">
-              <div class="geo-results" id="reg-geo-results"></div>
-              <input type="hidden" id="reg-natal-city">
-              <input type="hidden" id="reg-natal-lat">
-              <input type="hidden" id="reg-natal-lon">
-              <input type="hidden" id="reg-natal-tz">
-            </div>
-          </div>
-          <div class="row" style="justify-content:flex-end;gap:6px;margin-top:8px;">
-            <button class="btn" onclick="showLogin()">{{ lang.back }}</button>
-            <button class="btn primary" onclick="doRegister()">{{ lang.create }}</button>
-          </div>
-          <div id="reg-status" style="font-size:11px;color:#808080;margin-top:4px;"></div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ════════════ ÉCRAN APPLICATION ════════════ -->
-  <div class="screen" id="app-screen">
-
-    <!-- Bandeau natal -->
-    <div class="winbody" style="padding-bottom:0;">
-      <div class="row" style="gap:8px;flex-wrap:wrap;align-items:center;">
-        <div class="natal-badge" id="natal-badge">
-          <strong id="pseudo-badge">—</strong>
-          <span class="sep">·</span>
-          <span id="natal-summary">—</span>
-        </div>
-        <div class="reglages-badge">
-          {{ lang.settings }}&nbsp;
-          <span>Ayanamsa : Djwhal Khul</span> ·
-          <span>Moonrise (Chandra Lagna)</span> ·
-          <span>Nodes True</span> ·
-          <span>Orbe : &lt; 3°</span>
-        </div>
-        <button class="btn" style="margin-left:auto;" onclick="doLogout()">{{ lang.logout }}</button>
-      </div>
-    </div>
-
-    <!-- Barre transit -->
-    <div class="winbody" style="padding-top:4px;padding-bottom:0;">
-      <div class="win">
-        <div class="titlebar teal">
-          <div class="titlebar-title">{{ lang.transit_title }}</div>
-        </div>
-        <div class="winbody">
-          <div class="toolbar">
-            <label>{{ lang.date }}</label>
-            <input type="date" id="t-date" class="sunken">
-            <label>{{ lang.hour }}</label>
-            <input type="number" id="t-hour" class="sunken" min="0" max="23" value="{{ now_hour }}">
-            <label>h</label>
-            <input type="number" id="t-minute" class="sunken" min="0" max="59" value="{{ now_minute }}">
-            <label>{{ lang.min }}</label>
-
-            <div class="geo-wrap" style="position:relative;">
-              <input type="text" id="transit-city-display" class="sunken"
-                     placeholder="{{ lang.transit_ph }}" style="width:180px;"
-                     oninput="geocodeField(this,'transit-geo-results','transit-city-val','transit-lat-val','transit-lon-val','transit-tz-val')">
-              <div class="geo-results" id="transit-geo-results"></div>
-              <input type="hidden" id="transit-city-val">
-              <input type="hidden" id="transit-lat-val">
-              <input type="hidden" id="transit-lon-val">
-              <input type="hidden" id="transit-tz-val">
-            </div>
-
-            <button class="btn primary" id="calc-btn" onclick="calculateTransits()">{{ lang.calculate }}</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── ONGLETS ── -->
-    <div class="winbody" style="padding-top:4px;">
-      <div class="tabs-bar">
-        <button class="tab-btn active" id="tab-btn-gochara" onclick="switchTab('gochara')">{{ lang.tab_gochara }}</button>
-        <button class="tab-btn hidden"  id="tab-btn-carte"  onclick="switchTab('carte')">{{ lang.tab_carte }}</button>
-      </div>
-
-      <!-- ── Tab : Gochara ── -->
-      <div class="tab-panel active" id="tab-gochara">
-        <div class="win">
-          <div class="titlebar purple">
-            <div class="titlebar-title">{{ lang.synthesis_title }}</div>
-          </div>
-          <div class="winbody" style="padding:0;">
-
-            <!-- ← LOADING INDICATOR (remplace le vide pendant le calcul) -->
-            <div id="loading-indicator">
-              <div class="load-title">⚙ Calcul en cours<span class="load-spinner"></span></div>
-              <div class="load-bar-wrap"><div class="load-bar-inner"></div></div>
-              <div class="load-steps">
-                <div class="load-step" id="ls-1">Calcul des éphémérides sidérales</div>
-                <div class="load-step" id="ls-2">Analyse des aspects (orbe &lt; 3°)</div>
-                <div class="load-step" id="ls-3">Lecture des Nakshatras &amp; cycles nodaux</div>
-                <div class="load-step" id="ls-4">Synthèse karmique @siderealAstro13</div>
-              </div>
-            </div>
-
-            <div id="synthesis"><span class="loading">{{ lang.synthesis_wait }}</span></div>
-          </div>
-        </div>
-
-        <!-- Barre actions audio + email -->
-        <div class="row" style="margin-top:8px;gap:6px;flex-wrap:wrap;">
-          <button id="btnAudio" class="btn" onclick="toggleAudio()">{{ lang.listen }}</button>
-          <input type="range" id="speedSlider" min="0.6" max="1.8" step="0.1" value="1.0"
-            style="width:100px;vertical-align:middle;"
-            oninput="document.getElementById('speedVal').textContent=parseFloat(this.value).toFixed(1)+'x'"/>
-          <span id="speedVal" style="font-size:11px;">1.0x</span>
-
-          <button id="btnEmail" class="btn" onclick="sendSynthesisEmail()" style="margin-left:8px;">
-            {{ lang.send_email }}
-          </button>
-          <span id="email-status" style="font-size:11px;color:#808080;"></span>
-        </div>
-      </div>
-
-      <!-- ── Tab : Carte Karmique ── -->
-      <div class="tab-panel" id="tab-carte">
-
-        <div class="win">
-          <div class="titlebar green">
-            <div class="titlebar-title">{{ lang.carte_title }}</div>
-          </div>
-          <div class="winbody">
-            <svg id="karma-map-svg" viewBox="0 0 560 560"
-                 xmlns="http://www.w3.org/2000/svg">
-              <circle cx="280" cy="280" r="275" fill="#f8f8f8" stroke="#808080" stroke-width="1"/>
-              <text x="280" y="286" text-anchor="middle" font-size="14" fill="#808080"
-                    font-family="MS Sans Serif, Arial">{{ lang.map_wait }}</text>
-            </svg>
-            <div class="quadrant-panels" id="quadrant-panels"></div>
-          </div>
-        </div>
-
-        <div class="win">
-          <div class="titlebar gold">
-            <div class="titlebar-title">{{ lang.aspects_title }}</div>
-          </div>
-          <div class="winbody" style="padding:0;">
-            <div class="aspects-wrap" id="aspects-wrap">
-              <div style="padding:8px;" class="loading">{{ lang.aspects_wait }}</div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- /tab-carte -->
-
-    </div><!-- /winbody onglets -->
-
-    <!-- ── Status bar ── -->
-    <div class="statusbar">
-      <div class="statpanel" id="status-msg">{{ lang.ready }}</div>
-      <div class="statpanel fixed">Sidéral · Djwhal Khul · Moonrise</div>
-      <div class="statpanel fixed" id="status-count"></div>
-    </div>
-
-  </div><!-- /app-screen -->
-
-</div><!-- /main-win -->
-
-<a id="btn-coffee" href="https://buymeacoffee.com/jerome6" target="_blank" rel="noopener">
-  ☕ {{ lang.support_label }}
+<a class="bmc-btn" href="https://buymeacoffee.com/jerome6" target="_blank" rel="noopener">
+  ☕ Buy me a coffee
 </a>
 
-
-<!-- ═══════════════════════════════════════════════════════════════
-     JAVASCRIPT
-═══════════════════════════════════════════════════════════════ -->
 <script>
-"use strict";
+let lastSynthesisText = '';
+let lastTransitDate = '';
+let currentUser = null;
 
-const L = {
-  ready:          {{ lang.ready | tojson }},
-  no_calc:        {{ lang.no_calc | tojson }},
-  select_transit: {{ lang.select_transit | tojson }},
-  select_date:    {{ lang.select_date | tojson }},
-  calc_ephem:     {{ lang.calc_ephem | tojson }},
-  calc_sideral:   {{ lang.calc_sideral | tojson }},
-  calc_karmic:    {{ lang.calc_karmic | tojson }},
-  listen:         {{ lang.listen | tojson }},
-  stop:           {{ lang.stop | tojson }},
-  sending:        {{ lang.sending | tojson }},
-  sent_ok:        {{ lang.sent_ok | tojson }},
-  sent_err:       {{ lang.sent_err | tojson }},
-};
-
-let currentPseudo     = "";
-let lastChartData     = null;
-let lastSynthesisText = "";
-let lastTransitDate   = "";
-
-/* ══ UTILS ═══════════════════════════════════════════════════════ */
-function escHtml(s)  { return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;"); }
-function pad(n)      { return String(n).padStart(2,"0"); }
-
-function setStatus(txt) {
-  const el = document.getElementById("status-msg");
-  if (el) el.textContent = txt;
-}
-function setCount(txt) {
-  const el = document.getElementById("status-count");
-  if (el) el.textContent = txt;
-}
-function setAspectsHTML(html) {
-  const el = document.getElementById("aspects-wrap");
-  if (el) el.innerHTML = html;
-}
-function setSynthesis(text) {
-  const el = document.getElementById("synthesis");
-  if (!el) return;
-  if (typeof marked !== "undefined" && text && text.trim()) {
-    el.innerHTML = marked.parse(text);
-  } else {
-    el.textContent = text || "";
-  }
+// ── LANG ──
+function setLang(code) {
+  fetch('/set_lang', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({lang: code})
+  }).then(() => location.reload());
 }
 
-/* ══ LOADING INDICATOR ═══════════════════════════════════════════ */
-let _loadTimers = [];
-
-function showLoading() {
-  const ind = document.getElementById("loading-indicator");
-  const syn = document.getElementById("synthesis");
-  if (!ind || !syn) return;
-  ind.classList.add("visible");
-  syn.style.display = "none";
-  [1,2,3,4].forEach(i => {
-    const el = document.getElementById("ls-"+i);
-    if (el) el.className = "load-step";
-  });
-  // étape 1 active immédiatement, les suivantes avec délai
-  const delays = [0, 1800, 5000, 9000];
-  _loadTimers = [];
-  delays.forEach((d, i) => {
-    const t = setTimeout(() => {
-      if (i > 0) {
-        const prev = document.getElementById("ls-"+i);
-        if (prev) prev.className = "load-step done";
-      }
-      const cur = document.getElementById("ls-"+(i+1));
-      if (cur) cur.className = "load-step active";
-    }, d);
-    _loadTimers.push(t);
-  });
-}
-
-function hideLoading() {
-  _loadTimers.forEach(t => clearTimeout(t));
-  _loadTimers = [];
-  const ind = document.getElementById("loading-indicator");
-  const syn = document.getElementById("synthesis");
-  if (ind) ind.classList.remove("visible");
-  if (syn) syn.style.display = "";
-  [1,2,3,4].forEach(i => {
-    const el = document.getElementById("ls-"+i);
-    if (el) el.className = "load-step done";
-  });
-}
-
-/* ══ LANGUE ══════════════════════════════════════════════════════ */
-async function setLang(code) {
-  try {
-    await fetch("/set_lang", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({lang: code}),
-    });
-    location.reload();
-  } catch(e) { console.error("setLang error", e); }
-}
-
-/* ══ TABS ════════════════════════════════════════════════════════ */
-function switchTab(name) {
-  ["gochara", "carte"].forEach(t => {
-    const btn = document.getElementById("tab-btn-" + t);
-    const pan = document.getElementById("tab-" + t);
-    if (btn) btn.classList.toggle("active", t === name);
-    if (pan) pan.classList.toggle("active", t === name);
-  });
-  if (name === "carte" && lastChartData) renderKarmaMap(lastChartData);
-}
-
-/* ══ SCREENS ═════════════════════════════════════════════════════ */
-function showLogin()    { _showScreen("login-screen"); }
-function showRegister() { _showScreen("register-screen"); }
-function showApp()      { _showScreen("app-screen"); }
-function _showScreen(id) {
-  ["login-screen","register-screen","app-screen"].forEach(s => {
-    const el = document.getElementById(s);
-    if (el) el.classList.remove("visible");
-  });
-  const target = document.getElementById(id);
-  if (target) target.classList.add("visible");
-}
-
-/* ══ LOGIN ═══════════════════════════════════════════════════════ */
-async function doLogin() {
-  const pseudo = document.getElementById("pseudo-input").value.trim();
-  const errEl  = document.getElementById("login-error");
-  const statEl = document.getElementById("login-status");
-  errEl.style.display = "none";
-  if (!pseudo) { showLoginError("Saisis un pseudo pour continuer."); return; }
-  statEl.textContent = "Connexion…";
-  try {
-    const res  = await fetch("/login", {
-      method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({pseudo}),
-    });
-    const data = await res.json();
-    if (!data.ok) { showLoginError(data.error || "Connexion refusée."); statEl.textContent=""; return; }
-    currentPseudo = data.pseudo;
-    loadProfile(data.profile);
-    showApp();
-    statEl.textContent = "";
-  } catch (err) {
-    showLoginError("Erreur réseau : " + err.message);
-    statEl.textContent = "";
-  }
-}
-function showLoginError(msg) {
-  const el = document.getElementById("login-error");
-  el.textContent = msg; el.style.display = "block";
-}
-
-/* ══ LOGOUT ══════════════════════════════════════════════════════ */
-async function doLogout() {
-  try { await fetch("/logout", {method:"POST"}); } catch(_) {}
-  showLogin();
-}
-
-/* ══ REGISTER ════════════════════════════════════════════════════ */
-async function doRegister() {
-  const errEl  = document.getElementById("reg-error");
-  const statEl = document.getElementById("reg-status");
-  errEl.style.display = "none";
-
-  const payload = {
-    pseudo:  document.getElementById("reg-pseudo").value.trim(),
-    name:    document.getElementById("reg-name").value.trim(),
-    email:   document.getElementById("reg-email").value.trim(),
-    day:     parseInt(document.getElementById("reg-day").value)    || 0,
-    month:   parseInt(document.getElementById("reg-month").value)  || 0,
-    year:    parseInt(document.getElementById("reg-year").value)   || 0,
-    hour:    parseInt(document.getElementById("reg-hour").value)   || 0,
-    minute:  parseInt(document.getElementById("reg-minute").value) || 0,
-    city:    document.getElementById("reg-natal-city").value,
-    lat:     parseFloat(document.getElementById("reg-natal-lat").value) || 0,
-    lon:     parseFloat(document.getElementById("reg-natal-lon").value) || 0,
-    tz:      document.getElementById("reg-natal-tz").value || "UTC",
-  };
-
-  if (!payload.pseudo || !payload.name || !payload.year) {
-    showRegError("Pseudo, prénom et date de naissance sont obligatoires."); return;
-  }
-
-  statEl.textContent = "Création du profil…";
-  try {
-    const res  = await fetch("/register", {
-      method: "POST", headers: {"Content-Type":"application/json"},
-      body: JSON.stringify(payload),
-    });
-    const data = await res.json();
-    if (!data.ok) { showRegError(data.error || "Erreur lors de la création."); statEl.textContent=""; return; }
-    currentPseudo = data.pseudo;
-    loadProfile(data.profile);
-    showApp();
-    statEl.textContent = "";
-  } catch (err) {
-    showRegError("Erreur réseau : " + err.message);
-    statEl.textContent = "";
-  }
-}
-function showRegError(msg) {
-  const el = document.getElementById("reg-error");
-  el.textContent = msg; el.style.display = "block";
-}
-
-/* ══ LOAD PROFILE UI ═════════════════════════════════════════════ */
-function loadProfile(p) {
-  document.getElementById("pseudo-badge").textContent = "👤 " + (p.pseudo || p.name || "—");
-  document.getElementById("natal-summary").textContent =
-    `${p.day}/${p.month}/${p.year} ${pad(p.hour||0)}h${pad(p.minute||0)} · ${p.city||""}`;
-
-  const now = new Date();
-  const todayIso = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
-  document.getElementById("t-date").value   = todayIso;
-  document.getElementById("t-hour").value   = now.getHours();
-  document.getElementById("t-minute").value = now.getMinutes();
-
-  if (p.city) {
-    document.getElementById("transit-city-display").value = p.city;
-    document.getElementById("transit-city-val").value     = p.city;
-  }
-  if (p.lat) document.getElementById("transit-lat-val").value = p.lat;
-  if (p.lon) document.getElementById("transit-lon-val").value = p.lon;
-  if (p.tz)  document.getElementById("transit-tz-val").value  = p.tz;
-}
-
-/* ══ GÉOCODAGE ═══════════════════════════════════════════════════ */
-let _geoTimer = null;
-function geocodeField(inputEl, resultsId, cityId, latId, lonId, tzId) {
-  clearTimeout(_geoTimer);
-  const q   = inputEl.value.trim();
-  const box = document.getElementById(resultsId);
-  if (q.length < 2) { box.style.display = "none"; return; }
-
-  _geoTimer = setTimeout(async () => {
-    try {
-      const res  = await fetch("/geocode?q=" + encodeURIComponent(q));
-      const data = await res.json();
-      if (!Array.isArray(data) || data.length === 0) { box.style.display = "none"; return; }
-      box.innerHTML = "";
-      data.forEach(item => {
-        const div = document.createElement("div");
-        div.className   = "geo-item";
-        div.textContent = item.display_name;
-        div.onclick = async () => {
-          inputEl.value = item.display_name;
-          document.getElementById(cityId).value = item.display_name;
-          document.getElementById(latId).value  = item.lat;
-          document.getElementById(lonId).value  = item.lon;
-          box.style.display = "none";
-          try {
-            const tz = await fetch(
-              `https://timeapi.io/api/timezone/coordinate?latitude=${item.lat}&longitude=${item.lon}`
-            );
-            const tzData = await tz.json();
-            document.getElementById(tzId).value = tzData.timeZone || "UTC";
-          } catch { document.getElementById(tzId).value = "UTC"; }
-        };
-        box.appendChild(div);
-      });
-      box.style.display = "block";
-    } catch { box.style.display = "none"; }
-  }, 400);
-}
-
-/* ══ CALCUL TRANSITS ═════════════════════════════════════════════ */
-async function calculateTransits() {
-  const date   = document.getElementById("t-date").value;
-  const hour   = parseInt(document.getElementById("t-hour").value)   || 0;
-  const minute = parseInt(document.getElementById("t-minute").value) || 0;
-  const lat    = parseFloat(document.getElementById("transit-lat-val").value);
-  const lon    = parseFloat(document.getElementById("transit-lon-val").value);
-  const city   = document.getElementById("transit-city-val").value;
-  const tz     = document.getElementById("transit-tz-val").value || "UTC";
-
-  if (!date)                    { setStatus(L.select_date);    return; }
-  if (isNaN(lat) || isNaN(lon)) { setStatus(L.select_transit); return; }
-
-  lastTransitDate = date;
-  setStatus(L.calc_ephem);
-  document.getElementById("calc-btn").disabled = true;
-  setAspectsHTML(`<div style="padding:8px;" class="loading">${L.calc_sideral}</div>`);
-
-  // ← NOUVEAU : loading indicator remplace le vide
-  setSynthesis("");
-  showLoading();
-  switchTab("gochara");
-  document.getElementById("email-status").textContent = "";
-
-  try {
-    const res  = await fetch("/calculate", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ date, hour, minute, transit_lat: lat, transit_lon: lon,
-                             transit_city: city, transit_tz: tz }),
-    });
-    const data = await res.json();
-
-    // ── Quota dépassé ─────────────────────────────────────────────
-    if (res.status === 429) {
-      const msg = data.message || "Limite mensuelle atteinte.";
-      const url = data.upgrade_url || "";
-      hideLoading();
-      document.getElementById("synthesis").innerHTML =
-        `<div style="color:#800000;padding:12px;line-height:1.8;">
-          🔒 <strong>${escHtml(msg)}</strong><br><br>
-          Pour continuer à consulter l'oracle, passe au plan Premium.<br><br>
-          ${url ? `<a href="${escHtml(url)}" target="_blank"><button class="btn">✦ Plan Premium</button></a>` : ""}
-        </div>`;
-      setStatus("🔒 Quota mensuel atteint");
-      return;
-    }
-
-    if (data.error) throw new Error(data.error);
-    lastChartData     = data;
-    lastSynthesisText = data.synthesis || "";
-    renderAspects(data.aspects);
-    hideLoading();
-    setSynthesis(lastSynthesisText);
-    const n = (data.aspects || []).length;
-    const rem = typeof data.remaining === "number"
-      ? ` — ${data.remaining} synthèse${data.remaining !== 1 ? "s" : ""} restante${data.remaining !== 1 ? "s" : ""} ce mois`
-      : "";
-    setStatus(`✓ ${n} aspect${n !== 1 ? "s" : ""}${rem}`);
-    setCount(`${n} asp.`);
-
-  } catch (err) {
-    const raw = err.message || "";
-    let friendly = raw;
-    if (raw.includes("529") || raw.toLowerCase().includes("overload")) {
-      friendly = "⏳ L'oracle est temporairement surchargé — réessaie dans quelques secondes.";
-    } else if (raw.includes("500") || raw.includes("502") || raw.includes("503")) {
-      friendly = "⚠ Le serveur est momentanément indisponible — réessaie dans un instant.";
-    } else if (raw.toLowerCase().includes("networkerror") || raw.toLowerCase().includes("failed to fetch")) {
-      friendly = "⚠ Problème de connexion réseau — vérifie ta connexion et réessaie.";
-    }
-    setStatus("⚠ " + friendly);
-    hideLoading();
-    document.getElementById("synthesis").innerHTML =
-      `<div style="color:#800000;padding:8px;line-height:1.6;">${escHtml(friendly)}<br><br>
-       <button class="btn" onclick="calculateTransits()" style="margin-top:4px;">↺ Réessayer</button></div>`;
-
-  } finally {
-    document.getElementById("calc-btn").disabled = false;
-  }
-}
-
-/* ══ ASPECTS TABLE ═══════════════════════════════════════════════ */
-function renderAspects(aspects) {
-  if (!aspects || aspects.length === 0) {
-    setAspectsHTML('<div style="padding:8px;">Aucun aspect dans l\'orbe de 3°.</div>');
-    return;
-  }
-  let html = '<table><thead><tr>'
-    + '<th>Transit</th><th>Aspect</th><th>Natal</th><th>Orbe</th>'
-    + '</tr></thead><tbody>';
-  aspects.forEach(a => {
-    const cls   = aspClass(a.aspect);
-    const retro = a.retrograde ? ' <span class="retro">℞</span>' : "";
-    html += `<tr>
-      <td>${escHtml(a.transit_planet)}${retro}<br>
-          <small style="color:#404040">${escHtml(a.transit_display||"")}</small></td>
-      <td><span class="${cls}">${escHtml(a.aspect)}</span></td>
-      <td>${escHtml(a.natal_planet)}<br>
-          <small style="color:#404040">${escHtml(a.natal_display||"")}</small></td>
-      <td style="text-align:right">${a.orb}°</td>
-    </tr>`;
-  });
-  html += "</tbody></table>";
-  setAspectsHTML(html);
-}
-function aspClass(asp) {
-  if (!asp) return "";
-  if (asp.includes("Conjonction")) return "asp-conj";
-  if (asp.includes("Opposition"))  return "asp-oppo";
-  if (asp.includes("Trigone"))     return "asp-trig";
-  if (asp.includes("Carr"))        return "asp-carr";
-  if (asp.includes("Sextile"))     return "asp-sext";
-  return "";
-}
-
-/* ══ CARTE KARMIQUE SVG ══════════════════════════════════════════ */
-function renderKarmaMap(data) {
-  const svg = document.getElementById("karma-map-svg");
-  if (!svg || !data) return;
-
-  const natal   = data.natal_positions   || {};
-  const transit = data.transit_positions || {};
-  const aspects = data.aspects           || [];
-  const CX = 280, CY = 280;
-  const R_OUTER = 260, R_INNER = 180, R_NATAL = 140, R_POINT = 8;
-
-  const quadrantColor = (lon) => {
-    const deg = ((lon % 360) + 360) % 360;
-    if (deg < 90)  return "#4b0082";
-    if (deg < 180) return "#800000";
-    if (deg < 270) return "#005000";
-    return "#005060";
-  };
-
-  const lonToAngle = (lon) => {
-    const deg = ((lon % 360) + 360) % 360;
-    return (deg - 90) * Math.PI / 180;
-  };
-
-  const polarXY = (r, angleDeg) => {
-    const a = (angleDeg - 90) * Math.PI / 180;
-    return [CX + r * Math.cos(a), CY + r * Math.sin(a)];
-  };
-
-  let s = `<circle cx="${CX}" cy="${CY}" r="${R_OUTER}" fill="#f0f0f8" stroke="#808080" stroke-width="1"/>`;
-  s += `<circle cx="${CX}" cy="${CY}" r="${R_INNER}" fill="#f8f8ff" stroke="#c0c0c0" stroke-width="1"/>`;
-  s += `<circle cx="${CX}" cy="${CY}" r="${R_NATAL}" fill="#fff" stroke="#e0e0e0" stroke-width="1"/>`;
-
-  for (let i = 0; i < 12; i++) {
-    const [x1, y1] = polarXY(R_NATAL - 20, i * 30);
-    const [x2, y2] = polarXY(R_OUTER, i * 30);
-    s += `<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#d0d0d0" stroke-width="1"/>`;
-  }
-
-  const SIGNES = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"];
-  for (let i = 0; i < 12; i++) {
-    const [x, y] = polarXY(R_OUTER - 18, i * 30 + 15);
-    s += `<text x="${x.toFixed(1)}" y="${y.toFixed(1)}" text-anchor="middle" dominant-baseline="middle"
-           font-size="13" fill="#606060" font-family="Arial">${SIGNES[i]}</text>`;
-  }
-
-  const aspColorLine = (asp) => {
-    if (!asp) return "#808080";
-    if (asp.includes("Conjonction")) return "#000080";
-    if (asp.includes("Opposition"))  return "#800000";
-    if (asp.includes("Trigone"))     return "#006000";
-    if (asp.includes("Carr"))        return "#cc0000";
-    if (asp.includes("Sextile"))     return "#005080";
-    return "#808080";
-  };
-
-  aspects.forEach(a => {
-    const tp = transit[a.transit_planet];
-    const np = natal[a.natal_planet];
-    if (!tp || !np) return;
-    const tLon = tp.lon_raw !== undefined ? tp.lon_raw : 0;
-    const nLon = np.lon_raw !== undefined ? np.lon_raw : 0;
-    const tAngle = lonToAngle(tLon) * 180 / Math.PI + 90;
-    const nAngle = lonToAngle(nLon) * 180 / Math.PI + 90;
-    const [tx, ty] = polarXY(R_INNER - 5, tAngle);
-    const [nx, ny] = polarXY(R_NATAL - 5, nAngle);
-    const col = aspColorLine(a.aspect);
-    s += `<line x1="${tx.toFixed(1)}" y1="${ty.toFixed(1)}" x2="${nx.toFixed(1)}" y2="${ny.toFixed(1)}"
-           stroke="${col}" stroke-width="0.8" opacity="0.5"/>`;
-  });
-
-  Object.entries(transit).forEach(([planet, pos]) => {
-    if (pos.lon_raw === undefined) return;
-    const angle = lonToAngle(pos.lon_raw) * 180 / Math.PI + 90;
-    const [x, y] = polarXY((R_INNER + R_OUTER) / 2, angle);
-    const col = quadrantColor(pos.lon_raw);
-    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R_POINT}"
-           fill="${col}" stroke="#fff" stroke-width="1" opacity="0.9"/>`;
-    s += `<text x="${x.toFixed(1)}" y="${(y+1).toFixed(1)}" text-anchor="middle"
-           dominant-baseline="middle" font-size="8" fill="#fff"
-           font-family="Arial">${escHtml(planet.substring(0,2))}</text>`;
-  });
-
-  Object.entries(natal).forEach(([planet, pos]) => {
-    if (pos.lon_raw === undefined) return;
-    const angle = lonToAngle(pos.lon_raw) * 180 / Math.PI + 90;
-    const [x, y] = polarXY((R_NATAL + R_INNER) / 2, angle);
-    s += `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="${R_POINT}"
-           fill="#c0c0c0" stroke="#404040" stroke-width="1"/>`;
-    s += `<text x="${x.toFixed(1)}" y="${(y+1).toFixed(1)}" text-anchor="middle"
-           dominant-baseline="middle" font-size="8" fill="#000"
-           font-family="Arial">${escHtml(planet.substring(0,2))}</text>`;
-  });
-
-  s += `<text x="${CX}" y="${CY-8}" text-anchor="middle" font-size="9" fill="#808080">Natal</text>`;
-  s += `<text x="${CX}" y="${CY+8}" text-anchor="middle" font-size="9" fill="#808080">Transit</text>`;
-
-  svg.innerHTML = s;
-  renderQuadrantLists(aspects);
-}
-
-function renderQuadrantLists(aspects) {
-  const panel = document.getElementById("quadrant-panels");
-  if (!panel) return;
-  const quad = {ROM:[], RAM:[], Stage:[], Lilith:[]};
-  (aspects||[]).forEach(a => {
-    const planet = a.transit_planet || "";
-    if (["Nœud Sud","Ketu"].some(n => planet.includes(n))) quad.ROM.push(a);
-    else if (planet.includes("Chiron")) quad.RAM.push(a);
-    else if (planet.includes("Lilith")) quad.Lilith.push(a);
-    else quad.Stage.push(a);
-  });
-  const colors = {ROM:"#4b0082",RAM:"#005000",Stage:"#005060",Lilith:"#800000"};
-  panel.innerHTML = Object.entries(quad).map(([name, list]) => `
-    <div class="quadrant-panel">
-      <h4 style="color:${colors[name]}">◆ ${name} (${list.length})</h4>
-      <ul>${list.length === 0
-        ? '<li style="color:#808080">—</li>'
-        : list.map(a => `<li>${escHtml(a.transit_planet)} ${escHtml(a.aspect)} ${escHtml(a.natal_planet)}</li>`).join("")
-      }</ul>
-    </div>`).join("");
-}
-
-/* ══ AUDIO TTS ═══════════════════════════════════════════════════ */
-let _synth = window.speechSynthesis;
-let _chunks = [], _ci = 0, _playing = false;
-
-function toggleAudio() {
-  const btn = document.getElementById("btnAudio");
-  if (_playing) {
-    _synth.cancel(); _playing = false;
-    btn.textContent = L.listen; return;
-  }
-  let raw = document.getElementById("synthesis").innerText || "";
-  if (!raw.trim()) { alert(L.no_calc); return; }
-  raw = raw.replace(/#{1,3}\s*/g,"").replace(/\*\*/g,"").replace(/---/g,"").trim();
-  _chunks = raw.match(/[^.!?]+[.!?]+/g) || [raw];
-  _ci = 0; _playing = true;
-  btn.textContent = L.stop;
-  _speakNext();
-}
-function _speakNext() {
-  if (_ci >= _chunks.length || !_playing) {
-    _playing = false;
-    document.getElementById("btnAudio").textContent = L.listen; return;
-  }
-  const u = new SpeechSynthesisUtterance(_chunks[_ci]);
-  const langCode = document.documentElement.lang || "fr";
-  u.lang = langCode + "-" + langCode.toUpperCase();
-  u.rate = parseFloat(document.getElementById("speedSlider").value);
-  const voices = _synth.getVoices().filter(v => v.lang.startsWith(langCode));
-  if (voices.length) u.voice = voices[0];
-  u.onend = () => { _ci++; _speakNext(); };
-  _synth.speak(u);
-}
-
-/* ══ EMAIL SYNTHÈSE ══════════════════════════════════════════════ */
-async function sendSynthesisEmail() {
-  if (!lastSynthesisText) { alert(L.no_calc); return; }
-  const btn    = document.getElementById("btnEmail");
-  const status = document.getElementById("email-status");
-  btn.disabled = true;
-  status.textContent = L.sending;
-  try {
-    const res  = await fetch("/send_synthesis", {
-      method: "POST",
-      headers: {"Content-Type":"application/json"},
-      body: JSON.stringify({ synthesis: lastSynthesisText, date: lastTransitDate }),
-    });
-    const data = await res.json();
-    if (data.ok) {
-      status.textContent = L.sent_ok;
-      status.style.color = "#006000";
+// ── LOGIN ──
+function login() {
+  const pseudo = document.getElementById('pseudo-input').value.trim();
+  if (!pseudo) return;
+  showLoading(true);
+  fetch('/calculate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({pseudo: pseudo, action: 'login'})
+  })
+  .then(r => r.json())
+  .then(data => {
+    showLoading(false);
+    if (data.error) {
+      document.getElementById('login-error').textContent = data.error;
     } else {
-      status.textContent = L.sent_err + " — " + (data.error || "");
-      status.style.color = "#800000";
+      currentUser = pseudo;
+      showApp(pseudo);
     }
-  } catch (err) {
-    status.textContent = L.sent_err;
-    status.style.color = "#800000";
-  } finally {
-    btn.disabled = false;
-  }
+  })
+  .catch(() => { showLoading(false); });
 }
 
-/* ══ INIT ════════════════════════════════════════════════════════ */
-(function init() {
-  const dateEl = document.getElementById("t-date");
-  if (dateEl && !dateEl.value) {
-    const now = new Date();
-    dateEl.value = `${now.getFullYear()}-${pad(now.getMonth()+1)}-${pad(now.getDate())}`;
+function createProfile() {
+  const pseudo = document.getElementById('pseudo-input').value.trim();
+  if (!pseudo) return;
+  showLoading(true);
+  fetch('/calculate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({pseudo: pseudo, action: 'create'})
+  })
+  .then(r => r.json())
+  .then(data => {
+    showLoading(false);
+    if (data.error) {
+      document.getElementById('login-error').textContent = data.error;
+    } else if (data.redirect) {
+      window.location.href = data.redirect;
+    } else {
+      currentUser = pseudo;
+      showApp(pseudo);
+    }
+  })
+  .catch(() => { showLoading(false); });
+}
+
+function logout() {
+  fetch('/logout', {method: 'POST'}).then(() => {
+    currentUser = null;
+    document.getElementById('hero-section').style.display = '';
+    document.getElementById('app-section').style.display = 'none';
+    document.getElementById('pseudo-input').value = '';
+    document.getElementById('login-error').textContent = '';
+    document.getElementById('synthesis-box').style.display = 'none';
+    document.getElementById('accroche-box').style.display = 'none';
+    document.getElementById('action-row').style.display = 'none';
+  });
+}
+
+function showApp(pseudo) {
+  document.getElementById('hero-section').style.display = 'none';
+  document.getElementById('app-section').style.display = 'block';
+  document.getElementById('display-pseudo').textContent = pseudo;
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('transit-date').value = today;
+}
+
+// ── CALCULATE ──
+function calculate() {
+  const date = document.getElementById('transit-date').value;
+  if (!date) return;
+  lastTransitDate = date;
+  showLoading(true);
+  setStatus('');
+
+  fetch('/calculate', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({pseudo: currentUser, date: date, action: 'gochara'})
+  })
+  .then(r => r.json())
+  .then(data => {
+    showLoading(false);
+    if (data.error) {
+      setStatus(data.error);
+    } else {
+      if (data.accroche) {
+        document.getElementById('accroche-content').textContent = data.accroche;
+        document.getElementById('accroche-box').style.display = 'block';
+      }
+      if (data.synthesis || data.reply) {
+        const text = data.synthesis || data.reply;
+        lastSynthesisText = text;
+        document.getElementById('synthesis-content').innerHTML = marked.parse(text);
+        document.getElementById('synthesis-box').style.display = 'block';
+        document.getElementById('action-row').style.display = 'flex';
+      }
+    }
+  })
+  .catch(e => { showLoading(false); setStatus('Erreur réseau.'); });
+}
+
+// ── EMAIL ──
+function sendEmail() {
+  if (!lastSynthesisText) return;
+  showLoading(true);
+  fetch('/send_synthesis', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({
+      pseudo: currentUser,
+      synthesis: lastSynthesisText,
+      date: lastTransitDate
+    })
+  })
+  .then(r => r.json())
+  .then(data => {
+    showLoading(false);
+    setStatus(data.message || data.error || '');
+  })
+  .catch(() => { showLoading(false); });
+}
+
+// ── UTILS ──
+function showLoading(show) {
+  document.getElementById('loading-overlay').style.display = show ? 'flex' : 'none';
+}
+
+function setStatus(msg) {
+  document.getElementById('status-msg').textContent = msg;
+}
+
+// ── SESSION CHECK ──
+{% if session_user %}
+currentUser = "{{ session_user }}";
+showApp(currentUser);
+{% endif %}
+
+// ── SW ──
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/static/sw.js')
+      .catch(e => console.log('SW error', e));
+  });
+}
+
+// ── ENTER KEY ──
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('hero-section').style.display !== 'none') login();
   }
-})();
+});
 </script>
 </body>
 </html>
