@@ -139,6 +139,53 @@ def get_julian_day(year, month, day, hour, minute, tz_str: str) -> float:
     )
 
 
+# ── Portes Visible / Invisible (Castanier) ──────────────────────────────────
+
+def calc_portes(saturn_lon: float, uranus_lon: float) -> dict:
+    """
+    Calcule la Porte Visible (PV) et la Porte Invisible (PI).
+    PV = mi-point du PETIT ARC Saturne→Uranus.
+    PI = PV + 180° (mod 360).
+    Source : Catherine Castanier, Chiron et l'axe des Portes, pp. 26-27.
+    """
+    diff = (uranus_lon - saturn_lon) % 360
+
+    if diff <= 180:
+        # Uranus est "devant" Saturne dans le sens direct — petit arc
+        midpoint = (saturn_lon + diff / 2.0) % 360
+    else:
+        # Le petit arc est dans l'autre sens
+        diff_inv = 360 - diff
+        midpoint = (saturn_lon - diff_inv / 2.0) % 360
+
+    pv = midpoint % 360
+    pi = (pv + 180.0) % 360
+
+    nak_pv = lon_to_nakshatra(pv)
+    nak_pi = lon_to_nakshatra(pi)
+
+    return {
+        "porte_visible": {
+            "lon":        pv,
+            "lon_raw":    pv,
+            "display":    lon_to_display(pv),
+            "nakshatra":  nak_pv["nakshatra"],
+            "pada":       nak_pv["pada"],
+            "lord":       nak_pv["lord"],
+            "deg_in_nak": nak_pv["deg_in_nak"],
+        },
+        "porte_invisible": {
+            "lon":        pi,
+            "lon_raw":    pi,
+            "display":    lon_to_display(pi),
+            "nakshatra":  nak_pi["nakshatra"],
+            "pada":       nak_pi["pada"],
+            "lord":       nak_pi["lord"],
+            "deg_in_nak": nak_pi["deg_in_nak"],
+        },
+    }
+
+
 def _calc_positions(jd: float, lat: float, lon: float) -> dict:
     _set_ayanamsa()
     flags = swe.FLG_SIDEREAL | swe.FLG_SPEED
@@ -228,6 +275,42 @@ def calculate_transits(natal: dict, transit_loc: dict,
 
     natal_pos   = _calc_positions(natal_jd,    natal["lat"],        natal["lon"])
     transit_pos = _calc_positions(transit_jd, transit_loc["lat"], transit_loc["lon"])
+
+    # ── Portes natales ────────────────────────────────────────────────────────
+    sat_natal = natal_pos.get("Saturne ♄")
+    ura_natal = natal_pos.get("Uranus ♅")
+    if sat_natal and ura_natal:
+        portes_natal = calc_portes(sat_natal["lon"], ura_natal["lon"])
+        natal_pos["Porte Visible ⊙"] = {
+            **portes_natal["porte_visible"],
+            "speed":      0,
+            "retrograde": False,
+            "nak_lord":   portes_natal["porte_visible"].get("lord", ""),
+        }
+        natal_pos["Porte Invisible ⊗"] = {
+            **portes_natal["porte_invisible"],
+            "speed":      0,
+            "retrograde": False,
+            "nak_lord":   portes_natal["porte_invisible"].get("lord", ""),
+        }
+
+    # ── Portes de transit ─────────────────────────────────────────────────────
+    sat_transit = transit_pos.get("Saturne ♄")
+    ura_transit = transit_pos.get("Uranus ♅")
+    if sat_transit and ura_transit:
+        portes_transit = calc_portes(sat_transit["lon"], ura_transit["lon"])
+        transit_pos["Porte Visible ⊙"] = {
+            **portes_transit["porte_visible"],
+            "speed":      0,
+            "retrograde": False,
+            "nak_lord":   portes_transit["porte_visible"].get("lord", ""),
+        }
+        transit_pos["Porte Invisible ⊗"] = {
+            **portes_transit["porte_invisible"],
+            "speed":      0,
+            "retrograde": False,
+            "nak_lord":   portes_transit["porte_invisible"].get("lord", ""),
+        }
 
     aspects = []
     skip_transit = {"Nœud Sud ☋"}
