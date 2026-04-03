@@ -68,7 +68,19 @@ function setLang(code) {
 
 function login() {
     const pseudo = document.getElementById('pseudo-input').value.trim();
-    if (!pseudo) return;
+    const errDiv = document.getElementById('login-error');
+    
+    // 1. Vérification si vide
+    if (!pseudo) {
+        errDiv.style.color = "#c97a6b";
+        errDiv.textContent = "Veuillez entrer un pseudo.";
+        return;
+    }
+
+    // 2. Message de chargement
+    errDiv.style.color = "var(--gold)";
+    errDiv.textContent = "Connexion en cours...";
+
     fetch('/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -76,15 +88,33 @@ function login() {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.ok) { location.reload(); } 
-        else { document.getElementById('login-error').textContent = data.error; }
+        if (data.ok) { 
+            location.reload(); 
+        } else { 
+            errDiv.style.color = "#c97a6b";
+            errDiv.textContent = data.error || "Pseudo introuvable."; 
+        }
+    })
+    .catch(err => {
+        errDiv.style.color = "#c97a6b";
+        errDiv.textContent = "Erreur serveur. Vérifiez les logs Render.";
+        console.error("Erreur réseau:", err);
     });
 }
 
 function register() {
     const pseudo = document.getElementById('pseudo-input').value.trim();
-    if (!pseudo) return;
-    // Note: Le backend attend 'pseudo' pour créer le profil
+    const errDiv = document.getElementById('login-error');
+    
+    if (!pseudo) {
+        errDiv.style.color = "#c97a6b";
+        errDiv.textContent = "Veuillez entrer un pseudo pour créer un profil.";
+        return;
+    }
+
+    errDiv.style.color = "var(--gold)";
+    errDiv.textContent = "Création en cours...";
+
     fetch('/register', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -92,8 +122,17 @@ function register() {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.ok) { location.reload(); }
-        else { document.getElementById('login-error').textContent = data.error; }
+        if (data.ok) { 
+            location.reload(); 
+        } else { 
+            errDiv.style.color = "#c97a6b";
+            errDiv.textContent = data.error || "Erreur lors de la création."; 
+        }
+    })
+    .catch(err => {
+        errDiv.style.color = "#c97a6b";
+        errDiv.textContent = "Erreur serveur. Vérifiez les logs Render.";
+        console.error("Erreur réseau:", err);
     });
 }
 
