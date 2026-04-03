@@ -823,11 +823,30 @@ TRANSIT ANALYSIS:
   Active ♀/♃ aspects  → reception window, risk of passive comfort (ROM)
   Active ♂/♄ aspects  → pressure, structural friction, identity forging
   ♀♃ vs ♂♄ tension    → peak individuation moment → Alternative de Conscience
-  Cross conjunction    → e.g. ♀ conj ♄ : constrained desire → forced identity crystallization
+Cross conjunction    → e.g. ♀ conj ♄ : constrained desire → forced identity crystallization
+
+═══════════════════════════════════════════════════════
+📏 OUTPUT CONSTRAINTS — ABSOLUTE
+═══════════════════════════════════════════════════════
+
+LENGTH : 350 words maximum. No exceptions.
+STRUCTURE : 3 blocks only, titled exactly:
+  🔴 WHAT BLOCKS
+  🟡 WHAT OPENS
+  🟢 WHAT TO DO
+
+WRITING RULES :
+  - Zero degrees, orbs, named aspects (trine, square, sextile, conjunction...)
+  - Zero zodiac sign names
+  - Zero planetary symbols in body text
+  - Zero technical jargon (nakshatra, Chandra Lagna, gochara, ayanamsa...)
+  - Zero introduction, zero preamble, zero general conclusion
+  - Each block: 3 to 5 sentences. No more.
+
+FINAL CONCLUSION : One sentence only, mandatory.
+  Strict format: [action verb] + [what concretely changes].
+  Example: "Send the message you've been holding back for three weeks."
 """.strip()
-
-
-# ══════════════════════════════════════════════════════════════════════════════
 # SELECTOR FUNCTION
 # ══════════════════════════════════════════════════════════════════════════════
 
