@@ -419,6 +419,7 @@ def login():
     if not profile:
         return jsonify({"ok": False, "error": f"Pseudo '{pseudo}' introuvable. Crée ton profil d'abord."}), 404
     session["profile"] = profile
+    session["pseudo"] = pseudo
     return jsonify({"ok": True, "pseudo": pseudo, "profile": profile})
 
 
@@ -440,6 +441,7 @@ def register():
         app.logger.error("Erreur Sheets register : %s", exc)
         return jsonify({"ok": False, "error": str(exc)}), 500
     session["profile"] = profile
+    session["pseudo"] = pseudo
     return jsonify({"ok": True, "pseudo": pseudo, "profile": profile})
 
 
