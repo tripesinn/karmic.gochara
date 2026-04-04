@@ -13,13 +13,38 @@
         }
         body { background: var(--bg); color: var(--text); font-family: var(--body); margin: 0; text-align: center; }
         header { padding: 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); }
+        
         .hero-title { font-family: var(--display); font-size: clamp(2rem, 8vw, 3.5rem); margin-top: 10vh; text-transform: uppercase; }
         .login-card { border: 1px solid rgba(201,168,76,0.2); padding: 2.5rem; max-width: 400px; margin: 3rem auto; background: #111110; }
-        .login-input { width: 100%; padding: 0.85rem; margin-bottom: 1.5rem; background: #000; border: 1px solid var(--border); color: #fff; outline: none; box-sizing: border-box; }
-        .btn-primary { background: var(--gold); border: none; padding: 0.85rem 1.5rem; cursor: pointer; font-family: var(--display); font-size: 0.7rem; width: 100%; margin-bottom: 10px; transition: opacity 0.3s; }
+        
+        .login-input { width: 100%; padding: 0.85rem; margin-bottom: 1.5rem; background: #000; border: 1px solid var(--border); color: #fff; outline: none; box-sizing: border-box; font-family: var(--body); }
+        
+        .btn-primary { 
+            background: var(--gold); border: none; padding: 0.85rem 1.5rem; cursor: pointer; 
+            font-family: var(--display); font-size: 0.7rem; width: 100%; margin-bottom: 10px; 
+            transition: all 0.3s; position: relative; overflow: hidden;
+        }
+        .btn-primary:disabled { opacity: 0.7; cursor: wait; }
+        
         .btn-secondary { background: transparent; border: 1px solid var(--border); color: var(--text-dim); padding: 0.85rem 1.5rem; cursor: pointer; font-family: var(--display); font-size: 0.7rem; width: 100%; }
+        
         #app-section { display: none; padding: 2rem; }
-        .date-input { background: #111110; border: 1px solid var(--border); color: #fff; padding: 0.8rem; margin-bottom: 1rem; width: 100%; max-width: 300px; }
+        .date-input { background: #111110; border: 1px solid var(--border); color: #fff; padding: 0.8rem; margin-bottom: 1rem; width: 100%; max-width: 300px; font-family: var(--body); }
+
+        /* Animation de la roue (Spinner) */
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
         .registration-area { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: left; }
         .label-small { font-size: 0.7rem; color: var(--gold); font-family: var(--display); margin-bottom: 5px; display: block; letter-spacing: 0.1em; }
     </style>
@@ -66,10 +91,13 @@
     </div>
     
     <input type="date" id="transit-date" class="date-input" value="{{ today_iso }}">
-    <button class="btn-primary" style="max-width: 300px;" onclick="calculate()">{{ lang.calculate if lang.calculate else 'CALCULER' }}</button>
+    <br>
+    <button id="calc-btn" class="btn-primary" style="max-width: 300px;" onclick="calculate()">
+        <span id="btn-text">{{ lang.calculate if lang.calculate else 'CALCULER' }}</span>
+    </button>
 
-    <div id="synthesis-box" style="margin-top: 3rem; text-align: left; display: none;">
-        <div id="synthesis-content" style="line-height: 1.8;"></div>
+    <div id="synthesis-box" style="margin-top: 3rem; text-align: left; display: none; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 20px;">
+        <div id="synthesis-content" style="line-height: 1.8; font-size: 1.1rem;"></div>
     </div>
 </div>
 
@@ -82,7 +110,6 @@ function setLang(code) {
     }).then(() => location.reload());
 }
 
-// Bascule l'affichage entre Login et Inscription
 function toggleRegistration() {
     const fields = document.getElementById('registration-fields');
     const mainBtn = document.getElementById('main-action-btn');
@@ -94,28 +121,22 @@ function toggleRegistration() {
         mainBtn.innerHTML = "S'INSCRIRE ET SE CONNECTER";
         mainBtn.onclick = register;
         toggleBtn.innerHTML = "RETOUR À LA CONNEXION";
-        errDiv.textContent = "";
     } else {
         fields.style.display = 'none';
         mainBtn.innerHTML = "{{ lang.login if lang.login else 'CONNEXION' }}";
         mainBtn.onclick = login;
         toggleBtn.innerHTML = "{{ lang.create_profile if lang.create_profile else 'CRÉER UN PROFIL' }}";
-        errDiv.textContent = "";
     }
+    errDiv.textContent = "";
 }
 
 function login() {
     const pseudo = document.getElementById('pseudo-input').value.trim();
     const errDiv = document.getElementById('login-error');
-    
-    if (!pseudo) {
-        errDiv.style.color = "#c97a6b";
-        errDiv.textContent = "Veuillez entrer un pseudo.";
-        return;
-    }
+    if (!pseudo) { errDiv.textContent = "Pseudo requis."; return; }
 
     errDiv.style.color = "var(--gold)";
-    errDiv.textContent = "Connexion en cours...";
+    errDiv.textContent = "Alignement des énergies...";
 
     fetch('/login', {
         method: 'POST',
@@ -124,17 +145,8 @@ function login() {
     })
     .then(r => r.json())
     .then(data => {
-        if (data.ok) { 
-            location.reload(); 
-        } else { 
-            errDiv.style.color = "#c97a6b";
-            errDiv.textContent = data.error || "Pseudo introuvable."; 
-        }
-    })
-    .catch(err => {
-        errDiv.style.color = "#c97a6b";
-        errDiv.textContent = "Erreur serveur.";
-        console.error(err);
+        if (data.ok) location.reload();
+        else { errDiv.style.color = "#c97a6b"; errDiv.textContent = data.error || "Inconnu."; }
     });
 }
 
@@ -147,35 +159,19 @@ function register() {
     
     if (!pseudo || !birthDate || !birthTime || !birthCity) {
         errDiv.style.color = "#c97a6b";
-        errDiv.textContent = "Veuillez remplir toutes les coordonnées de naissance.";
+        errDiv.textContent = "Champs de naissance manquants.";
         return;
     }
-
-    errDiv.style.color = "var(--gold)";
-    errDiv.textContent = "Création du profil astral...";
 
     fetch('/register', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({
-            pseudo: pseudo,
-            birth_date: birthDate,
-            birth_time: birthTime,
-            birth_city: birthCity
-        })
+        body: JSON.stringify({pseudo, birth_date: birthDate, birth_time: birthTime, birth_city: birthCity})
     })
     .then(r => r.json())
     .then(data => {
-        if (data.ok) { 
-            location.reload(); 
-        } else { 
-            errDiv.style.color = "#c97a6b";
-            errDiv.textContent = data.error || "Erreur lors de la création."; 
-        }
-    })
-    .catch(err => {
-        errDiv.style.color = "#c97a6b";
-        errDiv.textContent = "Erreur de connexion au serveur.";
+        if (data.ok) location.reload();
+        else { errDiv.style.color = "#c97a6b"; errDiv.textContent = data.error; }
     });
 }
 
@@ -183,12 +179,13 @@ function calculate() {
     const date = document.getElementById('transit-date').value;
     if (!date) return;
 
-    const btn = document.querySelector('button[onclick="calculate()"]');
-    const originalText = btn.innerHTML;
-    
+    const btn = document.getElementById('calc-btn');
+    const btnText = document.getElementById('btn-text');
+    const originalText = btnText.innerHTML;
+
+    // Activation de l'état de chargement (Roue + Texte)
     btn.disabled = true;
-    btn.innerHTML = "✦ LECTURE DES ASTRES EN COURS... ✦";
-    btn.style.opacity = "0.6";
+    btnText.innerHTML = '<span class="spinner"></span> LECTURE DES ASTRES...';
 
     fetch('/calculate', {
         method: 'POST',
@@ -197,22 +194,23 @@ function calculate() {
     })
     .then(r => r.json())
     .then(data => {
+        // Retour à l'état normal
         btn.disabled = false;
-        btn.innerHTML = originalText;
-        btn.style.opacity = "1";
+        btnText.innerHTML = originalText;
 
         if (data.error) { 
             alert(data.error); 
         } else {
             document.getElementById('synthesis-content').innerHTML = marked.parse(data.synthesis);
             document.getElementById('synthesis-box').style.display = 'block';
+            // Scroll automatique vers le résultat
+            document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
         }
     })
     .catch(err => {
         btn.disabled = false;
-        btn.innerHTML = originalText;
-        btn.style.opacity = "1";
-        alert("Erreur de connexion au serveur.");
+        btnText.innerHTML = originalText;
+        alert("Erreur de connexion.");
     });
 }
 
