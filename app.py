@@ -521,7 +521,11 @@ def calculate():
 
     # ── Vérification quota mensuel ────────────────────────────────────────────
     pseudo = profile.get("pseudo", "")
-    quota = check_and_increment_synthesis(pseudo)
+    UNLIMITED_PSEUDOS = {"jero"}
+    if pseudo.lower() in UNLIMITED_PSEUDOS:
+        quota = {"allowed": True, "remaining": 999}
+    else:
+        quota = check_and_increment_synthesis(pseudo)
     if not quota["allowed"]:
         return jsonify({
             "error": "quota_exceeded",

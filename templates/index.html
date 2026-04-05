@@ -120,13 +120,20 @@
     
     <input type="date" id="transit-date" class="date-input" value="{{ today_iso }}">
     <br>
-    <div style="display: flex; gap: 8px; justify-content: center; max-width: 300px; margin: 0 auto 0 auto;">
-        <button id="geo-btn" class="btn-secondary" style="width: auto; padding: 0.85rem 1rem; flex-shrink: 0;" onclick="useGeolocation()" title="Utiliser ma position actuelle">
-            <span id="geo-icon">📍</span>
-        </button>
-        <div style="flex: 1; text-align: left;">
-            <div id="geo-label" style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--display); letter-spacing: 0.05em;">LIEU DE TRANSIT</div>
-            <div id="geo-city" style="font-size: 0.8rem; color: var(--gold); font-family: var(--display);">{{ lang.geo_auto if lang.geo_auto else 'Position auto…' }}</div>
+    <div style="max-width: 300px; margin: 0 auto; position: relative;">
+        <div style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--display); letter-spacing: 0.05em; text-align: left; margin-bottom: 4px;">LIEU DE TRANSIT</div>
+        <div style="display: flex; gap: 8px;">
+            <button id="geo-btn" class="btn-secondary" style="width: auto; padding: 0.85rem 1rem; flex-shrink: 0;" onclick="useGeolocation()" title="Utiliser ma position actuelle">
+                <span id="geo-icon">📍</span>
+            </button>
+            <div style="flex: 1; position: relative;">
+                <input id="transit-city-input" class="login-input" type="text" autocomplete="off"
+                    placeholder="{{ lang.geo_auto if lang.geo_auto else 'Position auto ou saisir une ville…' }}"
+                    style="margin-bottom: 0; font-size: 0.85rem;"
+                    oninput="onCityInput(this.value)"
+                    onfocus="onCityInput(this.value)">
+                <div id="city-suggestions" style="display:none; position:absolute; top:100%; left:0; right:0; background:#111110; border:1px solid var(--border); z-index:100; max-height:180px; overflow-y:auto;"></div>
+            </div>
         </div>
     </div>
     <br>
@@ -281,20 +288,20 @@ let transitGeo = null; // { lat, lon, city, tz }
 
 function useGeolocation() {
     const icon = document.getElementById('geo-icon');
-    const cityEl = document.getElementById('geo-city');
+    const input = document.getElementById('transit-city-input');
     if (!navigator.geolocation) {
-        cityEl.textContent = "Géolocalisation non supportée";
+        input.placeholder = "Géolocalisation non supportée — saisir une ville";
         return;
     }
     icon.textContent = '⏳';
-    cityEl.style.color = 'var(--text-dim)';
-    cityEl.textContent = 'Localisation…';
+    input.value = '';
+    input.placeholder = 'Localisation…';
+    input.disabled = true;
     navigator.geolocation.getCurrentPosition(
         async (pos) => {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
             const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            // Reverse geocoding via nominatim (open, sans clé)
             try {
                 const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language={{ lang.code if lang.code else 'fr' }}`);
                 const d = await r.json();
@@ -305,17 +312,74 @@ function useGeolocation() {
                 transitGeo = { lat, lon, city: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, tz };
             }
             icon.textContent = '✓';
-            cityEl.style.color = 'var(--gold)';
-            cityEl.textContent = transitGeo.city;
+            input.value = transitGeo.city;
+            input.disabled = false;
         },
         (err) => {
             icon.textContent = '📍';
-            cityEl.style.color = '#c97a6b';
-            cityEl.textContent = err.code === 1 ? 'Permission refusée' : 'Erreur de localisation';
+            input.disabled = false;
+            input.value = '';
+            input.placeholder = err.code === 1
+                ? 'Permission refusée — saisir une ville'
+                : 'Erreur GPS — saisir une ville';
         },
         { timeout: 10000 }
     );
 }
+
+let _cityTimer = null;
+
+function onCityInput(val) {
+    // Si l'utilisateur efface le champ, on retire la géoloc manuelle
+    if (!val.trim()) { transitGeo = null; hideSuggestions(); return; }
+    clearTimeout(_cityTimer);
+    _cityTimer = setTimeout(() => fetchCitySuggestions(val.trim()), 350);
+}
+
+async function fetchCitySuggestions(q) {
+    if (q.length < 2) return;
+    try {
+        const r = await fetch(`/geocode?q=${encodeURIComponent(q)}`);
+        const results = await r.json();
+        showSuggestions(results);
+    } catch { hideSuggestions(); }
+}
+
+function showSuggestions(results) {
+    const box = document.getElementById('city-suggestions');
+    if (!results.length) { hideSuggestions(); return; }
+    box.innerHTML = '';
+    results.forEach(item => {
+        // Nominatim renvoie display_name, lat, lon
+        const name = item.display_name || item.name || '';
+        const lat  = parseFloat(item.lat);
+        const lon  = parseFloat(item.lon);
+        const tz   = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        const div  = document.createElement('div');
+        div.textContent = name;
+        div.style.cssText = 'padding:8px 12px; cursor:pointer; font-size:0.82rem; border-bottom:1px solid var(--border); color:var(--text);';
+        div.onmouseenter = () => div.style.background = '#1a1a18';
+        div.onmouseleave = () => div.style.background = '';
+        div.onclick = () => {
+            transitGeo = { lat, lon, city: name, tz };
+            document.getElementById('transit-city-input').value = name;
+            document.getElementById('geo-icon').textContent = '✓';
+            hideSuggestions();
+        };
+        box.appendChild(div);
+    });
+    box.style.display = 'block';
+}
+
+function hideSuggestions() {
+    document.getElementById('city-suggestions').style.display = 'none';
+}
+
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#transit-city-input') && !e.target.closest('#city-suggestions')) {
+        hideSuggestions();
+    }
+});
 
 async function sendSynthesisEmail() {
     if (!lastSynthesis) { alert('Lance d\'abord un calcul pour obtenir ta synthèse.'); return; }
