@@ -390,8 +390,9 @@ Applique le protocole en 4 étapes :
 
 Développe chaque section en lecture d'âme cohérente, narrative, sans liste mécanique. Minimum 300 mots. Ne pas tronquer."""
 
+    synthesis_model = os.environ.get("SYNTHESIS_MODEL", "claude-sonnet-4-6")
     msg = _get_client().messages.create(
-        model="claude-sonnet-4-6",
+        model=synthesis_model,
         max_tokens=4000,
         system=_build_system_prompt(user),
         messages=[{"role": "user", "content": prompt}],
