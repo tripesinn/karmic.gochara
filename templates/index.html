@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>✦ {{ lang.title if lang.title else 'Karmic Gochara' }}</title>
+    <link rel="manifest" href="/static/manifest.json">
+    <meta name="theme-color" content="#c9a84c">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Gochara">
+    <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
     <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
@@ -47,6 +54,17 @@
 
         .registration-area { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid var(--border); text-align: left; }
         .label-small { font-size: 0.7rem; color: var(--gold); font-family: var(--display); margin-bottom: 5px; display: block; letter-spacing: 0.1em; }
+
+        #btn-coffee {
+            position: fixed; bottom: 18px; right: 18px; z-index: 999;
+            background: var(--gold); color: #000;
+            border: none; padding: 8px 16px;
+            font-family: var(--display); font-size: 0.7rem;
+            font-weight: bold; cursor: pointer;
+            text-decoration: none; display: inline-block;
+            transition: opacity 0.2s;
+        }
+        #btn-coffee:hover { opacity: 0.85; }
     </style>
 </head>
 <body>
@@ -106,6 +124,10 @@
         </div>
     </div>
 </div>
+
+<a id="btn-coffee" href="https://buymeacoffee.com/jerome6" target="_blank" rel="noopener">
+    ☕ {{ lang.support_label if lang.support_label else 'Soutenir le projet' }}
+</a>
 
 <script>
 function setLang(code) {
@@ -255,6 +277,10 @@ async function sendSynthesisEmail() {
 
 function logout() {
     fetch('/logout', { method: 'POST' }).then(() => location.reload());
+}
+
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('/sw.js');
 }
 </script>
 </body>

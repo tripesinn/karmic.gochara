@@ -7,7 +7,7 @@ import os
 from datetime import datetime
 
 import pytz
-from flask import Flask, jsonify, render_template, request, session
+from flask import Flask, jsonify, render_template, request, session, send_from_directory
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -377,6 +377,11 @@ def get_lang():
 
 
 # ── Routes publiques ──────────────────────────────────────────────────────────
+@app.route("/sw.js")
+def service_worker():
+    return send_from_directory("static", "sw.js", mimetype="application/javascript")
+
+
 @app.route("/")
 def index():
     tz = pytz.timezone("Europe/Paris")
