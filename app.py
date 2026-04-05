@@ -83,6 +83,9 @@ LANGS = {
         "hero_hook3": "Ton <strong>Stage</strong> est la scène qui t'attend.",
         "hero_cta": "Accéder à ta synthèse",
         "geo_auto": "Position auto ou saisir une ville…",
+        "pillar1_title": "Mémoire Karmique",
+        "pillar2_title": "Porte Invisible",
+        "pillar3_title": "Mise en Scène",
     },
     "en": {
         "code": "en", "label": "🇬🇧 EN",
@@ -142,6 +145,9 @@ LANGS = {
         "hero_hook3": "Your <strong>Stage</strong> is the scene waiting for you.",
         "hero_cta": "Access your synthesis",
         "geo_auto": "Auto position or type a city…",
+        "pillar1_title": "Karmic Memory",
+        "pillar2_title": "Invisible Door",
+        "pillar3_title": "The Stage",
     },
     "es": {
         "code": "es", "label": "🇪🇸 ES",
@@ -201,6 +207,9 @@ LANGS = {
         "hero_hook3": "Tu <strong>Stage</strong> es el escenario que te espera.",
         "hero_cta": "Acceder a tu síntesis",
         "geo_auto": "Posición auto o escribe una ciudad…",
+        "pillar1_title": "Memoria Kármica",
+        "pillar2_title": "Puerta Invisible",
+        "pillar3_title": "La Escena",
     },
     "pt": {
         "code": "pt", "label": "🇧🇷 PT",
@@ -260,6 +269,9 @@ LANGS = {
         "hero_hook3": "Seu <strong>Stage</strong> é o palco que te espera.",
         "hero_cta": "Acessar sua síntese",
         "geo_auto": "Posição auto ou digitar uma cidade…",
+        "pillar1_title": "Memória Kármica",
+        "pillar2_title": "Porta Invisível",
+        "pillar3_title": "O Palco",
     },
     "de": {
         "code": "de", "label": "🇩🇪 DE",
@@ -319,6 +331,9 @@ LANGS = {
         "hero_hook3": "Deine <strong>Stage</strong> ist die Bühne, die auf dich wartet.",
         "hero_cta": "Zugang zu deiner Synthese",
         "geo_auto": "Automatische Position oder Stadt eingeben…",
+        "pillar1_title": "Karmisches Gedächtnis",
+        "pillar2_title": "Unsichtbare Tür",
+        "pillar3_title": "Die Bühne",
     },
     "nl": {
         "code": "nl", "label": "🇳🇱 NL",
@@ -378,6 +393,9 @@ LANGS = {
         "hero_hook3": "Jouw <strong>Stage</strong> is het podium dat op je wacht.",
         "hero_cta": "Toegang tot je synthese",
         "geo_auto": "Auto positie of typ een stad…",
+        "pillar1_title": "Karmisch Geheugen",
+        "pillar2_title": "Onzichtbare Deur",
+        "pillar3_title": "Het Podium",
     },
     "it": {
         "code": "it", "label": "🇮🇹 IT",
@@ -437,6 +455,9 @@ LANGS = {
         "hero_hook3": "Il tuo <strong>Stage</strong> è la scena che ti aspetta.",
         "hero_cta": "Accedi alla tua sintesi",
         "geo_auto": "Posizione auto o digita una città…",
+        "pillar1_title": "Memoria Karmica",
+        "pillar2_title": "Porta Invisibile",
+        "pillar3_title": "La Scena",
     },
 }
 

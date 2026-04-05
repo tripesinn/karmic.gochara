@@ -173,17 +173,17 @@
     <div class="pillars">
         <div class="pillar">
             <span class="pillar-glyph">☋ ROM</span>
-            <h3>{{ 'Mémoire Karmique' }}</h3>
+            <h3>{{ lang.pillar1_title if lang.pillar1_title else 'Mémoire Karmique' }}</h3>
             <p>{{ lang.hero_ketu if lang.hero_ketu else 'Nœud Sud · mémoires passées · schémas de résistance' }}</p>
         </div>
         <div class="pillar">
             <span class="pillar-glyph">⚷ RAM</span>
-            <h3>{{ 'Porte Invisible' }}</h3>
+            <h3>{{ lang.pillar2_title if lang.pillar2_title else 'Porte Invisible' }}</h3>
             <p>{{ lang.hero_chiron if lang.hero_chiron else 'Chiron · blessure originelle · clé de la Porte Visible' }}</p>
         </div>
         <div class="pillar">
             <span class="pillar-glyph">☉ Stage</span>
-            <h3>{{ 'Mise en Scène' }}</h3>
+            <h3>{{ lang.pillar3_title if lang.pillar3_title else 'Mise en Scène' }}</h3>
             <p>{{ lang.hero_stage if lang.hero_stage else 'Dharma · lieu de libération · action incarnée' }}</p>
         </div>
     </div>
