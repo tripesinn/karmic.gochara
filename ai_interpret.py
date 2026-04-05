@@ -369,7 +369,8 @@ Apply the 4-step protocol:
 
 4. ALTERNATIVE DE CONSCIENCE + STAGING — Formulate the inner shift. What the soul must stop. What it must activate. The Visible Door's house as manifestation space. End with ONE single direct and actionable sentence.
 
-Develop each section as coherent soul-reading, narrative, no mechanical lists. Minimum 300 words. Do not truncate."""
+Develop each section as coherent soul-reading, narrative, no mechanical lists. Minimum 300 words. Do not truncate.
+LANGUAGE RULE: every single sentence must be in English. No French words allowed."""
     else:
         prompt = f"""Analyse siderealAstro13 des transits de {name} — {date} à {time}.
 CONSIGNE : commence directement par "## 1. LA MÉMOIRE KARMIQUE". Aucune note préalable, aucun récapitulatif des positions natales, aucune introduction.
