@@ -98,6 +98,12 @@
 
     <div id="synthesis-box" style="margin-top: 3rem; text-align: left; display: none; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 20px;">
         <div id="synthesis-content" style="line-height: 1.8; font-size: 1.1rem;"></div>
+        <div style="margin-top: 1.5rem; text-align: center;">
+            <button id="btnEmail" class="btn-secondary" onclick="sendSynthesisEmail()" style="max-width: 260px;">
+                {{ lang.send_email if lang.send_email else '📧 Recevoir par email' }}
+            </button>
+            <span id="email-status" style="display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-dim);"></span>
+        </div>
     </div>
 </div>
 
@@ -198,11 +204,13 @@ function calculate() {
         btn.disabled = false;
         btnText.innerHTML = originalText;
 
-        if (data.error) { 
-            alert(data.error); 
+        if (data.error) {
+            alert(data.error);
         } else {
+            lastSynthesis = data.synthesis;
             document.getElementById('synthesis-content').innerHTML = marked.parse(data.synthesis);
             document.getElementById('synthesis-box').style.display = 'block';
+            document.getElementById('email-status').textContent = '';
             // Scroll automatique vers le résultat
             document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
         }
@@ -212,6 +220,37 @@ function calculate() {
         btnText.innerHTML = originalText;
         alert("Erreur de connexion.");
     });
+}
+
+let lastSynthesis = '';
+
+async function sendSynthesisEmail() {
+    if (!lastSynthesis) { alert('Lance d\'abord un calcul pour obtenir ta synthèse.'); return; }
+    const btn = document.getElementById('btnEmail');
+    const status = document.getElementById('email-status');
+    btn.disabled = true;
+    status.style.color = 'var(--text-dim)';
+    status.textContent = 'Envoi en cours…';
+    try {
+        const res = await fetch('/send_synthesis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ synthesis: lastSynthesis }),
+        });
+        const data = await res.json();
+        if (data.ok) {
+            status.textContent = '✓ Synthèse envoyée par email.';
+            status.style.color = '#6a9f6a';
+        } else {
+            status.textContent = '✗ Erreur : ' + (data.error || 'inconnu');
+            status.style.color = '#c06060';
+        }
+    } catch (err) {
+        status.textContent = '✗ Erreur réseau.';
+        status.style.color = '#c06060';
+    } finally {
+        btn.disabled = false;
+    }
 }
 
 function logout() {
