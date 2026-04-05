@@ -351,7 +351,36 @@ def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr") -> str:
     nodal_bloc   = nodal_cycle if nodal_cycle else ""
     frict_bloc   = transit_frict if transit_frict else ""
 
-    if lang == "en":
+    # Noms de langue pour la règle d'enforcement
+    LANG_NAMES = {
+        "fr": "français",    "en": "English",
+        "es": "español",     "pt": "português",
+        "de": "Deutsch",     "nl": "Nederlands",
+        "it": "italiano",
+    }
+    lang_name = LANG_NAMES.get(lang, "English")
+
+    if lang == "fr":
+        prompt = f"""Analyse siderealAstro13 des transits de {name} — {date} à {time}.
+CONSIGNE : commence directement par "## 1. LA MÉMOIRE KARMIQUE". Aucune note préalable, aucun récapitulatif des positions natales, aucune introduction.
+{natal_bloc}{amsa_bloc}{nodal_bloc}{frict_bloc}
+
+Aspects actifs (avec thèmes nakshatra si disponibles) :
+{aspects_text}
+
+Applique le protocole en 4 étapes :
+
+1. LA MÉMOIRE KARMIQUE (ROM ☋) — Quels transits activent les schémas de moindre résistance ? Décris ce que l'âme fait quand elle est dans ce piège, en langage narratif direct.
+
+2. LA BLESSURE EN TRAITEMENT (RAM ⚷) — Quels transits activent Chiron ou l'Axe des Portes ? La Porte Invisible est-elle sous pression ? La Voie de libération / Stage est-elle activée ? Décris le mouvement, pas la mécanique.
+
+3. L'ÉPREUVE KARMIQUE (⚸) — Quel est le test de Lilith en cours ? Qu'est-ce qu'il rend insupportable ? Vers quoi il propulse ? Tu peux nommer ici les planètes et aspects pour créer le désir d'aller voir la carte.
+
+4. ALTERNATIVE DE CONSCIENCE + MISE EN SCÈNE — Formule la bascule intérieure. Ce que l'âme doit cesser. Ce qu'elle doit activer. La maison de la Porte Visible comme lieu de manifestation. Termine par UNE seule phrase directe et actionnable.
+
+Développe chaque section en lecture d'âme cohérente, narrative, sans liste mécanique. Minimum 300 mots. Ne pas tronquer.
+RÈGLE DE LANGUE : chaque phrase doit être entièrement en français. Aucun mot dans une autre langue."""
+    else:
         prompt = f"""siderealAstro13 transit analysis for {name} — {date} at {time}.
 INSTRUCTION: start directly with "## 1. KARMIC MEMORY". No preamble, no recap of natal positions, no introduction.
 {natal_bloc}{amsa_bloc}{nodal_bloc}{frict_bloc}
@@ -370,26 +399,7 @@ Apply the 4-step protocol:
 4. ALTERNATIVE DE CONSCIENCE + STAGING — Formulate the inner shift. What the soul must stop. What it must activate. The Visible Door's house as manifestation space. End with ONE single direct and actionable sentence.
 
 Develop each section as coherent soul-reading, narrative, no mechanical lists. Minimum 300 words. Do not truncate.
-LANGUAGE RULE: every single sentence must be in English. No French words allowed."""
-    else:
-        prompt = f"""Analyse siderealAstro13 des transits de {name} — {date} à {time}.
-CONSIGNE : commence directement par "## 1. LA MÉMOIRE KARMIQUE". Aucune note préalable, aucun récapitulatif des positions natales, aucune introduction.
-{natal_bloc}{amsa_bloc}{nodal_bloc}{frict_bloc}
-
-Aspects actifs (avec thèmes nakshatra si disponibles) :
-{aspects_text}
-
-Applique le protocole en 4 étapes :
-
-1. LA MÉMOIRE KARMIQUE (ROM ☋) — Quels transits activent les schémas de moindre résistance ? Décris ce que l'âme fait quand elle est dans ce piège, en langage narratif direct.
-
-2. LA BLESSURE EN TRAITEMENT (RAM ⚷) — Quels transits activent Chiron ou l'Axe des Portes ? La Porte Invisible est-elle sous pression ? La Voie de libération / Stage est-elle activée ? Décris le mouvement, pas la mécanique.
-
-3. L'ÉPREUVE KARMIQUE (⚸) — Quel est le test de Lilith en cours ? Qu'est-ce qu'il rend insupportable ? Vers quoi il propulse ? Tu peux nommer ici les planètes et aspects pour créer le désir d'aller voir la carte.
-
-4. ALTERNATIVE DE CONSCIENCE + MISE EN SCÈNE — Formule la bascule intérieure. Ce que l'âme doit cesser. Ce qu'elle doit activer. La maison de la Porte Visible comme lieu de manifestation. Termine par UNE seule phrase directe et actionnable.
-
-Développe chaque section en lecture d'âme cohérente, narrative, sans liste mécanique. Minimum 300 mots. Ne pas tronquer."""
+LANGUAGE RULE: every single sentence must be in {lang_name}. No French or English words unless they are proper astrological terms (nakshatra names, ROM, RAM, Stage)."""
 
     synthesis_model = os.environ.get("SYNTHESIS_MODEL", "claude-sonnet-4-6")
     msg = _get_client().messages.create(
