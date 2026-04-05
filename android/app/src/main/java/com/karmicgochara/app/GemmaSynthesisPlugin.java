@@ -36,13 +36,14 @@ import java.util.concurrent.Executors;
 @CapacitorPlugin(name = "GemmaSynthesis")
 public class GemmaSynthesisPlugin extends Plugin {
 
-    // ── URL de téléchargement du modèle Gemma 4 ──────────────────────────────
-    // À remplacer par l'URL officielle Google AI Edge / Hugging Face quand disponible.
-    // Le fichier doit être au format .task compatible MediaPipe LLM Inference.
+    // ── URL de téléchargement du modèle Gemma 3 (1B, int4, CPU) ─────────────
+    // Gemma 3 1B — ~400 Mo, fonctionne sur CPU, compatible MediaPipe 0.10.24+
+    // Remplacer par gemma3-4b-it-cpu-int4.task (~1.5 Go) pour plus de qualité.
+    // Docs : https://ai.google.dev/edge/mediapipe/solutions/genai/llm_inference/android
     private static final String MODEL_DOWNLOAD_URL =
-            "https://storage.googleapis.com/mediapipe-models/llm_inference/gemma-4/float16/1/gemma-4.task";
+            "https://storage.googleapis.com/mediapipe-models/llm_inference/gemma3-1b-it-cpu-int4/float32/1/gemma3-1b-it-cpu-int4.task";
 
-    private static final String MODEL_FILENAME = "gemma4.task";
+    private static final String MODEL_FILENAME = "gemma3.task";
     private static final int    MAX_TOKENS     = 2048;
     private static final float  TEMPERATURE    = 0.7f;
     private static final int    TOP_K          = 40;
