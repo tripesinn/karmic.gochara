@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find \"/c/Users/hp/Pictures/Screenshots/jerome/git clone/karmic.gochara\" -maxdepth 2 -not -path '*/.git/*' -not -path '*/__pycache__/*' -not -path '*/.vscode/*' -type f -exec du -h {} +)",
+      "Bash(sort -k2)",
+      "Bash(find:*)"
+    ]
+  }
+}

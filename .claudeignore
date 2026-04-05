@@ -1,0 +1,17 @@
+# Images et assets
+static/icons/
+*.png
+*.jpg
+*.ico
+
+# Config
+render.yaml
+Procfile.txt
+DEPLOIEMENT.md
+requirements.txt
+
+# Python
+__pycache__/
+venv/
+.env
+.git/
