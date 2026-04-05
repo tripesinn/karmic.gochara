@@ -229,6 +229,25 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
 
+    // ── getDeviceMemory : RAM totale de l'appareil ────────────────────────────
+    @PluginMethod
+    public void getDeviceMemory(PluginCall call) {
+        android.app.ActivityManager am = (android.app.ActivityManager)
+                getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        android.app.ActivityManager.MemoryInfo memInfo = new android.app.ActivityManager.MemoryInfo();
+        am.getMemoryInfo(memInfo);
+
+        long totalRamBytes = memInfo.totalMem;
+        long totalRamGb    = totalRamBytes / (1024L * 1024L * 1024L);
+        boolean sufficient = totalRamBytes >= 4L * 1024L * 1024L * 1024L; // ≥ 4 Go
+
+        JSObject result = new JSObject();
+        result.put("totalRamGb",  totalRamGb);
+        result.put("sufficient",  sufficient);
+        call.resolve(result);
+    }
+
+
     // ── unloadModel : libère la mémoire ───────────────────────────────────────
     @PluginMethod
     public void unloadModel(PluginCall call) {

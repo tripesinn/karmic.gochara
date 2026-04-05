@@ -767,18 +767,58 @@ document.addEventListener('DOMContentLoaded', () => {
     initLocalAIBanner();
 });
 
-function initLocalAIBanner() {
-    const isNative   = window.Capacitor?.isNativePlatform?.() ?? false;
-    const dismissed  = localStorage.getItem('localAIBannerDismissed');
-    const banner     = document.getElementById('banner-local-ai');
+async function initLocalAIBanner() {
+    const isNative  = window.Capacitor?.isNativePlatform?.() ?? false;
+    const dismissed = localStorage.getItem('localAIBannerDismissed');
+    const banner    = document.getElementById('banner-local-ai');
     if (!banner) return;
 
-    if (isNative && !dismissed) {
-        // Vérifie que le modèle n'est pas déjà là
-        Gemma.checkModel().then(status => {
-            if (!status.exists) banner.style.display = 'block';
-        });
+    if (!isNative) return;
+
+    // Vérification RAM
+    let sufficient = true;
+    let ramGb      = null;
+    const p = Gemma.plugin();
+    if (p) {
+        try {
+            const mem = await p.getDeviceMemory();
+            sufficient = mem.sufficient;
+            ramGb      = mem.totalRamGb;
+        } catch { /* fallback navigator.deviceMemory */ }
     }
+    // Fallback navigateur (deviceMemory = RAM en Go, arrondi puissance de 2)
+    if (ramGb === null && navigator.deviceMemory) {
+        ramGb      = navigator.deviceMemory;
+        sufficient = ramGb >= 4;
+    }
+
+    if (!sufficient) {
+        // Appareil trop léger → message informatif, pas de proposition de téléchargement
+        showLowRamBanner(ramGb);
+        return;
+    }
+
+    if (!dismissed) {
+        const status = await Gemma.checkModel();
+        if (!status.exists) banner.style.display = 'block';
+    }
+}
+
+function showLowRamBanner(ramGb) {
+    // Remplace la bannière verte par un message informatif neutre
+    const banner = document.getElementById('banner-local-ai');
+    if (!banner) return;
+    const ram = ramGb ? ` (${ramGb} Go détectés)` : '';
+    banner.style.borderColor   = '#2a2a3a';
+    banner.style.background    = 'linear-gradient(135deg,#0f0f18,#0f0f1a)';
+    banner.innerHTML = `
+        <div style="font-size:0.82rem;color:var(--text-dim);font-family:var(--display);margin-bottom:4px;">☁ Mode Cloud actif</div>
+        <div style="font-size:0.8rem;color:var(--text-dim);line-height:1.5;">
+            Votre appareil est trop léger pour l'IA locale${ram}.<br>
+            Nous utiliserons la version <strong style="color:var(--text);">Cloud (Haiku)</strong> pour vous — rapide et précis.
+        </div>
+        <button onclick="this.parentElement.style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;">×</button>`;
+    banner.style.display = 'block';
 }
 
 function dismissLocalAIBanner() {
