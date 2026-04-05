@@ -10,7 +10,9 @@
       "Bash(npx cap:*)",
       "Bash(file \"c:\\\\Users\\\\hp\\\\Pictures\\\\Screenshots\\\\jerome\\\\git clone\\\\karmic.gochara\\\\static\\\\icons\"/*)",
       "Bash(python -c \"from PIL import Image; print\\('Pillow OK'\\)\")",
-      "Bash(pip install:*)"
+      "Bash(pip install:*)",
+      "Read(//c/Users/hp/Pictures/Screenshots/jerome/git clone/**)",
+      "Bash(cp -r \"karmic.gochara\" \"karmic.gochara_backup_2026-04-05\")"
     ]
   }
 }
