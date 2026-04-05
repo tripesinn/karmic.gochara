@@ -120,6 +120,16 @@
     
     <input type="date" id="transit-date" class="date-input" value="{{ today_iso }}">
     <br>
+    <div style="display: flex; gap: 8px; justify-content: center; max-width: 300px; margin: 0 auto 0 auto;">
+        <button id="geo-btn" class="btn-secondary" style="width: auto; padding: 0.85rem 1rem; flex-shrink: 0;" onclick="useGeolocation()" title="Utiliser ma position actuelle">
+            <span id="geo-icon">📍</span>
+        </button>
+        <div style="flex: 1; text-align: left;">
+            <div id="geo-label" style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--display); letter-spacing: 0.05em;">LIEU DE TRANSIT</div>
+            <div id="geo-city" style="font-size: 0.8rem; color: var(--gold); font-family: var(--display);">{{ lang.geo_auto if lang.geo_auto else 'Position auto…' }}</div>
+        </div>
+    </div>
+    <br>
     <button id="calc-btn" class="btn-primary" style="max-width: 300px;" onclick="calculate()">
         <span id="btn-text">{{ lang.calculate if lang.calculate else 'CALCULER' }}</span>
     </button>
@@ -230,10 +240,17 @@ function calculate() {
     btn.disabled = true;
     btnText.innerHTML = '<span class="spinner"></span> LECTURE DES ASTRES...';
 
+    const payload = { date, hour: 12, minute: 0 };
+    if (transitGeo) {
+        payload.transit_lat  = transitGeo.lat;
+        payload.transit_lon  = transitGeo.lon;
+        payload.transit_city = transitGeo.city;
+        payload.transit_tz   = transitGeo.tz;
+    }
     fetch('/calculate', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({date: date, hour: 12, minute: 0})
+        body: JSON.stringify(payload)
     })
     .then(r => r.json())
     .then(data => {
@@ -260,6 +277,45 @@ function calculate() {
 }
 
 let lastSynthesis = '';
+let transitGeo = null; // { lat, lon, city, tz }
+
+function useGeolocation() {
+    const icon = document.getElementById('geo-icon');
+    const cityEl = document.getElementById('geo-city');
+    if (!navigator.geolocation) {
+        cityEl.textContent = "Géolocalisation non supportée";
+        return;
+    }
+    icon.textContent = '⏳';
+    cityEl.style.color = 'var(--text-dim)';
+    cityEl.textContent = 'Localisation…';
+    navigator.geolocation.getCurrentPosition(
+        async (pos) => {
+            const lat = pos.coords.latitude;
+            const lon = pos.coords.longitude;
+            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            // Reverse geocoding via nominatim (open, sans clé)
+            try {
+                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language={{ lang.code if lang.code else 'fr' }}`);
+                const d = await r.json();
+                const city = d.address?.city || d.address?.town || d.address?.village || d.address?.county || 'Position GPS';
+                const country = d.address?.country || '';
+                transitGeo = { lat, lon, city: `${city}, ${country}`.trim().replace(/,$/, ''), tz };
+            } catch {
+                transitGeo = { lat, lon, city: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, tz };
+            }
+            icon.textContent = '✓';
+            cityEl.style.color = 'var(--gold)';
+            cityEl.textContent = transitGeo.city;
+        },
+        (err) => {
+            icon.textContent = '📍';
+            cityEl.style.color = '#c97a6b';
+            cityEl.textContent = err.code === 1 ? 'Permission refusée' : 'Erreur de localisation';
+        },
+        { timeout: 10000 }
+    );
+}
 
 async function sendSynthesisEmail() {
     if (!lastSynthesis) { alert('Lance d\'abord un calcul pour obtenir ta synthèse.'); return; }
