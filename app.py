@@ -503,6 +503,7 @@ def index():
         langs=LANGS,  # On envoie le dictionnaire complet pour la boucle for
         session_user=session.get('pseudo', ''),
         session_profile=session.get('profile', {}),
+        enable_local_ai=os.environ.get('ENABLE_LOCAL_AI', '').lower() in ('1', 'true'),
     )
 
 @app.route("/set_lang", methods=["POST"])
@@ -784,8 +785,11 @@ def send_synthesis():
 def synthesis_prompt():
     """
     Construit et retourne le prompt (system + user) sans appeler Claude.
-    Utilisé par le plugin Gemma 4 / AI Core sur Android pour l'inférence locale.
+    Utilisé par le plugin Gemma 3 / AI Core sur Android pour l'inférence locale.
+    Désactivé sur prod (ENABLE_LOCAL_AI non défini).
     """
+    if not os.environ.get('ENABLE_LOCAL_AI', '').lower() in ('1', 'true'):
+        return jsonify({"error": "Non disponible"}), 404
     from astro_calc import calculate_transits
     from ai_interpret import build_prompt_only
 
