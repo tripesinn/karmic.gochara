@@ -318,8 +318,8 @@
             <!-- Token HuggingFace (requis pour télécharger Gemma) -->
             <div id="hf-token-block" style="margin-bottom:12px;display:none;">
                 <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">
-                    Gemma nécessite un compte <a href="https://huggingface.co/google/gemma-3-1b-it-mediapipe" target="_blank" rel="noopener" style="color:var(--gold);">HuggingFace</a> avec les CGU acceptées.<br>
-                    <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener" style="color:var(--gold);">Crée un token ici</a> puis colle-le ci-dessous.
+                    Gemma nécessite un compte HuggingFace avec les CGU acceptées sur <a href="https://huggingface.co/litert-community/Gemma3-1B-IT" target="_blank" rel="noopener" style="color:var(--gold);">ce repo</a>.<br>
+                    <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener" style="color:var(--gold);">Crée un token "Read"</a> puis colle-le ci-dessous.
                 </div>
                 <div style="display:flex;gap:6px;">
                     <input id="hf-token-input" type="password" placeholder="hf_xxxxxxxxxxxxxxxxxxxx"
@@ -637,8 +637,10 @@ if ('serviceWorker' in navigator) {
 const GEMMA_WASM_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai@0.10.14/wasm';
 const GEMMA_SDK_URL  = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai@0.10.14/genai_bundle.mjs';
 const GEMMA_MODEL_URLS = {
-    e2b: 'https://huggingface.co/google/gemma-3-1b-it-mediapipe/resolve/main/gemma3-1b-it-cpu-int4.task',
-    e4b: 'https://huggingface.co/google/gemma-3-4b-it-mediapipe/resolve/main/gemma3-4b-it-cpu-int4.task',
+    // litert-community/Gemma3-1B-IT — variante web (WebAssembly/OPFS)
+    e2b: 'https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/gemma3-1b-it-int4-web.task',
+    // E4B : placeholder — à mettre à jour quand Gemma3 4B litert disponible
+    e4b: 'https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/gemma3-1b-it-int4-web.task',
 };
 const GEMMA_FILENAMES = { e2b: 'gemma_e2b.task', e4b: 'gemma_e4b.task' };
 

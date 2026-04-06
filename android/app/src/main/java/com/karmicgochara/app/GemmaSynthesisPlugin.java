@@ -36,7 +36,7 @@ public class GemmaSynthesisPlugin extends Plugin {
     // E2B — Gemma 4 2B int4 (~800 Mo) — synthèse quotidienne
     // En attendant Gemma 4 officiel : Gemma 3 1B (~400 Mo) en placeholder
     private static final String MODEL_2B_URL      =
-            "https://huggingface.co/google/gemma-3-1b-it-mediapipe/resolve/main/gemma3-1b-it-cpu-int4.task";
+            "https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/gemma3-1b-it-int4.task";
     private static final String MODEL_2B_FILENAME = "gemma_e2b.task";
     private static final long   MODEL_2B_RAM_GB   = 4L;   // RAM minimum requise
 
