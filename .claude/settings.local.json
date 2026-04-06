@@ -15,7 +15,8 @@
       "Bash(cp -r \"karmic.gochara\" \"karmic.gochara_backup_2026-04-05\")",
       "Bash(python -c ':*)",
       "Bash(python -c \"import ast; ast.parse\\(open\\('app.py'\\).read\\(\\)\\); print\\('OK app.py'\\)\")",
-      "Bash(python -c \"import ast; ast.parse\\(open\\('ai_interpret.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK'\\)\")"
+      "Bash(python -c \"import ast; ast.parse\\(open\\('ai_interpret.py', encoding='utf-8'\\).read\\(\\)\\); print\\('OK'\\)\")",
+      "Bash(curl:*)"
     ]
   }
 }
