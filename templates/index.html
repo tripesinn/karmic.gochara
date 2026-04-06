@@ -704,7 +704,8 @@ const GemmaWeb = {
         const hfToken = localStorage.getItem('hf_token') || '';
         const headers = hfToken ? { 'Authorization': 'Bearer ' + hfToken } : {};
         const res = await fetch(url, { headers });
-        if (res.status === 401) throw new Error('Token HuggingFace invalide ou absent. Accepte les CGU Gemma sur huggingface.co et saisis ton token.');
+        if (res.status === 401) throw new Error('Token HuggingFace invalide. Crée un token "Read" sur huggingface.co/settings/tokens et saisis-le ci-dessus.');
+        if (res.status === 403) throw new Error('Accès refusé (403) — accepte les CGU sur huggingface.co/litert-community/Gemma3-1B-IT en cliquant "Agree and access repository", puis réessaie.');
         if (!res.ok) throw new Error(`HTTP ${res.status} — vérifier la connexion`);
 
         const total  = parseInt(res.headers.get('content-length') || '0');
