@@ -22,128 +22,165 @@ import java.util.concurrent.Executors;
 /**
  * GemmaSynthesisPlugin — Inférence locale Gemma 4 via MediaPipe Tasks GenAI
  *
- * Flow :
- *   1. JS appelle checkModel()     → le modèle est-il téléchargé ?
- *   2. Si non : JS appelle downloadModel() → télécharge via DownloadManager
- *   3. JS appelle generate(prompt) → inférence locale, retourne la synthèse
+ * Deux modèles selon la RAM disponible :
+ *   E2B (~800 Mo, ≥ 4 Go RAM) → synthèse quotidienne  — rapide, offline
+ *   E4B (~2 Go,  ≥ 6 Go RAM) → rapport annuel PDF     — qualité narrative
  *
- * Le modèle (~2 Go) est stocké dans :
- *   /Android/data/com.karmicgochara.app/files/gemma4.task
- *
- * Pour obtenir le fichier .task compatible MediaPipe :
- *   https://ai.google.dev/edge/mediapipe/solutions/genai/llm_inference/android
+ * Sélection automatique via getDeviceMemory() + choix utilisateur.
+ * URLs à mettre à jour dès la sortie officielle Gemma 4 (Google AI Edge).
  */
 @CapacitorPlugin(name = "GemmaSynthesis")
 public class GemmaSynthesisPlugin extends Plugin {
 
-    // ── URL de téléchargement du modèle Gemma 3 (1B, int4, CPU) ─────────────
-    // Gemma 3 1B — ~400 Mo, CPU only, compatible MediaPipe 0.10.24+
-    // Source : HuggingFace google/gemma-3-1b-it (format MediaPipe .task)
-    // Remplacer par la version 4B (~1.5 Go) pour une meilleure qualité narrative.
-    // Alternative manuelle : adb push gemma3.task /sdcard/Android/data/com.karmicgochara.app/files/Downloads/
-    private static final String MODEL_DOWNLOAD_URL =
+    // ── Modèles disponibles ───────────────────────────────────────────────────
+    // E2B — Gemma 4 2B int4 (~800 Mo) — synthèse quotidienne
+    // En attendant Gemma 4 officiel : Gemma 3 1B (~400 Mo) en placeholder
+    private static final String MODEL_2B_URL      =
             "https://huggingface.co/google/gemma-3-1b-it-mediapipe/resolve/main/gemma3-1b-it-cpu-int4.task";
+    private static final String MODEL_2B_FILENAME = "gemma_e2b.task";
+    private static final long   MODEL_2B_RAM_GB   = 4L;   // RAM minimum requise
 
-    private static final String MODEL_FILENAME = "gemma3.task";
-    private static final int    MAX_TOKENS     = 2048;
-    private static final float  TEMPERATURE    = 0.7f;
-    private static final int    TOP_K          = 40;
+    // E4B — Gemma 4 4B int4 (~2 Go) — rapport annuel
+    // URL placeholder : à remplacer par l'URL officielle Gemma 4 4B quand disponible
+    private static final String MODEL_4B_URL      =
+            "https://huggingface.co/google/gemma-3-4b-it-mediapipe/resolve/main/gemma3-4b-it-cpu-int4.task";
+    private static final String MODEL_4B_FILENAME = "gemma_e4b.task";
+    private static final long   MODEL_4B_RAM_GB   = 6L;   // RAM minimum requise
 
-    private LlmInference    llmInference = null;
-    private boolean         modelLoaded  = false;
-    private ExecutorService executor     = Executors.newSingleThreadExecutor();
+    // ── Paramètres d'inférence ────────────────────────────────────────────────
+    private static final int   MAX_TOKENS_SYNTHESIS = 2048;  // synthèse quotidienne
+    private static final int   MAX_TOKENS_REPORT    = 4096;  // rapport annuel
+    private static final float TEMPERATURE          = 0.7f;
+    private static final int   TOP_K                = 40;
+
+    // ── État runtime ──────────────────────────────────────────────────────────
+    private LlmInference    llm2b       = null;  // E2B chargé
+    private LlmInference    llm4b       = null;  // E4B chargé
+    private ExecutorService executor    = Executors.newSingleThreadExecutor();
 
 
-    // ── Chemin du fichier modèle ──────────────────────────────────────────────
-    private File getModelFile() {
-        File dir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        if (dir == null) {
-            dir = getContext().getFilesDir();
-        }
-        return new File(dir, MODEL_FILENAME);
-    }
-
-
-    // ── checkModel : le modèle est-il présent et chargé ? ────────────────────
+    // ── checkModels : état des deux modèles ───────────────────────────────────
     @PluginMethod
-    public void checkModel(PluginCall call) {
-        File modelFile = getModelFile();
-        boolean exists = modelFile.exists() && modelFile.length() > 1_000_000L;
+    public void checkModels(PluginCall call) {
+        File f2b = getModelFile(MODEL_2B_FILENAME);
+        File f4b = getModelFile(MODEL_4B_FILENAME);
 
         JSObject result = new JSObject();
-        result.put("exists", exists);
-        result.put("loaded", modelLoaded);
-        result.put("path",   exists ? modelFile.getAbsolutePath() : "");
-        result.put("sizeMb", exists ? modelFile.length() / (1024 * 1024) : 0);
+        result.put("e2b_exists",  f2b.exists() && f2b.length() > 1_000_000L);
+        result.put("e2b_loaded",  llm2b != null);
+        result.put("e2b_sizeMb",  f2b.exists() ? f2b.length() / (1024 * 1024) : 0);
+        result.put("e4b_exists",  f4b.exists() && f4b.length() > 1_000_000L);
+        result.put("e4b_loaded",  llm4b != null);
+        result.put("e4b_sizeMb",  f4b.exists() ? f4b.length() / (1024 * 1024) : 0);
+        call.resolve(result);
+    }
+
+    // Rétrocompat avec l'ancien checkModel()
+    @PluginMethod
+    public void checkModel(PluginCall call) { checkModels(call); }
+
+
+    // ── getDeviceMemory : RAM + recommandation modèle ─────────────────────────
+    @PluginMethod
+    public void getDeviceMemory(PluginCall call) {
+        android.app.ActivityManager am = (android.app.ActivityManager)
+                getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        android.app.ActivityManager.MemoryInfo memInfo =
+                new android.app.ActivityManager.MemoryInfo();
+        am.getMemoryInfo(memInfo);
+
+        long totalRamGb   = memInfo.totalMem / (1024L * 1024L * 1024L);
+        boolean can2b     = totalRamGb >= MODEL_2B_RAM_GB;
+        boolean can4b     = totalRamGb >= MODEL_4B_RAM_GB;
+
+        JSObject result = new JSObject();
+        result.put("totalRamGb",   totalRamGb);
+        result.put("sufficient",   can2b);          // rétrocompat
+        result.put("can_e2b",      can2b);
+        result.put("can_e4b",      can4b);
+        result.put("recommended",  can4b ? "e4b" : can2b ? "e2b" : "cloud");
         call.resolve(result);
     }
 
 
-    // ── loadModel : charge le modèle en mémoire ───────────────────────────────
+    // ── loadModel : charge E2B ou E4B en mémoire ──────────────────────────────
     @PluginMethod
     public void loadModel(PluginCall call) {
-        File modelFile = getModelFile();
+        String type = call.getString("type", "e2b"); // "e2b" ou "e4b"
+        boolean isE4b = "e4b".equals(type);
+
+        File modelFile = getModelFile(isE4b ? MODEL_4B_FILENAME : MODEL_2B_FILENAME);
+        int  maxTokens = isE4b ? MAX_TOKENS_REPORT : MAX_TOKENS_SYNTHESIS;
+
         if (!modelFile.exists()) {
-            call.reject("MODEL_NOT_FOUND", "Le fichier modèle n'est pas téléchargé.");
+            call.reject("MODEL_NOT_FOUND", "Modèle " + type.toUpperCase() + " non téléchargé.");
             return;
         }
 
         executor.execute(() -> {
             try {
-                if (llmInference != null) {
-                    llmInference.close();
-                    llmInference = null;
-                }
+                LlmInference existing = isE4b ? llm4b : llm2b;
+                if (existing != null) { try { existing.close(); } catch (Exception ignored) {} }
 
                 LlmInferenceOptions options = LlmInferenceOptions.builder()
                         .setModelPath(modelFile.getAbsolutePath())
-                        .setMaxTokens(MAX_TOKENS)
+                        .setMaxTokens(maxTokens)
                         .setTemperature(TEMPERATURE)
                         .setTopK(TOP_K)
                         .build();
 
-                llmInference = LlmInference.createFromOptions(getContext(), options);
-                modelLoaded  = true;
+                LlmInference llm = LlmInference.createFromOptions(getContext(), options);
+                if (isE4b) llm4b = llm; else llm2b = llm;
 
                 JSObject result = new JSObject();
-                result.put("ok", true);
+                result.put("ok",   true);
+                result.put("type", type);
                 call.resolve(result);
 
             } catch (Exception e) {
-                modelLoaded = false;
-                call.reject("LOAD_ERROR", "Erreur chargement modèle : " + e.getMessage(), e);
+                call.reject("LOAD_ERROR", "Erreur chargement " + type + " : " + e.getMessage(), e);
             }
         });
     }
 
 
-    // ── generate : inférence locale ───────────────────────────────────────────
+    // ── generate : inférence avec le modèle approprié ────────────────────────
     @PluginMethod
     public void generate(PluginCall call) {
-        String systemPrompt = call.getString("system", "");
-        String userPrompt   = call.getString("user",   "");
+        String system = call.getString("system", "");
+        String user   = call.getString("user",   "");
+        String type   = call.getString("type",   "e2b"); // "e2b" ou "e4b"
+        boolean isE4b = "e4b".equals(type);
 
-        if (userPrompt == null || userPrompt.isEmpty()) {
-            call.reject("INVALID_PROMPT", "Le prompt ne peut pas être vide.");
-            return;
-        }
-        if (!modelLoaded || llmInference == null) {
-            call.reject("MODEL_NOT_LOADED", "Le modèle n'est pas chargé. Appelle loadModel() d'abord.");
+        if (user == null || user.isEmpty()) {
+            call.reject("INVALID_PROMPT", "Prompt vide.");
             return;
         }
 
-        // Gemma 4 utilise le format de chat standard
-        // system et user sont concaténés dans un seul prompt structuré
-        String fullPrompt = buildGemmaPrompt(systemPrompt, userPrompt);
+        LlmInference llm = isE4b ? llm4b : llm2b;
+        // Fallback : si E4B demandé mais non chargé, tente E2B
+        if (llm == null && isE4b && llm2b != null) {
+            llm = llm2b;
+            type = "e2b";
+        }
+        if (llm == null) {
+            call.reject("MODEL_NOT_LOADED", "Aucun modèle chargé. Appelle loadModel() d'abord.");
+            return;
+        }
+
+        final LlmInference finalLlm = llm;
+        final String       finalType = type;
 
         executor.execute(() -> {
             try {
-                String response = llmInference.generateResponse(fullPrompt);
+                String fullPrompt = buildGemmaPrompt(system, user);
+                String response   = finalLlm.generateResponse(fullPrompt);
 
                 JSObject result = new JSObject();
-                result.put("ok",       true);
+                result.put("ok",        true);
                 result.put("synthesis", response.trim());
-                result.put("local",    true);
+                result.put("local",     true);
+                result.put("model",     finalType);
                 call.resolve(result);
 
             } catch (Exception e) {
@@ -153,23 +190,30 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
 
-    // ── downloadModel : lance le téléchargement via DownloadManager ───────────
+    // ── downloadModel : télécharge E2B ou E4B ────────────────────────────────
     @PluginMethod
     public void downloadModel(PluginCall call) {
-        File modelFile = getModelFile();
+        String type  = call.getString("type", "e2b");
+        boolean isE4b = "e4b".equals(type);
+
+        String url      = isE4b ? MODEL_4B_URL      : MODEL_2B_URL;
+        String filename = isE4b ? MODEL_4B_FILENAME  : MODEL_2B_FILENAME;
+        String label    = isE4b ? "Gemma E4B (~2 Go)" : "Gemma E2B (~800 Mo)";
+
+        File modelFile = getModelFile(filename);
         if (modelFile.exists() && modelFile.length() > 1_000_000L) {
             JSObject result = new JSObject();
             result.put("ok",      true);
             result.put("already", true);
+            result.put("type",    type);
             call.resolve(result);
             return;
         }
 
         try {
-            DownloadManager.Request request = new DownloadManager.Request(
-                    Uri.parse(MODEL_DOWNLOAD_URL))
-                    .setTitle("Gemma 4 — Karmic Gochara")
-                    .setDescription("Téléchargement du modèle IA local (~2 Go)")
+            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
+                    .setTitle("Karmic Gochara — " + label)
+                    .setDescription("Téléchargement du modèle IA local")
                     .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     .setDestinationUri(Uri.fromFile(modelFile))
                     .setAllowedOverMetered(false)
@@ -183,38 +227,35 @@ public class GemmaSynthesisPlugin extends Plugin {
             result.put("ok",         true);
             result.put("downloadId", downloadId);
             result.put("already",    false);
+            result.put("type",       type);
             call.resolve(result);
 
         } catch (Exception e) {
-            call.reject("DOWNLOAD_ERROR", "Erreur lancement téléchargement : " + e.getMessage(), e);
+            call.reject("DOWNLOAD_ERROR", e.getMessage(), e);
         }
     }
 
 
-    // ── checkDownloadProgress : état du téléchargement ───────────────────────
+    // ── checkDownloadProgress ─────────────────────────────────────────────────
     @PluginMethod
     public void checkDownloadProgress(PluginCall call) {
         long downloadId = call.getLong("downloadId", -1L);
-        if (downloadId == -1) {
-            call.reject("INVALID_ID", "downloadId requis.");
-            return;
-        }
+        if (downloadId == -1) { call.reject("INVALID_ID", "downloadId requis."); return; }
 
         DownloadManager dm = (DownloadManager)
                 getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-        DownloadManager.Query query = new DownloadManager.Query().setFilterById(downloadId);
-        Cursor cursor = dm.query(query);
+        Cursor cursor = dm.query(new DownloadManager.Query().setFilterById(downloadId));
 
         JSObject result = new JSObject();
         if (cursor != null && cursor.moveToFirst()) {
-            int statusIdx   = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-            int dlIdx       = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
-            int totalIdx    = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
+            int statusIdx = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
+            int dlIdx     = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
+            int totalIdx  = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
 
-            int    status    = statusIdx  >= 0 ? cursor.getInt(statusIdx)  : -1;
-            long   dlBytes   = dlIdx      >= 0 ? cursor.getLong(dlIdx)     : 0;
-            long   total     = totalIdx   >= 0 ? cursor.getLong(totalIdx)  : -1;
-            int    progress  = (total > 0) ? (int)(dlBytes * 100 / total) : 0;
+            int  status   = statusIdx >= 0 ? cursor.getInt(statusIdx)  : -1;
+            long dlBytes  = dlIdx     >= 0 ? cursor.getLong(dlIdx)     : 0;
+            long total    = totalIdx  >= 0 ? cursor.getLong(totalIdx)  : -1;
+            int  progress = total > 0 ? (int)(dlBytes * 100 / total) : 0;
 
             result.put("status",   statusToString(status));
             result.put("progress", progress);
@@ -222,40 +263,23 @@ public class GemmaSynthesisPlugin extends Plugin {
             result.put("totalMb",  total   / (1024 * 1024));
             cursor.close();
         } else {
-            result.put("status",   "unknown");
+            result.put("status", "unknown");
             result.put("progress", 0);
         }
         call.resolve(result);
     }
 
 
-    // ── getDeviceMemory : RAM totale de l'appareil ────────────────────────────
-    @PluginMethod
-    public void getDeviceMemory(PluginCall call) {
-        android.app.ActivityManager am = (android.app.ActivityManager)
-                getContext().getSystemService(Context.ACTIVITY_SERVICE);
-        android.app.ActivityManager.MemoryInfo memInfo = new android.app.ActivityManager.MemoryInfo();
-        am.getMemoryInfo(memInfo);
-
-        long totalRamBytes = memInfo.totalMem;
-        long totalRamGb    = totalRamBytes / (1024L * 1024L * 1024L);
-        boolean sufficient = totalRamBytes >= 4L * 1024L * 1024L * 1024L; // ≥ 4 Go
-
-        JSObject result = new JSObject();
-        result.put("totalRamGb",  totalRamGb);
-        result.put("sufficient",  sufficient);
-        call.resolve(result);
-    }
-
-
-    // ── unloadModel : libère la mémoire ───────────────────────────────────────
+    // ── unloadModel ───────────────────────────────────────────────────────────
     @PluginMethod
     public void unloadModel(PluginCall call) {
-        if (llmInference != null) {
-            try { llmInference.close(); } catch (Exception ignored) {}
-            llmInference = null;
+        String type   = call.getString("type", "all");
+        if ("e2b".equals(type) || "all".equals(type)) {
+            if (llm2b != null) { try { llm2b.close(); } catch (Exception ignored) {} llm2b = null; }
         }
-        modelLoaded = false;
+        if ("e4b".equals(type) || "all".equals(type)) {
+            if (llm4b != null) { try { llm4b.close(); } catch (Exception ignored) {} llm4b = null; }
+        }
         JSObject result = new JSObject();
         result.put("ok", true);
         call.resolve(result);
@@ -263,19 +287,20 @@ public class GemmaSynthesisPlugin extends Plugin {
 
 
     // ── Helpers ───────────────────────────────────────────────────────────────
+    private File getModelFile(String filename) {
+        File dir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (dir == null) dir = getContext().getFilesDir();
+        return new File(dir, filename);
+    }
+
     /**
-     * Formate le prompt au format Gemma 4 / Gemma Instruct.
-     * Format : <start_of_turn>user\n{system}\n\n{user}<end_of_turn>\n<start_of_turn>model\n
+     * Format de prompt Gemma Instruct (Gemma 3 & 4) :
+     * <start_of_turn>user\n{system}\n\n{user}<end_of_turn>\n<start_of_turn>model\n
      */
     private String buildGemmaPrompt(String system, String user) {
-        StringBuilder sb = new StringBuilder();
-        if (system != null && !system.isEmpty()) {
-            sb.append("<start_of_turn>user\n").append(system).append("\n\n");
-        } else {
-            sb.append("<start_of_turn>user\n");
-        }
-        sb.append(user);
-        sb.append("<end_of_turn>\n<start_of_turn>model\n");
+        StringBuilder sb = new StringBuilder("<start_of_turn>user\n");
+        if (system != null && !system.isEmpty()) sb.append(system).append("\n\n");
+        sb.append(user).append("<end_of_turn>\n<start_of_turn>model\n");
         return sb.toString();
     }
 
@@ -293,9 +318,8 @@ public class GemmaSynthesisPlugin extends Plugin {
     @Override
     protected void handleOnDestroy() {
         executor.shutdown();
-        if (llmInference != null) {
-            try { llmInference.close(); } catch (Exception ignored) {}
-        }
+        if (llm2b != null) { try { llm2b.close(); } catch (Exception ignored) {} }
+        if (llm4b != null) { try { llm4b.close(); } catch (Exception ignored) {} }
         super.handleOnDestroy();
     }
 }

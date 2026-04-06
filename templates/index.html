@@ -614,54 +614,60 @@ if ('serviceWorker' in navigator) {
 // ══ Gemma 4 — Inférence locale (AI Core / MediaPipe) ═════════════════════════
 
 const Gemma = {
-    _available: null,   // null = pas encore vérifié
-    _loaded:    false,
-    _dlId:      null,
+    _dlIds:  { e2b: null, e4b: null },  // downloadId en cours par type
+    _status: null,                       // cache checkModels()
 
     plugin() {
         return window.Capacitor?.Plugins?.GemmaSynthesis ?? null;
     },
 
-    async isAvailable() {
-        if (this._available !== null) return this._available;
+    // Retourne { e2b_exists, e2b_loaded, e4b_exists, e4b_loaded, e2b_sizeMb, e4b_sizeMb }
+    async checkModels() {
         const p = this.plugin();
-        if (!p) { this._available = false; return false; }
+        if (!p) return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false };
         try {
-            const r = await p.checkModel();
-            this._available = r.exists && r.loaded;
-            return this._available;
-        } catch { this._available = false; return false; }
+            this._status = await p.checkModels();
+            return this._status;
+        } catch { return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false }; }
     },
 
-    async checkModel() {
+    // Rétrocompat — utilisé par initLocalAIBanner
+    async checkModel() { return this.checkModels(); },
+
+    // true si au moins E2B chargé (suffit pour synthèse quotidienne)
+    async isAvailable() {
         const p = this.plugin();
-        if (!p) return { exists: false, loaded: false };
-        try { return await p.checkModel(); }
-        catch { return { exists: false, loaded: false }; }
+        if (!p) return false;
+        try {
+            const r = await this.checkModels();
+            return r.e2b_loaded || r.e4b_loaded;
+        } catch { return false; }
     },
 
-    async loadModel() {
+    // type = "e2b" | "e4b"
+    async loadModel(type = 'e2b') {
         const p = this.plugin();
         if (!p) throw new Error('Plugin non disponible');
-        const r = await p.loadModel();
-        this._loaded = r.ok;
+        return await p.loadModel({ type });
+    },
+
+    // type = "e2b" | "e4b"
+    async downloadModel(type = 'e2b') {
+        const p = this.plugin();
+        if (!p) throw new Error('Plugin non disponible');
+        const r = await p.downloadModel({ type });
+        this._dlIds[type] = r.downloadId ?? null;
         return r;
     },
 
-    async downloadModel() {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        const r = await p.downloadModel();
-        this._dlId = r.downloadId;
-        return r;
-    },
-
-    async pollDownload(onProgress) {
-        if (!this._dlId) return;
+    // Suit le téléchargement d'un type donné
+    async pollDownload(type = 'e2b', onProgress) {
+        const dlId = this._dlIds[type];
+        if (!dlId) return;
         const p = this.plugin();
         const interval = setInterval(async () => {
             try {
-                const r = await p.checkDownloadProgress({ downloadId: this._dlId });
+                const r = await p.checkDownloadProgress({ downloadId: dlId });
                 onProgress(r);
                 if (r.status === 'success' || r.status === 'failed') {
                     clearInterval(interval);
@@ -670,10 +676,11 @@ const Gemma = {
         }, 2000);
     },
 
-    async generate(systemPrompt, userPrompt) {
+    // type = "e2b" (synthèse quotidienne) | "e4b" (rapport annuel)
+    async generate(systemPrompt, userPrompt, type = 'e2b') {
         const p = this.plugin();
         if (!p) throw new Error('Plugin non disponible');
-        return await p.generate({ system: systemPrompt, user: userPrompt });
+        return await p.generate({ system: systemPrompt, user: userPrompt, type });
     },
 };
 
@@ -703,7 +710,7 @@ async function calculateWithRouting() {
 
     try {
         if (gemmaReady) {
-            // ── Voie locale : prompt serveur + inférence Gemma ─────────────
+            // ── Voie locale : prompt serveur + inférence Gemma E2B ─────────
             btnText.innerHTML = '<span class="spinner"></span> CALCUL ASTRAL…';
             const pr = await fetch('/synthesis/prompt', {
                 method: 'POST',
@@ -714,10 +721,10 @@ async function calculateWithRouting() {
             if (pd.error) throw new Error(pd.error);
 
             btnText.innerHTML = '<span class="spinner"></span> GEMMA LOCAL…';
-            const gr = await Gemma.generate(pd.system, pd.user);
+            const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
 
             showSynthesis(gr.synthesis, null);
-            showLocalBadge(true);
+            showLocalBadge(true, gr.model ?? 'e2b');
 
         } else {
             // ── Voie serveur : Claude (comportement existant) ───────────────
@@ -748,7 +755,7 @@ function showSynthesis(text, remaining) {
     document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
 }
 
-function showLocalBadge(isLocal) {
+function showLocalBadge(isLocal, modelType) {
     let badge = document.getElementById('local-badge');
     if (!badge) {
         badge = document.createElement('span');
@@ -757,7 +764,8 @@ function showLocalBadge(isLocal) {
         document.getElementById('synthesis-box').querySelector('div').prepend(badge);
     }
     if (isLocal) {
-        badge.textContent = '✦ Gemma local';
+        const label = modelType === 'e4b' ? 'Gemma E4B local' : 'Gemma E2B local';
+        badge.textContent = '✦ ' + label;
         badge.style.cssText += 'background:#1a2a1a;color:#6ab56a;border:1px solid #2a4a2a;';
     } else {
         badge.textContent = '☁ Claude';
@@ -771,8 +779,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (calcBtn) calcBtn.onclick = calculateWithRouting;
 
     // Affiche l'indicateur Gemma si disponible
-    Gemma.checkModel().then(status => {
-        if (status.exists) updateGemmaIndicator(status);
+    Gemma.checkModels().then(status => {
+        if (status.e2b_exists || status.e4b_exists) updateGemmaIndicator(status);
     });
 
     // Bannière IA locale — Android natif uniquement, une seule fois
@@ -788,31 +796,35 @@ async function initLocalAIBanner() {
     if (!isNative) return;
 
     // Vérification RAM
-    let sufficient = true;
-    let ramGb      = null;
+    let can_e2b = true;
+    let can_e4b = false;
+    let ramGb   = null;
     const p = Gemma.plugin();
     if (p) {
         try {
             const mem = await p.getDeviceMemory();
-            sufficient = mem.sufficient;
-            ramGb      = mem.totalRamGb;
+            can_e2b = mem.can_e2b ?? mem.sufficient ?? false;
+            can_e4b = mem.can_e4b ?? false;
+            ramGb   = mem.totalRamGb;
         } catch { /* fallback navigator.deviceMemory */ }
     }
     // Fallback navigateur (deviceMemory = RAM en Go, arrondi puissance de 2)
     if (ramGb === null && navigator.deviceMemory) {
-        ramGb      = navigator.deviceMemory;
-        sufficient = ramGb >= 4;
+        ramGb   = navigator.deviceMemory;
+        can_e2b = ramGb >= 4;
+        can_e4b = ramGb >= 6;
     }
 
-    if (!sufficient) {
+    if (!can_e2b) {
         // Appareil trop léger → message informatif, pas de proposition de téléchargement
         showLowRamBanner(ramGb);
         return;
     }
 
     if (!dismissed) {
-        const status = await Gemma.checkModel();
-        if (!status.exists) banner.style.display = 'block';
+        const status = await Gemma.checkModels();
+        // Afficher bannière si E2B pas encore téléchargé
+        if (!status.e2b_exists) banner.style.display = 'block';
     }
 }
 
@@ -842,11 +854,17 @@ function dismissLocalAIBanner() {
 function updateGemmaIndicator(status) {
     let ind = document.getElementById('gemma-indicator');
     if (!ind) return;
-    if (status.loaded) {
-        ind.textContent = '✦ Gemma local actif';
+    if (status.e4b_loaded) {
+        ind.textContent = '✦ Gemma E4B local actif';
         ind.style.color = '#6ab56a';
-    } else if (status.exists) {
-        ind.textContent = '◆ Gemma disponible (non chargé)';
+    } else if (status.e2b_loaded) {
+        ind.textContent = '✦ Gemma E2B local actif';
+        ind.style.color = '#6ab56a';
+    } else if (status.e4b_exists) {
+        ind.textContent = '◆ Gemma E4B disponible (non chargé)';
+        ind.style.color = '#c9a84c';
+    } else if (status.e2b_exists) {
+        ind.textContent = '◆ Gemma E2B disponible (non chargé)';
         ind.style.color = '#c9a84c';
     }
 }
