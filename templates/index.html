@@ -312,11 +312,26 @@
         {% if enable_local_ai %}
         <!-- ── Panel Gemma Manager ─────────────────────────────────────────── -->
         <div id="gemma-panel" style="display:none; margin-top:1.5rem; background:#0f0f22; border:1px solid var(--border); border-radius:3px; padding:16px;">
-            <div style="color:var(--gold);font-family:var(--display);font-size:0.85rem;margin-bottom:10px;">✦ Gemma 4 — Inférence locale</div>
+            <div style="color:var(--gold);font-family:var(--display);font-size:0.85rem;margin-bottom:10px;">✦ Gemma 3 — Inférence locale</div>
             <div id="gemma-status-text" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">Vérification…</div>
+
+            <!-- Token HuggingFace (requis pour télécharger Gemma) -->
+            <div id="hf-token-block" style="margin-bottom:12px;display:none;">
+                <div style="font-size:0.75rem;color:var(--text-dim);margin-bottom:6px;">
+                    Gemma nécessite un compte <a href="https://huggingface.co/google/gemma-3-1b-it-mediapipe" target="_blank" rel="noopener" style="color:var(--gold);">HuggingFace</a> avec les CGU acceptées.<br>
+                    <a href="https://huggingface.co/settings/tokens" target="_blank" rel="noopener" style="color:var(--gold);">Crée un token ici</a> puis colle-le ci-dessous.
+                </div>
+                <div style="display:flex;gap:6px;">
+                    <input id="hf-token-input" type="password" placeholder="hf_xxxxxxxxxxxxxxxxxxxx"
+                        style="flex:1;background:#0a0a18;border:1px solid #2a2a4a;border-radius:2px;padding:6px 10px;color:var(--text);font-family:var(--mono);font-size:0.78rem;"
+                        value="">
+                    <button onclick="saveHfToken()" class="btn-secondary" style="width:auto;padding:6px 12px;font-size:0.78rem;">Sauver</button>
+                </div>
+            </div>
+
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="btn-secondary" onclick="gemmaDownload()" id="btn-gemma-dl" style="width:auto;padding:0.6rem 1rem;font-size:0.78rem;">
-                    ⬇ Télécharger le modèle (~2 Go)
+                    ⬇ Télécharger (~400 Mo)
                 </button>
                 <button class="btn-secondary" onclick="gemmaLoad()" id="btn-gemma-load" style="width:auto;padding:0.6rem 1rem;font-size:0.78rem;display:none;">
                     ▶ Charger en mémoire
@@ -683,7 +698,11 @@ const GemmaWeb = {
             }
         } catch {}
 
-        const res = await fetch(url);
+        // Token HuggingFace requis pour les modèles Gemma
+        const hfToken = localStorage.getItem('hf_token') || '';
+        const headers = hfToken ? { 'Authorization': 'Bearer ' + hfToken } : {};
+        const res = await fetch(url, { headers });
+        if (res.status === 401) throw new Error('Token HuggingFace invalide ou absent. Accepte les CGU Gemma sur huggingface.co et saisis ton token.');
         if (!res.ok) throw new Error(`HTTP ${res.status} — vérifier la connexion`);
 
         const total  = parseInt(res.headers.get('content-length') || '0');
@@ -1173,6 +1192,15 @@ async function openGemmaManager() {
     if (panel.style.display === 'block') await refreshGemmaStatus();
 }
 
+function saveHfToken() {
+    const val = document.getElementById('hf-token-input').value.trim();
+    if (!val) return;
+    localStorage.setItem('hf_token', val);
+    document.getElementById('hf-token-input').value = '';
+    document.getElementById('hf-token-input').placeholder = '✓ Token sauvegardé';
+    setTimeout(() => { document.getElementById('hf-token-input').placeholder = 'hf_xxxxxxxxxxxxxxxxxxxx'; }, 2000);
+}
+
 async function refreshGemmaStatus() {
     const statusEl  = document.getElementById('gemma-status-text');
     const btnDl     = document.getElementById('btn-gemma-dl');
@@ -1214,6 +1242,9 @@ async function refreshGemmaStatus() {
         btnDl.style.display   = 'block';
         btnLoad.style.display = 'none';
         if (indicator) indicator.textContent = '';
+        // Afficher le bloc token HF si mode web
+        const tokenBlock = document.getElementById('hf-token-block');
+        if (tokenBlock && isWeb) tokenBlock.style.display = 'block';
     }
 }
 
