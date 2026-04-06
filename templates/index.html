@@ -280,6 +280,12 @@
                 📄 Rapport annuel PDF
             </button>
 
+            <!-- Unlock sans pub -->
+            <button id="btn-unlock" class="btn-secondary" onclick="Monetization.purchase()"
+                style="max-width: 220px; font-size: 0.82rem; display:none;">
+                ✦ Supprimer les pubs — €2,99
+            </button>
+
             <!-- Gemma local -->
             <button class="btn-secondary" onclick="openGemmaManager()" id="btn-gemma" style="max-width: 220px; font-size: 0.82rem;">
                 🤖 IA locale (Gemma 4)
@@ -838,6 +844,98 @@ function updateGemmaIndicator(status) {
         ind.style.color = '#c9a84c';
     }
 }
+
+// ══ Monétisation — AdMob + Unlock ════════════════════════════════════════════
+
+// IDs de test Google (à remplacer par tes vrais IDs AdMob en production)
+const AD_UNIT_BANNER      = 'ca-app-pub-3940256099942544/6300978111'; // test
+const AD_UNIT_INTERSTITIAL = 'ca-app-pub-3940256099942544/1033173712'; // test
+
+const Monetization = {
+    _unlocked: null,
+
+    async isUnlocked() {
+        if (this._unlocked !== null) return this._unlocked;
+        const p = window.Capacitor?.Plugins?.Unlock;
+        if (!p) { this._unlocked = false; return false; }
+        try {
+            const r = await p.isUnlocked();
+            this._unlocked = r.unlocked;
+            return r.unlocked;
+        } catch { this._unlocked = false; return false; }
+    },
+
+    async purchase() {
+        const p = window.Capacitor?.Plugins?.Unlock;
+        if (!p) return false;
+        try {
+            const r = await p.purchase();
+            if (r.unlocked) {
+                this._unlocked = true;
+                hideBannerAd();
+                showUnlockSuccess();
+            }
+            return r.unlocked;
+        } catch (e) {
+            if (e.message !== 'USER_CANCELED') alert('Erreur achat : ' + e.message);
+            return false;
+        }
+    },
+
+    async restore() {
+        const p = window.Capacitor?.Plugins?.Unlock;
+        if (!p) return false;
+        try {
+            const r = await p.restore();
+            if (r.unlocked) { this._unlocked = true; hideBannerAd(); }
+            return r.unlocked;
+        } catch { return false; }
+    },
+};
+
+// ── Bannière AdMob ────────────────────────────────────────────────────────────
+async function initAdMob() {
+    const { AdMob } = window.Capacitor?.Plugins ?? {};
+    if (!AdMob) return;
+    const unlocked = await Monetization.isUnlocked();
+    if (unlocked) return;
+
+    try {
+        await AdMob.initialize({ testingDevices: [], initializeForTesting: true });
+        await AdMob.showBanner({
+            adId:     AD_UNIT_BANNER,
+            adSize:   'BANNER',
+            position: 'BOTTOM_CENTER',
+            margin:   0,
+        });
+    } catch (e) { console.warn('AdMob banner:', e); }
+}
+
+function hideBannerAd() {
+    const { AdMob } = window.Capacitor?.Plugins ?? {};
+    if (AdMob) AdMob.hideBanner().catch(() => {});
+}
+
+function showUnlockSuccess() {
+    const btn = document.getElementById('btn-unlock');
+    if (btn) {
+        btn.textContent = '✓ App débloquée';
+        btn.style.color = '#6ab56a';
+        btn.disabled    = true;
+    }
+}
+
+// Init au chargement (Android natif uniquement)
+document.addEventListener('DOMContentLoaded', () => {
+    if (window.Capacitor?.isNativePlatform?.()) {
+        initAdMob();
+        Monetization.isUnlocked().then(u => {
+            const btn = document.getElementById('btn-unlock');
+            if (btn) btn.style.display = u ? 'none' : 'block';
+            if (u) showUnlockSuccess();
+        });
+    }
+});
 
 // ── Alertes transit ───────────────────────────────────────────────────────────
 async function toggleAlerts(enabled) {

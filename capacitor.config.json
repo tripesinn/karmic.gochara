@@ -7,6 +7,12 @@
     "cleartext": false
   },
   "plugins": {
+    "AdMob": {
+      "appId": {
+        "android": "ca-app-pub-3940256099942544~3347511713"
+      },
+      "initializeForTesting": true
+    },
     "SplashScreen": {
       "launchShowDuration": 2000,
       "backgroundColor": "#0a0a08",
