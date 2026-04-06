@@ -272,6 +272,7 @@
     <div style="max-width: 800px; margin: 2.5rem auto 0; padding: 0 20px;">
         <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;">
 
+            {% if enable_features %}
             <!-- Calendrier mensuel -->
             <button class="btn-secondary" onclick="toggleCalendar()" style="max-width: 220px; font-size: 0.82rem;">
                 📅 Calendrier mensuel
@@ -281,6 +282,7 @@
             <button class="btn-secondary" onclick="downloadAnnualReport()" id="btn-annual-report" style="max-width: 220px; font-size: 0.82rem;">
                 📄 Rapport annuel PDF
             </button>
+            {% endif %}
 
             <!-- Unlock sans pub -->
             <button id="btn-unlock" class="btn-secondary" onclick="Monetization.purchase()"
@@ -333,6 +335,7 @@
         {% endif %}
 
         <!-- ── Panel calendrier ─────────────────────────────────────────────── -->
+        {% if enable_features %}
         <div id="calendar-panel" style="display:none; margin-top: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                 <button onclick="shiftMonth(-1)" class="btn-secondary" style="width:auto; padding: 0.5rem 1rem; font-size: 0.82rem;">← Préc.</button>
@@ -342,6 +345,7 @@
             <div id="calendar-loading" style="display:none; text-align:center; color: var(--text-dim); font-size:0.85rem;">Calcul en cours…</div>
             <div id="calendar-content"></div>
         </div>
+        {% endif %}
     </div>
 </div>
 

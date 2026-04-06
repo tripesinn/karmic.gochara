@@ -504,6 +504,7 @@ def index():
         session_user=session.get('pseudo', ''),
         session_profile=session.get('profile', {}),
         enable_local_ai=os.environ.get('ENABLE_LOCAL_AI', '').lower() in ('1', 'true'),
+        enable_features=os.environ.get('ENABLE_FEATURES', '').lower() in ('1', 'true'),
     )
 
 @app.route("/set_lang", methods=["POST"])

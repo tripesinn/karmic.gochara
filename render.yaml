@@ -12,3 +12,7 @@ services:
         value: "3.11.0"
       - key: CRON_SECRET
         sync: false          # Token secret pour sécuriser /cron/daily
+      - key: ENABLE_FEATURES
+        value: "0"           # Calendrier mensuel + rapport annuel — activer sur test uniquement
+      - key: ENABLE_LOCAL_AI
+        value: "0"           # IA locale Gemma — activer sur test uniquement
