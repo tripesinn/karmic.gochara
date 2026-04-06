@@ -615,57 +615,160 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js');
 }
 
-// ══ Gemma 4 — Inférence locale (AI Core / MediaPipe) ═════════════════════════
+// ══ Gemma 4 — Inférence locale (MediaPipe Tasks GenAI) ═══════════════════════
+// Deux backends : APK natif (Java plugin) ou navigateur web (WebAssembly + OPFS)
 
-const Gemma = {
-    _dlIds:  { e2b: null, e4b: null },  // downloadId en cours par type
-    _status: null,                       // cache checkModels()
+// ── Backend WEB : MediaPipe Tasks GenAI JS + stockage OPFS ───────────────────
+const GEMMA_WASM_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai@0.10.14/wasm';
+const GEMMA_SDK_URL  = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai@0.10.14/genai_bundle.mjs';
+const GEMMA_MODEL_URLS = {
+    e2b: 'https://huggingface.co/google/gemma-3-1b-it-mediapipe/resolve/main/gemma3-1b-it-cpu-int4.task',
+    e4b: 'https://huggingface.co/google/gemma-3-4b-it-mediapipe/resolve/main/gemma3-4b-it-cpu-int4.task',
+};
+const GEMMA_FILENAMES = { e2b: 'gemma_e2b.task', e4b: 'gemma_e4b.task' };
 
-    plugin() {
-        return window.Capacitor?.Plugins?.GemmaSynthesis ?? null;
+const GemmaWeb = {
+    _llm:     { e2b: null, e4b: null },
+    _genai:   null,
+    _sdk:     null,   // { FilesetResolver, LlmInference }
+
+    // Charge le SDK MediaPipe dynamiquement (une seule fois)
+    async _loadSDK() {
+        if (this._sdk) return this._sdk;
+        this._sdk = await import(GEMMA_SDK_URL);
+        return this._sdk;
     },
 
-    // Retourne { e2b_exists, e2b_loaded, e4b_exists, e4b_loaded, e2b_sizeMb, e4b_sizeMb }
+    async _getGenai() {
+        if (this._genai) return this._genai;
+        const { FilesetResolver } = await this._loadSDK();
+        this._genai = await FilesetResolver.forGenAiTasks(GEMMA_WASM_CDN);
+        return this._genai;
+    },
+
+    // Vérifie ce qui est stocké dans l'OPFS (Origin Private File System)
     async checkModels() {
-        const p = this.plugin();
-        if (!p) return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false };
+        const out = { e2b_exists: false, e2b_loaded: !!this._llm.e2b,
+                      e4b_exists: false, e4b_loaded: !!this._llm.e4b,
+                      e2b_sizeMb: 0,     e4b_sizeMb: 0 };
         try {
-            this._status = await p.checkModels();
-            return this._status;
-        } catch { return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false }; }
+            const root = await navigator.storage.getDirectory();
+            for (const type of ['e2b', 'e4b']) {
+                try {
+                    const fh   = await root.getFileHandle(GEMMA_FILENAMES[type]);
+                    const file = await fh.getFile();
+                    if (file.size > 1_000_000) {
+                        out[`${type}_exists`]  = true;
+                        out[`${type}_sizeMb`]  = Math.round(file.size / 1024 / 1024);
+                    }
+                } catch {}
+            }
+        } catch {}
+        return out;
     },
 
-    // Rétrocompat — utilisé par initLocalAIBanner
-    async checkModel() { return this.checkModels(); },
+    // Télécharge un modèle dans l'OPFS avec callback de progression
+    async downloadModel(type = 'e2b', onProgress) {
+        const url      = GEMMA_MODEL_URLS[type];
+        const filename = GEMMA_FILENAMES[type];
+        const root     = await navigator.storage.getDirectory();
 
-    // true si au moins E2B chargé (suffit pour synthèse quotidienne)
-    async isAvailable() {
-        const p = this.plugin();
-        if (!p) return false;
+        // Déjà présent ?
         try {
-            const r = await this.checkModels();
-            return r.e2b_loaded || r.e4b_loaded;
-        } catch { return false; }
+            const fh   = await root.getFileHandle(filename);
+            const file = await fh.getFile();
+            if (file.size > 1_000_000) {
+                if (onProgress) onProgress({ status: 'success', progress: 100, dlMb: Math.round(file.size/1024/1024), totalMb: Math.round(file.size/1024/1024) });
+                return { ok: true, already: true };
+            }
+        } catch {}
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(`HTTP ${res.status} — vérifier la connexion`);
+
+        const total  = parseInt(res.headers.get('content-length') || '0');
+        let   loaded = 0;
+        const fh     = await root.getFileHandle(filename, { create: true });
+        const wr     = await fh.createWritable();
+        const reader = res.body.getReader();
+
+        while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+            await wr.write(value);
+            loaded += value.length;
+            if (onProgress) onProgress({
+                status: 'running',
+                progress: total > 0 ? Math.round(loaded * 100 / total) : 0,
+                dlMb:    Math.round(loaded / 1024 / 1024),
+                totalMb: Math.round(total  / 1024 / 1024),
+            });
+        }
+        await wr.close();
+        if (onProgress) onProgress({ status: 'success', progress: 100 });
+        return { ok: true, already: false };
     },
 
-    // type = "e2b" | "e4b"
+    // Charge un modèle depuis l'OPFS en mémoire
     async loadModel(type = 'e2b') {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        return await p.loadModel({ type });
+        const { LlmInference } = await this._loadSDK();
+        const genai  = await this._getGenai();
+        const root   = await navigator.storage.getDirectory();
+        const fh     = await root.getFileHandle(GEMMA_FILENAMES[type]);
+        const file   = await fh.getFile();
+        const buffer = await file.arrayBuffer();
+
+        if (this._llm[type]) { try { this._llm[type].close(); } catch {} }
+        this._llm[type] = await LlmInference.createFromOptions(genai, {
+            baseOptions: { modelAssetBuffer: new Uint8Array(buffer) },
+            maxTokens:   type === 'e4b' ? 4096 : 2048,
+            topK:        40,
+            temperature: 0.7,
+        });
+        return { ok: true, type };
+    },
+
+    // Inférence avec format prompt Gemma Instruct
+    async generate(system, user, type = 'e2b') {
+        let llm = this._llm[type];
+        if (!llm && type === 'e4b' && this._llm.e2b) llm = this._llm.e2b;
+        if (!llm) throw new Error('Modèle non chargé — lance loadModel() d\'abord');
+        const prompt   = `<start_of_turn>user\n${system ? system + '\n\n' : ''}${user}<end_of_turn>\n<start_of_turn>model\n`;
+        const response = await llm.generateResponse(prompt);
+        return { ok: true, synthesis: response.trim(), local: true, model: type };
+    },
+};
+
+// ── Routeur principal : natif (APK) ou web (Chrome) ──────────────────────────
+const Gemma = {
+    _dlIds: { e2b: null, e4b: null },
+
+    plugin() { return window.Capacitor?.Plugins?.GemmaSynthesis ?? null; },
+    isWeb()  { return !this.plugin(); },
+
+    async checkModels() {
+        if (this.isWeb()) return GemmaWeb.checkModels();
+        try { return await this.plugin().checkModels(); }
+        catch { return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false }; }
+    },
+
+    async isAvailable() {
+        try { const r = await this.checkModels(); return r.e2b_loaded || r.e4b_loaded; }
+        catch { return false; }
     },
 
     // type = "e2b" | "e4b"
-    async downloadModel(type = 'e2b') {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        const r = await p.downloadModel({ type });
+    // onProgress(cb) uniquement utilisé en mode web (streaming)
+    async downloadModel(type = 'e2b', onProgress) {
+        if (this.isWeb()) return GemmaWeb.downloadModel(type, onProgress);
+        const r = await this.plugin().downloadModel({ type });
         this._dlIds[type] = r.downloadId ?? null;
         return r;
     },
 
-    // Suit le téléchargement d'un type donné
+    // En mode natif, poll le DownloadManager Android
     async pollDownload(type = 'e2b', onProgress) {
+        if (this.isWeb()) return; // web: progression déjà inline dans downloadModel()
         const dlId = this._dlIds[type];
         if (!dlId) return;
         const p = this.plugin();
@@ -673,18 +776,19 @@ const Gemma = {
             try {
                 const r = await p.checkDownloadProgress({ downloadId: dlId });
                 onProgress(r);
-                if (r.status === 'success' || r.status === 'failed') {
-                    clearInterval(interval);
-                }
+                if (r.status === 'success' || r.status === 'failed') clearInterval(interval);
             } catch { clearInterval(interval); }
         }, 2000);
     },
 
-    // type = "e2b" (synthèse quotidienne) | "e4b" (rapport annuel)
+    async loadModel(type = 'e2b') {
+        if (this.isWeb()) return GemmaWeb.loadModel(type);
+        return await this.plugin().loadModel({ type });
+    },
+
     async generate(systemPrompt, userPrompt, type = 'e2b') {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        return await p.generate({ system: systemPrompt, user: userPrompt, type });
+        if (this.isWeb()) return GemmaWeb.generate(systemPrompt, userPrompt, type);
+        return await this.plugin().generate({ system: systemPrompt, user: userPrompt, type });
     },
 };
 
@@ -793,26 +897,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
 async function initLocalAIBanner() {
     const isNative  = window.Capacitor?.isNativePlatform?.() ?? false;
+    const isChrome  = /Chrome\//.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
     const dismissed = localStorage.getItem('localAIBannerDismissed');
     const banner    = document.getElementById('banner-local-ai');
     if (!banner) return;
 
-    if (!isNative) return;
+    // Montrer la bannière en APK natif ET dans Chrome Android
+    if (!isNative && !isChrome) return;
 
     // Vérification RAM
     let can_e2b = true;
     let can_e4b = false;
     let ramGb   = null;
-    const p = Gemma.plugin();
-    if (p) {
+
+    // Natif : demander au plugin Java
+    if (isNative && Gemma.plugin()) {
         try {
-            const mem = await p.getDeviceMemory();
+            const mem = await Gemma.plugin().getDeviceMemory();
             can_e2b = mem.can_e2b ?? mem.sufficient ?? false;
             can_e4b = mem.can_e4b ?? false;
             ramGb   = mem.totalRamGb;
-        } catch { /* fallback navigator.deviceMemory */ }
+        } catch {}
     }
-    // Fallback navigateur (deviceMemory = RAM en Go, arrondi puissance de 2)
+    // Web / fallback : navigator.deviceMemory (Chrome expose cette info)
     if (ramGb === null && navigator.deviceMemory) {
         ramGb   = navigator.deviceMemory;
         can_e2b = ramGb >= 4;
@@ -820,14 +927,12 @@ async function initLocalAIBanner() {
     }
 
     if (!can_e2b) {
-        // Appareil trop léger → message informatif, pas de proposition de téléchargement
         showLowRamBanner(ramGb);
         return;
     }
 
     if (!dismissed) {
         const status = await Gemma.checkModels();
-        // Afficher bannière si E2B pas encore téléchargé
         if (!status.e2b_exists) banner.style.display = 'block';
     }
 }
@@ -1073,88 +1178,103 @@ async function refreshGemmaStatus() {
     const btnDl     = document.getElementById('btn-gemma-dl');
     const btnLoad   = document.getElementById('btn-gemma-load');
     const indicator = document.getElementById('gemma-indicator');
+    if (!statusEl) return;
 
-    const p = Gemma.plugin();
-    if (!p) {
-        statusEl.textContent = '⚠ Plugin non disponible — cette fonctionnalité nécessite l\'app Android.';
-        btnDl.style.display   = 'none';
-        btnLoad.style.display = 'none';
-        return;
+    const isWeb = Gemma.isWeb();
+    if (isWeb) {
+        const hasOPFS = typeof navigator.storage?.getDirectory === 'function';
+        if (!hasOPFS) {
+            statusEl.textContent  = '⚠ Navigateur non compatible — utilise Chrome 110+ sur Android.';
+            btnDl.style.display   = 'none';
+            btnLoad.style.display = 'none';
+            return;
+        }
     }
 
-    const status = await Gemma.checkModel();
-    if (status.loaded) {
-        statusEl.textContent  = `✓ Modèle chargé (${status.sizeMb} Mo) — inférence locale active.`;
+    const status = await Gemma.checkModels();
+
+    if (status.e2b_loaded) {
+        statusEl.textContent  = `✦ Gemma E2B actif (${status.e2b_sizeMb} Mo)${isWeb ? ' — mode navigateur' : ''} — inférence locale prête.`;
         statusEl.style.color  = '#6ab56a';
         btnDl.style.display   = 'none';
         btnLoad.style.display = 'none';
-        indicator.textContent = '✦ Gemma local actif';
-        indicator.style.color = '#6ab56a';
-    } else if (status.exists) {
-        statusEl.textContent  = `◆ Modèle présent (${status.sizeMb} Mo) — non chargé en mémoire.`;
+        if (indicator) { indicator.textContent = '✦ Gemma local actif'; indicator.style.color = '#6ab56a'; }
+    } else if (status.e2b_exists) {
+        statusEl.textContent  = `◆ Modèle présent (${status.e2b_sizeMb} Mo) — non chargé en mémoire.`;
         statusEl.style.color  = '#c9a84c';
         btnDl.style.display   = 'none';
         btnLoad.style.display = 'block';
-        indicator.textContent = '◆ Gemma disponible';
-        indicator.style.color = '#c9a84c';
+        if (indicator) { indicator.textContent = '◆ Gemma disponible'; indicator.style.color = '#c9a84c'; }
     } else {
-        statusEl.textContent  = 'Modèle non téléchargé. Connexion Wi-Fi recommandée (~2 Go).';
+        const info = isWeb
+            ? 'Stockage dans le navigateur (~400 Mo). Wi-Fi recommandé.'
+            : 'Téléchargement Android (~400 Mo). Wi-Fi recommandé.';
+        statusEl.textContent  = info;
         statusEl.style.color  = 'var(--text-dim)';
         btnDl.style.display   = 'block';
         btnLoad.style.display = 'none';
-        indicator.textContent = '';
+        if (indicator) indicator.textContent = '';
+    }
+}
+
+function _updateGemmaProgress(p) {
+    const bar      = document.getElementById('gemma-progress-bar');
+    const txt      = document.getElementById('gemma-progress-text');
+    const progress = document.getElementById('gemma-dl-progress');
+    if (!bar) return;
+    progress.style.display = 'block';
+    bar.style.width        = p.progress + '%';
+    txt.textContent        = `${p.dlMb} Mo / ${p.totalMb > 0 ? p.totalMb + ' Mo' : '?'} — ${p.progress}%`;
+    if (p.status === 'success') {
+        setTimeout(() => { progress.style.display = 'none'; refreshGemmaStatus(); }, 600);
+    }
+    if (p.status === 'failed') {
+        const btnDl = document.getElementById('btn-gemma-dl');
+        document.getElementById('gemma-status-text').textContent = '✗ Échec du téléchargement.';
+        document.getElementById('gemma-status-text').style.color = '#c06060';
+        btnDl.disabled = false; btnDl.textContent = '⬇ Réessayer';
     }
 }
 
 async function gemmaDownload() {
-    const btnDl   = document.getElementById('btn-gemma-dl');
-    const progress = document.getElementById('gemma-dl-progress');
-    btnDl.disabled = true;
-    btnDl.textContent = 'Lancement du téléchargement…';
+    const btnDl = document.getElementById('btn-gemma-dl');
+    btnDl.disabled    = true;
+    btnDl.textContent = Gemma.isWeb() ? 'Téléchargement en cours…' : 'Lancement du téléchargement…';
     try {
-        const r = await Gemma.downloadModel();
-        if (r.already) {
-            await refreshGemmaStatus();
-            return;
+        if (Gemma.isWeb()) {
+            // Web : progression inline via streaming fetch
+            const r = await Gemma.downloadModel('e2b', _updateGemmaProgress);
+            if (r.already) await refreshGemmaStatus();
+        } else {
+            // Natif : DownloadManager Android, puis polling
+            const r = await Gemma.downloadModel('e2b');
+            if (r.already) { await refreshGemmaStatus(); return; }
+            Gemma.pollDownload('e2b', _updateGemmaProgress);
         }
-        progress.style.display = 'block';
-        Gemma.pollDownload(p => {
-            document.getElementById('gemma-progress-bar').style.width = p.progress + '%';
-            document.getElementById('gemma-progress-text').textContent =
-                `${p.dlMb} Mo / ${p.totalMb > 0 ? p.totalMb + ' Mo' : '?'} — ${p.progress}%`;
-            if (p.status === 'success') {
-                refreshGemmaStatus();
-                progress.style.display = 'none';
-            }
-            if (p.status === 'failed') {
-                document.getElementById('gemma-status-text').textContent = '✗ Échec du téléchargement.';
-                document.getElementById('gemma-status-text').style.color = '#c06060';
-                btnDl.disabled = false;
-                btnDl.textContent = '⬇ Réessayer';
-            }
-        });
     } catch (e) {
-        btnDl.disabled = false;
-        btnDl.textContent = '⬇ Télécharger le modèle (~2 Go)';
-        alert('Erreur : ' + e.message);
+        btnDl.disabled    = false;
+        btnDl.textContent = '⬇ Réessayer';
+        document.getElementById('gemma-status-text').textContent = '✗ Erreur : ' + e.message;
+        document.getElementById('gemma-status-text').style.color = '#c06060';
     }
 }
 
 async function gemmaLoad() {
-    const btnLoad = document.getElementById('btn-gemma-load');
+    const btnLoad  = document.getElementById('btn-gemma-load');
     const statusEl = document.getElementById('gemma-status-text');
-    btnLoad.disabled = true;
-    btnLoad.textContent = 'Chargement en mémoire…';
-    statusEl.textContent = 'Chargement du modèle… (peut prendre 15-30 sec)';
+    btnLoad.disabled     = true;
+    btnLoad.textContent  = 'Chargement en mémoire…';
+    statusEl.textContent = Gemma.isWeb()
+        ? 'Chargement du modèle depuis le navigateur… (30-60 sec selon RAM)'
+        : 'Chargement du modèle… (peut prendre 15-30 sec)';
     try {
-        await Gemma.loadModel();
-        Gemma._available = true;
+        await Gemma.loadModel('e2b');
         await refreshGemmaStatus();
     } catch (e) {
         statusEl.textContent = '✗ Erreur : ' + e.message;
         statusEl.style.color = '#c06060';
-        btnLoad.disabled = false;
-        btnLoad.textContent = '▶ Charger en mémoire';
+        btnLoad.disabled     = false;
+        btnLoad.textContent  = '▶ Charger en mémoire';
     }
 }
 
