@@ -903,8 +903,9 @@ def synthesis_prompt():
 
     try:
         year, month, day = map(int, date_str.split("-"))
-        chart_data = calculate_transits(natal, transit_loc, year, month, day, hour, minute)
-        prompts    = build_prompt_only(chart_data, profile, lang=lang)
+        chart_data       = calculate_transits(natal, transit_loc, year, month, day, hour, minute)
+        enriched_profile = _enrich_profile_with_natal(profile, chart_data.get("natal", {}))
+        prompts          = build_prompt_only(chart_data, enriched_profile, lang=lang)
         return jsonify({
             "ok":          True,
             "system":      prompts["system"],
