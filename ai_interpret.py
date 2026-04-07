@@ -349,6 +349,15 @@ def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr") -> str:
     time           = chart_data.get("transit_time", "")
     name           = user.get("name", "l'utilisateur")
 
+    # ── Garde-fous : vérification des données essentielles avant envoi ────────
+    _NO_ASPECT_FR = "Aucun aspect actif dans l'orbe de 3°."
+    if not aspects_text or aspects_text.strip() == _NO_ASPECT_FR:
+        return ("⚠️ Synthèse impossible : aucun aspect de transit actif détecté. "
+                "Vérifie que `calculate_transits()` retourne bien des aspects avant d'appeler `get_synthesis()`.")
+    if not natal_context:
+        return ("⚠️ Synthèse impossible : thème natal manquant. "
+                "Vérifie que le profil utilisateur contient au minimum `chandra_lagna_sign`.")
+
     natal_bloc   = f"\nThème natal de référence :\n{natal_context}\n" if natal_context else ""
     nodal_bloc   = nodal_cycle if nodal_cycle else ""
     frict_bloc   = transit_frict if transit_frict else ""
@@ -363,7 +372,10 @@ def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr") -> str:
     lang_name = LANG_NAMES.get(lang, "English")
 
     if lang == "fr":
-        prompt = f"""LANGUE : français uniquement. Aucun mot anglais. Écris "socialement" pas "socially", "profondément" pas "deeply", etc.
+        prompt = f"""Tu ES @siderealAstro13. Ne te comporte pas comme un assistant. Analyse directement les données ci-dessous selon la doctrine karmique.
+Interdiction de reformuler le prompt. Tu dois rédiger une analyse basée exclusivement sur les aspects et positions fournis.
+
+LANGUE : français uniquement. Aucun mot anglais. Écris "socialement" pas "socially", "profondément" pas "deeply", etc.
 Analyse siderealAstro13 des transits de {name} — {date} à {time}.
 CONSIGNE : commence directement par "## 1. LA MÉMOIRE KARMIQUE". Aucune note préalable, aucun récapitulatif des positions natales, aucune introduction.
 {natal_bloc}{amsa_bloc}{nodal_bloc}{frict_bloc}
@@ -391,7 +403,10 @@ Applique le protocole en 4 étapes :
 Développe chaque section en lecture d'âme cohérente, narrative, sans liste mécanique. Minimum 300 mots. Ne pas tronquer.
 RÈGLE DE LANGUE : chaque phrase doit être entièrement en français. Aucun mot dans une autre langue."""
     else:
-        prompt = f"""siderealAstro13 transit analysis for {name} — {date} at {time}.
+        prompt = f"""You ARE @siderealAstro13. Do not behave as an assistant. Analyse the data below directly according to karmic doctrine.
+Forbidden to rephrase the prompt. You must write an analysis based exclusively on the aspects and positions provided.
+
+siderealAstro13 transit analysis for {name} — {date} at {time}.
 INSTRUCTION: start directly with "## 1. KARMIC MEMORY". No preamble, no recap of natal positions, no introduction.
 {natal_bloc}{amsa_bloc}{nodal_bloc}{frict_bloc}
 
