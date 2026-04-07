@@ -445,66 +445,51 @@ LANGUAGE RULE: every single sentence must be in {lang_name}. No French or Englis
 
 def build_prompt_only(chart_data: dict, user: dict = None, lang: str = "fr") -> dict:
     """
-    Construit le prompt complet SANS appeler Claude.
-    Utilisé par /synthesis/prompt pour l'inférence locale (Gemma 4 via AI Core).
+    Construit le prompt compact SANS appeler Claude.
+    Optimisé pour Gemma3-1B (< 1500 tokens) : system vide, user ultra-direct.
     Retourne {"system": "...", "user": "..."} prêt à injecter dans n'importe quel LLM.
     """
     user = user or {}
     lang = user.get("lang", lang)
 
-    aspects_text  = _aspects_to_text(chart_data.get("aspects", []), max_aspects=5)
-    natal_context = _build_natal_context(user)
-    nodal_cycle   = _detect_nodal_cycle(user, chart_data)
-    transit_frict = _detect_transit_friction(chart_data, lang=lang)
-    amsa_bloc     = _build_amsa_bloc(chart_data, lang=lang, compact=True)
-    date          = chart_data.get("transit_date", "")
-    time          = chart_data.get("transit_time", "")
-    name          = user.get("name", "l'utilisateur")
+    aspects_text = _aspects_to_text(chart_data.get("aspects", []), max_aspects=4)
+    date         = chart_data.get("transit_date", "")
+    name         = user.get("name", "l'utilisateur")
 
-    natal_bloc = f"\nThème natal de référence :\n{natal_context}\n" if natal_context else ""
-    nodal_bloc = nodal_cycle  if nodal_cycle  else ""
-    frict_bloc = transit_frict if transit_frict else ""
+    # Contexte natal minimal (signes clés seulement)
+    cl   = user.get("chandra_lagna_sign", "")
+    ketu = user.get("ketu_sign", "")
+    rahu = user.get("rahu_sign", "")
+    chi  = user.get("chiron_sign", "")
+    lil  = user.get("lilith_sign", "")
+    natal_mini = f"Chandra Lagna {cl}, Ketu {ketu}, Rahu {rahu}, Chiron {chi}, Lilith {lil}." if cl else ""
 
     if lang == "en":
-        user_prompt = f"""Transit reading for {name} — {date}.
-{natal_bloc}{amsa_bloc}{nodal_bloc}{frict_bloc}
-Key aspects:
+        user_prompt = f"""Karmic transit analysis for {name} — {date}.
+Natal: {natal_mini}
+Active aspects:
 {aspects_text}
 
-Write 4 sections. Be direct, Soul Reader style, max 250 words total. No preamble.
+Write 4 sections directly. No questions. No preamble. Address {name} as "you".
 
-## 1. MEMORY (ROM)
-What karmic trap is replaying? Name the automatic behavior.
-
-## 2. WOUND (RAM)
-What core wound is activated? What is moving?
-
-## 3. TRIAL (Lilith)
-What is unbearable right now? Where does it push {name}?
-
-## 4. ACTION (Alternative)
-One clear shift. What to stop. What to activate. End with one direct sentence to {name}."""
+MEMORY (ROM): What karmic trap replays?
+WOUND (RAM): What core wound activates?
+TRIAL (Lilith): What is unbearable right now?
+ACTION: One clear shift — what to stop, what to activate."""
     else:
-        user_prompt = f"""Lecture de transit pour {name} — {date}.
-{natal_bloc}{amsa_bloc}{nodal_bloc}{frict_bloc}
-Aspects clés :
+        user_prompt = f"""Analyse karmique de transit pour {name} — {date}.
+Natal : {natal_mini}
+Aspects actifs :
 {aspects_text}
 
-Écris 4 sections. Sois direct, style Soul Reader, max 250 mots au total. Aucun préambule.
+Écris 4 sections directement. Aucune question. Aucun préambule. Tutoie {name}.
 
-## 1. MÉMOIRE (ROM)
-Quel piège karmique se rejoue ? Nomme le comportement automatique.
-
-## 2. BLESSURE (RAM)
-Quelle blessure profonde est activée ? Qu'est-ce qui se meut ?
-
-## 3. ÉPREUVE (Lilith)
-Qu'est-ce qui est insupportable en ce moment ? Vers quoi ça pousse {name} ?
-
-## 4. ACTION (Alternative)
-Une bascule claire. Ce qu'il faut cesser. Ce qu'il faut activer. Termine par une phrase directe à {name}."""
+MÉMOIRE (ROM) : Quel piège karmique se rejoue ?
+BLESSURE (RAM) : Quelle blessure est activée ?
+ÉPREUVE (Lilith) : Qu'est-ce qui est insupportable en ce moment ?
+ACTION : Une bascule — ce qu'il faut cesser, ce qu'il faut activer."""
 
     return {
-        "system": _build_system_prompt(user),
+        "system": "",   # Vide pour Gemma3-1B — le system prompt doctrine est trop long
         "user":   user_prompt,
     }

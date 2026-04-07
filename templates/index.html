@@ -753,9 +753,10 @@ const GemmaWeb = {
         let llm = this._llm[type];
         if (!llm && type === 'e4b' && this._llm.e2b) llm = this._llm.e2b;
         if (!llm) throw new Error('Modèle non chargé — lance loadModel() d\'abord');
-        const prompt   = `<start_of_turn>user\n${system ? system + '\n\n' : ''}${user}<end_of_turn>\n<start_of_turn>model\n`;
+        const primer   = "## 1.";
+        const prompt   = `<start_of_turn>user\n${system ? system + '\n\n' : ''}${user}<end_of_turn>\n<start_of_turn>model\n${primer}`;
         const response = await llm.generateResponse(prompt);
-        return { ok: true, synthesis: response.trim(), local: true, model: type };
+        return { ok: true, synthesis: (primer + response).trim(), local: true, model: type };
     },
 };
 
