@@ -23,6 +23,64 @@ TRANSIT_LOC_DEFAULT = {
     "tz":   "Europe/Paris",
 }
 
+_SIGNS_FR = [
+    "Bélier", "Taureau", "Gémeaux", "Cancer",
+    "Lion", "Vierge", "Balance", "Scorpion",
+    "Sagittaire", "Capricorne", "Verseau", "Poissons",
+]
+
+def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
+    """
+    Enrichit le profil session avec les données du thème natal calculé,
+    pour que get_synthesis() dispose de chandra_lagna_sign, ketu_sign, etc.
+    natal = result["natal"] de calculate_transits().
+    """
+    def _sign(display: str) -> str:
+        parts = (display or "").strip().split()
+        return parts[1] if len(parts) >= 2 else ""
+
+    def _deg(display: str) -> str:
+        parts = (display or "").strip().split()
+        return parts[2] if len(parts) >= 3 else ""
+
+    def _house(planet_key: str, asc_sign: str) -> str:
+        if not asc_sign or asc_sign not in _SIGNS_FR:
+            return ""
+        p = natal.get(planet_key) or {}
+        p_sign = _sign(p.get("display", ""))
+        if not p_sign or p_sign not in _SIGNS_FR:
+            return ""
+        return str((_SIGNS_FR.index(p_sign) - _SIGNS_FR.index(asc_sign)) % 12 + 1)
+
+    enriched = dict(profile)
+
+    asc = natal.get("ASC ↑") or {}
+    asc_sign = _sign(asc.get("display", ""))
+    enriched["chandra_lagna_sign"] = asc_sign
+    enriched["chandra_lagna_deg"]  = _deg(asc.get("display", ""))
+
+    for key, s_field, h_field, nak_field in [
+        ("Nœud Sud ☋",      "ketu_sign",            "ketu_house",            "ketu_nakshatra"),
+        ("Nœud Nord ☊",     "rahu_sign",            "rahu_house",            "rahu_nakshatra"),
+        ("Chiron ⚷",        "chiron_sign",          "chiron_house",          "chiron_nakshatra"),
+        ("Lilith ⚸",        "lilith_sign",          "lilith_house",          "lilith_nakshatra"),
+        ("Saturne ♄",       "saturn_sign",          "saturn_house",          None),
+        ("Jupiter ♃",       "jupiter_sign",         "jupiter_house",         None),
+        ("Porte Visible ⊙", "porte_visible_sign",   "porte_visible_house",   None),
+        ("Porte Invisible ⊗","porte_invisible_sign", "porte_invisible_house", None),
+    ]:
+        p = natal.get(key) or {}
+        enriched[s_field] = _sign(p.get("display", ""))
+        enriched[h_field] = _house(key, asc_sign)
+        if nak_field:
+            enriched[nak_field] = p.get("nakshatra", "")
+
+    enriched["porte_visible_deg"]   = _deg((natal.get("Porte Visible ⊙")  or {}).get("display", ""))
+    enriched["porte_invisible_deg"] = _deg((natal.get("Porte Invisible ⊗") or {}).get("display", ""))
+    enriched["natal_positions"]     = natal
+
+    return enriched
+
 # ── Labels multilingues ───────────────────────────────────────────────────────
 LANGS = {
     "fr": {
@@ -659,12 +717,15 @@ def calculate():
         year, month, day = map(int, date_str.split("-"))
         result = calculate_transits(natal, transit_loc, year, month, day, hour, minute)
 
+        # Enrichit le profil avec les positions natales calculées
+        enriched_profile = _enrich_profile_with_natal(profile, result.get("natal", {}))
+
         # Retry 3x sur surcharge Anthropic (529 / overloaded_error)
         synthesis = None
         last_exc  = None
         for attempt in range(3):
             try:
-                synthesis = get_synthesis(result, profile, lang=lang)
+                synthesis = get_synthesis(result, enriched_profile, lang=lang)
                 break
             except Exception as exc:
                 last_exc = exc
