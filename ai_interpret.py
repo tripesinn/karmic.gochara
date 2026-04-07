@@ -489,7 +489,11 @@ BLESSURE (RAM) : Quelle blessure est activée ?
 ÉPREUVE (Lilith) : Qu'est-ce qui est insupportable en ce moment ?
 ACTION : Une bascule — ce qu'il faut cesser, ce qu'il faut activer."""
 
+    system = ("Tu es @siderealAstro13. Ton rôle est de faire une lecture d'âme technique "
+              "en 4 étapes : ROM, RAM, LILITH, ACTION. "
+              "Utilise uniquement les données fournies. Sois bref (200 mots max).")
+
     return {
-        "system": "",   # Vide pour Gemma3-1B — le system prompt doctrine est trop long
+        "system": system,
         "user":   user_prompt,
     }
