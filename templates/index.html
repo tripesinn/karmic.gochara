@@ -646,6 +646,28 @@ const GEMMA_MODEL_URLS = {
 };
 const GEMMA_FILENAMES = { e2b: 'gemma_e2b.task', e4b: 'gemma_e4b.task' };
 
+// Supprime les répétitions de Gemma3-1B : coupe dès qu'une phrase réapparaît
+function _dedupeGemma(text) {
+    const sentences = text.split(/(?<=[.!?»])\s+/);
+    const seen = new Set();
+    const out  = [];
+    for (const s of sentences) {
+        const key = s.trim().slice(0, 60).toLowerCase();
+        if (key.length > 10 && seen.has(key)) break;
+        seen.add(key);
+        out.push(s);
+    }
+    // Coupe aussi après la section ACTION si elle est présente
+    const full = out.join(' ');
+    const actionIdx = full.search(/##\s*4\./);
+    if (actionIdx !== -1) {
+        const afterAction = full.slice(actionIdx);
+        const nextSection = afterAction.slice(10).search(/##\s*[1-9]\./);
+        if (nextSection !== -1) return full.slice(0, actionIdx + 10 + nextSection).trim();
+    }
+    return full.trim();
+}
+
 const GemmaWeb = {
     _llm:     { e2b: null, e4b: null },
     _genai:   null,
@@ -755,8 +777,9 @@ const GemmaWeb = {
         if (!llm) throw new Error('Modèle non chargé — lance loadModel() d\'abord');
         const primer   = "## 1.";
         const prompt   = `<start_of_turn>user\n${system ? system + '\n\n' : ''}${user}<end_of_turn>\n<start_of_turn>model\n${primer}`;
-        const response = await llm.generateResponse(prompt);
-        return { ok: true, synthesis: (primer + response).trim(), local: true, model: type };
+        const raw      = await llm.generateResponse(prompt);
+        const synthesis = _dedupeGemma((primer + raw).trim());
+        return { ok: true, synthesis, local: true, model: type };
     },
 };
 
