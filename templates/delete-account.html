@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Supprimer mon compte — Karmic Gochara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a08; --gold: #c9a84c; --text: #e8e4d8; --text-dim: #8a8678;
+            --border: #2a2820; --red: #c0392b; --display: 'Cinzel', serif; --body: 'EB Garamond', serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { background: var(--bg); color: var(--text); font-family: var(--body); font-size: 1.05rem; line-height: 1.8; }
+        header {
+            padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { color: var(--gold); font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.2em; text-decoration: none; }
+        main { max-width: 620px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+        h1 {
+            font-family: var(--display); font-size: clamp(1.2rem, 4vw, 1.7rem);
+            color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        .subtitle { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2.5rem; font-style: italic; }
+        h2 {
+            font-family: var(--display); font-size: 0.78rem; letter-spacing: 0.15em;
+            text-transform: uppercase; color: var(--gold); margin: 2rem 0 0.8rem;
+            padding-bottom: 0.5rem; border-bottom: 1px solid var(--border);
+        }
+        p { margin-bottom: 1rem; color: var(--text); }
+        ul { margin: 0.5rem 0 1rem 1.5rem; }
+        li { margin-bottom: 0.4rem; }
+        .warning {
+            background: rgba(192,57,43,0.08); border-left: 3px solid var(--red);
+            padding: 0.8rem 1rem; margin: 1.5rem 0; font-size: 0.95rem; color: #e8b4ae;
+        }
+        label { display: block; font-family: var(--display); font-size: 0.75rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-dim); margin-bottom: 0.4rem; margin-top: 1.2rem; }
+        input[type="text"] {
+            width: 100%; background: #111109; border: 1px solid var(--border);
+            color: var(--text); font-family: var(--body); font-size: 1rem;
+            padding: 0.6rem 0.9rem; outline: none;
+        }
+        input[type="text"]:focus { border-color: var(--gold); }
+        .checkbox-row { display: flex; align-items: flex-start; gap: 0.7rem; margin: 1.5rem 0; }
+        .checkbox-row input { margin-top: 0.35rem; accent-color: var(--gold); flex-shrink: 0; }
+        .checkbox-row span { font-size: 0.95rem; color: var(--text-dim); }
+        button {
+            margin-top: 1.5rem; width: 100%; padding: 0.8rem;
+            background: transparent; border: 1px solid var(--red); color: #e8b4ae;
+            font-family: var(--display); font-size: 0.75rem; letter-spacing: 0.15em;
+            text-transform: uppercase; cursor: pointer; transition: background 0.2s;
+        }
+        button:hover:not(:disabled) { background: rgba(192,57,43,0.15); }
+        button:disabled { opacity: 0.4; cursor: not-allowed; }
+        .msg { margin-top: 1.2rem; font-size: 0.95rem; min-height: 1.4rem; }
+        .msg.ok  { color: #7ec8a0; }
+        .msg.err { color: #e8b4ae; }
+        .back { display: inline-block; margin-top: 2rem; color: var(--text-dim); font-size: 0.9rem; text-decoration: none; }
+        .back:hover { color: var(--gold); }
+    </style>
+</head>
+<body>
+<header>
+    <a class="logo" href="/">KARMIC GOCHARA</a>
+</header>
+<main>
+    <h1>Supprimer mon compte</h1>
+    <p class="subtitle">Suppression définitive du compte et des données associées</p>
+
+    <h2>Données supprimées</h2>
+    <ul>
+        <li>Pseudo et adresse email</li>
+        <li>Date, heure et lieu de naissance</li>
+        <li>Lieu de transit enregistré</li>
+        <li>Historique du quota de synthèses</li>
+    </ul>
+
+    <h2>Données non conservées</h2>
+    <p>Karmic Gochara ne conserve aucun historique de synthèses ni de calculs. La suppression est immédiate et irréversible.</p>
+
+    <div class="warning">
+        ⚠ Cette action est permanente. Ton profil karmique sera effacé définitivement et ne pourra pas être récupéré.
+    </div>
+
+    <h2>Demander la suppression</h2>
+
+    <form id="deleteForm">
+        <label for="pseudo">Ton pseudo</label>
+        <input type="text" id="pseudo" name="pseudo" placeholder="Ton pseudo exact…" autocomplete="off" required>
+
+        <div class="checkbox-row">
+            <input type="checkbox" id="confirm" name="confirm">
+            <span>Je comprends que cette suppression est définitive et irréversible.</span>
+        </div>
+
+        <button type="submit" id="submitBtn" disabled>Supprimer mon compte définitivement</button>
+        <p class="msg" id="msg"></p>
+    </form>
+
+    <a class="back" href="/">← Retour à l'application</a>
+</main>
+
+<script>
+    const form      = document.getElementById('deleteForm');
+    const confirmCb = document.getElementById('confirm');
+    const pseudoIn  = document.getElementById('pseudo');
+    const submitBtn = document.getElementById('submitBtn');
+    const msg       = document.getElementById('msg');
+
+    function updateBtn() {
+        submitBtn.disabled = !(confirmCb.checked && pseudoIn.value.trim());
+    }
+    confirmCb.addEventListener('change', updateBtn);
+    pseudoIn.addEventListener('input', updateBtn);
+
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        msg.textContent = '';
+        msg.className = 'msg';
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Suppression en cours…';
+
+        try {
+            const r = await fetch('/delete-account', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pseudo: pseudoIn.value.trim() }),
+            });
+            const data = await r.json();
+            if (data.ok) {
+                msg.className = 'msg ok';
+                msg.textContent = '✓ Compte supprimé. Tes données ont été effacées définitivement.';
+                form.reset();
+                submitBtn.textContent = 'Compte supprimé';
+            } else {
+                msg.className = 'msg err';
+                msg.textContent = '⚠ ' + (data.error || 'Erreur inconnue');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Supprimer mon compte définitivement';
+                updateBtn();
+            }
+        } catch (err) {
+            msg.className = 'msg err';
+            msg.textContent = '⚠ Erreur réseau — réessaie.';
+            submitBtn.disabled = false;
+            submitBtn.textContent = 'Supprimer mon compte définitivement';
+            updateBtn();
+        }
+    });
+</script>
+</body>
+</html>
