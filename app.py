@@ -376,6 +376,49 @@ def get_lang():
     return LANGS.get(code, LANGS["fr"])
 
 
+# ── Helper géolocalisation ───────────────────────────────────────────────────
+def geocode_location(query: str) -> dict:
+    """Géolocalise une ville — retourne {lat, lon, tz}. Fallback Photon si Nominatim échoue."""
+    import time, requests as req
+    from timezonefinder import TimezoneFinder
+    _tf = TimezoneFinder()
+
+    def _tz_from_coords(lat: float, lon: float) -> str:
+        tz = _tf.timezone_at(lat=lat, lng=lon)
+        return tz or "Europe/Paris"
+
+    try:
+        r = req.get(
+            "https://nominatim.openstreetmap.org/search",
+            params={"q": query, "format": "json", "limit": 1},
+            headers={"User-Agent": "Karmic.Gochara/1.0"},
+            timeout=5,
+        )
+        time.sleep(1)
+        results = r.json()
+        if results:
+            lat = float(results[0]["lat"])
+            lon = float(results[0]["lon"])
+            return {"lat": lat, "lon": lon, "tz": _tz_from_coords(lat, lon)}
+    except Exception:
+        pass
+    try:
+        r2 = req.get(
+            "https://photon.komoot.io/api/",
+            params={"q": query, "limit": 1},
+            headers={"User-Agent": "Karmic.Gochara/1.0"},
+            timeout=5,
+        )
+        features = r2.json().get("features", [])
+        if features:
+            g = features[0].get("geometry", {}).get("coordinates", [None, None])
+            lat, lon = float(g[1]), float(g[0])
+            return {"lat": lat, "lon": lon, "tz": _tz_from_coords(lat, lon)}
+    except Exception:
+        pass
+    return {"lat": 48.8566, "lon": 2.3522, "tz": "Europe/Paris"}
+
+
 # ── Routes publiques ──────────────────────────────────────────────────────────
 @app.route("/")
 def index():
@@ -660,6 +703,354 @@ def send_synthesis():
     except Exception as exc:
         app.logger.error("Resend exception : %s", exc)
         return jsonify({"ok": False, "error": str(exc)}), 500
+
+
+# ── Suppression de compte ─────────────────────────────────────────────────────
+@app.route("/delete-account", methods=["GET"])
+def delete_account_page():
+    return render_template("delete-account.html")
+
+
+@app.route("/delete-account", methods=["POST"])
+def delete_account():
+    from profiles import get_profile_by_pseudo, delete_profile
+    data   = request.get_json(force=True) or {}
+    pseudo = (data.get("pseudo") or "").strip()
+    if not pseudo:
+        return jsonify({"ok": False, "error": "Pseudo requis"}), 400
+
+    profile = get_profile_by_pseudo(pseudo)
+    if not profile:
+        return jsonify({"ok": False, "error": "Pseudo introuvable"}), 404
+
+    try:
+        delete_profile(pseudo)
+    except Exception as exc:
+        app.logger.error("Erreur suppression compte %s : %s", pseudo, exc)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    # Déconnexion si c'est le compte actif
+    if session.get("profile", {}).get("pseudo", "").lower() == pseudo.lower():
+        session.clear()
+
+    return jsonify({"ok": True})
+
+
+# ── /calculate_guest ─────────────────────────────────────────────────────────
+@app.route("/calculate_guest", methods=["POST"])
+def calculate_guest():
+    """
+    Transit invité — aucune donnée stockée, aucun compte requis.
+    Retourne 1 phrase teaser (résumé #1/#2/#3 + désir du #4).
+    """
+    data       = request.get_json(force=True) or {}
+    birthdate  = (data.get("birthdate") or "").strip()
+    birthtime  = (data.get("birthtime") or "12:00").strip() or "12:00"
+    birthplace = (data.get("birthplace") or "").strip()
+    lang       = (data.get("lang") or session.get("lang", "fr"))
+
+    if not birthdate:
+        return jsonify({"error": "Date de naissance requise"}), 400
+
+    try:
+        from astro_calc import get_julian_day, _calc_positions, calc_portes, SIGNS
+        from ai_interpret import get_guest_section
+        from datetime import datetime, timezone
+
+        year, month, day = [int(x) for x in birthdate.split("-")]
+        hour, minute = [int(x) for x in birthtime.split(":")]
+
+        if birthplace:
+            loc = geocode_location(birthplace)
+            lat, lon_geo, tz_str = loc["lat"], loc["lon"], loc.get("tz", "Europe/Paris")
+        else:
+            lat, lon_geo, tz_str = 48.8566, 2.3522, "Europe/Paris"
+
+        jd_natal  = get_julian_day(year, month, day, hour, minute, tz_str)
+        natal_pos = _calc_positions(jd_natal, lat, lon_geo)
+
+        sat_n = natal_pos.get("Saturne ♄")
+        ura_n = natal_pos.get("Uranus ♅")
+        if sat_n and ura_n:
+            portes = calc_portes(sat_n["lon"], ura_n["lon"])
+            natal_pos["Porte Visible ⊙"]   = {**portes["porte_visible"],   "speed": 0, "retrograde": False}
+            natal_pos["Porte Invisible ⊗"] = {**portes["porte_invisible"], "speed": 0, "retrograde": False}
+
+        now    = datetime.now(timezone.utc)
+        jd_now = get_julian_day(now.year, now.month, now.day, now.hour, now.minute, "UTC")
+        transit_pos = _calc_positions(jd_now, lat, lon_geo)
+
+        def sign_name(lon_val):
+            return SIGNS[int(lon_val / 30) % 12]
+
+        def house(p_lon, m_lon):
+            return ((int(p_lon / 30) % 12) - (int(m_lon / 30) % 12)) % 12 + 1
+
+        moon   = natal_pos.get("Lune ☽")
+        ketu   = natal_pos.get("Nœud Sud ☋")
+        chiron = natal_pos.get("Chiron ⚷")
+        pv     = natal_pos.get("Porte Visible ⊙")
+        m_lon  = moon["lon"] if moon else None
+
+        hook = get_guest_hook(natal_pos, transit_pos, lang=lang)
+
+        return jsonify({
+            "hook":  hook,
+            "lagna": sign_name(moon["lon"])   if moon   else "—",
+            "rom":   f"Ketu {sign_name(ketu['lon'])} H{house(ketu['lon'], m_lon)}"     if ketu  and m_lon else "—",
+            "ram":   f"Chiron {sign_name(chiron['lon'])} H{house(chiron['lon'], m_lon)}" if chiron and m_lon else "—",
+            "stage": f"{sign_name(pv['lon'])} H{house(pv['lon'], m_lon)}"              if pv    and m_lon else "—",
+        })
+
+    except Exception as exc:
+        app.logger.error("Erreur calculate_guest : %s", exc, exc_info=True)
+        return jsonify({"error": str(exc)}), 500
+
+
+# ── /api/extension/guest ─────────────────────────────────────────────────────
+@app.route("/api/extension/guest", methods=["POST"])
+def extension_guest():
+    """
+    Reçoit : { birthdate, birthtime, birthplace }
+    Retourne : { lagna, rom, stage, hook, mode:"live" } — sans compte requis
+    """
+    data       = request.get_json(force=True) or {}
+    birthdate  = (data.get("birthdate") or "").strip()
+    birthtime  = (data.get("birthtime") or "12:00").strip() or "12:00"
+    birthplace = (data.get("birthplace") or "").strip()
+
+    if not birthdate:
+        return jsonify({"error": "Date de naissance requise"}), 400
+
+    try:
+        from astro_calc import get_julian_day, _calc_positions, calc_portes, SIGNS
+        from ai_interpret import get_hook
+        from datetime import datetime, timezone
+
+        year, month, day = [int(x) for x in birthdate.split("-")]
+        hour, minute = [int(x) for x in birthtime.split(":")]
+
+        if birthplace:
+            loc = geocode_location(birthplace)
+            lat, lon_geo, tz_str = loc["lat"], loc["lon"], loc.get("tz", "Europe/Paris")
+        else:
+            lat, lon_geo, tz_str = 48.8566, 2.3522, "Europe/Paris"
+
+        jd_natal = get_julian_day(year, month, day, hour, minute, tz_str)
+        natal_pos = _calc_positions(jd_natal, lat, lon_geo)
+
+        # Portes natales
+        sat_n = natal_pos.get("Saturne ♄")
+        ura_n = natal_pos.get("Uranus ♅")
+        if sat_n and ura_n:
+            portes_n = calc_portes(sat_n["lon"], ura_n["lon"])
+            natal_pos["Porte Visible ⊙"]   = {**portes_n["porte_visible"],   "speed": 0, "retrograde": False}
+            natal_pos["Porte Invisible ⊗"] = {**portes_n["porte_invisible"], "speed": 0, "retrograde": False}
+
+        # Transits du jour
+        now = datetime.now(timezone.utc)
+        jd_now = get_julian_day(now.year, now.month, now.day, now.hour, now.minute, "UTC")
+        transit_pos = _calc_positions(jd_now, lat, lon_geo)
+
+        def sign_name(lon_val):
+            return SIGNS[int(lon_val / 30) % 12]
+
+        moon   = natal_pos.get("Lune ☽")
+        ketu   = natal_pos.get("Nœud Sud ☋")
+        chiron = natal_pos.get("Chiron ⚷")
+        pv     = natal_pos.get("Porte Visible ⊙")
+
+        lagna      = sign_name(moon["lon"])   if moon   else "—"
+        ketu_sign  = sign_name(ketu["lon"])   if ketu   else "—"
+        ketu_house = _house_from_lagna(ketu["lon"], moon["lon"])   if ketu and moon   else "—"
+        chir_sign  = sign_name(chiron["lon"]) if chiron else "—"
+        chir_house = _house_from_lagna(chiron["lon"], moon["lon"]) if chiron and moon else "—"
+        pv_sign    = sign_name(pv["lon"])     if pv     else "—"
+        pv_house   = _house_from_lagna(pv["lon"], moon["lon"])     if pv and moon     else "—"
+
+        profile = {"name": "invité", "lang": "fr"}
+        hook = get_hook(natal_pos, transit_pos, profile, lang="fr")
+
+        return jsonify({
+            "mode":   "live",
+            "lagna":  lagna,
+            "rom":    f"Ketu {ketu_sign} H{ketu_house}",
+            "ram":    f"Chiron {chir_sign} H{chir_house}",
+            "stage":  f"{pv_sign} H{pv_house}",
+            "hook":   hook,
+        })
+
+    except Exception as e:
+        app.logger.error(f"extension_guest error: {e}")
+        return jsonify({"error": str(e)}), 500
+
+
+# ── Helper : numéro de maison depuis Chandra Lagna ───────────────────────────
+def _house_from_lagna(planet_lon: float, moon_lon: float) -> int:
+    """Retourne le numéro de maison (1-12) en système Chandra Lagna."""
+    lagna_sign = int(moon_lon / 30) % 12
+    planet_sign = int(planet_lon / 30) % 12
+    return ((planet_sign - lagna_sign) % 12) + 1
+
+
+# ── /api/extension/login ──────────────────────────────────────────────────────
+@app.route("/api/extension/login", methods=["POST"])
+def extension_login():
+    """
+    Reçoit : { pseudo }
+    Retourne : profil natal structuré pour l'extension Chrome
+    """
+    from profiles import get_profile_by_pseudo
+    data = request.get_json(force=True) or {}
+    pseudo = (data.get("pseudo") or "").strip()
+    if not pseudo:
+        return jsonify({"error": "Pseudo manquant"}), 400
+
+    profile = get_profile_by_pseudo(pseudo)
+    if not profile:
+        return jsonify({"error": "Pseudo introuvable"}), 404
+
+    try:
+        from astro_calc import (
+            get_julian_day, _calc_positions, calc_portes,
+            SIGNS, lon_to_nakshatra
+        )
+
+        year   = profile.get("year", 1990)
+        month  = profile.get("month", 1)
+        day    = profile.get("day", 1)
+        hour   = profile.get("hour", 12)
+        minute = profile.get("minute", 0)
+        lat    = profile.get("lat", 48.8566)
+        lon_geo = profile.get("lon", 2.3522)
+        tz_str  = profile.get("tz", "Europe/Paris")
+
+        jd = get_julian_day(year, month, day, hour, minute, tz_str)
+        positions = _calc_positions(jd, lat, lon_geo)
+
+        def sign_name(lon_val):
+            return SIGNS[int(lon_val / 30) % 12]
+
+        moon = positions.get("Lune ☽")
+        lagna = sign_name(moon["lon"]) if moon else "—"
+
+        ketu = positions.get("Nœud Sud ☋")
+        ketu_sign = sign_name(ketu["lon"]) if ketu else "—"
+        ketu_house = _house_from_lagna(ketu["lon"], moon["lon"]) if ketu and moon else "—"
+
+        chiron = positions.get("Chiron ⚷")
+        chiron_sign = sign_name(chiron["lon"]) if chiron else "—"
+        chiron_house = _house_from_lagna(chiron["lon"], moon["lon"]) if chiron and moon else "—"
+
+        sat = positions.get("Saturne ♄")
+        ura = positions.get("Uranus ♅")
+        if sat and ura:
+            portes = calc_portes(sat["lon"], ura["lon"])
+            pv_sign = sign_name(portes["porte_visible"]["lon"])
+            pi_sign = sign_name(portes["porte_invisible"]["lon"])
+            pv_house = _house_from_lagna(portes["porte_visible"]["lon"], moon["lon"]) if moon else "—"
+        else:
+            pv_sign = pi_sign = pv_house = "—"
+
+        stage_sign = pv_sign
+        stage_house = pv_house
+
+        rahu = positions.get("Nœud Nord ☊")
+        rahu_sign = sign_name(rahu["lon"]) if rahu else "—"
+
+    except Exception as e:
+        app.logger.warning(f"extension_login calc error: {e}")
+        lagna = ketu_sign = ketu_house = chiron_sign = chiron_house = "—"
+        pv_sign = pi_sign = stage_sign = rahu_sign = "—"
+        ketu_house = chiron_house = stage_house = pv_house = "—"
+
+    return jsonify({
+        "pseudo":     pseudo,
+        "birthdate":  f"{profile.get('year','')}-{profile.get('month',''):02d}-{profile.get('day',''):02d}" if profile.get("year") else "",
+        "birthplace": profile.get("city", ""),
+        "lagna":      lagna,
+        "rom":        f"Ketu {ketu_sign} H{ketu_house}",
+        "ram":        f"Chiron {chiron_sign} H{chiron_house}",
+        "stage":      f"{stage_sign} H{stage_house}",
+        "pv":         f"{pv_sign} H{pv_house}",
+        "pi":         pi_sign,
+        "rahu_sign":  rahu_sign,
+    })
+
+
+# ── /api/extension/transit ────────────────────────────────────────────────────
+@app.route("/api/extension/transit", methods=["POST"])
+def extension_transit():
+    """
+    Reçoit : { pseudo }
+    Retourne : { rom, stage, hook, mode:"live" }
+    Hook = 4 phrases — Alternative de Conscience du jour
+    """
+    from profiles import get_profile_by_pseudo
+    data = request.get_json(force=True) or {}
+    pseudo = (data.get("pseudo") or "").strip()
+    if not pseudo:
+        return jsonify({"error": "Pseudo manquant"}), 400
+
+    profile = get_profile_by_pseudo(pseudo)
+    if not profile:
+        return jsonify({"error": "Pseudo introuvable"}), 404
+
+    try:
+        from astro_calc import (
+            get_julian_day, _calc_positions, calc_portes,
+            calculate_transits, SIGNS
+        )
+        from ai_interpret import get_hook
+        from datetime import datetime, timezone
+
+        year   = profile.get("year", 1990)
+        month  = profile.get("month", 1)
+        day    = profile.get("day", 1)
+        hour   = profile.get("hour", 12)
+        minute = profile.get("minute", 0)
+        lat    = profile.get("lat", 48.8566)
+        lon_geo = profile.get("lon", 2.3522)
+        tz_str  = profile.get("tz", "Europe/Paris")
+
+        jd_natal = get_julian_day(year, month, day, hour, minute, tz_str)
+        natal_pos = _calc_positions(jd_natal, lat, lon_geo)
+
+        sat_n = natal_pos.get("Saturne ♄")
+        ura_n = natal_pos.get("Uranus ♅")
+        if sat_n and ura_n:
+            portes_n = calc_portes(sat_n["lon"], ura_n["lon"])
+            natal_pos["Porte Visible ⊙"]   = {**portes_n["porte_visible"],   "speed": 0, "retrograde": False}
+            natal_pos["Porte Invisible ⊗"] = {**portes_n["porte_invisible"], "speed": 0, "retrograde": False}
+
+        now = datetime.now(timezone.utc)
+        jd_now = get_julian_day(now.year, now.month, now.day, now.hour, now.minute, "UTC")
+        transit_pos = _calc_positions(jd_now, lat, lon_geo)
+
+        hook = get_hook(natal_pos, transit_pos, profile, lang="fr")
+
+        def sign_name(lon_val):
+            return SIGNS[int(lon_val / 30) % 12]
+
+        moon = natal_pos.get("Lune ☽")
+        ketu = natal_pos.get("Nœud Sud ☋")
+        pv   = natal_pos.get("Porte Visible ⊙")
+
+        ketu_sign = sign_name(ketu["lon"]) if ketu else "—"
+        ketu_house = _house_from_lagna(ketu["lon"], moon["lon"]) if ketu and moon else "—"
+        pv_sign  = sign_name(pv["lon"]) if pv else "—"
+        pv_house = _house_from_lagna(pv["lon"], moon["lon"]) if pv and moon else "—"
+
+        return jsonify({
+            "mode":  "live",
+            "rom":   f"Ketu {ketu_sign} H{ketu_house}",
+            "stage": f"{pv_sign} H{pv_house}",
+            "hook":  hook,
+        })
+
+    except Exception as e:
+        app.logger.error(f"extension_transit error: {e}")
+        return jsonify({"error": str(e)}), 500
 
 
 # ── Lancement ─────────────────────────────────────────────────────────────────

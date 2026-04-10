@@ -118,14 +118,20 @@ def get_profile_by_email(email: str) -> dict | None:
     return None
 
 
+def _clean_pseudo(s: str) -> str:
+    """Supprime espaces insécables, caractères invisibles, BOM — pour comparaison robuste."""
+    import unicodedata
+    s = "".join(c for c in s if not unicodedata.category(c).startswith("C"))
+    return s.strip().replace("\u00a0", "").replace("\u200b", "").replace("\ufeff", "").lower()
+
+
 def get_profile_by_pseudo(pseudo: str) -> dict | None:
     ws = _get_sheet()
     records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-    header = records[0] if records else []
+    pseudo_clean = _clean_pseudo(pseudo)
 
     for row in records[1:]:
-        if row and row[0].strip().lower() == pseudo_lower:
+        if row and _clean_pseudo(row[0]) == pseudo_clean:
             return _row_to_profile(row)
     return None
 
@@ -234,6 +240,18 @@ def check_and_increment_synthesis(pseudo: str) -> dict:
 
     # Pseudo introuvable
     return {"allowed": False, "remaining": 0}
+
+
+def delete_profile(pseudo: str) -> bool:
+    """Supprime définitivement le profil et toutes les données associées. Retourne True si supprimé."""
+    ws = _get_sheet()
+    records = ws.get_all_values()
+    pseudo_lower = pseudo.strip().lower()
+    for i, row in enumerate(records[1:], start=2):
+        if row and row[0].strip().lower() == pseudo_lower:
+            ws.delete_rows(i)
+            return True
+    return False
 
 
 def pseudo_exists(pseudo: str) -> bool:
