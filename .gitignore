@@ -12,6 +12,7 @@ venv/
 
 # Propriété intellectuelle — doctrine karmique (hébergée via Render Secret Files)
 doctrine.py
+karmic_vault/
 
 # Secrets & credentials — NE JAMAIS COMMITTER
 credentials.json
