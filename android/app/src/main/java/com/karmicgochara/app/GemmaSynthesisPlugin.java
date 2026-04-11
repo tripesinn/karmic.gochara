@@ -15,7 +15,11 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 import com.google.mediapipe.tasks.genai.llminference.LlmInference;
 import com.google.mediapipe.tasks.genai.llminference.LlmInference.LlmInferenceOptions;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -146,6 +150,7 @@ public class GemmaSynthesisPlugin extends Plugin {
         String system = call.getString("system", "");
         String user   = call.getString("user",   "");
         String type   = call.getString("type",   "e2b"); // "e2b" ou "e4b"
+        boolean useVault = call.getBoolean("useVault", true);
         boolean isE4b = "e4b".equals(type);
 
         if (user == null || user.isEmpty()) {
@@ -166,10 +171,17 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         final LlmInference finalLlm = llm;
         final String       finalType = type;
+        final String       finalSystem = system;
 
         executor.execute(() -> {
             try {
-                String fullPrompt = buildGemmaPrompt(system, user);
+                String vaultData = useVault ? getVaultContent() : "";
+                String augmentedSystem = finalSystem;
+                if (!vaultData.isEmpty()) {
+                    augmentedSystem = "RÉFÉRENCES (VAULT) :\n" + vaultData + "\n\nINSTRUCTIONS :\n" + finalSystem;
+                }
+
+                String fullPrompt = buildGemmaPrompt(augmentedSystem, user);
                 String response   = finalLlm.generateResponse(fullPrompt);
 
                 JSObject result = new JSObject();
@@ -177,6 +189,7 @@ public class GemmaSynthesisPlugin extends Plugin {
                 result.put("synthesis", response.trim());
                 result.put("local",     true);
                 result.put("model",     finalType);
+                result.put("vaultUsed", !vaultData.isEmpty());
                 call.resolve(result);
 
             } catch (Exception e) {
@@ -287,6 +300,33 @@ public class GemmaSynthesisPlugin extends Plugin {
         File dir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
         if (dir == null) dir = getContext().getFilesDir();
         return new File(dir, filename);
+    }
+
+    /**
+     * Lit récursivement le contenu du dossier assets/vault pour l'injecter dans le prompt.
+     */
+    private String getVaultContent() {
+        StringBuilder sb = new StringBuilder();
+        try {
+            String[] files = getContext().getAssets().list("vault");
+            if (files == null || files.length == 0) return "";
+
+            for (String fileName : files) {
+                if (fileName.endsWith(".md")) {
+                    try (InputStream is = getContext().getAssets().open("vault/" + fileName);
+                         BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                        String line;
+                        while ((line = reader.readLine()) != null) {
+                            sb.append(line).append("\n");
+                        }
+                        sb.append("\n---\n");
+                    }
+                }
+            }
+        } catch (IOException e) {
+            return "";
+        }
+        return sb.toString();
     }
 
     /**
