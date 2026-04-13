@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(./gradlew assembleDebug)",
+      "Bash(mkdir -p karmic_vault)",
+      "Bash(cp \"/c/Users/hp/Downloads/00_MASTER_CONTEXT.md\" karmic_vault/)",
+      "Bash(cp \"/c/Users/hp/Downloads/01_output_rules.md\" karmic_vault/)",
+      "Bash(cp \"/c/Users/hp/Downloads/02_planet_keywords.md\" karmic_vault/)"
+    ]
+  }
+}

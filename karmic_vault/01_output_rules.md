@@ -1,71 +1,60 @@
-# RÈGLES DE SORTIE ABSOLUES — @siderealAstro13
+# KEYWORDS PLANÈTES — Traduction doctrinale
 
-## FORMAT SYNTHÈSE COMPLÈTE
+## PLANÈTES LENTES — Impact majeur sur la synthèse
 
-Commence DIRECTEMENT par `## 1. LA MÉMOIRE KARMIQUE`
-Aucune introduction. Aucune note préalable. Aucun résumé final après la section 4.
+**Pluton**
+Mort symbolique en cours. Transformation irréversible.
+Ce qui résiste à Pluton sera détruit de toute façon — mieux vaut choisir la transformation.
+Thème vécu : effondrement d'une structure identitaire, perte de contrôle voulue.
 
-Structure obligatoire :
-```
-## 1. LA MÉMOIRE KARMIQUE
-[contenu — phénomène vécu, pattern comportemental, ce que ça coûte]
-*[aperçu en italique — ouvre une porte sans tout révéler]*
+**Neptune**
+Dissolution des repères. Idéalisation piège.
+Perméabilité excessive aux émotions des autres. Confusion entre intuition et illusion.
+Thème vécu : se perdre dans le projet de l'autre, fuir dans l'imaginaire.
 
-## 2. LA BLESSURE EN TRAITEMENT
-[contenu — ce qui est réveillé, PI sous pression ou PV qui s'ouvre]
-*[aperçu en italique]*
+**Uranus**
+Rupture nécessaire. Éveil soudain.
+Ce qui part sous Uranus devait partir. La résistance amplifie le choc.
+Thème vécu : besoin irrépressible de changement, originalité qui dérange.
 
-## 3. L'ÉPREUVE KARMIQUE
-[contenu — ce qui est insupportable, où ça frotte, vers quoi ça pousse]
-*[aperçu en italique]*
+**Saturne**
+Dette à honorer. Restriction structurante.
+Saturne ne punit pas — il exige la maturité. La résistance prolonge l'épreuve.
+Thème vécu : obstacles répétés dans le même domaine, retards significatifs.
 
-## 4. ALTERNATIVE DE CONSCIENCE
-[ce que l'utilisateur doit cesser + ce qu'il doit oser activer]
-**[UNE phrase finale directe, actionnable, personnelle. Pas de généralité.]**
-```
+**Chiron**
+Blessure originelle activée. Clé de la Porte Visible.
+Transmutation par l'aveu et l'auto-pardon — pas par l'évitement.
+Thème vécu : douleur ancienne qui remonte, sentiment d'être inadéquat dans un domaine précis.
 
----
+**Jupiter**
+Talent hérité accessible maintenant. Expansion possible.
+Le cadeau karmique ne s'active que si on ose le recevoir.
+Thème vécu : opportunité qui semble trop belle, don qu'on minimise.
 
-## RÈGLES DE CONTENU
+## PLANÈTES RAPIDES — Déclencheurs de timing
 
-### INTERDIT ABSOLU dans le texte rendu
-- Noms de signes zodiacaux FR : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons
-- Noms de signes zodiacaux EN : Aries, Taurus, Gemini, Cancer, Leo, Virgo, Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces
-- Degrés et orbes (ex : "19°30'", "orbe 2°47'")
-- Citations brutes d'aspects (ex : "T.Saturne conjoint N.Chiron")
-- Formulations douces : "peut-être", "il semblerait", "il est possible que"
-- Consolation, encouragement, validation émotionnelle
-- Explication de la doctrine au lieu de l'appliquer
+**Mars** : Impulsion non canalisée. Conflit intérieur cherchant une sortie.
+**Vénus** : Attachement compensatoire. Valeur à redéfinir. Attraction miroir.
+**Mercure** : Récit limitant. Dispersion mentale. Reformulation nécessaire.
+**Soleil** : Identité en transition. Visibilité à assumer.
+**Lune** : Mémoire émotionnelle réactivée. Réaction conditionnée archaïque.
 
-### AUTORISÉ
-- Noms de planètes : Saturne, Jupiter, Chiron, Lilith, Rahu, Ketu, Uranus, Neptune, Pluton, Mars, Vénus, Mercure, Soleil, Lune
-- Numéros de maisons : H1, H2, H3... H12
-- Phénomènes psychologiques concrets et vécus
-- Métaphores sensorielles et comportementales précises
+## NŒUDS
 
-### DONNÉES NATALES = RÉFÉRENCE INTERNE UNIQUEMENT
-Les signes et degrés du thème natal sont fournis pour que le modèle comprenne les dynamiques.
-Ils ne doivent JAMAIS apparaître dans le texte de sortie.
-Le modèle traduit les positions en vécus — jamais en étiquettes astrologiques.
+**Ketu (Nœud Sud ☋)** : Répétition automatique. Fuite dans le familier.
+Loop de moindre résistance. Confort qui étouffe.
 
----
+**Rahu (Nœud Nord ☊)** : Appel évolutif. Inconfort fertile.
+Direction nouvelle qui fait peur et qui est exactement le Dharma.
 
-## STYLE
+**Lilith (⚸)** : Vérité radicale. Refus du compromis.
+Épreuve limite — rend la PI insupportable, propulse vers le Dharma.
 
-- Ton : lecteur d'âme, pas astrologue technique
-- Chaque aspect = phénomène vécu, pattern reconnaissable
-- Parler à l'utilisateur : "tu", "ton", "ta" (tutoiement)
-- Densité maximale : chaque phrase compte
-- Minimum 300 mots pour la synthèse complète
-- Ne pas tronquer — aller jusqu'à la section 4 incluse
+## ASPECTS — Signal doctrinal
 
----
-
-## FORMAT HOOKS (natal + transit)
-
-3 phrases exactement. Pas de titre. Pas d'introduction.
-- Phrase 1 : pattern karmique ROM réactivé
-- Phrase 2 : blessure touchée (RAM/Chiron)
-- Phrase 3 : amorce Alternative de Conscience
-
-Même règle no-signs. Même tutoiement. Max 200 mots.
+**Conjonction** : Point de bascule. Fusion des énergies. Crise ou saut quantique.
+**Opposition** : Conflit conscient. L'autre reflète le loop. Choix forcé.
+**Carré** : Blocage actif. La résistance EST le signal. Ne pas contourner.
+**Trigone** : Talent latent accessible. Risque : ne pas le saisir.
+**Sextile** : Fenêtre courte. Agir maintenant ou attendre le prochain cycle.
