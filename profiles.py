@@ -40,6 +40,31 @@ COLS = [
     "stripe_customer_id",   # V
 ]
 
+# Colonnes natales — à partir de W (index 22)
+NATAL_COLS = [
+    "chandra_lagna_sign",    # W  (22)
+    "ketu_sign",             # X  (23)
+    "ketu_house",            # Y  (24)
+    "ketu_nakshatra",        # Z  (25)
+    "rahu_sign",             # AA (26)
+    "rahu_house",            # AB (27)
+    "rahu_nakshatra",        # AC (28)
+    "chiron_sign",           # AD (29)
+    "chiron_house",          # AE (30)
+    "chiron_nakshatra",      # AF (31)
+    "lilith_sign",           # AG (32)
+    "lilith_house",          # AH (33)
+    "saturn_sign",           # AI (34)
+    "saturn_house",          # AJ (35)
+    "jupiter_sign",          # AK (36)
+    "jupiter_house",         # AL (37)
+    "porte_visible_sign",    # AM (38)
+    "porte_visible_house",   # AN (39)
+    "porte_visible_deg",     # AO (40)
+    "porte_invisible_sign",  # AP (41)
+    "porte_invisible_house", # AQ (42)
+]
+
 SYNTHESIS_QUOTA = 3  # max synthèses par mois (plan free)
 
 _sheet = None
@@ -113,6 +138,28 @@ def _row_to_profile(row: list) -> dict:
         "plan":                 _safe(19) or "free",
         "plan_syntheses":       _safe(20, int, 0),
         "stripe_customer_id":   _safe(21) or "",
+        # Données natales (colonnes W→AQ, indices 22→42)
+        "chandra_lagna_sign":    _safe(22),
+        "ketu_sign":             _safe(23),
+        "ketu_house":            _safe(24),
+        "ketu_nakshatra":        _safe(25),
+        "rahu_sign":             _safe(26),
+        "rahu_house":            _safe(27),
+        "rahu_nakshatra":        _safe(28),
+        "chiron_sign":           _safe(29),
+        "chiron_house":          _safe(30),
+        "chiron_nakshatra":      _safe(31),
+        "lilith_sign":           _safe(32),
+        "lilith_house":          _safe(33),
+        "saturn_sign":           _safe(34),
+        "saturn_house":          _safe(35),
+        "jupiter_sign":          _safe(36),
+        "jupiter_house":         _safe(37),
+        "porte_visible_sign":    _safe(38),
+        "porte_visible_house":   _safe(39),
+        "porte_visible_deg":     _safe(40),
+        "porte_invisible_sign":  _safe(41),
+        "porte_invisible_house": _safe(42),
     }
 
 
@@ -186,8 +233,7 @@ def update_profile(email: str, data: dict) -> dict | None:
             # Préserve les colonnes quota existantes
             existing_count      = row[16] if len(row) > 16 else "0"
             existing_reset_date = row[17] if len(row) > 17 else _current_month_str()
-
-            existing_alerts = row[18] if len(row) > 18 else "0"
+            existing_alerts     = row[18] if len(row) > 18 else "0"
 
             new_row = [
                 data.get("pseudo",       row[0]  if len(row) > 0  else ""),
@@ -215,6 +261,24 @@ def update_profile(email: str, data: dict) -> dict | None:
     return None
 
 
+def save_natal_to_sheet(pseudo: str, profile: dict) -> bool:
+    """
+    Sauvegarde les données natales calculées dans les colonnes W→AQ.
+    Appelée après calcul natal à l'inscription ou au premier login.
+    """
+    ws = _get_sheet()
+    records = ws.get_all_values()
+    pseudo_lower = pseudo.strip().lower()
+
+    for i, row in enumerate(records[1:], start=2):
+        if not row or row[0].strip().lower() != pseudo_lower:
+            continue
+        natal_row = [str(profile.get(col, "")) for col in NATAL_COLS]
+        ws.update(f"W{i}:AQ{i}", [natal_row])
+        return True
+    return False
+
+
 def check_and_increment_synthesis(pseudo: str) -> dict:
     """
     Vérifie le quota mensuel de synthèses pour un utilisateur.
@@ -231,7 +295,6 @@ def check_and_increment_synthesis(pseudo: str) -> dict:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
 
-        # Lecture quota avec fallback anciens profils
         try:
             count = int(row[16]) if len(row) > 16 and row[16] else 0
         except ValueError:
@@ -239,7 +302,6 @@ def check_and_increment_synthesis(pseudo: str) -> dict:
 
         reset_date = row[17] if len(row) > 17 and row[17] else ""
 
-        # Reset si nouveau mois
         if reset_date != current_month:
             count = 0
             reset_date = current_month
@@ -247,18 +309,16 @@ def check_and_increment_synthesis(pseudo: str) -> dict:
         if count >= SYNTHESIS_QUOTA:
             return {"allowed": False, "remaining": 0}
 
-        # Incrémenter
         new_count = count + 1
         ws.update(f"Q{i}:R{i}", [[str(new_count), current_month]])
 
         return {"allowed": True, "remaining": SYNTHESIS_QUOTA - new_count}
 
-    # Pseudo introuvable
     return {"allowed": False, "remaining": 0}
 
 
 def delete_profile(pseudo: str) -> bool:
-    """Supprime définitivement le profil et toutes les données associées. Retourne True si supprimé."""
+    """Supprime définitivement le profil. Retourne True si supprimé."""
     ws = _get_sheet()
     records = ws.get_all_values()
     pseudo_lower = pseudo.strip().lower()
@@ -279,6 +339,19 @@ def pseudo_exists(pseudo: str) -> bool:
     return False
 
 
+def set_alerts(pseudo: str, enabled: bool) -> bool:
+    """Active ou désactive les alertes transit pour un utilisateur."""
+    ws = _get_sheet()
+    records = ws.get_all_values()
+    pseudo_lower = pseudo.strip().lower()
+    for i, row in enumerate(records[1:], start=2):
+        if not row or row[0].strip().lower() != pseudo_lower:
+            continue
+        ws.update(f"S{i}", [[str(int(enabled))]])
+        return True
+    return False
+
+
 # ── Gestion plans Stripe ───────────────────────────────────────────────────────
 
 PLAN_SYNTHESES = {
@@ -293,7 +366,6 @@ def upgrade_plan(pseudo: str, plan: str) -> bool:
     """
     Met à jour le plan d'un utilisateur après paiement Stripe confirmé.
     Crédite le nombre de synthèses correspondant au plan.
-    Retourne True si mis à jour.
     """
     ws = _get_sheet()
     records = ws.get_all_values()
@@ -303,16 +375,13 @@ def upgrade_plan(pseudo: str, plan: str) -> bool:
     for i, row in enumerate(records[1:], start=2):
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
-        # Colonne T=plan (index 19), U=plan_syntheses (index 20)
         ws.update(f"T{i}:U{i}", [[plan, str(syntheses)]])
         return True
     return False
 
 
 def downgrade_plan(pseudo: str) -> bool:
-    """
-    Remet le plan à "free" après annulation abonnement Stripe.
-    """
+    """Remet le plan à "free" après annulation abonnement Stripe."""
     ws = _get_sheet()
     records = ws.get_all_values()
     pseudo_lower = pseudo.strip().lower()
