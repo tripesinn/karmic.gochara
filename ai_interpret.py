@@ -1,5 +1,5 @@
 """
-ai_interpret.py — Gochara Karmique
+ai_interpret.py — Gochara Karmique [FIXED]
 Intelligence siderealAstro13 | Astrologie védique sidérale (Chandra Lagna)
 Doctrine centralisée dans doctrine.py — ce fichier ne contient que la logique d'appel API.
 
@@ -49,7 +49,7 @@ def _load_vault(include_keywords: bool = True) -> str | None:
                 vault += "\n\n---\n\n" + open(kw_path, encoding="utf-8").read()
         import logging
         logging.getLogger(__name__).info("VAULT chargé — %d tokens estimés", len(vault.split()))
-        
+
         return vault
     except FileNotFoundError:
         return None
@@ -119,9 +119,9 @@ def _build_system_prompt(user: dict, use_vault: bool = True) -> str:
         lbl_h1     = "Identity (H1 / Chandra Lagna)"
         lbl_ketu   = "Karmic Memory — Ketu (ROM ☋)"
         lbl_rahu   = "Dharma — Rahu (☊)"
-        lbl_pv     = "Liberation Path (Visible Door / Stage)"
-        lbl_pi     = "Unconscious Prison (Invisible Door / RAM ⚷)"
-        lbl_chiron = "Core Wound — Chiron (RAM ⚷)"
+        lbl_pv     = "Liberation Path (Visible Door — healing/Stage)"
+        lbl_pi     = "Unconscious Prison (Invisible Door — refoulement/blockage)"  # CORR L123
+        lbl_chiron = "Core Wound — Chiron (RAM ⚷ — opening tool of Visible Door)"  # CORR L124
         lbl_lilith = "Karmic Trial — Lilith (⚸)"
         lbl_saturn = "Saturn — Architect (♄)"
         lbl_jup    = "Jupiter — Gift-Bearer (♃)"
@@ -131,9 +131,9 @@ def _build_system_prompt(user: dict, use_vault: bool = True) -> str:
         lbl_h1     = "Identité (H1 / Chandra Lagna)"
         lbl_ketu   = "Mémoire karmique — Ketu (ROM ☋)"
         lbl_rahu   = "Dharma — Rahu (☊)"
-        lbl_pv     = "Voie de libération (Porte Visible / Stage)"
-        lbl_pi     = "Prison inconsciente (Porte Invisible / RAM ⚷)"
-        lbl_chiron = "Blessure originelle — Chiron (RAM ⚷)"
+        lbl_pv     = "Voie de libération (Porte Visible — guérison/Stage)"
+        lbl_pi     = "Prison inconsciente (Porte Invisible — refoulement/blocage)"  # CORR L135
+        lbl_chiron = "Blessure originelle — Chiron (RAM ⚷ — outil d'ouverture de la Porte Visible)"  # CORR L136
         lbl_lilith = "Épreuve karmique — Lilith (⚸)"
         lbl_saturn = "Saturne — Architecte (♄)"
         lbl_jup    = "Jupiter — Porteur de cadeaux (♃)"
@@ -245,15 +245,15 @@ def _build_natal_context(user: dict) -> str:
     user = user or {}
     lines = []
     fields = [
-        ("Chandra Lagna H1",        "chandra_lagna_sign",  "chandra_lagna_deg"),
-        ("Ketu (ROM ☋)",            "ketu_sign",           "ketu_house"),
-        ("Rahu (Dharma ☊)",         "rahu_sign",           "rahu_house"),
-        ("Porte Visible / Stage",   "porte_visible_sign",  "porte_visible_house"),
-        ("Porte Invisible (RAM ⚷)", "porte_invisible_sign","porte_invisible_house"),
-        ("Chiron (RAM ⚷)",          "chiron_sign",         "chiron_house"),
-        ("Lilith (⚸)",              "lilith_sign",         "lilith_house"),
-        ("Saturne (♄)",             "saturn_sign",         "saturn_house"),
-        ("Jupiter (♃)",             "jupiter_sign",        "jupiter_house"),
+        ("Chandra Lagna H1",                "chandra_lagna_sign",  "chandra_lagna_deg"),
+        ("Ketu (ROM ☋)",                    "ketu_sign",           "ketu_house"),
+        ("Rahu (Dharma ☊)",                 "rahu_sign",           "rahu_house"),
+        ("Porte Visible (guérison/Stage)",  "porte_visible_sign",  "porte_visible_house"),   # CORR L251
+        ("Porte Invisible (prison/refoul.)", "porte_invisible_sign","porte_invisible_house"), # CORR L252
+        ("Chiron (RAM ⚷ — ouverture PV)",   "chiron_sign",         "chiron_house"),
+        ("Lilith (⚸)",                      "lilith_sign",         "lilith_house"),
+        ("Saturne (♄)",                     "saturn_sign",         "saturn_house"),
+        ("Jupiter (♃)",                     "jupiter_sign",        "jupiter_house"),
     ]
     for label, key1, key2 in fields:
         v1 = user.get(key1, "")
@@ -389,8 +389,8 @@ def get_hook_natal(user: dict) -> str:
     natal_mini = (
         f"Chandra Lagna H1: {cl}. "
         f"Ketu (mémoire statique): H{ketu_h}. "
-        f"Chiron (blessure-clé): H{chi_h}. "
-        f"Porte Visible (libération): {pv}. "
+        f"Chiron (blessure-clé, outil d'ouverture): H{chi_h}. "
+        f"Porte Visible (guérison/Stage): {pv}. "
         f"Lilith (épreuve): H{lil_h}."
     )
 
@@ -410,8 +410,8 @@ def get_hook_natal(user: dict) -> str:
 
 Écris un hook de 3 phrases exactement. Pas de titre. Pas d'introduction.
 Phrase 1 : le schéma karmique dominant que {name} rejoue (basé sur Ketu H{ketu_h}).
-Phrase 2 : la nature de la blessure active et ce qu'elle cherche (Chiron H{chi_h}).
-Phrase 3 : la direction de libération qui s'ouvre (Porte Visible) + une amorce d'Alternative de Conscience.
+Phrase 2 : la nature de la blessure active et ce qu'elle cherche (Chiron H{chi_h} — outil d'ouverture vers la Porte Visible).
+Phrase 3 : la direction de libération qui s'ouvre (Porte Visible/Stage) + une amorce d'Alternative de Conscience.
 Ton : dense, précis, comme si tu lisais directement l'âme. Donne envie d'en savoir plus."""
     else:
         system = (
@@ -429,8 +429,8 @@ Ton : dense, précis, comme si tu lisais directement l'âme. Donne envie d'en sa
 
 Write a hook of exactly 3 sentences. No title. No introduction.
 Sentence 1: the dominant karmic pattern {name} replays (based on Ketu H{ketu_h}).
-Sentence 2: the nature of the active wound and what it seeks (Chiron H{chi_h}).
-Sentence 3: the liberation direction opening (Visible Door) + a seed of Alternative of Consciousness.
+Sentence 2: the nature of the active wound and what it seeks (Chiron H{chi_h} — opening tool toward Visible Door).
+Sentence 3: the liberation direction opening (Visible Door/Stage) + a seed of Alternative of Consciousness.
 Tone: dense, precise, as if reading the soul directly. Make them want to know more."""
 
     hook_model = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
@@ -488,7 +488,7 @@ Aspects actifs ce jour ({date}) — ne pas citer tels quels :
 
 Écris un hook de 3 phrases. Pas de titre. Pas d'introduction.
 Phrase 1 : ce qui se réactive dans la mémoire karmique de {name} aujourd'hui.
-Phrase 2 : ce que ça touche dans sa blessure profonde.
+Phrase 2 : ce que ça touche dans sa blessure profonde (Chiron = outil d'ouverture vers la Porte Visible).
 Phrase 3 : l'amorce de l'Alternative de Conscience — ce qui change si {name} choisit autrement.
 Donne envie d'obtenir la lecture complète. Ton dense et précis."""
     else:
@@ -509,7 +509,7 @@ Active aspects today ({date}) — do not quote as-is:
 
 Write a hook of 3 sentences. No title. No introduction.
 Sentence 1: what reactivates in {name}'s karmic memory today.
-Sentence 2: what this touches in their core wound.
+Sentence 2: what this touches in their core wound (Chiron = opening tool toward Visible Door).
 Sentence 3: the seed of the Alternative of Consciousness — what changes if {name} chooses differently.
 Make them want the full reading. Dense and precise tone."""
 
@@ -587,7 +587,7 @@ Applique le protocole en 4 étapes :
 
 1. LA MÉMOIRE KARMIQUE (ROM ☋) — Quel piège l'âme de {name} rejoue-t-elle en ce moment ? Décris le comportement automatique, la sensation familière, ce que ça lui coûte. Termine par un aperçu en italique.
 
-2. LA BLESSURE EN TRAITEMENT (RAM ⚷) — Qu'est-ce qui est réveillé dans la blessure profonde de {name} ? La Porte Invisible est-elle sous pression ? La Voie de libération s'ouvre-t-elle ? Décris le mouvement vécu, pas la mécanique. Termine par un aperçu en italique.
+2. LA BLESSURE EN TRAITEMENT (RAM ⚷) — Qu'est-ce qui est réveillé dans la blessure profonde de {name} ? La Porte Invisible (prison/refoulement) est-elle sous pression ? La Porte Visible (guérison/Stage) s'ouvre-t-elle via Chiron ? Décris le mouvement vécu, pas la mécanique. Termine par un aperçu en italique.
 
 3. L'ÉPREUVE KARMIQUE (⚸) — Qu'est-ce que la période rend insupportable à {name} ? Quel endroit de sa vie frotte le plus fort ? Vers quoi ça le pousse malgré lui ? Termine par un aperçu en italique.
 
@@ -612,7 +612,7 @@ MANDATORY STYLE: soul reader, not technical astrologer.
 - End sections 1, 2, 3 with an INSIGHT in italics.
 
 1. KARMIC MEMORY (ROM ☋) — What trap replays? Automatic behavior, familiar feeling, what it costs. Insight in italics.
-2. THE WOUND IN PROCESSING (RAM ⚷) — What is awakened? Invisible Door under pressure? Liberation opening? Insight in italics.
+2. THE WOUND IN PROCESSING (RAM ⚷) — What is awakened? Invisible Door (prison/blockage) under pressure? Visible Door (healing/Stage) opening via Chiron? Insight in italics.
 3. KARMIC TRIAL (⚸) — What is unbearable? Where does it chafe? Where does it push? Insight in italics.
 4. ALTERNATIVE OF CONSCIOUSNESS — What {name} must stop. What to dare activate. ONE direct actionable sentence.
 
@@ -660,7 +660,7 @@ Active aspects:
 
 Write 4 sections directly. No questions. No preamble. Address {name} as "you".
 MEMORY (ROM): What karmic trap replays?
-WOUND (RAM): What core wound activates?
+WOUND (RAM): What core wound activates? How does Chiron open the path to the Visible Door?
 TRIAL (Lilith): What is unbearable right now?
 ACTION: One clear shift — what to stop, what to activate."""
     else:
@@ -672,12 +672,14 @@ Aspects actifs :
 Écris 4 sections : MÉMOIRE, BLESSURE, ÉPREUVE, ACTION.
 Nomme au moins une planète des aspects dans chaque section.
 Explique concrètement comment elle influence la mémoire karmique ou la blessure de {name}.
+BLESSURE : Chiron est l'outil d'ouverture de la Porte Visible — montre ce mouvement.
 Tutoiement. Direct. 200 mots max."""
 
     system = (
         "Tu es @siderealAstro13. "
         "ROM (Ketu)=Mémoires passées/automatisme. "
-        "RAM (Chiron)=Traitement actif de la blessure. "
+        "RAM (Chiron)=Traitement actif de la blessure, outil d'ouverture de la Porte Visible (guérison/Stage). "  # CORR L683
+        "Porte Invisible=Prison inconsciente/refoulement. "
         "LILITH=Point de rupture/épreuve. "
         "ACTION=Dharma/Bascule. "
         "Tutoie l'utilisateur. Sois direct. 200 mots max."
