@@ -24,7 +24,6 @@
         *, *::before, *::after { box-sizing: border-box; }
         body { background: var(--bg); color: var(--text); font-family: var(--body); margin: 0; text-align: center; font-size: 18px; line-height: 1.7; overflow-x: hidden; }
 
-        /* Gradient + grain background */
         body::before {
             content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
             background:
@@ -38,7 +37,6 @@
 
         header { padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(201,168,76,0.12); position: relative; z-index: 10; }
 
-        /* ── Hero ── */
         .hero-sigil { width: 56px; height: 56px; margin: 0 auto 24px; opacity: 0; animation: fadeUp 1s ease 0.2s forwards; }
         .hero-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-dim); opacity: 0; animation: fadeUp 1s ease 0.4s forwards; }
         .hero-title { font-family: var(--display); font-size: clamp(28px, 7vw, 52px); font-weight: 400; letter-spacing: 0.04em; line-height: 1.15; color: var(--text); margin: 14px 0 6px; opacity: 0; animation: fadeUp 1s ease 0.6s forwards; }
@@ -46,12 +44,10 @@
         .hero-subtitle-line { font-size: 15px; font-weight: 300; font-style: italic; color: rgba(245,240,232,0.55); margin-top: 10px; opacity: 0; animation: fadeUp 1s ease 0.8s forwards; font-family: var(--mono); letter-spacing: 0.05em; }
         .gold-rule { width: 50px; height: 1px; background: var(--gold); margin: 26px auto; opacity: 0; animation: fadeUp 1s ease 1s forwards; }
 
-        /* ── Hook ── */
         .hero-hook { padding: 0 0 40px; opacity: 0; animation: fadeUp 1s ease 1.1s forwards; }
         .hero-hook p { font-size: 19px; font-style: italic; color: rgba(245,240,232,0.78); max-width: 480px; margin: 0 auto 8px; }
         .hero-hook strong { color: var(--gold); font-weight: 400; }
 
-        /* ── Pillars ── */
         .pillars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; max-width: 620px; margin: 0 auto 44px; padding: 0 20px; }
         @media (max-width: 540px) { .pillars { grid-template-columns: 1fr; } }
         .pillar { border: 1px solid var(--glyph); border-top: 2px solid var(--gold-dim); padding: 20px 16px; background: var(--mist); text-align: left; transition: border-color 0.3s, background 0.3s; }
@@ -60,10 +56,9 @@
         .pillar h3 { font-family: var(--display); font-size: 13px; font-weight: 400; letter-spacing: 0.06em; color: var(--text); margin-bottom: 6px; }
         .pillar p { font-size: 14px; font-style: italic; color: rgba(245,240,232,0.5); line-height: 1.4; margin: 0; }
 
-        /* ── Login card ── */
         .login-card { border: 1px solid var(--glyph); padding: 2.2rem 2rem; max-width: 420px; margin: 0 auto 3rem; background: rgba(201,168,76,0.04); position: relative; }
         .login-card::before { content: ''; position: absolute; top: -1px; left: 40px; right: 40px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-        
+
         .login-input { width: 100%; padding: 0.85rem; margin-bottom: 1.2rem; background: rgba(12,10,8,0.6); border: 1px solid rgba(201,168,76,0.2); color: var(--text); outline: none; box-sizing: border-box; font-family: var(--body); font-size: 16px; transition: border-color 0.25s; border-radius: 0; }
         .login-input:focus { border-color: var(--gold); background: rgba(12,10,8,0.85); }
         .login-input::placeholder { color: rgba(245,240,232,0.25); font-style: italic; }
@@ -83,21 +78,15 @@
 
         .btn-secondary { background: transparent; border: 1px solid rgba(201,168,76,0.2); color: var(--text-dim); padding: 0.85rem 1.5rem; cursor: pointer; font-family: var(--display); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; width: 100%; transition: border-color 0.25s; }
         .btn-secondary:hover { border-color: var(--gold-dim); }
-        
+
         #app-section { display: none; padding: 2rem; }
         .date-input { background: #111110; border: 1px solid var(--border); color: #fff; padding: 0.8rem; margin-bottom: 1rem; width: 100%; max-width: 300px; font-family: var(--body); }
 
-        /* Animation de la roue (Spinner) */
         .spinner {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
+            display: inline-block; width: 12px; height: 12px;
+            border: 2px solid rgba(255,255,255,0.3); border-radius: 50%;
+            border-top-color: #fff; animation: spin 1s ease-in-out infinite;
+            margin-right: 10px; vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
@@ -107,24 +96,40 @@
 
         #btn-coffee {
             position: fixed; bottom: 18px; right: 18px; z-index: 999;
-            background: var(--gold); color: #000;
-            border: none; padding: 8px 16px;
-            font-family: var(--display); font-size: 0.7rem;
-            font-weight: bold; cursor: pointer;
-            text-decoration: none; display: inline-block;
-            transition: opacity 0.2s;
+            background: var(--gold); color: #000; border: none; padding: 8px 16px;
+            font-family: var(--display); font-size: 0.7rem; font-weight: bold; cursor: pointer;
+            text-decoration: none; display: inline-block; transition: opacity 0.2s;
         }
         #btn-coffee:hover { opacity: 0.85; }
         #btn-x {
             position: fixed; bottom: 18px; left: 18px; z-index: 999;
-            background: #000; color: #fff;
-            border: 1px solid var(--border); padding: 8px 14px;
-            font-family: var(--display); font-size: 0.7rem;
-            font-weight: bold; cursor: pointer;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-            transition: opacity 0.2s;
+            background: #000; color: #fff; border: 1px solid var(--border); padding: 8px 14px;
+            font-family: var(--display); font-size: 0.7rem; font-weight: bold; cursor: pointer;
+            text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: opacity 0.2s;
         }
         #btn-x:hover { opacity: 0.75; }
+
+        /* ── Synthèse markdown ───────────────────────────────────────────── */
+        #synthesis-content strong { color: var(--gold); font-weight: 600; }
+        #synthesis-content em { color: rgba(245,240,232,0.7); font-style: italic; }
+        #synthesis-content h2 { font-family: var(--display); font-size: 1rem; letter-spacing: 0.1em; color: var(--gold); border-bottom: 1px solid var(--border); padding-bottom: 0.3rem; margin-top: 1.8rem; }
+        #synthesis-content h3 { font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.08em; color: var(--gold-dim); margin-top: 1.2rem; }
+
+        /* ── Plans paiement ──────────────────────────────────────────────── */
+        .btn-plan {
+            display: flex; flex-direction: column; align-items: flex-start;
+            width: 100%; padding: 0.75rem 1rem;
+            background: transparent; border: 1px solid var(--border);
+            color: var(--text); cursor: pointer;
+            transition: border-color 0.2s, background 0.2s;
+            text-align: left; gap: 0.2rem;
+        }
+        .btn-plan:hover { border-color: var(--gold); background: rgba(201,168,76,0.05); }
+        .btn-plan--featured { border-color: var(--gold-dim); }
+        .plan-label { font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.12em; color: var(--gold); text-transform: uppercase; }
+        .plan-price { font-family: var(--mono); font-size: 1.1rem; color: var(--text); }
+        .plan-price small { font-size: 0.65rem; color: var(--text-dim); }
+        .plan-desc { font-size: 0.65rem; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.05em; }
     </style>
 </head>
 <body>
@@ -140,7 +145,6 @@
 
 <div id="hero-section" style="{% if session_user %}display:none;{% endif %}; position: relative; z-index: 1;">
 
-    <!-- Sigil -->
     <div style="padding: 60px 0 0;">
         <svg class="hero-sigil" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
             <circle cx="32" cy="32" r="30" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
@@ -162,14 +166,12 @@
         <div class="gold-rule"></div>
     </div>
 
-    <!-- Hook -->
     <div class="hero-hook">
         <p>{{ lang.hero_hook1 | safe if lang.hero_hook1 else 'Ton <strong>Ketu</strong> révèle la prison de mémoires passées.' | safe }}</p>
         <p>{{ lang.hero_hook2 | safe if lang.hero_hook2 else 'Ton <strong>Chiron</strong> est la clé qui ouvre la porte.' | safe }}</p>
         <p>{{ lang.hero_hook3 | safe if lang.hero_hook3 else 'Ton <strong>Stage</strong> est la scène qui t\'attend.' | safe }}</p>
     </div>
 
-    <!-- Pillars -->
     <div class="pillars">
         <div class="pillar">
             <span class="pillar-glyph">☋ ROM</span>
@@ -188,24 +190,20 @@
         </div>
     </div>
 
-    <!-- Login card -->
     <div class="login-card">
         <input id="pseudo-input" class="login-input" type="text" placeholder="{{ lang.pseudo_ph if lang.pseudo_ph else 'Ton pseudo...' }}">
 
         <div id="registration-fields" class="registration-area">
             <span class="label-small">{{ lang.birthdate if lang.birthdate else 'Date de Naissance' }}</span>
             <input id="birth-date" class="login-input" type="date">
-
             <span class="label-small">{{ lang.birthtime if lang.birthtime else 'Heure de Naissance' }}</span>
             <input id="birth-time" class="login-input" type="time">
-
             <span class="label-small">{{ lang.birthcity if lang.birthcity else 'Ville de Naissance' }}</span>
             <input id="birth-city" class="login-input" type="text" placeholder="{{ lang.city_ph if lang.city_ph else 'Ex: Paris' }}">
         </div>
 
         <button id="main-action-btn" class="btn-primary" onclick="login()"><span>{{ lang.login if lang.login else 'CONNEXION' }}</span></button>
         <button id="toggle-reg-btn" class="btn-secondary" onclick="toggleRegistration()">{{ lang.create_profile if lang.create_profile else 'CRÉER UN PROFIL' }}</button>
-
         <div id="login-error" style="color: #c97a6b; margin-top: 15px; font-size: 0.88rem; font-style: italic;"></div>
     </div>
 </div>
@@ -217,7 +215,6 @@
     </div>
 
     {% if enable_local_ai %}
-    <!-- ── Bannière IA locale (Android uniquement, dismissible) ──────────── -->
     <div id="banner-local-ai" style="display:none; margin-bottom:1.5rem; background:linear-gradient(135deg,#0f1a0f,#0f0f1a); border:1px solid #2a4a2a; border-radius:3px; padding:14px 16px; position:relative;">
         <div style="font-size:0.82rem; color:#6ab56a; font-family:var(--display); margin-bottom:4px;">✦ IA locale disponible</div>
         <div style="font-size:0.8rem; color:var(--text-dim); line-height:1.5;">
@@ -235,7 +232,7 @@
     </div>
     {% endif %}
 
-    <!-- ── Hook natal — affiché dès le login ──────────────────────────────── -->
+    <!-- Hook natal -->
     <div id="hook-natal-box" style="display:none; max-width:600px; margin:0 auto 2.5rem; padding:0 20px;">
         <div style="border-left:2px solid var(--gold-dim); padding:1rem 1.2rem; background:var(--mist);">
             <div style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:0.6rem; text-transform:uppercase;">✦ Lecture natale</div>
@@ -243,7 +240,7 @@
         </div>
     </div>
 
-    <!-- ── Hook transit — affiché après sélection date+lieu ──────────────── -->
+    <!-- Hook transit -->
     <div id="hook-transit-box" style="display:none; max-width:600px; margin:0 auto 2rem; padding:0 20px;">
         <div style="border-left:2px solid var(--gold); padding:1rem 1.2rem; background:rgba(201,168,76,0.06);">
             <div style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:0.6rem; text-transform:uppercase;">◆ Signal du jour</div>
@@ -254,7 +251,7 @@
         </div>
     </div>
 
-        <input type="date" id="transit-date" class="date-input" value="{{ today_iso }}">
+    <input type="date" id="transit-date" class="date-input" value="{{ today_iso }}">
     <br>
     <div style="max-width: 300px; margin: 0 auto; position: relative;">
         <div style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--display); letter-spacing: 0.05em; text-align: left; margin-bottom: 4px;">LIEU DE TRANSIT</div>
@@ -273,19 +270,45 @@
         </div>
     </div>
     <br>
+
     <!-- Étape 1 : hook transit -->
     <button id="hook-btn" class="btn-primary" style="max-width: 300px;" onclick="requestHookTransit()">
         <span id="hook-btn-text">◆ VOIR LE SIGNAL DU JOUR</span>
     </button>
 
-    <!-- Étape 2 : synthèse complète — visible seulement après hook transit -->
+    <!-- Étape 2 : synthèse complète -->
     <div id="synthesis-cta" style="display:none; margin-top:1rem;">
-        <button id="calc-btn" class="btn-primary" style="max-width: 300px; border-color: var(--gold); color: var(--gold);" onclick="calculate()">
+        <button id="calc-btn" class="btn-primary" style="max-width: 300px; border-color: var(--gold); color: var(--gold);" onclick="calculateWithRouting()">
             <span id="btn-text">✦ OBTENIR LA LECTURE COMPLÈTE</span>
         </button>
         <div style="font-family:var(--mono); font-size:0.65rem; color:var(--text-dim); letter-spacing:0.15em; margin-top:0.5rem;">
             Analyse védique complète · @siderealAstro13
         </div>
+    </div>
+
+    <!-- Étape 3 : plans paiement -->
+    <div id="payment-plans" style="display:none; margin-top:1.5rem;">
+        <div style="font-family:var(--mono); font-size:0.7rem; color:var(--gold); letter-spacing:0.15em; margin-bottom:1rem; text-align:center;">
+            ✦ CHOISIR UN PLAN
+        </div>
+        <div style="display:flex; flex-direction:column; gap:0.75rem; max-width:300px; margin:0 auto;">
+            <button class="btn-plan" onclick="stripeCheckout('sub')">
+                <span class="plan-label">Abonnement Alertes</span>
+                <span class="plan-price">1,99€<small>/mois</small></span>
+                <span class="plan-desc">Alertes quotidiennes + 1 synthèse/mois</span>
+            </button>
+            <button class="btn-plan" onclick="stripeCheckout('essential')">
+                <span class="plan-label">Synthèse Essentielle</span>
+                <span class="plan-price">4,99€</span>
+                <span class="plan-desc">1 lecture complète · accès immédiat</span>
+            </button>
+            <button class="btn-plan btn-plan--featured" onclick="stripeCheckout('complete')">
+                <span class="plan-label">Lecture Complète</span>
+                <span class="plan-price">19,99€</span>
+                <span class="plan-desc">Accès illimité · rapport annuel PDF</span>
+            </button>
+        </div>
+        <div id="payment-error" style="display:none; color:#ff6b6b; font-size:0.7rem; margin-top:0.75rem; text-align:center;"></div>
     </div>
 
     <div id="synthesis-box" style="margin-top: 3rem; text-align: left; display: none; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 20px;">
@@ -298,37 +321,25 @@
         </div>
     </div>
 
-    <!-- ── Outils supplémentaires ───────────────────────────────────────────── -->
+    <!-- Outils supplémentaires -->
     <div style="max-width: 800px; margin: 2.5rem auto 0; padding: 0 20px;">
         <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;">
 
             {% if enable_features %}
-            <!-- Calendrier mensuel — masqué -->
-            <!-- <button class="btn-secondary" onclick="toggleCalendar()" style="max-width: 220px; font-size: 0.82rem;">
-                📅 Calendrier mensuel
-            </button> -->
-
-            <!-- Rapport PDF annuel — masqué -->
-            <!-- <button class="btn-secondary" onclick="downloadAnnualReport()" id="btn-annual-report" style="max-width: 220px; font-size: 0.82rem;">
-                📄 Rapport annuel PDF
-            </button> -->
             {% endif %}
 
-            <!-- Unlock sans pub -->
             <button id="btn-unlock" class="btn-secondary" onclick="Monetization.purchase()"
                 style="max-width: 220px; font-size: 0.82rem; display:none;">
                 ✦ Supprimer les pubs — €2,99
             </button>
 
             {% if enable_local_ai %}
-            <!-- Gemma local -->
             <button class="btn-secondary" onclick="openGemmaManager()" id="btn-gemma" style="max-width: 220px; font-size: 0.82rem;">
                 🤖 IA locale (Gemma 3)
             </button>
             <span id="gemma-indicator" style="font-size:0.75rem;color:var(--text-dim);"></span>
             {% endif %}
 
-            <!-- Toggle alertes -->
             <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-dim);">
                 <input type="checkbox" id="alerts-toggle"
                     {% if session_profile and session_profile.get('alerts_enabled') %}checked{% endif %}
@@ -340,13 +351,9 @@
         </div>
 
         {% if enable_local_ai %}
-        <!-- ── Panel Gemma Manager ─────────────────────────────────────────── -->
         <div id="gemma-panel" style="display:none; margin-top:1.5rem; background:#0f0f22; border:1px solid var(--border); border-radius:3px; padding:16px;">
             <div style="color:var(--gold);font-family:var(--display);font-size:0.85rem;margin-bottom:10px;">✦ Gemma 3 — Inférence locale</div>
             <div id="gemma-status-text" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">Vérification…</div>
-
-
-
             <div style="display:flex;gap:8px;flex-wrap:wrap;">
                 <button class="btn-secondary" onclick="gemmaDownload()" id="btn-gemma-dl" style="width:auto;padding:0.6rem 1rem;font-size:0.78rem;">
                     ⬇ Télécharger (~400 Mo)
@@ -367,7 +374,6 @@
         </div>
         {% endif %}
 
-        <!-- ── Panel calendrier ─────────────────────────────────────────────── -->
         {% if enable_features %}
         <div id="calendar-panel" style="display:none; margin-top: 1.5rem;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
@@ -405,7 +411,6 @@ function toggleRegistration() {
     const mainBtn = document.getElementById('main-action-btn');
     const toggleBtn = document.getElementById('toggle-reg-btn');
     const errDiv = document.getElementById('login-error');
-
     if (fields.style.display === 'none' || fields.style.display === '') {
         fields.style.display = 'block';
         mainBtn.innerHTML = "S'INSCRIRE ET SE CONNECTER";
@@ -424,10 +429,8 @@ function login() {
     const pseudo = document.getElementById('pseudo-input').value.trim();
     const errDiv = document.getElementById('login-error');
     if (!pseudo) { errDiv.textContent = "Pseudo requis."; return; }
-
     errDiv.style.color = "var(--gold)";
     errDiv.textContent = "Alignement des énergies...";
-
     fetch('/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -436,10 +439,7 @@ function login() {
     .then(r => r.json())
     .then(data => {
         if (data.ok) {
-            // Afficher le hook natal avant le reload si disponible
-            if (data.hook_natal) {
-                sessionStorage.setItem('hook_natal', data.hook_natal);
-            }
+            if (data.hook_natal) sessionStorage.setItem('hook_natal', data.hook_natal);
             location.reload();
         } else {
             errDiv.style.color = "#c97a6b";
@@ -454,13 +454,11 @@ function register() {
     const birthTime = document.getElementById('birth-time').value;
     const birthCity = document.getElementById('birth-city').value.trim();
     const errDiv = document.getElementById('login-error');
-    
     if (!pseudo || !birthDate || !birthTime || !birthCity) {
         errDiv.style.color = "#c97a6b";
         errDiv.textContent = "Champs de naissance manquants.";
         return;
     }
-
     fetch('/register', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -473,81 +471,52 @@ function register() {
     });
 }
 
-function calculate() {
-    const date = document.getElementById('transit-date').value;
-    if (!date) return;
-
-    const btn = document.getElementById('calc-btn');
-    const btnText = document.getElementById('btn-text');
-    const originalText = btnText.innerHTML;
-
-    // Activation de l'état de chargement (Roue + Texte)
-    btn.disabled = true;
-    btnText.innerHTML = '<span class="spinner"></span> LECTURE DES ASTRES...';
-
-    const payload = { date, hour: 12, minute: 0 };
-    if (transitGeo) {
-        payload.transit_lat  = transitGeo.lat;
-        payload.transit_lon  = transitGeo.lon;
-        payload.transit_city = transitGeo.city;
-        payload.transit_tz   = transitGeo.tz;
-    }
-    fetch('/calculate', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(data => {
-        // Retour à l'état normal
-        btn.disabled = false;
-        btnText.innerHTML = originalText;
-
-        if (data.error) {
-            alert(data.error);
+// ── Stripe checkout ───────────────────────────────────────────────────────────
+async function stripeCheckout(plan) {
+    const errEl = document.getElementById('payment-error');
+    if (errEl) errEl.style.display = 'none';
+    try {
+        const res = await fetch('/stripe/checkout', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({ plan })
+        });
+        const data = await res.json();
+        if (data.url) {
+            window.location.href = data.url;
         } else {
-            lastSynthesis = data.synthesis;
-            if (data.local_ai_mode) {
-                openGemmaManager();
-            } else {
-                document.getElementById('synthesis-content').innerHTML = marked.parse(data.synthesis || '');
-                document.getElementById('synthesis-box').style.display = 'block';
-                document.getElementById('email-status').textContent = '';
-                document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
-            }
+            if (errEl) { errEl.textContent = data.error || 'Erreur paiement'; errEl.style.display = 'block'; }
         }
-    })
-    .catch(err => {
-        btn.disabled = false;
-        btnText.innerHTML = originalText;
-        alert("Erreur de connexion.");
-    });
+    } catch(e) {
+        if (errEl) { errEl.textContent = 'Erreur réseau'; errEl.style.display = 'block'; }
+    }
 }
 
-let lastSynthesis = '';
-// ══ Hooks natal + transit ════════════════════════════════════════════════════
+function showPaymentPlans() {
+    const el = document.getElementById('payment-plans');
+    if (el) {
+        el.style.display = 'block';
+        el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+}
 
-// Hook natal : lu depuis sessionStorage après reload post-login
+// ── Hook natal ────────────────────────────────────────────────────────────────
 (function initHookNatal() {
     const hook = sessionStorage.getItem('hook_natal');
     if (hook) {
         const box  = document.getElementById('hook-natal-box');
         const text = document.getElementById('hook-natal-text');
-        if (box && text) {
-            text.textContent = hook;
-            box.style.display = 'block';
-        }
+        if (box && text) { text.textContent = hook; box.style.display = 'block'; }
         sessionStorage.removeItem('hook_natal');
     }
 })();
 
-// Hook transit : déclenché par clic sur "Voir le signal du jour" — streaming SSE
+// ── Hook transit SSE ──────────────────────────────────────────────────────────
 async function requestHookTransit() {
-    const date = document.getElementById('transit-date').value;
+    const date    = document.getElementById('transit-date').value;
     const btn     = document.getElementById('hook-btn');
     const btnText = document.getElementById('hook-btn-text');
-
-    if (!date) { alert('Sélectionne une date.'); return; }
+    if (!date)       { alert('Sélectionne une date.'); return; }
     if (!transitGeo) { alert('Sélectionne un lieu de transit.'); return; }
 
     const spinner = document.getElementById('hook-transit-spinner');
@@ -555,7 +524,6 @@ async function requestHookTransit() {
     const box     = document.getElementById('hook-transit-box');
     const cta     = document.getElementById('synthesis-cta');
 
-    // État chargement
     btn.disabled      = true;
     btnText.innerHTML = '<span class="spinner"></span> LECTURE EN COURS…';
     if (box)     box.style.display     = 'block';
@@ -568,18 +536,13 @@ async function requestHookTransit() {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({
-                date,
-                hour: 12, minute: 0,
-                transit_lat:  transitGeo.lat,
-                transit_lon:  transitGeo.lon,
-                transit_city: transitGeo.city,
-                transit_tz:   transitGeo.tz,
+                date, hour: 12, minute: 0,
+                transit_lat: transitGeo.lat, transit_lon: transitGeo.lon,
+                transit_city: transitGeo.city, transit_tz: transitGeo.tz,
             })
         });
+        if (!res.ok) throw new Error('Erreur réseau ' + res.status);
 
-        if (!res.ok) { throw new Error('Erreur réseau ' + res.status); }
-
-        // ── Lecture du stream SSE ──────────────────────────────────────────
         const reader  = res.body.getReader();
         const decoder = new TextDecoder();
         let   buffer  = '';
@@ -588,41 +551,26 @@ async function requestHookTransit() {
         while (true) {
             const { done, value } = await reader.read();
             if (done) break;
-
             buffer += decoder.decode(value, { stream: true });
             const lines = buffer.split('\n');
-            buffer = lines.pop(); // garde le fragment incomplet
-
+            buffer = lines.pop();
             for (const line of lines) {
                 if (!line.startsWith('data: ')) continue;
                 const payload = line.slice(6).trim();
-
                 if (payload === '[DONE]') {
-                    // Stream terminé — révéler CTA
-                    if (cta) {
-                        cta.style.display = 'block';
-                        cta.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
+                    if (cta) { cta.style.display = 'block'; cta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
                     btnText.innerHTML = '◆ RELIRE LE SIGNAL';
                     btn.disabled = false;
                     return;
                 }
-
                 if (payload.startsWith('[ERROR]')) {
-                    console.warn('Hook transit erreur :', payload);
                     btnText.innerHTML = '◆ VOIR LE SIGNAL DU JOUR';
                     btn.disabled = false;
                     return;
                 }
-
-                // Token texte — append caractère par caractère
-                try {
-                    const chunk = JSON.parse(payload);
-                    if (text) text.textContent += chunk;
-                } catch { /* fragment partiel, ignorer */ }
+                try { const chunk = JSON.parse(payload); if (text) text.textContent += chunk; } catch {}
             }
         }
-
     } catch(e) {
         console.warn('Hook transit échoué :', e);
         btnText.innerHTML = '◆ VOIR LE SIGNAL DU JOUR';
@@ -632,7 +580,6 @@ async function requestHookTransit() {
     }
 }
 
-// Réinitialiser si date ou lieu change (masquer synthèse-cta)
 function resetHookTransit() {
     const cta  = document.getElementById('synthesis-cta');
     const text = document.getElementById('hook-transit-text');
@@ -643,64 +590,55 @@ function resetHookTransit() {
     if (box)  box.style.display  = 'none';
     if (btn)  btn.innerHTML      = '◆ VOIR LE SIGNAL DU JOUR';
     document.getElementById('hook-btn').disabled = false;
+    // Cacher aussi les plans paiement
+    const plans = document.getElementById('payment-plans');
+    if (plans) plans.style.display = 'none';
 }
 
 document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('transit-date');
-    if (dateInput) {
-        dateInput.addEventListener('change', resetHookTransit);
-    }
+    if (dateInput) dateInput.addEventListener('change', resetHookTransit);
 });
 
-
-let transitGeo = null; // { lat, lon, city, tz }
+let transitGeo = null;
 
 function useGeolocation() {
-    const icon = document.getElementById('geo-icon');
+    const icon  = document.getElementById('geo-icon');
     const input = document.getElementById('transit-city-input');
-    if (!navigator.geolocation) {
-        input.placeholder = "Géolocalisation non supportée — saisir une ville";
-        return;
-    }
+    if (!navigator.geolocation) { input.placeholder = "Géolocalisation non supportée — saisir une ville"; return; }
     icon.textContent = '⏳';
-    input.value = '';
-    input.placeholder = 'Localisation…';
-    input.disabled = true;
+    input.value = ''; input.placeholder = 'Localisation…'; input.disabled = true;
     navigator.geolocation.getCurrentPosition(
         async (pos) => {
             const lat = pos.coords.latitude;
             const lon = pos.coords.longitude;
-            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+            const tz  = Intl.DateTimeFormat().resolvedOptions().timeZone;
             try {
                 const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language={{ lang.code if lang.code else 'fr' }}`);
                 const d = await r.json();
-                const city = d.address?.city || d.address?.town || d.address?.village || d.address?.county || 'Position GPS';
+                const city    = d.address?.city || d.address?.town || d.address?.village || d.address?.county || 'Position GPS';
                 const country = d.address?.country || '';
                 transitGeo = { lat, lon, city: `${city}, ${country}`.trim().replace(/,$/, ''), tz };
             } catch {
                 transitGeo = { lat, lon, city: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, tz };
             }
             icon.textContent = '✓';
-            input.value = transitGeo.city;
-            input.disabled = false;
+            input.value      = transitGeo.city;
+            input.disabled   = false;
             resetHookTransit();
         },
         (err) => {
-            icon.textContent = '📍';
-            input.disabled = false;
-            input.value = '';
-            input.placeholder = err.code === 1
-                ? 'Permission refusée — saisir une ville'
-                : 'Erreur GPS — saisir une ville';
+            icon.textContent   = '📍';
+            input.disabled     = false;
+            input.value        = '';
+            input.placeholder  = err.code === 1 ? 'Permission refusée — saisir une ville' : 'Erreur GPS — saisir une ville';
         },
         { timeout: 10000 }
     );
 }
 
 let _cityTimer = null;
-
 function onCityInput(val) {
-    // Si l'utilisateur efface le champ, on retire la géoloc manuelle
     if (!val.trim()) { transitGeo = null; hideSuggestions(); return; }
     clearTimeout(_cityTimer);
     _cityTimer = setTimeout(() => fetchCitySuggestions(val.trim()), 350);
@@ -712,7 +650,7 @@ async function fetchCitySuggestions(q) {
         const r = await fetch(`/geocode?q=${encodeURIComponent(q)}`);
         const results = await r.json();
         showSuggestions(results);
-    } catch(e) { console.error('geocode error:', e); hideSuggestions(); }
+    } catch(e) { hideSuggestions(); }
 }
 
 function showSuggestions(results) {
@@ -720,7 +658,6 @@ function showSuggestions(results) {
     if (!results.length) { hideSuggestions(); return; }
     box.innerHTML = '';
     results.forEach(item => {
-        // Nominatim renvoie display_name, lat, lon
         const name = item.display_name || item.name || '';
         const lat  = parseFloat(item.lat);
         const lon  = parseFloat(item.lon);
@@ -742,324 +679,159 @@ function showSuggestions(results) {
     box.style.display = 'block';
 }
 
-function hideSuggestions() {
-    document.getElementById('city-suggestions').style.display = 'none';
-}
-
+function hideSuggestions() { document.getElementById('city-suggestions').style.display = 'none'; }
 document.addEventListener('click', (e) => {
-    if (!e.target.closest('#transit-city-input') && !e.target.closest('#city-suggestions')) {
-        hideSuggestions();
-    }
+    if (!e.target.closest('#transit-city-input') && !e.target.closest('#city-suggestions')) hideSuggestions();
 });
 
 async function sendSynthesisEmail() {
     if (!lastSynthesis) { alert('Lance d\'abord un calcul pour obtenir ta synthèse.'); return; }
-    const btn = document.getElementById('btnEmail');
+    const btn    = document.getElementById('btnEmail');
     const status = document.getElementById('email-status');
     btn.disabled = true;
-    status.style.color = 'var(--text-dim)';
-    status.textContent = 'Envoi en cours…';
+    status.style.color  = 'var(--text-dim)';
+    status.textContent  = 'Envoi en cours…';
     try {
-        const res = await fetch('/send_synthesis', {
+        const res  = await fetch('/send_synthesis', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ synthesis: lastSynthesis }),
         });
         const data = await res.json();
-        if (data.ok) {
-            status.textContent = '✓ Synthèse envoyée par email.';
-            status.style.color = '#6a9f6a';
-        } else {
-            status.textContent = '✗ Erreur : ' + (data.error || 'inconnu');
-            status.style.color = '#c06060';
-        }
-    } catch (err) {
-        status.textContent = '✗ Erreur réseau.';
-        status.style.color = '#c06060';
-    } finally {
-        btn.disabled = false;
-    }
+        if (data.ok) { status.textContent = '✓ Synthèse envoyée par email.'; status.style.color = '#6a9f6a'; }
+        else         { status.textContent = '✗ Erreur : ' + (data.error || 'inconnu'); status.style.color = '#c06060'; }
+    } catch {
+        status.textContent = '✗ Erreur réseau.'; status.style.color = '#c06060';
+    } finally { btn.disabled = false; }
 }
 
-function logout() {
-    fetch('/logout', { method: 'POST' }).then(() => location.reload());
-}
+function logout() { fetch('/logout', { method: 'POST' }).then(() => location.reload()); }
 
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
 
-// ══ Gemma 4 — Inférence locale (MediaPipe Tasks GenAI) ═══════════════════════
-// Deux backends : APK natif (Java plugin) ou navigateur web (WebAssembly + OPFS)
+let lastSynthesis = '';
 
-// ── Backend WEB : MediaPipe Tasks GenAI JS + stockage OPFS ───────────────────
+// ── Gemma / local AI ──────────────────────────────────────────────────────────
 const GEMMA_WASM_CDN = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai@0.10.26/wasm';
 const GEMMA_SDK_URL  = 'https://cdn.jsdelivr.net/npm/@mediapipe/tasks-genai@0.10.26/genai_bundle.mjs';
 
-// Polyfill Chrome 131+ : requestAdapterInfo() supprimée → adapter.info (synchrone)
 if (typeof navigator !== 'undefined' && navigator.gpu) {
-    const _origRequestAdapter = navigator.gpu.requestAdapter.bind(navigator.gpu);
+    const _orig = navigator.gpu.requestAdapter.bind(navigator.gpu);
     navigator.gpu.requestAdapter = async (...args) => {
-        const adapter = await _origRequestAdapter(...args);
-        if (adapter && typeof adapter.requestAdapterInfo !== 'function') {
+        const adapter = await _orig(...args);
+        if (adapter && typeof adapter.requestAdapterInfo !== 'function')
             adapter.requestAdapterInfo = async () => adapter.info ?? {};
-        }
         return adapter;
     };
 }
-const GEMMA_MODEL_URLS = {
-    // Servi depuis Cloudflare R2 — pas de token requis
-    e2b: 'https://models.karmicgochara.app/gemma3-1b-it-int4-web.task',
-    e4b: 'https://models.karmicgochara.app/gemma3-1b-it-int4-web.task',
-};
-const GEMMA_FILENAMES = { e2b: 'gemma_e2b.task', e4b: 'gemma_e4b.task' };
 
-// Supprime les répétitions de Gemma3-1B : coupe dès qu'une phrase réapparaît
+const GEMMA_MODEL_URLS = { e2b: 'https://models.karmicgochara.app/gemma3-1b-it-int4-web.task', e4b: 'https://models.karmicgochara.app/gemma3-1b-it-int4-web.task' };
+const GEMMA_FILENAMES  = { e2b: 'gemma_e2b.task', e4b: 'gemma_e4b.task' };
+
 function _dedupeGemma(text) {
     const sentences = text.split(/(?<=[.!?»])\s+/);
-    const seen = new Set();
-    const out  = [];
+    const seen = new Set(); const out = [];
     for (const s of sentences) {
         const key = s.trim().slice(0, 60).toLowerCase();
         if (key.length > 10 && seen.has(key)) break;
-        seen.add(key);
-        out.push(s);
+        seen.add(key); out.push(s);
     }
-    // Coupe aussi après la section ACTION si elle est présente
     const full = out.join(' ');
     const actionIdx = full.search(/##\s*4\./);
     if (actionIdx !== -1) {
-        const afterAction = full.slice(actionIdx);
-        const nextSection = afterAction.slice(10).search(/##\s*[1-9]\./);
-        if (nextSection !== -1) return full.slice(0, actionIdx + 10 + nextSection).trim();
+        const after = full.slice(actionIdx);
+        const next  = after.slice(10).search(/##\s*[1-9]\./);
+        if (next !== -1) return full.slice(0, actionIdx + 10 + next).trim();
     }
     return full.trim();
 }
 
 const GemmaWeb = {
-    _llm:     { e2b: null, e4b: null },
-    _genai:   null,
-    _sdk:     null,   // { FilesetResolver, LlmInference }
-
-    // Charge le SDK MediaPipe dynamiquement (une seule fois)
-    async _loadSDK() {
-        if (this._sdk) return this._sdk;
-        this._sdk = await import(GEMMA_SDK_URL);
-        return this._sdk;
-    },
-
-    async _getGenai() {
-        if (this._genai) return this._genai;
-        const { FilesetResolver } = await this._loadSDK();
-        this._genai = await FilesetResolver.forGenAiTasks(GEMMA_WASM_CDN);
-        return this._genai;
-    },
-
-    // Vérifie ce qui est stocké dans l'OPFS (Origin Private File System)
+    _llm: { e2b: null, e4b: null }, _genai: null, _sdk: null,
+    async _loadSDK() { if (this._sdk) return this._sdk; this._sdk = await import(GEMMA_SDK_URL); return this._sdk; },
+    async _getGenai() { if (this._genai) return this._genai; const { FilesetResolver } = await this._loadSDK(); this._genai = await FilesetResolver.forGenAiTasks(GEMMA_WASM_CDN); return this._genai; },
     async checkModels() {
-        const out = { e2b_exists: false, e2b_loaded: !!this._llm.e2b,
-                      e4b_exists: false, e4b_loaded: !!this._llm.e4b,
-                      e2b_sizeMb: 0,     e4b_sizeMb: 0 };
-        try {
-            const root = await navigator.storage.getDirectory();
-            for (const type of ['e2b', 'e4b']) {
-                try {
-                    const fh   = await root.getFileHandle(GEMMA_FILENAMES[type]);
-                    const file = await fh.getFile();
-                    if (file.size > 1_000_000) {
-                        out[`${type}_exists`]  = true;
-                        out[`${type}_sizeMb`]  = Math.round(file.size / 1024 / 1024);
-                    }
-                } catch {}
-            }
-        } catch {}
+        const out = { e2b_exists: false, e2b_loaded: !!this._llm.e2b, e4b_exists: false, e4b_loaded: !!this._llm.e4b, e2b_sizeMb: 0, e4b_sizeMb: 0 };
+        try { const root = await navigator.storage.getDirectory(); for (const type of ['e2b','e4b']) { try { const fh = await root.getFileHandle(GEMMA_FILENAMES[type]); const file = await fh.getFile(); if (file.size > 1_000_000) { out[`${type}_exists`] = true; out[`${type}_sizeMb`] = Math.round(file.size/1024/1024); } } catch {} } } catch {}
         return out;
     },
-
-    // Télécharge un modèle dans l'OPFS avec callback de progression
-    async downloadModel(type = 'e2b', onProgress) {
-        const url      = GEMMA_MODEL_URLS[type];
-        const filename = GEMMA_FILENAMES[type];
-        const root     = await navigator.storage.getDirectory();
-
-        // Déjà présent ?
-        try {
-            const fh   = await root.getFileHandle(filename);
-            const file = await fh.getFile();
-            if (file.size > 1_000_000) {
-                if (onProgress) onProgress({ status: 'success', progress: 100, dlMb: Math.round(file.size/1024/1024), totalMb: Math.round(file.size/1024/1024) });
-                return { ok: true, already: true };
-            }
-        } catch {}
-
-        // Téléchargement depuis R2 — pas d'authentification requise
-        const res = await fetch(url);
-        if (!res.ok) throw new Error(`HTTP ${res.status} — vérifier la connexion`);
-
-        const total  = parseInt(res.headers.get('content-length') || '0');
-        let   loaded = 0;
-        const fh     = await root.getFileHandle(filename, { create: true });
-        const wr     = await fh.createWritable();
-        const reader = res.body.getReader();
-
-        while (true) {
-            const { done, value } = await reader.read();
-            if (done) break;
-            await wr.write(value);
-            loaded += value.length;
-            if (onProgress) onProgress({
-                status: 'running',
-                progress: total > 0 ? Math.round(loaded * 100 / total) : 0,
-                dlMb:    Math.round(loaded / 1024 / 1024),
-                totalMb: Math.round(total  / 1024 / 1024),
-            });
-        }
-        await wr.close();
-        if (onProgress) onProgress({ status: 'success', progress: 100 });
-        return { ok: true, already: false };
+    async downloadModel(type='e2b', onProgress) {
+        const root = await navigator.storage.getDirectory();
+        try { const fh = await root.getFileHandle(GEMMA_FILENAMES[type]); const file = await fh.getFile(); if (file.size > 1_000_000) { if (onProgress) onProgress({ status:'success', progress:100, dlMb:Math.round(file.size/1024/1024), totalMb:Math.round(file.size/1024/1024) }); return { ok:true, already:true }; } } catch {}
+        const res = await fetch(GEMMA_MODEL_URLS[type]);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const total = parseInt(res.headers.get('content-length')||'0'); let loaded = 0;
+        const fh = await root.getFileHandle(GEMMA_FILENAMES[type], { create:true });
+        const wr = await fh.createWritable(); const reader = res.body.getReader();
+        while (true) { const { done, value } = await reader.read(); if (done) break; await wr.write(value); loaded += value.length; if (onProgress) onProgress({ status:'running', progress: total>0?Math.round(loaded*100/total):0, dlMb:Math.round(loaded/1024/1024), totalMb:Math.round(total/1024/1024) }); }
+        await wr.close(); if (onProgress) onProgress({ status:'success', progress:100 }); return { ok:true, already:false };
     },
-
-    // Charge un modèle depuis l'OPFS en mémoire
-    async loadModel(type = 'e2b') {
-        const { LlmInference } = await this._loadSDK();
-        const genai  = await this._getGenai();
-        const root   = await navigator.storage.getDirectory();
-        const fh     = await root.getFileHandle(GEMMA_FILENAMES[type]);
-        const file   = await fh.getFile();
-        const buffer = await file.arrayBuffer();
-
+    async loadModel(type='e2b') {
+        const { LlmInference } = await this._loadSDK(); const genai = await this._getGenai();
+        const root = await navigator.storage.getDirectory(); const fh = await root.getFileHandle(GEMMA_FILENAMES[type]);
+        const file = await fh.getFile(); const buffer = await file.arrayBuffer();
         if (this._llm[type]) { try { this._llm[type].close(); } catch {} }
-        this._llm[type] = await LlmInference.createFromOptions(genai, {
-            baseOptions: { modelAssetBuffer: new Uint8Array(buffer) },
-            maxTokens:   8192,  // Gemma3-1B supporte 8192 tokens (input + output)
-            topK:        40,
-            temperature: 0.7,
-        });
-        return { ok: true, type };
+        this._llm[type] = await LlmInference.createFromOptions(genai, { baseOptions: { modelAssetBuffer: new Uint8Array(buffer) }, maxTokens:8192, topK:40, temperature:0.7 });
+        return { ok:true, type };
     },
-
-    // Inférence avec format prompt Gemma Instruct
-    async generate(system, user, type = 'e2b') {
-        let llm = this._llm[type];
-        if (!llm && type === 'e4b' && this._llm.e2b) llm = this._llm.e2b;
-        if (!llm) throw new Error('Modèle non chargé — lance loadModel() d\'abord');
-        const primer   = "## 1.";
-        const prompt   = `<start_of_turn>user\n${system ? system + '\n\n' : ''}${user}<end_of_turn>\n<start_of_turn>model\n${primer}`;
-        const raw      = await llm.generateResponse(prompt);
-        const synthesis = _dedupeGemma((primer + raw).trim());
-        return { ok: true, synthesis, local: true, model: type };
+    async generate(system, user, type='e2b') {
+        let llm = this._llm[type]; if (!llm && type==='e4b' && this._llm.e2b) llm = this._llm.e2b;
+        if (!llm) throw new Error('Modèle non chargé');
+        const primer = "## 1."; const prompt = `<start_of_turn>user\n${system?system+'\n\n':''}${user}<end_of_turn>\n<start_of_turn>model\n${primer}`;
+        const raw = await llm.generateResponse(prompt);
+        return { ok:true, synthesis:_dedupeGemma((primer+raw).trim()), local:true, model:type };
     },
 };
 
-// ── Routeur principal : natif (APK) ou web (Chrome) ──────────────────────────
 const Gemma = {
-    _dlIds: { e2b: null, e4b: null },
-
+    _dlIds: { e2b:null, e4b:null },
     plugin() { return window.Capacitor?.Plugins?.GemmaSynthesis ?? null; },
     isWeb()  { return !this.plugin(); },
-
-    async checkModels() {
-        if (this.isWeb()) return GemmaWeb.checkModels();
-        try { return await this.plugin().checkModels(); }
-        catch { return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false }; }
-    },
-
-    async isAvailable() {
-        try { const r = await this.checkModels(); return r.e2b_loaded || r.e4b_loaded; }
-        catch { return false; }
-    },
-
-    // type = "e2b" | "e4b"
-    // onProgress(cb) uniquement utilisé en mode web (streaming)
-    async downloadModel(type = 'e2b', onProgress) {
-        if (this.isWeb()) return GemmaWeb.downloadModel(type, onProgress);
-        const r = await this.plugin().downloadModel({ type });
-        this._dlIds[type] = r.downloadId ?? null;
-        return r;
-    },
-
-    // En mode natif, poll le DownloadManager Android
-    async pollDownload(type = 'e2b', onProgress) {
-        if (this.isWeb()) return; // web: progression déjà inline dans downloadModel()
-        const dlId = this._dlIds[type];
-        if (!dlId) return;
-        const p = this.plugin();
-        const interval = setInterval(async () => {
-            try {
-                const r = await p.checkDownloadProgress({ downloadId: dlId });
-                onProgress(r);
-                if (r.status === 'success' || r.status === 'failed') clearInterval(interval);
-            } catch { clearInterval(interval); }
-        }, 2000);
-    },
-
-    async loadModel(type = 'e2b') {
-        if (this.isWeb()) return GemmaWeb.loadModel(type);
-        return await this.plugin().loadModel({ type });
-    },
-
-    async generate(systemPrompt, userPrompt, type = 'e2b') {
-        if (this.isWeb()) return GemmaWeb.generate(systemPrompt, userPrompt, type);
-        return await this.plugin().generate({ system: systemPrompt, user: userPrompt, type });
-    },
+    async checkModels() { if (this.isWeb()) return GemmaWeb.checkModels(); try { return await this.plugin().checkModels(); } catch { return { e2b_exists:false, e2b_loaded:false, e4b_exists:false, e4b_loaded:false }; } },
+    async isAvailable() { try { const r = await this.checkModels(); return r.e2b_loaded||r.e4b_loaded; } catch { return false; } },
+    async downloadModel(type='e2b', onProgress) { if (this.isWeb()) return GemmaWeb.downloadModel(type, onProgress); const r = await this.plugin().downloadModel({ type }); this._dlIds[type] = r.downloadId??null; return r; },
+    async pollDownload(type='e2b', onProgress) { if (this.isWeb()) return; const dlId = this._dlIds[type]; if (!dlId) return; const p = this.plugin(); const interval = setInterval(async () => { try { const r = await p.checkDownloadProgress({ downloadId:dlId }); onProgress(r); if (r.status==='success'||r.status==='failed') clearInterval(interval); } catch { clearInterval(interval); } }, 2000); },
+    async loadModel(type='e2b') { if (this.isWeb()) return GemmaWeb.loadModel(type); return await this.plugin().loadModel({ type }); },
+    async generate(s, u, type='e2b') { if (this.isWeb()) return GemmaWeb.generate(s, u, type); return await this.plugin().generate({ system:s, user:u, type }); },
 };
 
-// ── Calcul avec routage local / serveur ───────────────────────────────────────
-// Remplace la fonction calculate() existante par une version Gemma-aware.
-// Si Gemma est disponible et chargé → prompt côté serveur + inférence locale.
-// Sinon → flux Claude existant.
-
+// ── Calculate avec routage Gemma/Claude ──────────────────────────────────────
 async function calculateWithRouting() {
     const date = document.getElementById('transit-date').value;
     if (!date) return;
-
     const btn      = document.getElementById('calc-btn');
     const btnText  = document.getElementById('btn-text');
     const origText = btnText.innerHTML;
     btn.disabled   = true;
 
-    const payload = { date, hour: 12, minute: 0 };
-    if (transitGeo) {
-        payload.transit_lat  = transitGeo.lat;
-        payload.transit_lon  = transitGeo.lon;
-        payload.transit_city = transitGeo.city;
-        payload.transit_tz   = transitGeo.tz;
-    }
+    const payload = { date, hour:12, minute:0 };
+    if (transitGeo) { payload.transit_lat=transitGeo.lat; payload.transit_lon=transitGeo.lon; payload.transit_city=transitGeo.city; payload.transit_tz=transitGeo.tz; }
 
     const gemmaReady = await Gemma.isAvailable();
 
     try {
         if (gemmaReady) {
-            // ── Voie locale : prompt serveur + inférence Gemma E2B ─────────
             btnText.innerHTML = '<span class="spinner"></span> CALCUL ASTRAL…';
-            const pr = await fetch('/synthesis/prompt', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
+            const pr = await fetch('/synthesis/prompt', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
             const pd = await pr.json();
             if (pd.error) throw new Error(pd.error);
-
             btnText.innerHTML = '<span class="spinner"></span> GEMMA LOCAL…';
             const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
-
             showSynthesis(gr.synthesis, null);
-            showLocalBadge(true, gr.model ?? 'e2b');
-
+            showLocalBadge(true, gr.model??'e2b');
         } else {
-            // ── Voie serveur : Claude (comportement existant) ───────────────
             btnText.innerHTML = '<span class="spinner"></span> LECTURE DES ASTRES…';
-            const r = await fetch('/calculate', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-            });
+            const r    = await fetch('/calculate', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
             const data = await r.json();
+            if (data.error === 'quota_exceeded') {
+                showPaymentPlans();
+                return;
+            }
             if (data.error) { alert(data.error); return; }
             showSynthesis(data.synthesis, data.remaining);
             showLocalBadge(false);
         }
-    } catch (err) {
+    } catch(err) {
         alert('Erreur : ' + err.message);
     } finally {
         btn.disabled      = false;
@@ -1069,10 +841,10 @@ async function calculateWithRouting() {
 
 function showSynthesis(text, remaining) {
     lastSynthesis = text;
-    document.getElementById('synthesis-content').innerHTML = marked.parse(text || '');
+    document.getElementById('synthesis-content').innerHTML = marked.parse(text||'');
     document.getElementById('synthesis-box').style.display = 'block';
-    document.getElementById('email-status').textContent = '';
-    document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
+    document.getElementById('email-status').textContent    = '';
+    document.getElementById('synthesis-box').scrollIntoView({ behavior:'smooth' });
 }
 
 function showLocalBadge(isLocal, modelType) {
@@ -1081,29 +853,15 @@ function showLocalBadge(isLocal, modelType) {
         badge = document.createElement('span');
         badge.id = 'local-badge';
         badge.style.cssText = 'font-size:0.72rem;padding:2px 8px;border-radius:2px;margin-left:8px;';
-        document.getElementById('synthesis-box').querySelector('div').prepend(badge);
+        const box = document.getElementById('synthesis-box').querySelector('div');
+        if (box) box.prepend(badge);
     }
-    if (isLocal) {
-        const label = modelType === 'e4b' ? 'Gemma E4B local' : 'Gemma E2B local';
-        badge.textContent = '✦ ' + label;
-        badge.style.cssText += 'background:#1a2a1a;color:#6ab56a;border:1px solid #2a4a2a;';
-    } else {
-        badge.textContent = '☁ Claude';
-        badge.style.cssText += 'background:#1a1a2a;color:#9090b0;border:1px solid #2a2a4a;';
-    }
+    if (isLocal) { badge.textContent = '✦ ' + (modelType==='e4b'?'Gemma E4B local':'Gemma E2B local'); badge.style.cssText += 'background:#1a2a1a;color:#6ab56a;border:1px solid #2a4a2a;'; }
+    else         { badge.textContent = '☁ Claude'; badge.style.cssText += 'background:#1a1a2a;color:#9090b0;border:1px solid #2a2a4a;'; }
 }
 
-// Surcharge le bouton Calculer pour utiliser le routage Gemma
 document.addEventListener('DOMContentLoaded', () => {
-    const calcBtn = document.getElementById('calc-btn');
-    if (calcBtn) calcBtn.onclick = calculateWithRouting;
-
-    // Affiche l'indicateur Gemma si disponible
-    Gemma.checkModels().then(status => {
-        if (status.e2b_exists || status.e4b_exists) updateGemmaIndicator(status);
-    });
-
-    // Bannière IA locale — Android natif uniquement, une seule fois
+    Gemma.checkModels().then(status => { if (status.e2b_exists||status.e4b_exists) updateGemmaIndicator(status); });
     initLocalAIBanner();
 });
 
@@ -1112,173 +870,58 @@ async function initLocalAIBanner() {
     const isChrome  = /Chrome\//.test(navigator.userAgent) && /Android/.test(navigator.userAgent);
     const dismissed = localStorage.getItem('localAIBannerDismissed');
     const banner    = document.getElementById('banner-local-ai');
-    if (!banner) return;
-
-    // Montrer la bannière en APK natif ET dans Chrome Android
-    if (!isNative && !isChrome) return;
-
-    // Vérification RAM
-    let can_e2b = true;
-    let can_e4b = false;
-    let ramGb   = null;
-
-    // Natif : demander au plugin Java
-    if (isNative && Gemma.plugin()) {
-        try {
-            const mem = await Gemma.plugin().getDeviceMemory();
-            can_e2b = mem.can_e2b ?? mem.sufficient ?? false;
-            can_e4b = mem.can_e4b ?? false;
-            ramGb   = mem.totalRamGb;
-        } catch {}
-    }
-    // Web / fallback : navigator.deviceMemory (Chrome expose cette info)
-    if (ramGb === null && navigator.deviceMemory) {
-        ramGb   = navigator.deviceMemory;
-        can_e2b = ramGb >= 4;
-        can_e4b = ramGb >= 6;
-    }
-
-    if (!can_e2b) {
-        showLowRamBanner(ramGb);
-        return;
-    }
-
-    if (!dismissed) {
-        const status = await Gemma.checkModels();
-        if (!status.e2b_exists) banner.style.display = 'block';
-    }
+    if (!banner || (!isNative && !isChrome)) return;
+    let can_e2b = true, ramGb = null;
+    if (isNative && Gemma.plugin()) { try { const mem = await Gemma.plugin().getDeviceMemory(); can_e2b = mem.can_e2b??mem.sufficient??false; ramGb = mem.totalRamGb; } catch {} }
+    if (ramGb === null && navigator.deviceMemory) { ramGb = navigator.deviceMemory; can_e2b = ramGb >= 4; }
+    if (!can_e2b) { showLowRamBanner(ramGb); return; }
+    if (!dismissed) { const status = await Gemma.checkModels(); if (!status.e2b_exists) banner.style.display = 'block'; }
 }
 
 function showLowRamBanner(ramGb) {
-    // Remplace la bannière verte par un message informatif neutre
     const banner = document.getElementById('banner-local-ai');
     if (!banner) return;
     const ram = ramGb ? ` (${ramGb} Go détectés)` : '';
-    banner.style.borderColor   = '#2a2a3a';
-    banner.style.background    = 'linear-gradient(135deg,#0f0f18,#0f0f1a)';
-    banner.innerHTML = `
-        <div style="font-size:0.82rem;color:var(--text-dim);font-family:var(--display);margin-bottom:4px;">☁ Mode Cloud actif</div>
-        <div style="font-size:0.8rem;color:var(--text-dim);line-height:1.5;">
-            Votre appareil est trop léger pour l'IA locale${ram}.<br>
-            Nous utiliserons la version <strong style="color:var(--text);">Cloud (Haiku)</strong> pour vous — rapide et précis.
-        </div>
-        <button onclick="this.parentElement.style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;">×</button>`;
+    banner.style.borderColor = '#2a2a3a'; banner.style.background = 'linear-gradient(135deg,#0f0f18,#0f0f1a)';
+    banner.innerHTML = `<div style="font-size:0.82rem;color:var(--text-dim);font-family:var(--display);margin-bottom:4px;">☁ Mode Cloud actif</div><div style="font-size:0.8rem;color:var(--text-dim);line-height:1.5;">Votre appareil est trop léger pour l'IA locale${ram}.<br>Nous utiliserons la version <strong style="color:var(--text);">Cloud (Haiku)</strong> pour vous.</div><button onclick="this.parentElement.style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1rem;">×</button>`;
     banner.style.display = 'block';
 }
 
-function dismissLocalAIBanner() {
-    const banner = document.getElementById('banner-local-ai');
-    if (banner) banner.style.display = 'none';
-    localStorage.setItem('localAIBannerDismissed', '1');
-}
+function dismissLocalAIBanner() { const b = document.getElementById('banner-local-ai'); if (b) b.style.display='none'; localStorage.setItem('localAIBannerDismissed','1'); }
 
 function updateGemmaIndicator(status) {
-    let ind = document.getElementById('gemma-indicator');
+    const ind = document.getElementById('gemma-indicator');
     if (!ind) return;
-    if (status.e4b_loaded) {
-        ind.textContent = '✦ Gemma E4B local actif';
-        ind.style.color = '#6ab56a';
-    } else if (status.e2b_loaded) {
-        ind.textContent = '✦ Gemma E2B local actif';
-        ind.style.color = '#6ab56a';
-    } else if (status.e4b_exists) {
-        ind.textContent = '◆ Gemma E4B disponible (non chargé)';
-        ind.style.color = '#c9a84c';
-    } else if (status.e2b_exists) {
-        ind.textContent = '◆ Gemma E2B disponible (non chargé)';
-        ind.style.color = '#c9a84c';
-    }
+    if (status.e4b_loaded)      { ind.textContent='✦ Gemma E4B local actif'; ind.style.color='#6ab56a'; }
+    else if (status.e2b_loaded) { ind.textContent='✦ Gemma E2B local actif'; ind.style.color='#6ab56a'; }
+    else if (status.e4b_exists) { ind.textContent='◆ Gemma E4B disponible'; ind.style.color='#c9a84c'; }
+    else if (status.e2b_exists) { ind.textContent='◆ Gemma E2B disponible'; ind.style.color='#c9a84c'; }
 }
 
-// ══ Monétisation — AdMob + Unlock ════════════════════════════════════════════
-
-// IDs de test Google (à remplacer par tes vrais IDs AdMob en production)
-const AD_UNIT_BANNER      = 'ca-app-pub-3940256099942544/6300978111'; // test
-const AD_UNIT_INTERSTITIAL = 'ca-app-pub-3940256099942544/1033173712'; // test
+// ── Monétisation AdMob ────────────────────────────────────────────────────────
+const AD_UNIT_BANNER       = 'ca-app-pub-3940256099942544/6300978111';
+const AD_UNIT_INTERSTITIAL = 'ca-app-pub-3940256099942544/1033173712';
 
 const Monetization = {
     _unlocked: null,
-
-    async isUnlocked() {
-        if (this._unlocked !== null) return this._unlocked;
-        const p = window.Capacitor?.Plugins?.Unlock;
-        if (!p) { this._unlocked = false; return false; }
-        try {
-            const r = await p.isUnlocked();
-            this._unlocked = r.unlocked;
-            return r.unlocked;
-        } catch { this._unlocked = false; return false; }
-    },
-
-    async purchase() {
-        const p = window.Capacitor?.Plugins?.Unlock;
-        if (!p) return false;
-        try {
-            const r = await p.purchase();
-            if (r.unlocked) {
-                this._unlocked = true;
-                hideBannerAd();
-                showUnlockSuccess();
-            }
-            return r.unlocked;
-        } catch (e) {
-            if (e.message !== 'USER_CANCELED') alert('Erreur achat : ' + e.message);
-            return false;
-        }
-    },
-
-    async restore() {
-        const p = window.Capacitor?.Plugins?.Unlock;
-        if (!p) return false;
-        try {
-            const r = await p.restore();
-            if (r.unlocked) { this._unlocked = true; hideBannerAd(); }
-            return r.unlocked;
-        } catch { return false; }
-    },
+    async isUnlocked() { if (this._unlocked!==null) return this._unlocked; const p=window.Capacitor?.Plugins?.Unlock; if (!p) { this._unlocked=false; return false; } try { const r=await p.isUnlocked(); this._unlocked=r.unlocked; return r.unlocked; } catch { this._unlocked=false; return false; } },
+    async purchase() { const p=window.Capacitor?.Plugins?.Unlock; if (!p) return false; try { const r=await p.purchase(); if (r.unlocked) { this._unlocked=true; hideBannerAd(); showUnlockSuccess(); } return r.unlocked; } catch(e) { if (e.message!=='USER_CANCELED') alert('Erreur achat : '+e.message); return false; } },
+    async restore()  { const p=window.Capacitor?.Plugins?.Unlock; if (!p) return false; try { const r=await p.restore(); if (r.unlocked) { this._unlocked=true; hideBannerAd(); } return r.unlocked; } catch { return false; } },
 };
 
-// ── Bannière AdMob ────────────────────────────────────────────────────────────
 async function initAdMob() {
-    const { AdMob } = window.Capacitor?.Plugins ?? {};
+    const { AdMob } = window.Capacitor?.Plugins??{};
     if (!AdMob) return;
-    const unlocked = await Monetization.isUnlocked();
-    if (unlocked) return;
-
-    try {
-        await AdMob.initialize({ testingDevices: [], initializeForTesting: true });
-        await AdMob.showBanner({
-            adId:     AD_UNIT_BANNER,
-            adSize:   'BANNER',
-            position: 'BOTTOM_CENTER',
-            margin:   0,
-        });
-    } catch (e) { console.warn('AdMob banner:', e); }
+    if (await Monetization.isUnlocked()) return;
+    try { await AdMob.initialize({ testingDevices:[], initializeForTesting:true }); await AdMob.showBanner({ adId:AD_UNIT_BANNER, adSize:'BANNER', position:'BOTTOM_CENTER', margin:0 }); } catch(e) { console.warn('AdMob:',e); }
 }
+function hideBannerAd() { const { AdMob }=window.Capacitor?.Plugins??{}; if (AdMob) AdMob.hideBanner().catch(()=>{}); }
+function showUnlockSuccess() { const btn=document.getElementById('btn-unlock'); if (btn) { btn.textContent='✓ App débloquée'; btn.style.color='#6ab56a'; btn.disabled=true; } }
 
-function hideBannerAd() {
-    const { AdMob } = window.Capacitor?.Plugins ?? {};
-    if (AdMob) AdMob.hideBanner().catch(() => {});
-}
-
-function showUnlockSuccess() {
-    const btn = document.getElementById('btn-unlock');
-    if (btn) {
-        btn.textContent = '✓ App débloquée';
-        btn.style.color = '#6ab56a';
-        btn.disabled    = true;
-    }
-}
-
-// Init au chargement (Android natif uniquement)
 document.addEventListener('DOMContentLoaded', () => {
     if (window.Capacitor?.isNativePlatform?.()) {
         initAdMob();
-        Monetization.isUnlocked().then(u => {
-            const btn = document.getElementById('btn-unlock');
-            if (btn) btn.style.display = u ? 'none' : 'block';
-            if (u) showUnlockSuccess();
-        });
+        Monetization.isUnlocked().then(u => { const btn=document.getElementById('btn-unlock'); if (btn) btn.style.display=u?'none':'block'; if (u) showUnlockSuccess(); });
     }
 });
 
@@ -1287,244 +930,80 @@ async function toggleAlerts(enabled) {
     const status = document.getElementById('alerts-status');
     status.textContent = 'Mise à jour…';
     try {
-        const res  = await fetch('/toggle_alerts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ enabled }),
-        });
+        const res  = await fetch('/toggle_alerts', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({ enabled }) });
         const data = await res.json();
-        if (data.ok) {
-            status.textContent = enabled
-                ? '✓ Alertes activées — tu recevras un email à chaque transit important.'
-                : '✓ Alertes désactivées.';
-            status.style.color = '#6a9f6a';
-        } else {
-            status.textContent = '✗ ' + (data.error || 'Erreur');
-            status.style.color = '#c06060';
-            document.getElementById('alerts-toggle').checked = !enabled;
-        }
-    } catch {
-        status.textContent = '✗ Erreur réseau.';
-        status.style.color = '#c06060';
-        document.getElementById('alerts-toggle').checked = !enabled;
-    }
+        if (data.ok) { status.textContent = enabled ? '✓ Alertes activées.' : '✓ Alertes désactivées.'; status.style.color='#6a9f6a'; }
+        else         { status.textContent='✗ '+(data.error||'Erreur'); status.style.color='#c06060'; document.getElementById('alerts-toggle').checked=!enabled; }
+    } catch { status.textContent='✗ Erreur réseau.'; status.style.color='#c06060'; document.getElementById('alerts-toggle').checked=!enabled; }
 }
 
 // ── Calendrier mensuel ────────────────────────────────────────────────────────
-let calYear  = new Date().getFullYear();
-let calMonth = new Date().getMonth() + 1;
-let calOpen  = false;
+let calYear=new Date().getFullYear(), calMonth=new Date().getMonth()+1, calOpen=false;
+const MONTH_FR=['','Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
 
-const MONTH_FR = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-
-function toggleCalendar() {
-    const panel = document.getElementById('calendar-panel');
-    calOpen = !calOpen;
-    panel.style.display = calOpen ? 'block' : 'none';
-    if (calOpen) loadCalendar();
-}
-
-function shiftMonth(delta) {
-    calMonth += delta;
-    if (calMonth > 12) { calMonth = 1;  calYear++; }
-    if (calMonth < 1)  { calMonth = 12; calYear--; }
-    loadCalendar();
-}
+function toggleCalendar() { const panel=document.getElementById('calendar-panel'); calOpen=!calOpen; panel.style.display=calOpen?'block':'none'; if (calOpen) loadCalendar(); }
+function shiftMonth(delta) { calMonth+=delta; if (calMonth>12){calMonth=1;calYear++;} if (calMonth<1){calMonth=12;calYear--;} loadCalendar(); }
 
 async function loadCalendar() {
-    const title   = document.getElementById('calendar-title');
-    const loading = document.getElementById('calendar-loading');
-    const content = document.getElementById('calendar-content');
-
-    title.textContent   = `${MONTH_FR[calMonth]} ${calYear}`;
-    loading.style.display = 'block';
-    content.innerHTML   = '';
-
+    const title=document.getElementById('calendar-title'), loading=document.getElementById('calendar-loading'), content=document.getElementById('calendar-content');
+    title.textContent=`${MONTH_FR[calMonth]} ${calYear}`; loading.style.display='block'; content.innerHTML='';
     try {
-        const res  = await fetch(`/calendar?year=${calYear}&month=${calMonth}`);
-        const data = await res.json();
-        loading.style.display = 'none';
-
-        if (data.error) { content.innerHTML = `<p style="color:#c06060;">${data.error}</p>`; return; }
-
-        const days = data.days || {};
-        if (!Object.keys(days).length) {
-            content.innerHTML = '<p style="color:var(--text-dim);text-align:center;font-size:0.85rem;">Aucun transit majeur ce mois-ci.</p>';
-            return;
+        const res=await fetch(`/calendar?year=${calYear}&month=${calMonth}`); const data=await res.json();
+        loading.style.display='none';
+        if (data.error) { content.innerHTML=`<p style="color:#c06060;">${data.error}</p>`; return; }
+        const days=data.days||{};
+        if (!Object.keys(days).length) { content.innerHTML='<p style="color:var(--text-dim);text-align:center;font-size:0.85rem;">Aucun transit majeur ce mois-ci.</p>'; return; }
+        let html='<div style="display:flex;flex-direction:column;gap:10px;">';
+        for (const [dateKey,events] of Object.entries(days).sort()) {
+            const day=dateKey.split('-')[2];
+            html+=`<div style="background:#0f0f22;border:1px solid var(--border);border-radius:3px;padding:10px 14px;"><div style="color:var(--gold);font-size:0.78rem;font-family:var(--display);margin-bottom:6px;">${day} ${MONTH_FR[calMonth]} ${calYear}</div>`;
+            for (const e of events) { const retro=e.retrograde?'<span style="color:#c06060;">℞</span>':''; html+=`<div style="display:flex;gap:8px;align-items:baseline;margin-top:4px;"><span style="color:${e.transit_color};font-size:0.85rem;font-weight:bold;">${e.transit_label} ${retro}</span><span style="color:var(--text-dim);font-size:0.75rem;">⊕</span><span style="color:${e.natal_color};font-size:0.82rem;">${e.natal_label}</span><span style="color:var(--text-dim);font-size:0.72rem;margin-left:auto;">${e.orb}°</span></div>`; }
+            html+='</div>';
         }
-
-        let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-        for (const [dateKey, events] of Object.entries(days).sort()) {
-            const day = dateKey.split('-')[2];
-            html += `<div style="background:#0f0f22;border:1px solid var(--border);border-radius:3px;padding:10px 14px;">`;
-            html += `<div style="color:var(--gold);font-size:0.78rem;font-family:var(--display);margin-bottom:6px;">${day} ${MONTH_FR[calMonth]} ${calYear}</div>`;
-            for (const e of events) {
-                const retro = e.retrograde ? ' <span style="color:#c06060;">℞</span>' : '';
-                html += `<div style="display:flex;gap:8px;align-items:baseline;margin-top:4px;">
-                    <span style="color:${e.transit_color};font-size:0.85rem;font-weight:bold;">${e.transit_label}${retro}</span>
-                    <span style="color:var(--text-dim);font-size:0.75rem;">⊕</span>
-                    <span style="color:${e.natal_color};font-size:0.82rem;">${e.natal_label}</span>
-                    <span style="color:var(--text-dim);font-size:0.72rem;margin-left:auto;">${e.orb}°</span>
-                </div>`;
-            }
-            html += '</div>';
-        }
-        html += '</div>';
-        content.innerHTML = html;
-    } catch {
-        loading.style.display = 'none';
-        content.innerHTML = '<p style="color:#c06060;">Erreur de connexion.</p>';
-    }
+        html+='</div>'; content.innerHTML=html;
+    } catch { loading.style.display='none'; content.innerHTML='<p style="color:#c06060;">Erreur de connexion.</p>'; }
 }
 
-// ── Gemma Manager UI ─────────────────────────────────────────────────────────
-async function openGemmaManager() {
-    const panel = document.getElementById('gemma-panel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    if (panel.style.display === 'block') await refreshGemmaStatus();
-}
-
-function saveHfToken() {
-    const val = document.getElementById('hf-token-input').value.trim();
-    if (!val) return;
-    localStorage.setItem('hf_token', val);
-    document.getElementById('hf-token-input').value = '';
-    document.getElementById('hf-token-input').placeholder = '✓ Token sauvegardé';
-    setTimeout(() => { document.getElementById('hf-token-input').placeholder = 'hf_xxxxxxxxxxxxxxxxxxxx'; }, 2000);
-}
+// ── Gemma Manager UI ──────────────────────────────────────────────────────────
+async function openGemmaManager() { const panel=document.getElementById('gemma-panel'); panel.style.display=panel.style.display==='none'?'block':'none'; if (panel.style.display==='block') await refreshGemmaStatus(); }
 
 async function refreshGemmaStatus() {
-    const statusEl  = document.getElementById('gemma-status-text');
-    const btnDl     = document.getElementById('btn-gemma-dl');
-    const btnLoad   = document.getElementById('btn-gemma-load');
-    const indicator = document.getElementById('gemma-indicator');
+    const statusEl=document.getElementById('gemma-status-text'), btnDl=document.getElementById('btn-gemma-dl'), btnLoad=document.getElementById('btn-gemma-load'), indicator=document.getElementById('gemma-indicator');
     if (!statusEl) return;
-
-    const isWeb = Gemma.isWeb();
-    if (isWeb) {
-        const hasOPFS = typeof navigator.storage?.getDirectory === 'function';
-        if (!hasOPFS) {
-            statusEl.textContent  = '⚠ Navigateur non compatible — utilise Chrome 110+ sur Android.';
-            btnDl.style.display   = 'none';
-            btnLoad.style.display = 'none';
-            return;
-        }
-    }
-
-    const status = await Gemma.checkModels();
-
-    if (status.e2b_loaded) {
-        statusEl.textContent  = `✦ Gemma E2B actif (${status.e2b_sizeMb} Mo)${isWeb ? ' — mode navigateur' : ''} — inférence locale prête.`;
-        statusEl.style.color  = '#6ab56a';
-        btnDl.style.display   = 'none';
-        btnLoad.style.display = 'none';
-        if (indicator) { indicator.textContent = '✦ Gemma local actif'; indicator.style.color = '#6ab56a'; }
-    } else if (status.e2b_exists) {
-        statusEl.textContent  = `◆ Modèle présent (${status.e2b_sizeMb} Mo) — non chargé en mémoire.`;
-        statusEl.style.color  = '#c9a84c';
-        btnDl.style.display   = 'none';
-        btnLoad.style.display = 'block';
-        if (indicator) { indicator.textContent = '◆ Gemma disponible'; indicator.style.color = '#c9a84c'; }
-    } else {
-        const info = isWeb
-            ? 'Stockage dans le navigateur (~400 Mo). Wi-Fi recommandé.'
-            : 'Téléchargement Android (~400 Mo). Wi-Fi recommandé.';
-        statusEl.textContent  = info;
-        statusEl.style.color  = 'var(--text-dim)';
-        btnDl.style.display   = 'block';
-        btnLoad.style.display = 'none';
-        if (indicator) indicator.textContent = '';
-    }
+    const isWeb=Gemma.isWeb();
+    if (isWeb) { const hasOPFS=typeof navigator.storage?.getDirectory==='function'; if (!hasOPFS) { statusEl.textContent='⚠ Navigateur non compatible — utilise Chrome 110+ sur Android.'; btnDl.style.display='none'; btnLoad.style.display='none'; return; } }
+    const status=await Gemma.checkModels();
+    if (status.e2b_loaded) { statusEl.textContent=`✦ Gemma E2B actif (${status.e2b_sizeMb} Mo) — inférence locale prête.`; statusEl.style.color='#6ab56a'; btnDl.style.display='none'; btnLoad.style.display='none'; if (indicator) { indicator.textContent='✦ Gemma local actif'; indicator.style.color='#6ab56a'; } }
+    else if (status.e2b_exists) { statusEl.textContent=`◆ Modèle présent (${status.e2b_sizeMb} Mo) — non chargé.`; statusEl.style.color='#c9a84c'; btnDl.style.display='none'; btnLoad.style.display='block'; if (indicator) { indicator.textContent='◆ Gemma disponible'; indicator.style.color='#c9a84c'; } }
+    else { statusEl.textContent=isWeb?'Stockage dans le navigateur (~400 Mo). Wi-Fi recommandé.':'Téléchargement Android (~400 Mo). Wi-Fi recommandé.'; statusEl.style.color='var(--text-dim)'; btnDl.style.display='block'; btnLoad.style.display='none'; if (indicator) indicator.textContent=''; }
 }
 
 function _updateGemmaProgress(p) {
-    const bar      = document.getElementById('gemma-progress-bar');
-    const txt      = document.getElementById('gemma-progress-text');
-    const progress = document.getElementById('gemma-dl-progress');
+    const bar=document.getElementById('gemma-progress-bar'), txt=document.getElementById('gemma-progress-text'), progress=document.getElementById('gemma-dl-progress');
     if (!bar) return;
-    progress.style.display = 'block';
-    bar.style.width        = p.progress + '%';
-    txt.textContent        = `${p.dlMb} Mo / ${p.totalMb > 0 ? p.totalMb + ' Mo' : '?'} — ${p.progress}%`;
-    if (p.status === 'success') {
-        setTimeout(() => { progress.style.display = 'none'; refreshGemmaStatus(); }, 600);
-    }
-    if (p.status === 'failed') {
-        const btnDl = document.getElementById('btn-gemma-dl');
-        document.getElementById('gemma-status-text').textContent = '✗ Échec du téléchargement.';
-        document.getElementById('gemma-status-text').style.color = '#c06060';
-        btnDl.disabled = false; btnDl.textContent = '⬇ Réessayer';
-    }
+    progress.style.display='block'; bar.style.width=p.progress+'%'; txt.textContent=`${p.dlMb} Mo / ${p.totalMb>0?p.totalMb+' Mo':'?'} — ${p.progress}%`;
+    if (p.status==='success') setTimeout(()=>{progress.style.display='none';refreshGemmaStatus();},600);
+    if (p.status==='failed') { document.getElementById('gemma-status-text').textContent='✗ Échec du téléchargement.'; document.getElementById('gemma-status-text').style.color='#c06060'; const btnDl=document.getElementById('btn-gemma-dl'); btnDl.disabled=false; btnDl.textContent='⬇ Réessayer'; }
 }
 
 async function gemmaDownload() {
-    const btnDl = document.getElementById('btn-gemma-dl');
-    btnDl.disabled    = true;
-    btnDl.textContent = Gemma.isWeb() ? 'Téléchargement en cours…' : 'Lancement du téléchargement…';
-    try {
-        if (Gemma.isWeb()) {
-            // Web : progression inline via streaming fetch
-            const r = await Gemma.downloadModel('e2b', _updateGemmaProgress);
-            if (r.already) await refreshGemmaStatus();
-        } else {
-            // Natif : DownloadManager Android, puis polling
-            const r = await Gemma.downloadModel('e2b');
-            if (r.already) { await refreshGemmaStatus(); return; }
-            Gemma.pollDownload('e2b', _updateGemmaProgress);
-        }
-    } catch (e) {
-        btnDl.disabled    = false;
-        btnDl.textContent = '⬇ Réessayer';
-        document.getElementById('gemma-status-text').textContent = '✗ Erreur : ' + e.message;
-        document.getElementById('gemma-status-text').style.color = '#c06060';
-    }
+    const btnDl=document.getElementById('btn-gemma-dl'); btnDl.disabled=true; btnDl.textContent=Gemma.isWeb()?'Téléchargement en cours…':'Lancement du téléchargement…';
+    try { if (Gemma.isWeb()) { const r=await Gemma.downloadModel('e2b',_updateGemmaProgress); if (r.already) await refreshGemmaStatus(); } else { const r=await Gemma.downloadModel('e2b'); if (r.already){await refreshGemmaStatus();return;} Gemma.pollDownload('e2b',_updateGemmaProgress); } }
+    catch(e) { btnDl.disabled=false; btnDl.textContent='⬇ Réessayer'; document.getElementById('gemma-status-text').textContent='✗ Erreur : '+e.message; document.getElementById('gemma-status-text').style.color='#c06060'; }
 }
 
 async function gemmaLoad() {
-    const btnLoad  = document.getElementById('btn-gemma-load');
-    const statusEl = document.getElementById('gemma-status-text');
-    btnLoad.disabled     = true;
-    btnLoad.textContent  = 'Chargement en mémoire…';
-    statusEl.textContent = Gemma.isWeb()
-        ? 'Chargement du modèle depuis le navigateur… (30-60 sec selon RAM)'
-        : 'Chargement du modèle… (peut prendre 15-30 sec)';
-    try {
-        await Gemma.loadModel('e2b');
-        await refreshGemmaStatus();
-    } catch (e) {
-        statusEl.textContent = '✗ Erreur : ' + e.message;
-        statusEl.style.color = '#c06060';
-        btnLoad.disabled     = false;
-        btnLoad.textContent  = '▶ Charger en mémoire';
-    }
+    const btnLoad=document.getElementById('btn-gemma-load'), statusEl=document.getElementById('gemma-status-text');
+    btnLoad.disabled=true; btnLoad.textContent='Chargement en mémoire…'; statusEl.textContent=Gemma.isWeb()?'Chargement du modèle… (30-60 sec)':'Chargement du modèle… (15-30 sec)';
+    try { await Gemma.loadModel('e2b'); await refreshGemmaStatus(); }
+    catch(e) { statusEl.textContent='✗ Erreur : '+e.message; statusEl.style.color='#c06060'; btnLoad.disabled=false; btnLoad.textContent='▶ Charger en mémoire'; }
 }
 
-// ── Rapport PDF annuel ────────────────────────────────────────────────────────
 async function downloadAnnualReport() {
-    const btn = document.getElementById('btn-annual-report');
-    const orig = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = '⏳ Génération en cours… (1-2 min)';
-    try {
-        const res = await fetch('/report/annual');
-        if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            alert('Erreur : ' + (data.error || res.statusText));
-            return;
-        }
-        const blob = await res.blob();
-        const url  = URL.createObjectURL(blob);
-        const a    = document.createElement('a');
-        a.href     = url;
-        a.download = `karmic_gochara_${new Date().getFullYear()}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-    } catch {
-        alert('Erreur réseau lors de la génération du PDF.');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = orig;
-    }
+    const btn=document.getElementById('btn-annual-report'), orig=btn.textContent; btn.disabled=true; btn.textContent='⏳ Génération en cours… (1-2 min)';
+    try { const res=await fetch('/report/annual'); if (!res.ok) { const data=await res.json().catch(()=>({})); alert('Erreur : '+(data.error||res.statusText)); return; } const blob=await res.blob(); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download=`karmic_gochara_${new Date().getFullYear()}.pdf`; a.click(); URL.revokeObjectURL(url); }
+    catch { alert('Erreur réseau lors de la génération du PDF.'); }
+    finally { btn.disabled=false; btn.textContent=orig; }
 }
 </script>
 </body>
