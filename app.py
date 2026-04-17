@@ -946,6 +946,47 @@ def hook_transit():
     name         = enriched_profile.get("name", "")
     date_label   = chart_data.get("transit_date", date_str)
 
+    # Activations nakshatra : planètes lentes dans le nakshatra natal de Ketu/Rahu/Chiron
+    from transit_alerts import _active_nak_activations, PLANET_LABELS as _PLANET_LABELS, NAK_SIZE as _NAK_SIZE
+    from astro_calc import NAKSHATRAS as _NAKSHATRAS
+
+    def _nak_range(nak_name):
+        try:
+            idx = _NAKSHATRAS.index(nak_name)
+        except ValueError:
+            return None
+        s = idx * _NAK_SIZE
+        return s, s + _NAK_SIZE
+
+    natal_naks = {
+        "Ketu":   enriched_profile.get("ketu_nakshatra", ""),
+        "Rahu":   enriched_profile.get("rahu_nakshatra", ""),
+        "Chiron": enriched_profile.get("chiron_nakshatra", ""),
+    }
+    _transit_display = chart_data.get("transits", {})
+    _nak_active = set()
+    for _point_key, _nak_name in natal_naks.items():
+        if not _nak_name:
+            continue
+        _rng = _nak_range(_nak_name)
+        if not _rng:
+            continue
+        _s, _e = _rng
+        for _t_name, _t_data in _transit_display.items():
+            if _t_data is None or _t_name not in {"Jupiter ♃", "Saturne ♄", "Uranus ♅", "Neptune ♆", "Pluton ♇", "Chiron ⚷", "Nœud Nord ☊", "Nœud Sud ☋"}:
+                continue
+            _t_lon = float(_t_data.get("lon_raw", 0)) % 360
+            _in = (_s <= _t_lon < _e) if _e <= 360 else (_t_lon >= _s or _t_lon < _e % 360)
+            if _in:
+                _nak_active.add((_t_name, _point_key))
+
+    _nak_labels = {"Ketu": "Ketu natal", "Rahu": "Rahu natal", "Chiron": "Chiron natal"}
+    _nak_lines = [
+        f"{_PLANET_LABELS.get(t, t)} traverse {natal_naks[p]} (nakshatra de {_nak_labels[p]})"
+        for t, p in _nak_active
+    ]
+    nakshatra_context = ("Activations nakshatra actives :\n" + "\n".join(_nak_lines) + "\n\n") if _nak_lines else ""
+
     if lang == "fr":
         system = (
             "Tu es @siderealAstro13. Lecteur d'âme karmique védique. "
@@ -959,6 +1000,7 @@ def hook_transit():
         prompt = (
             f"Thème natal de {name} :\n{natal_mini}\n\n"
             f"Aspects actifs ce jour ({date_label}) — ne pas citer tels quels :\n{aspects_text}\n\n"
+            f"{nakshatra_context}"
             f"Écris un hook de 3 phrases. Pas de titre. Pas d'introduction.\n"
             f"Phrase 1 : ce qui se réactive dans la mémoire karmique de {name} aujourd'hui.\n"
             f"Phrase 2 : ce que ça touche dans sa blessure profonde.\n"
@@ -978,6 +1020,7 @@ def hook_transit():
         prompt = (
             f"Natal chart of {name}:\n{natal_mini}\n\n"
             f"Active aspects ({date_label}) — do not quote as-is:\n{aspects_text}\n\n"
+            f"{nakshatra_context}"
             f"Write a hook of 3 sentences. No title. No introduction.\n"
             f"Sentence 1: what reactivates in {name}'s karmic memory today.\n"
             f"Sentence 2: what this touches in their core wound.\n"
