@@ -186,6 +186,46 @@
         .plan-price { font-family: var(--mono); font-size: 1.1rem; color: var(--text); }
         .plan-price small { font-size: 0.65rem; color: var(--text-dim); }
         .plan-desc { font-size: 0.65rem; color: var(--text-dim); font-family: var(--mono); letter-spacing: 0.05em; }
+    /* ── Notation synthèse dataset ───────────────────────────────────────────── */
+#rating-bar {
+    display: none; margin-top: 1.5rem; padding: 1rem 1.2rem;
+    border: 1px solid rgba(201,168,76,0.15); background: rgba(201,168,76,0.04);
+    text-align: center; animation: fadeUp 0.4s ease forwards;
+}
+#rating-bar .rating-label {
+    font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.18em;
+    color: var(--text-dim); text-transform: uppercase; margin-bottom: 0.8rem; display: block;
+}
+.btn-rate {
+    background: transparent; border: 1px solid var(--border); color: var(--text);
+    padding: 0.5rem 1.4rem; cursor: pointer; font-size: 1.2rem;
+    margin: 0 6px; transition: border-color 0.2s, background 0.2s;
+}
+.btn-rate:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
+.btn-rate.selected { border-color: var(--gold); background: rgba(201,168,76,0.12); }
+
+/* ── Modal consent RGPD ─────────────────────────────────────────────────── */
+#consent-modal {
+    display: none; position: fixed; inset: 0; z-index: 9999;
+    background: rgba(0,0,0,0.75); align-items: center; justify-content: center;
+}
+#consent-modal.active { display: flex; }
+#consent-box {
+    background: #0f0f22; border: 1px solid var(--gold-dim);
+    padding: 2rem; max-width: 380px; width: 90%; text-align: left;
+}
+#consent-box h4 {
+    font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.1em;
+    color: var(--gold); margin: 0 0 0.8rem;
+}
+#consent-box p { font-size: 0.82rem; color: var(--text-dim); margin: 0 0 1.2rem; line-height: 1.6; }
+#consent-box label {
+    display: flex; align-items: flex-start; gap: 10px;
+    font-size: 0.8rem; color: var(--text-dim); cursor: pointer; margin-bottom: 1.2rem;
+}
+#consent-box input[type=checkbox] { accent-color: var(--gold); margin-top: 2px; flex-shrink: 0; }
+#consent-actions { display: flex; gap: 10px; }
+#consent-actions button { flex: 1; }
     </style>
 </head>
 <body>
@@ -374,6 +414,13 @@
                 {{ lang.send_email if lang.send_email else '📧 Recevoir par email' }}
             </button>
             <span id="email-status" style="display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-dim);"></span>
+        </div>
+            <!-- Rating bar -->
+            <div id="rating-bar">
+                <span class="rating-label">Cette lecture t'a-t-elle touché ?</span>
+                <button id="btn-rate-up"   class="btn-rate" onclick="rateUp()">👍</button>
+                <button id="btn-rate-down" class="btn-rate" onclick="rateDown()">👎</button>
+            </div>
         </div>
     </div>
 
@@ -975,6 +1022,7 @@ function showSynthesis(text, remaining) {
     document.getElementById('synthesis-box').style.display = 'block';
     document.getElementById('email-status').textContent    = '';
     document.getElementById('synthesis-box').scrollIntoView({ behavior:'smooth' });
+    showRatingBar();
 }
 
 function showLocalBadge(isLocal, modelType) {
@@ -1135,6 +1183,150 @@ async function downloadAnnualReport() {
     catch { alert('Erreur réseau lors de la génération du PDF.'); }
     finally { btn.disabled=false; btn.textContent=orig; }
 }
+</script>
+<!-- ── Modal consent RGPD ──────────────────────────────────────────────────── -->
+<div id="consent-modal">
+    <div id="consent-box">
+        <h4>✦ Contribuer au modèle karmique</h4>
+        <p>Autorises-tu l'utilisation anonyme de cette lecture pour entraîner le modèle d'astrologie karmique ?<br>
+        Aucune donnée personnelle (nom, email) n'est transmise.</p>
+        <label>
+            <input type="checkbox" id="consent-check">
+            J'autorise l'utilisation anonyme de mes positions natales et de cette synthèse.
+        </label>
+        <div id="consent-actions">
+            <button class="btn-secondary" onclick="submitRating(false)" style="font-size:0.7rem;">Non merci</button>
+            <button class="btn-primary" onclick="submitRating(true)" style="font-size:0.7rem;"><span>Confirmer</span></button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Dataset rating ─────────────────────────────────────────────────────────
+let _pendingRating = 0;
+
+function showRatingBar() {
+    const bar = document.getElementById('rating-bar');
+    if (bar) bar.style.display = 'block';
+}
+
+function rateUp()   { _pendingRating = 1;  openConsentModal(); }
+function rateDown() { _pendingRating = -1; openConsentModal(); }
+
+function openConsentModal() {
+    // Griser le bouton sélectionné
+    document.querySelectorAll('.btn-rate').forEach(b => b.classList.remove('selected'));
+    const sel = _pendingRating === 1
+        ? document.getElementById('btn-rate-up')
+        : document.getElementById('btn-rate-down');
+    if (sel) sel.classList.add('selected');
+    document.getElementById('consent-modal').classList.add('active');
+}
+
+async function submitRating(openConsent) {
+    const consent = openConsent && document.getElementById('consent-check').checked;
+    document.getElementById('consent-modal').classList.remove('active');
+
+    const date = document.getElementById('transit-date')?.value || '';
+    try {
+        await fetch('/rate_synthesis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                rating:    _pendingRating,
+                consent:   consent,
+                synthesis: lastSynthesis,
+                date:      date,
+            })
+        });
+    } catch(e) { console.warn('Rating échoué (non bloquant):', e); }
+
+    // Feedback visuel
+    const bar = document.getElementById('rating-bar');
+    if (bar) {
+        bar.innerHTML =
+            '<span class="rating-label" style="color:var(--gold);">' +
+            (_pendingRating === 1 ? '✦ Merci — feedback enregistré.' : '✦ Noté — on s\'améliore.') +
+            '</span>';
+    }
+}
+
+// Ferme modal si clic hors du box
+document.getElementById('consent-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+});
+</script>
+<!-- ── Modal consent RGPD ──────────────────────────────────────────────────── -->
+<div id="consent-modal">
+    <div id="consent-box">
+        <h4>✦ Contribuer au modèle karmique</h4>
+        <p>Autorises-tu l'utilisation anonyme de cette lecture pour entraîner le modèle d'astrologie karmique ?<br>
+        Aucune donnée personnelle (nom, email) n'est transmise.</p>
+        <label>
+            <input type="checkbox" id="consent-check">
+            J'autorise l'utilisation anonyme de mes positions natales et de cette synthèse.
+        </label>
+        <div id="consent-actions">
+            <button class="btn-secondary" onclick="submitRating(false)" style="font-size:0.7rem;">Non merci</button>
+            <button class="btn-primary" onclick="submitRating(true)" style="font-size:0.7rem;"><span>Confirmer</span></button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ── Dataset rating ─────────────────────────────────────────────────────────
+let _pendingRating = 0;
+
+function showRatingBar() {
+    const bar = document.getElementById('rating-bar');
+    if (bar) bar.style.display = 'block';
+}
+
+function rateUp()   { _pendingRating = 1;  openConsentModal(); }
+function rateDown() { _pendingRating = -1; openConsentModal(); }
+
+function openConsentModal() {
+    // Griser le bouton sélectionné
+    document.querySelectorAll('.btn-rate').forEach(b => b.classList.remove('selected'));
+    const sel = _pendingRating === 1
+        ? document.getElementById('btn-rate-up')
+        : document.getElementById('btn-rate-down');
+    if (sel) sel.classList.add('selected');
+    document.getElementById('consent-modal').classList.add('active');
+}
+
+async function submitRating(openConsent) {
+    const consent = openConsent && document.getElementById('consent-check').checked;
+    document.getElementById('consent-modal').classList.remove('active');
+
+    const date = document.getElementById('transit-date')?.value || '';
+    try {
+        await fetch('/rate_synthesis', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                rating:    _pendingRating,
+                consent:   consent,
+                synthesis: lastSynthesis,
+                date:      date,
+            })
+        });
+    } catch(e) { console.warn('Rating échoué (non bloquant):', e); }
+
+    // Feedback visuel
+    const bar = document.getElementById('rating-bar');
+    if (bar) {
+        bar.innerHTML =
+            '<span class="rating-label" style="color:var(--gold);">' +
+            (_pendingRating === 1 ? '✦ Merci — feedback enregistré.' : '✦ Noté — on s\'améliore.') +
+            '</span>';
+    }
+}
+
+// Ferme modal si clic hors du box
+document.getElementById('consent-modal').addEventListener('click', function(e) {
+    if (e.target === this) this.classList.remove('active');
+});
 </script>
 </body>
 </html>
