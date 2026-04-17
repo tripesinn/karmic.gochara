@@ -1315,15 +1315,18 @@ def stripe_webhook():
         return jsonify({"error": "Signature invalide"}), 400
 
     if event["type"] == "checkout.session.completed":
-        obj    = event["data"]["object"]
-        pseudo = obj.get("metadata", {}).get("pseudo", "")
-        plan   = obj.get("metadata", {}).get("plan", "")
+        obj      = event["data"]["object"]
+        metadata = dict(obj.get("metadata") or {})
+        pseudo   = metadata.get("pseudo", "")
+        plan     = metadata.get("plan", "")
 
         # Récupère le price_id pour les one-shots
         if not plan:
-            line_items = obj.get("line_items", {}).get("data", [])
+            line_items_raw = obj.get("line_items") or {}
+            line_items = (line_items_raw.get("data") or []) if hasattr(line_items_raw, "get") else []
             if line_items:
-                plan = get_plan_from_price(line_items[0].get("price", {}).get("id", ""))
+                price_obj = line_items[0].get("price") or {}
+                plan = get_plan_from_price(price_obj.get("id", "") if hasattr(price_obj, "get") else "")
 
         if pseudo and plan:
             try:
@@ -1335,7 +1338,7 @@ def stripe_webhook():
     elif event["type"] == "customer.subscription.deleted":
         obj    = event["data"]["object"]
         # Retrouve le pseudo via customer email
-        email  = obj.get("customer_email", "")
+        email  = obj.get("customer_email", "") or ""
         if email:
             try:
                 from profiles import get_profile_by_email, downgrade_plan
