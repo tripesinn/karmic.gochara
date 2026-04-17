@@ -14,7 +14,7 @@ from datetime import date, timedelta
 
 import requests as req
 
-from astro_calc import get_julian_day, _calc_positions, ORB, NAKSHATRAS
+from astro_calc import get_julian_day, _calc_positions, ORB, NAKSHATRAS, NAKSHATRA_LORDS
 
 # Planètes lentes en transit — celles qui déclenchent des alertes
 SLOW_PLANETS = {
@@ -54,11 +54,35 @@ NATAL_LABELS = {
 
 NAK_SIZE = 360.0 / 27.0  # 13.333°
 
-# Labels pour les nakshatras natals surveillés
+# Régime doctrinal par point natal
+# Ketu = ROM (Mémoire karmique) → activation oppressive : test, friction, répétition
+# Rahu = Dharma (Direction d'évolution) → activation amplifiante : opportunité, expansion
+# Chiron = Porte Invisible (Blessure-seuil) → activation de transformation
+_NAK_INTERPRETATION = {
+    "Ketu":   "ROM_oppression",
+    "Rahu":   "Dharma_amplification",
+    "Chiron": "Blessure_activation",
+}
+
+# Labels email pour les nakshatras natals
 NAK_NATAL_LABELS = {
     "Ketu":   "nakshatra de ton Ketu natal",
     "Rahu":   "nakshatra de ton Rahu natal",
     "Chiron": "nakshatra de ton Chiron natal",
+}
+
+# Couleurs email selon le régime doctrinal
+_INTERPRETATION_COLORS = {
+    "ROM_oppression":      "#e57373",  # rouge-brique — friction karmique
+    "Dharma_amplification": "#6ab56a", # vert doré — expansion
+    "Blessure_activation": "#b07ecf",  # violet Chiron — seuil
+}
+
+# Libellés interprétatifs dans l'email
+_INTERPRETATION_LABELS = {
+    "ROM_oppression":       "Activation ROM — test karmique",
+    "Dharma_amplification": "Activation Dharma — opportunité",
+    "Blessure_activation":  "Activation Chiron — seuil de transformation",
 }
 
 
@@ -72,13 +96,19 @@ def _nak_lon_range(nak_name: str) -> tuple[float, float] | None:
     return start, start + NAK_SIZE
 
 
-def _active_nak_activations(natal_naks: dict, transit_pos: dict) -> set[tuple]:
+def _active_nak_activations(natal_naks: dict, transit_pos: dict) -> dict[tuple, dict]:
     """
-    Détecte les planètes lentes en transit dans le nakshatra natal de Ketu/Rahu/Chiron.
-    natal_naks : {"Ketu": "Ashwini", "Rahu": "Swati", "Chiron": "Mula"}
-    Retourne : set de (transit_planet_name, natal_point_key)
+    Détecte les planètes lentes dans le nakshatra natal de Ketu/Rahu/Chiron.
+    natal_naks : {"Ketu": "Mula", "Rahu": "Swati", "Chiron": "Ashwini"}
+
+    Retourne : {(transit_planet_name, natal_point_key): enriched_dict}
+    enriched_dict = {
+        "nakshatra":      str,   # ex. "Mula"
+        "lord":           str,   # ex. "Ketu"  (régent Vimshotari)
+        "interpretation": str,   # "ROM_oppression" | "Dharma_amplification" | "Blessure_activation"
+    }
     """
-    active = set()
+    active = {}
     for point_key, nak_name in natal_naks.items():
         if not nak_name:
             continue
@@ -86,6 +116,12 @@ def _active_nak_activations(natal_naks: dict, transit_pos: dict) -> set[tuple]:
         if not rng:
             continue
         start, end = rng
+        try:
+            nak_idx = NAKSHATRAS.index(nak_name)
+            lord = NAKSHATRA_LORDS[nak_idx]
+        except (ValueError, IndexError):
+            lord = ""
+        interp = _NAK_INTERPRETATION.get(point_key, "neutre")
         for t_name, t_data in transit_pos.items():
             if t_data is None or t_name not in SLOW_PLANETS:
                 continue
@@ -95,7 +131,11 @@ def _active_nak_activations(natal_naks: dict, transit_pos: dict) -> set[tuple]:
             else:
                 in_range = t_lon >= start or t_lon < end % 360
             if in_range:
-                active.add((t_name, point_key))
+                active[(t_name, point_key)] = {
+                    "nakshatra":      nak_name,
+                    "lord":           lord,
+                    "interpretation": interp,
+                }
     return active
 
 
@@ -179,10 +219,27 @@ def detect_transit_events(profile: dict) -> list[dict]:
     }
     today_naks     = _active_nak_activations(natal_naks, today_transit)
     yesterday_naks = _active_nak_activations(natal_naks, yesterday_transit)
-    for pair in today_naks - yesterday_naks:
-        events.append({"type": "debut", "kind": "nakshatra", "transit": pair[0], "natal": pair[1]})
-    for pair in yesterday_naks - today_naks:
-        events.append({"type": "fin", "kind": "nakshatra", "transit": pair[0], "natal": pair[1]})
+
+    for key in set(today_naks) - set(yesterday_naks):
+        t_name, point_key = key
+        info = today_naks[key]
+        events.append({
+            "type": "debut", "kind": "nakshatra",
+            "transit": t_name, "natal": point_key,
+            "nakshatra": info["nakshatra"],
+            "lord": info["lord"],
+            "interpretation": info["interpretation"],
+        })
+    for key in set(yesterday_naks) - set(today_naks):
+        t_name, point_key = key
+        info = yesterday_naks[key]
+        events.append({
+            "type": "fin", "kind": "nakshatra",
+            "transit": t_name, "natal": point_key,
+            "nakshatra": info["nakshatra"],
+            "lord": info["lord"],
+            "interpretation": info["interpretation"],
+        })
 
     return events
 
@@ -198,9 +255,13 @@ def _build_alert_html(profile: dict, events: list[dict]) -> str:
         color    = "#6ab56a" if is_debut else "#e57373"
         t_label  = PLANET_LABELS.get(e["transit"], e["transit"])
         if e.get("kind") == "nakshatra":
-            nak_name  = profile.get(f"{e['natal'].lower()}_nakshatra", "")
-            n_label   = f"{nak_name} — {NAK_NATAL_LABELS.get(e['natal'], e['natal'])}"
-            label     = "Entrée dans le nakshatra" if is_debut else "Sortie du nakshatra"
+            interp    = e.get("interpretation", "")
+            color     = _INTERPRETATION_COLORS.get(interp, "#9090b0")
+            lord      = e.get("lord", "")
+            nak_name  = e.get("nakshatra", "")
+            n_label   = f"{nak_name} ({lord}) — {NAK_NATAL_LABELS.get(e['natal'], e['natal'])}"
+            label     = _INTERPRETATION_LABELS.get(interp, "Activation nakshatra")
+            label     = label if is_debut else label.replace("Activation", "Fin d'activation").replace("activation", "fin d'activation")
         else:
             n_label   = NATAL_LABELS.get(e["natal"], e["natal"])
             label     = "Début de transit" if is_debut else "Fin de transit"
