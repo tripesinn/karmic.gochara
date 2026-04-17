@@ -537,6 +537,98 @@ Make them want the full reading. Dense and precise tone."""
         messages=[{"role": "user", "content": prompt}],
     )
     return msg.content[0].text
+# ══════════════════════════════════════════════════════════════════════════════
+# SIGNAL DU JOUR — compact pour TikTok/Web
+# ══════════════════════════════════════════════════════════════════════════════
+
+def get_daily_signal(user: dict, transit_date: str = None) -> dict:
+    """
+    Génère le Signal du Jour compact pour TikTok/Web.
+    Retourne un dict avec hook, nakshatra actif, régime doctrinal.
+
+    Retourne :
+    {
+        "title": "Signal du Jour — 17/04/2026",
+        "hook": "Ta mémoire ROM est figée...",
+        "nakshatra": "Mula",
+        "regime": "ROM_oppression",
+        "regime_label": "Activation ROM — test karmique"
+    }
+    """
+    from datetime import datetime, date as date_cls
+    from astro_calc import calculate_transits
+    from transit_alerts import detect_transit_events
+
+    user = user or {}
+    lang = user.get("lang", "fr")
+
+    if not transit_date:
+        transit_date = str(date_cls.today())
+
+    try:
+        transit_date_obj = datetime.strptime(transit_date, "%Y-%m-%d").date()
+    except ValueError:
+        return {"error": "Invalid date format. Use YYYY-MM-DD.",
+                "title": "", "hook": "", "nakshatra": "", "regime": ""}
+
+    # Activations nakshatra du jour (entrées uniquement)
+    try:
+        events = detect_transit_events(user)
+    except Exception as exc:
+        return {"error": f"Transit calculation failed: {str(exc)}",
+                "title": "", "hook": "", "nakshatra": "", "regime": ""}
+
+    nak_events = [
+        e for e in events
+        if e.get("kind") == "nakshatra" and e.get("type") == "debut"
+    ]
+    primary_nak_event = nak_events[0] if nak_events else None
+
+    title_str = transit_date_obj.strftime("%d/%m/%Y")
+    title = f"Signal du Jour — {title_str}" if lang == "fr" else f"Daily Signal — {title_str}"
+
+    # Hook de transit via calculate_transits + get_hook_transit
+    hook = ""
+    try:
+        natal = {
+            k: user[k] for k in
+            ("name", "year", "month", "day", "hour", "minute", "lat", "lon", "tz", "city")
+            if k in user
+        }
+        transit_loc = {
+            "city": user.get("transit_city") or user.get("city", "Paris, France"),
+            "lat":  float(user.get("transit_lat") or user.get("lat", 48.8566)),
+            "lon":  float(user.get("transit_lon") or user.get("lon", 2.3522)),
+            "tz":   user.get("transit_tz") or user.get("tz", "Europe/Paris"),
+        }
+        chart_data = calculate_transits(
+            natal, transit_loc,
+            transit_date_obj.year, transit_date_obj.month, transit_date_obj.day,
+            12, 0,
+        )
+        hook = get_hook_transit(chart_data, user)
+    except Exception:
+        hook = ""
+
+    # Nakshatra + régime du jour
+    nakshatra = regime = regime_label = ""
+    if primary_nak_event:
+        nakshatra = primary_nak_event.get("nakshatra", "")
+        regime    = primary_nak_event.get("interpretation", "")
+        regime_labels = {
+            "ROM_oppression":       "Activation ROM — test karmique"       if lang == "fr" else "ROM Activation — karmic test",
+            "Dharma_amplification": "Activation Dharma — opportunité"       if lang == "fr" else "Dharma Activation — opportunity",
+            "Blessure_activation":  "Activation Chiron — seuil de transformation" if lang == "fr" else "Chiron Activation — threshold",
+        }
+        regime_label = regime_labels.get(regime, "Activation nakshatra")
+
+    return {
+        "title":        title,
+        "hook":         hook,
+        "nakshatra":    nakshatra,
+        "regime":       regime,
+        "regime_label": regime_label,
+    }
 
 
 # ══════════════════════════════════════════════════════════════════════════════

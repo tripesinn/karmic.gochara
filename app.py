@@ -1605,6 +1605,67 @@ def rate_synthesis():
 
     return jsonify({"ok": True})
 
+@app.route("/content/daily", methods=["GET"])
+def content_daily():
+    """
+    Route publique : Signal du Jour pour TikTok/Web.
+
+    Paramètres :
+      ?user_id=xxx        (optionnel, récupère depuis session si absent)
+      ?date=yyyy-mm-dd    (optionnel, défaut = aujourd'hui)
+      ?lang=fr|en         (optionnel, défaut = user.lang)
+
+    Retourne JSON :
+    {
+        "signal": {"title", "hook", "nakshatra", "regime", "regime_label"},
+        "cta":    {"text", "link"}
+    }
+    """
+    from datetime import date as date_cls
+    from ai_interpret import get_daily_signal
+    from profiles import get_profile_by_pseudo
+
+    user_id      = request.args.get("user_id")
+    transit_date = request.args.get("date", str(date_cls.today()))
+    lang_override = request.args.get("lang")
+
+    user = None
+    if user_id:
+        try:
+            user = get_profile_by_pseudo(user_id)
+        except Exception as exc:
+            return jsonify({"error": f"User not found: {exc}"}), 404
+        if not user:
+            return jsonify({"error": f"User '{user_id}' not found"}), 404
+    elif "profile" in session:
+        user = session.get("profile")
+    else:
+        return jsonify({"error": "No user_id provided and not logged in"}), 401
+
+    if lang_override:
+        user = dict(user)
+        user["lang"] = lang_override
+
+    signal_data = get_daily_signal(user, transit_date)
+
+    if "error" in signal_data:
+        return jsonify({"error": signal_data["error"]}), 400
+
+    lang = user.get("lang", "fr")
+    if user.get("plan") in ("essential", "complete"):
+        cta_text = "Synthèse disponible" if lang == "fr" else "Synthesis available"
+    else:
+        cta_text = "Voir ma Synthèse Essentielle" if lang == "fr" else "View my Essential Synthesis"
+
+    return jsonify({
+        "signal": signal_data,
+        "cta": {
+            "text": cta_text,
+            "link": f"https://karmicgochara.app/calculate?date={transit_date}",
+        },
+    }), 200
+
+
 # ── Lancement ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))
