@@ -5,7 +5,10 @@
       "Bash(mkdir -p karmic_vault)",
       "Bash(cp \"/c/Users/hp/Downloads/00_MASTER_CONTEXT.md\" karmic_vault/)",
       "Bash(cp \"/c/Users/hp/Downloads/01_output_rules.md\" karmic_vault/)",
-      "Bash(cp \"/c/Users/hp/Downloads/02_planet_keywords.md\" karmic_vault/)"
+      "Bash(cp \"/c/Users/hp/Downloads/02_planet_keywords.md\" karmic_vault/)",
+      "Bash(python -c ' *)",
+      "Bash(git -C \"c:/Users/hp/Pictures/Screenshots/jerome/git clone/karmic.gochara/karmic.gochara\" add karmic_vault/08_pada_table.md karmic_vault/pada_table.csv _generate_pada_table.py)",
+      "Bash(git -C 'c:/Users/hp/Pictures/Screenshots/jerome/git clone/karmic.gochara/karmic.gochara' commit -m ' *)"
     ]
   }
 }

@@ -297,6 +297,8 @@
             <input id="birth-time" class="login-input" type="time">
             <span class="label-small">{{ lang.birthcity if lang.birthcity else 'Ville de Naissance' }}</span>
             <input id="birth-city" class="login-input" type="text" placeholder="{{ lang.city_ph if lang.city_ph else 'Ex: Paris' }}">
+            <span class="label-small">{{ lang.email if lang.email else 'Email' }}</span>
+            <input id="reg-email" class="login-input" type="email" placeholder="ton@email.com">
         </div>
 
         <button id="main-action-btn" class="btn-primary" onclick="login()"><span>{{ lang.login if lang.login else 'CONNEXION' }}</span></button>
@@ -584,16 +586,22 @@ function register() {
     const birthDate = document.getElementById('birth-date').value;
     const birthTime = document.getElementById('birth-time').value;
     const birthCity = document.getElementById('birth-city').value.trim();
+    const email = document.getElementById('reg-email').value.trim();
     const errDiv = document.getElementById('login-error');
     if (!pseudo || !birthDate || !birthTime || !birthCity) {
         errDiv.style.color = "#c97a6b";
         errDiv.textContent = "Champs de naissance manquants.";
         return;
     }
+    if (!email || !email.includes('@')) {
+        errDiv.style.color = "#c97a6b";
+        errDiv.textContent = "Email requis pour les alertes et l'envoi de synthèse.";
+        return;
+    }
     fetch('/register', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({pseudo, birth_date: birthDate, birth_time: birthTime, birth_city: birthCity})
+        body: JSON.stringify({pseudo, email, birth_date: birthDate, birth_time: birthTime, birth_city: birthCity})
     })
     .then(r => r.json())
     .then(data => {
@@ -1017,7 +1025,29 @@ const Gemma = {
     async pollDownload(type='e2b', onProgress) { if (this.isWeb()) return; const dlId = this._dlIds[type]; if (!dlId) return; const p = this.plugin(); const interval = setInterval(async () => { try { const r = await p.checkDownloadProgress({ downloadId:dlId }); onProgress(r); if (r.status==='success'||r.status==='failed') clearInterval(interval); } catch { clearInterval(interval); } }, 2000); },
     async loadModel(type='e2b') { if (this.isWeb()) return GemmaWeb.loadModel(type); return await this.plugin().loadModel({ type }); },
     async generate(s, u, type='e2b') { if (this.isWeb()) return GemmaWeb.generate(s, u, type); return await this.plugin().generate({ system:s, user:u, type }); },
-    async pickModelFile() { if (this.isWeb()) throw new Error('Non supporté en web'); return await this.plugin().pickModelFile(); },
+    async pickModelFile() {
+        if (this.isWeb()) {
+            return new Promise((resolve, reject) => {
+                const inp = document.createElement('input');
+                inp.type = 'file'; inp.accept = '.task,application/octet-stream';
+                inp.onchange = async () => {
+                    const file = inp.files[0];
+                    if (!file) { reject(new Error('Aucun fichier sélectionné')); return; }
+                    try {
+                        const root = await navigator.storage.getDirectory();
+                        const fh = await root.getFileHandle(GEMMA_FILENAMES['e2b'], { create: true });
+                        const wr = await fh.createWritable();
+                        await wr.write(await file.arrayBuffer());
+                        await wr.close();
+                        resolve({ ok: true });
+                    } catch(e) { reject(e); }
+                };
+                inp.oncancel = () => reject(new Error('Annulé'));
+                inp.click();
+            });
+        }
+        return await this.plugin().pickModelFile();
+    },
 };
 
 // ── Calculate avec routage Gemma/Claude ──────────────────────────────────────
@@ -1039,6 +1069,7 @@ async function calculateWithRouting() {
             btnText.innerHTML = '<span class="spinner"></span> CALCUL ASTRAL…';
             const pr = await fetch('/synthesis/prompt', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(payload) });
             const pd = await pr.json();
+            if (pd.error === 'quota_exceeded') { showPaymentPlans(); return; }
             if (pd.error) throw new Error(pd.error);
             btnText.innerHTML = '<span class="spinner"></span> GEMMA LOCAL…';
             const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
@@ -1235,7 +1266,7 @@ async function refreshGemmaStatus() {
         statusEl.textContent = isWeb ? 'Stockage dans le navigateur (~400 Mo). Wi-Fi recommandé.' : 'Téléchargement Android (~400 Mo). Wi-Fi recommandé.';
         statusEl.style.color = 'var(--text-dim)';
         btnDl.style.display = 'block'; btnLoad.style.display = 'none';
-        if (btnPick) btnPick.style.display = isWeb ? 'none' : 'inline-block';
+        if (btnPick) btnPick.style.display = 'inline-block';
         if (indicator) indicator.textContent = '';
         if (badge) { badge.textContent = '☁ CLAUDE (SERVEUR)'; badge.style.color = 'var(--text-dim)'; badge.style.borderColor = 'var(--border)'; }
     }
