@@ -86,6 +86,105 @@ _INTERPRETATION_LABELS = {
 }
 
 
+# Régime doctrinal intrinsèque de chaque nakshatra (source : 07_nakshatra_keywords.md)
+NAKSHATRA_REGIME = {
+    "Ashwini":             "ROM_oppression",
+    "Bharani":             "Dharma_amplification",
+    "Krittika":            "Blessure_activation",
+    "Rohini":              "Dharma_amplification",
+    "Mrigashira":          "ROM_oppression",
+    "Ardra":               "Blessure_activation",
+    "Punarvasu":           "Dharma_amplification",
+    "Pushya":              "ROM_oppression",
+    "Ashlesha":            "Blessure_activation",
+    "Magha":               "ROM_oppression",
+    "Purva Phalguni":      "Dharma_amplification",
+    "Uttara Phalguni":     "Blessure_activation",
+    "Hasta":               "Dharma_amplification",
+    "Chitra":              "ROM_oppression",
+    "Swati":               "Dharma_amplification",
+    "Vishakha":            "Dharma_amplification",
+    "Anuradha":            "ROM_oppression",
+    "Jyeshtha":            "Blessure_activation",
+    "Mula":                "ROM_oppression",
+    "Purva Ashadha":       "Dharma_amplification",
+    "Uttara Ashadha":      "Blessure_activation",
+    "Shravana":            "Dharma_amplification",
+    "Dhanishtha":          "ROM_oppression",
+    "Shatabhisha":         "Dharma_amplification",
+    "Purva Bhadrapada":    "Dharma_amplification",
+    "Uttara Bhadrapada":   "ROM_oppression",
+    "Revati":              "Blessure_activation",
+}
+
+
+def detect_global_nak_transits(target_date: date = None) -> list[dict]:
+    """
+    Détecte les planètes lentes qui entrent dans un nouveau nakshatra aujourd'hui.
+    Sans profil natal — météo astrologique globale.
+
+    Retourne une liste d'événements :
+    [
+        {
+            "transit":      "Saturne ♄",
+            "nakshatra":    "Mula",
+            "lord":         "Ketu",
+            "regime":       "ROM_oppression",
+            "regime_label": "Activation ROM — test karmique",
+        },
+        ...
+    ]
+    """
+    from astro_calc import lon_to_nakshatra
+
+    if target_date is None:
+        target_date = date.today()
+    yesterday = target_date - timedelta(days=1)
+
+    # Lieu arbitraire (les planètes lentes sont indépendantes du lieu)
+    ref_lat, ref_lon, ref_tz = 48.8566, 2.3522, "Europe/Paris"
+
+    jd_today = get_julian_day(
+        target_date.year, target_date.month, target_date.day, 12, 0, ref_tz
+    )
+    jd_yest = get_julian_day(
+        yesterday.year, yesterday.month, yesterday.day, 12, 0, ref_tz
+    )
+
+    pos_today = _add_south_node(_calc_positions(jd_today, ref_lat, ref_lon))
+    pos_yest  = _add_south_node(_calc_positions(jd_yest,  ref_lat, ref_lon))
+
+    _regime_labels = {
+        "ROM_oppression":       "Activation ROM — test karmique",
+        "Dharma_amplification": "Activation Dharma — opportunité",
+        "Blessure_activation":  "Activation Chiron — seuil de transformation",
+    }
+
+    events = []
+    for planet in SLOW_PLANETS:
+        t_data = pos_today.get(planet)
+        y_data = pos_yest.get(planet)
+        if t_data is None or y_data is None:
+            continue
+        nak_today = lon_to_nakshatra(t_data["lon"])["nakshatra"]
+        nak_yest  = lon_to_nakshatra(y_data["lon"])["nakshatra"]
+        if nak_today != nak_yest:
+            regime = NAKSHATRA_REGIME.get(nak_today, "neutre")
+            try:
+                lord = NAKSHATRA_LORDS[NAKSHATRAS.index(nak_today)]
+            except (ValueError, IndexError):
+                lord = ""
+            events.append({
+                "transit":      planet,
+                "nakshatra":    nak_today,
+                "lord":         lord,
+                "regime":       regime,
+                "regime_label": _regime_labels.get(regime, "Activation nakshatra"),
+            })
+
+    return events
+
+
 def _nak_lon_range(nak_name: str) -> tuple[float, float] | None:
     """Retourne (start_lon, end_lon) pour un nakshatra donné."""
     try:

@@ -563,7 +563,7 @@ def get_daily_signal(transit_date: str = None) -> dict:
     }
     """
     from datetime import datetime, date as date_cls
-    from transit_alerts import detect_transit_events
+    from transit_alerts import detect_global_nak_transits, PLANET_LABELS
 
     if not transit_date:
         transit_date = str(date_cls.today())
@@ -574,50 +574,30 @@ def get_daily_signal(transit_date: str = None) -> dict:
         return {"error": "Invalid date format. Use YYYY-MM-DD.",
                 "global": {}, "hook_generic": "", "cta": {}}
 
-    # Profil de référence pour calculer les positions de transit du jour
-    fake_user = {
-        "name": "Astrologue", "lang": "fr",
-        "year": 1974, "month": 10, "day": 31,
-        "hour": 8,   "minute": 25,
-        "lat": 48.7, "lon": 2.4, "tz": "Europe/Paris",
-        "ketu_nakshatra":   "",
-        "rahu_nakshatra":   "",
-        "chiron_nakshatra": "",
-    }
-
     try:
-        events = detect_transit_events(fake_user)
+        events = detect_global_nak_transits(transit_date_obj)
     except Exception as exc:
         return {"error": f"Transit calculation failed: {str(exc)}",
                 "global": {}, "hook_generic": "", "cta": {}}
 
-    nak_events = [
-        e for e in events
-        if e.get("kind") == "nakshatra" and e.get("type") == "debut"
-    ]
-    primary_nak_event = nak_events[0] if nak_events else None
+    primary = events[0] if events else None
 
     title_str = transit_date_obj.strftime("%d/%m/%Y")
     title = f"Météo Astrologique — {title_str}"
 
-    nakshatra = regime = regime_label = transits_text = ""
-
-    if primary_nak_event:
-        nakshatra      = primary_nak_event.get("nakshatra", "")
-        regime         = primary_nak_event.get("interpretation", "")
-        transit_planet = primary_nak_event.get("transit", "")
-        lord           = primary_nak_event.get("lord", "")
-        regime_labels  = {
-            "ROM_oppression":       "Activation ROM — test karmique",
-            "Dharma_amplification": "Activation Dharma — opportunité",
-            "Blessure_activation":  "Activation Chiron — seuil de transformation",
-        }
-        regime_label  = regime_labels.get(regime, "Activation nakshatra")
-        transits_text = f"{transit_planet} entre en {nakshatra} (régent {lord}) — {regime_label.lower()}"
+    if primary:
+        nakshatra     = primary["nakshatra"]
+        regime        = primary["regime"]
+        regime_label  = primary["regime_label"]
+        transits_text = (
+            f"{PLANET_LABELS.get(primary['transit'], primary['transit'])} "
+            f"entre en {nakshatra} (régent {primary['lord']}) — {regime_label.lower()}"
+        )
     else:
-        transits_text = "Aucune activation majeure détectée aujourd'hui."
+        nakshatra     = ""
         regime        = "neutre"
         regime_label  = "Jour stable"
+        transits_text = "Aucune activation majeure détectée aujourd'hui."
 
     return {
         "global": {
