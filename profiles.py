@@ -378,17 +378,17 @@ def set_alerts(pseudo: str, enabled: bool) -> bool:
 # ── Gestion plans Stripe ───────────────────────────────────────────────────────
 
 PLAN_SYNTHESES = {
-    "sub":       1,
-    "essential": 1,
-    "complete":  1,
-    "free":      0,
+    "test":         1,    # one-shot → 1 synthèse + 3 questions chatbot
+    "subscription": 999,  # illimité (managé côté Edge AI)
+    "free":         0,
 }
 
 
-def upgrade_plan(pseudo: str, plan: str) -> bool:
+def upgrade_plan(pseudo: str, plan: str, stripe_customer_id: str = "") -> bool:
     """
     Met à jour le plan d'un utilisateur après paiement Stripe confirmé.
     Crédite le nombre de synthèses correspondant au plan.
+    Sauvegarde le stripe_customer_id si fourni.
     """
     ws = _get_sheet()
     records = ws.get_all_values()
@@ -399,6 +399,8 @@ def upgrade_plan(pseudo: str, plan: str) -> bool:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
         ws.update(f"T{i}:U{i}", [[plan, str(syntheses)]])
+        if stripe_customer_id:
+            ws.update(f"V{i}", [[stripe_customer_id]])
         return True
     return False
 

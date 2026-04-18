@@ -775,7 +775,7 @@ def calculate():
         quota = {"allowed": True, "remaining": 999}
     else:
         plan = profile.get("plan", "free")
-        if plan in ("sub", "essential", "complete"):
+        if plan in ("test", "subscription"):
             # Utilisateur payant — consomme une synthèse plan
             from profiles import consume_plan_synthesis
             allowed = consume_plan_synthesis(pseudo)
@@ -1188,7 +1188,7 @@ def synthesis_prompt():
     UNLIMITED_PSEUDOS = {"jero"}
     if pseudo.lower() not in UNLIMITED_PSEUDOS:
         plan = profile.get("plan", "free")
-        if plan in ("sub", "essential", "complete"):
+        if plan in ("test", "subscription"):
             from profiles import consume_plan_synthesis
             if not consume_plan_synthesis(pseudo):
                 return jsonify({"error": "quota_exceeded",
@@ -1428,7 +1428,7 @@ def expand():
 def stripe_checkout():
     """
     Crée une session Stripe Checkout.
-    Body JSON : {"plan": "sub"|"essential"|"complete"}
+    Body JSON : {"product_type": "test_gemma"|"gemma_unlimited"}
     Retourne  : {"url": "https://checkout.stripe.com/..."}
     """
     from stripe_payments import create_checkout_session
@@ -1437,10 +1437,10 @@ def stripe_checkout():
     if not profile:
         return jsonify({"error": "Non connecté"}), 401
 
-    data    = request.get_json() or {}
-    plan    = data.get("plan", "")
-    if plan not in ("sub", "essential", "complete"):
-        return jsonify({"error": "Plan invalide"}), 400
+    data         = request.get_json() or {}
+    product_type = data.get("product_type", "")
+    if product_type not in ("test_gemma", "gemma_unlimited"):
+        return jsonify({"error": "product_type invalide"}), 400
 
     email  = profile.get("email", "")
     pseudo = profile.get("pseudo", "")
@@ -1449,7 +1449,7 @@ def stripe_checkout():
 
     base_url = request.host_url.rstrip("/")
     try:
-        url = create_checkout_session(plan, email, pseudo, base_url)
+        url = create_checkout_session(product_type, email, pseudo, base_url)
         return jsonify({"url": url})
     except Exception as exc:
         app.logger.error("Stripe checkout error : %s", exc, exc_info=True)
@@ -1484,7 +1484,7 @@ def stripe_webhook():
         pseudo   = metadata.get("pseudo", "")
         plan     = metadata.get("plan", "")
 
-        # Récupère le price_id pour les one-shots
+        # Récupère le price_id pour les one-shots si plan absent des metadata
         if not plan:
             line_items_raw = obj.get("line_items") or {}
             line_items = line_items_raw.get("data", []) if isinstance(line_items_raw, dict) else []
@@ -1492,10 +1492,12 @@ def stripe_webhook():
                 price_obj = line_items[0].get("price") or {}
                 plan = get_plan_from_price(price_obj.get("id", "") if isinstance(price_obj, dict) else "")
 
+        stripe_customer_id = obj.get("customer", "") or ""
+
         if pseudo and plan:
             try:
-                upgrade_plan(pseudo, plan)
-                app.logger.info("Plan upgradé : %s → %s", pseudo, plan)
+                upgrade_plan(pseudo, plan, stripe_customer_id=stripe_customer_id)
+                app.logger.info("Plan upgradé : %s → %s (customer: %s)", pseudo, plan, stripe_customer_id)
             except Exception as exc:
                 app.logger.error("Erreur upgrade plan : %s", exc)
 
@@ -1536,9 +1538,8 @@ def stripe_success():
 
     lang = get_lang()
     plan_labels = {
-        "sub":       "Abonnement Alertes activé ✓",
-        "essential": "Synthèse Essentielle débloquée ✓",
-        "complete":  "Lecture Complète débloquée ✓",
+        "test":         "Test Gemma débloqué — Synthèse + 3 questions ✓",
+        "subscription": "Chatbot Gemma Illimité activé ✓",
     }
     message = plan_labels.get(plan, "Paiement confirmé ✓")
 
