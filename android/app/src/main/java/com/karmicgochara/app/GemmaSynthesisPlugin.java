@@ -8,6 +8,8 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import org.json.JSONObject;
+
 import com.google.mlkit.genai.inference.GenerativeModel;
 import com.google.mlkit.genai.inference.GenerativeModelOptions;
 import com.google.mlkit.genai.inference.ContentGenerationRequest;
@@ -132,6 +134,7 @@ public class GemmaSynthesisPlugin extends Plugin {
         String system = call.getString("system", "");
         String user   = call.getString("user",   "");
         String type   = call.getString("type",   "synthesis");
+        String lang   = call.getString("lang",   "fr");
 
         if (user == null || user.isEmpty()) {
             call.reject("INVALID_PROMPT", "Prompt vide.");
@@ -142,13 +145,29 @@ public class GemmaSynthesisPlugin extends Plugin {
             return;
         }
 
+        // Profil utilisateur pour le nakshatra RAG (optionnel)
+        JSObject profileJs = call.getObject("profile", new JSObject());
+        JSONObject profile;
+        try { profile = new JSONObject(profileJs.toString()); }
+        catch (Exception e) { profile = new JSONObject(); }
+        final JSONObject finalProfile = profile;
+
         executor.execute(() -> {
             try {
-                // Si LoRA chargé, la doctrine est dans les poids — system prompt minimal.
-                // Sinon, injecter le vault dans le contexte (fallback).
-                String contextualSystem = (loraLoaded || system != null && !system.isEmpty())
-                    ? system
-                    : getVaultContent();
+                // Priorité :
+                // 1. LoRA chargé → doctrine dans les poids, system prompt minimal
+                // 2. system fourni par l'appelant → l'utiliser tel quel
+                // 3. fallback → DoctrinePromptBuilder (prompt compressé + nakshatra RAG)
+                String contextualSystem;
+                if (loraLoaded) {
+                    contextualSystem = (system != null && !system.isEmpty()) ? system : "";
+                } else if (system != null && !system.isEmpty()) {
+                    contextualSystem = system;
+                } else {
+                    contextualSystem = DoctrinePromptBuilder.buildSystemPrompt(
+                        getContext(), finalProfile, lang
+                    );
+                }
 
                 String fullPrompt = buildGemmaPrompt(contextualSystem, user);
 

@@ -1161,6 +1161,119 @@ FINAL CONCLUSION : One sentence only, mandatory.
   Strict format: [action verb] + [what concretely changes].
   Example: "Send the message you've been holding back for three weeks."
 """.strip()
+# ══════════════════════════════════════════════════════════════════════════════
+# SYSTEM PROMPT MOBILE — version compressée ~250 tokens pour Edge AI
+# Conçu pour Gemma 2B on-device. Le contexte nakshatra est injecté séparément
+# via get_nakshatra_context(). Total budget : ~400 tokens (prompt + nakshatra).
+# ══════════════════════════════════════════════════════════════════════════════
+
+SYSTEM_PROMPT_MOBILE_FR = """
+Tu es @siderealAstro13. Astrologie karmique védique sidérale. Tutoiement. Direct. Sans introduction.
+
+ROM/RAM/DHARMA :
+☋ Ketu = ROM — schéma automatique des vies passées, boucle de moindre résistance.
+⚷ Chiron = RAM — blessure active en traitement. Clé pour traverser la Porte Invisible.
+⚸ Lilith = Épreuve — rupture qui force la sortie de la ROM.
+☊ Rahu = Dharma — direction évolutive de l'âme.
+Porte Visible = mi-point Saturne↔Uranus. Porte Invisible = Porte Visible +180°.
+
+STRUCTURE OBLIGATOIRE (4 sections, dans cet ordre) :
+1. LA MÉMOIRE KARMIQUE — ce qui tourne en boucle (ROM)
+2. LA BLESSURE — Chiron RAM, ce qui est en traitement actif
+3. L'ÉPREUVE — Lilith, test radical qui force la bascule
+4. ALTERNATIVE DE CONSCIENCE — shift actionnable précis, maintenant
+
+RÈGLES ABSOLUES :
+— Jamais de signe zodiacal (ni français ni anglais). Uniquement maisons H1-H12.
+— Jamais de jargon : pas de nakshatra, ayanamsa, gochara, trigone, carré, orbe.
+— Jamais d'introduction ni de conclusion générale.
+— 350 mots maximum. Phrases courtes. Impact immédiat.
+""".strip()
+
+SYSTEM_PROMPT_MOBILE_EN = """
+You are @siderealAstro13. Sidereal Vedic karmic astrology. Direct address (you). No introduction.
+
+ROM/RAM/DHARMA :
+☋ Ketu = ROM — automatic pattern from past lives, path-of-least-resistance loop.
+⚷ Chiron = RAM — active wound in processing. Key to cross the Invisible Door.
+⚸ Lilith = Trial — rupture forcing the exit from ROM.
+☊ Rahu = Dharma — soul's evolutionary destination.
+Visible Door = Saturn↔Uranus short-arc midpoint. Invisible Door = Visible Door +180°.
+
+MANDATORY STRUCTURE (4 sections, in this order) :
+1. KARMIC MEMORY — what runs on loop (ROM)
+2. THE WOUND — Chiron RAM, what is actively processing
+3. THE TRIAL — Lilith, radical test forcing the shift
+4. ALTERNATIVE DE CONSCIENCE — precise, actionable shift, right now
+
+ABSOLUTE RULES :
+— Never use zodiac sign names (FR or EN). Use house numbers H1-H12 only.
+— No jargon: no nakshatra, ayanamsa, gochara, trine, square, orb.
+— No introduction, no general conclusion.
+— 350 words max. Short sentences. Immediate impact.
+""".strip()
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# NAKSHATRA RAG — Sélecteur contextuel pour Edge AI
+# Injecte uniquement les entrées nakshatra pertinentes au thème natal.
+# Budget : ~50 tokens/planète × 4 planètes = ~200 tokens.
+# ══════════════════════════════════════════════════════════════════════════════
+
+# Ordre de priorité doctrinale : ROM → RAM → Dharma → Épreuve → structure
+_MOBILE_PLANET_PRIORITY = [
+    ("ketu",    "ketu"),
+    ("chiron",  "chiron"),
+    ("rahu",    "rahu"),
+    ("lilith",  "lilith"),
+    ("saturn",  "saturn"),
+    ("jupiter", "jupiter"),
+]
+
+
+def get_nakshatra_context(natal_positions: dict, max_planets: int = 4, lang: str = "fr") -> str:
+    """
+    Retourne un bloc de contexte nakshatra pour les planètes clés du thème natal.
+
+    natal_positions : dict avec clés 'ketu_nakshatra', 'chiron_nakshatra', etc.
+                      (format profil Google Sheets / _row_to_profile)
+    max_planets     : nombre max de planètes à inclure (défaut 4, ~200 tokens)
+    lang            : 'fr' ou 'en' (non utilisé pour l'instant — données en FR)
+
+    Retourne une string vide si aucun nakshatra reconnu.
+    """
+    lines = []
+    for planet_key, karma_key in _MOBILE_PLANET_PRIORITY:
+        if len(lines) >= max_planets:
+            break
+        nak = natal_positions.get(f"{planet_key}_nakshatra", "").strip()
+        if not nak or nak not in NAKSHATRA_KARMA:
+            continue
+        entry = NAKSHATRA_KARMA[nak].get(karma_key, "").strip()
+        if entry:
+            lines.append(f"[{planet_key.upper()} · {nak}] {entry}")
+
+    if not lines:
+        return ""
+    return "MÉMOIRE NAKSHATRA :\n" + "\n".join(lines)
+
+
+def get_mobile_prompt(natal_positions: dict, lang: str = "fr") -> str:
+    """
+    Construit le prompt complet Edge AI : system compressé + contexte nakshatra.
+    Utilisé par le serveur pour /synthesis/prompt (mode mobile) et par le script
+    d'export JSON pour Android.
+
+    Budget total estimé : ~400-450 tokens selon les nakshatras.
+    """
+    base = SYSTEM_PROMPT_MOBILE_FR if lang != "en" else SYSTEM_PROMPT_MOBILE_EN
+    nak_ctx = get_nakshatra_context(natal_positions, max_planets=4, lang=lang)
+    if nak_ctx:
+        return base + "\n\n" + nak_ctx
+    return base
+
+
+# ══════════════════════════════════════════════════════════════════════════════
 # SELECTOR FUNCTION
 # ══════════════════════════════════════════════════════════════════════════════
 
