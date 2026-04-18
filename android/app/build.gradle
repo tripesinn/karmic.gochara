@@ -41,8 +41,8 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 
-    // ── Gemma 3/4 — MediaPipe Tasks GenAI (inférence locale) ────────────────
-    implementation 'com.google.mediapipe:tasks-genai:0.10.24'
+    // ── Gemma — ML Kit GenAI Inference API (on-device, LoRA support) ─────────
+    implementation 'com.google.mlkit:genai-inference:0.0.1-beta01'
 
     // ── Google Play Billing (achat "Supprimer les pubs") ─────────────────────
     implementation 'com.android.billingclient:billing:7.1.1'

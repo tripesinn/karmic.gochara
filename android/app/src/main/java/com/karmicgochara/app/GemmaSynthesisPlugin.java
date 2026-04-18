@@ -1,10 +1,6 @@
 package com.karmicgochara.app;
 
-import android.app.DownloadManager;
 import android.content.Context;
-import android.database.Cursor;
-import android.net.Uri;
-import android.os.Environment;
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -12,8 +8,13 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-import com.google.mediapipe.tasks.genai.llminference.LlmInference;
-import com.google.mediapipe.tasks.genai.llminference.LlmInference.LlmInferenceOptions;
+import com.google.mlkit.genai.inference.GenerativeModel;
+import com.google.mlkit.genai.inference.GenerativeModelOptions;
+import com.google.mlkit.genai.inference.ContentGenerationRequest;
+import com.google.mlkit.genai.inference.InferenceFeature;
+import com.google.mlkit.genai.inference.LoraWeightsParameters;
+import com.google.mlkit.genai.inference.DownloadConfig;
+import com.google.mlkit.genai.inference.InferenceAvailability;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -24,303 +25,266 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * GemmaSynthesisPlugin — Inférence locale Gemma 4 via MediaPipe Tasks GenAI
+ * GemmaSynthesisPlugin — Inférence locale Gemma via ML Kit GenAI APIs.
  *
- * Deux modèles selon la RAM disponible :
- *   E2B (~800 Mo, ≥ 4 Go RAM) → synthèse quotidienne  — rapide, offline
- *   E4B (~2 Go,  ≥ 6 Go RAM) → rapport annuel PDF     — qualité narrative
+ * Architecture :
+ *   - Modèle de base : géré par le système (AICore / Play Services), pas bundlé dans l'APK.
+ *   - LoRA adapter   : assets/lora/doctrine_adapter.bin — doctrine karmique @siderealAstro13
+ *                      baked dans les poids, contexte réduit de ~4000 → ~400 tokens.
  *
- * Sélection automatique via getDeviceMemory() + choix utilisateur.
- * URLs à mettre à jour dès la sortie officielle Gemma 4 (Google AI Edge).
+ * Capacitor methods exposés au JS :
+ *   checkAvailability()  → {available: bool, status: string, downloading: bool}
+ *   prepareModel()       → télécharge le modèle si nécessaire, charge le LoRA
+ *   generate(system, user, type) → {synthesis: string, local: true, loraUsed: bool}
+ *   unloadModel()        → libère la mémoire
+ *   getDeviceMemory()    → {totalRamGb, sufficient, recommended}
  */
 @CapacitorPlugin(name = "GemmaSynthesis")
 public class GemmaSynthesisPlugin extends Plugin {
 
-    // ── Modèles disponibles ───────────────────────────────────────────────────
-    // E2B — Gemma 4 2B int4 (~800 Mo) — synthèse quotidienne
-    // En attendant Gemma 4 officiel : Gemma 3 1B (~400 Mo) en placeholder
-    private static final String MODEL_2B_URL      =
-            "https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/gemma3-1b-it-int4.task";
-    private static final String MODEL_2B_FILENAME = "gemma_e2b.task";
-    private static final long   MODEL_2B_RAM_GB   = 4L;   // RAM minimum requise
+    // Fichier LoRA bundlé dans l'APK (assets/lora/)
+    private static final String LORA_ASSET_PATH    = "lora/doctrine_adapter.bin";
+    private static final String LORA_CACHE_FILENAME = "doctrine_adapter.bin";
 
-    // E4B — Gemma 4 4B int4 (~2 Go) — rapport annuel
-    // URL placeholder : à remplacer par l'URL officielle Gemma 4 4B quand disponible
-    private static final String MODEL_4B_URL      =
-            "https://huggingface.co/google/gemma-3-4b-it-mediapipe/resolve/main/gemma3-4b-it-cpu-int4.task";
-    private static final String MODEL_4B_FILENAME = "gemma_e4b.task";
-    private static final long   MODEL_4B_RAM_GB   = 6L;   // RAM minimum requise
+    // Paramètres d'inférence
+    private static final int MAX_TOKENS_SYNTHESIS = 2048;
+    private static final int MAX_TOKENS_REPORT    = 4096;
 
-    // ── Paramètres d'inférence ────────────────────────────────────────────────
-    private static final int   MAX_TOKENS_SYNTHESIS = 2048;  // synthèse quotidienne
-    private static final int   MAX_TOKENS_REPORT    = 4096;  // rapport annuel
-
-    // ── État runtime ──────────────────────────────────────────────────────────
-    private LlmInference    llm2b       = null;  // E2B chargé
-    private LlmInference    llm4b       = null;  // E4B chargé
-    private ExecutorService executor    = Executors.newSingleThreadExecutor();
+    // État runtime
+    private GenerativeModel model        = null;
+    private boolean         loraLoaded   = false;
+    private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
-    // ── checkModels : état des deux modèles ───────────────────────────────────
+    // ── checkAvailability : modèle disponible sur ce device ? ────────────────
     @PluginMethod
-    public void checkModels(PluginCall call) {
-        File f2b = getModelFile(MODEL_2B_FILENAME);
-        File f4b = getModelFile(MODEL_4B_FILENAME);
-
-        JSObject result = new JSObject();
-        result.put("e2b_exists",  f2b.exists() && f2b.length() > 1_000_000L);
-        result.put("e2b_loaded",  llm2b != null);
-        result.put("e2b_sizeMb",  f2b.exists() ? f2b.length() / (1024 * 1024) : 0);
-        result.put("e4b_exists",  f4b.exists() && f4b.length() > 1_000_000L);
-        result.put("e4b_loaded",  llm4b != null);
-        result.put("e4b_sizeMb",  f4b.exists() ? f4b.length() / (1024 * 1024) : 0);
-        call.resolve(result);
-    }
-
-    // Rétrocompat avec l'ancien checkModel()
-    @PluginMethod
-    public void checkModel(PluginCall call) { checkModels(call); }
-
-
-    // ── getDeviceMemory : RAM + recommandation modèle ─────────────────────────
-    @PluginMethod
-    public void getDeviceMemory(PluginCall call) {
-        android.app.ActivityManager am = (android.app.ActivityManager)
-                getContext().getSystemService(Context.ACTIVITY_SERVICE);
-        android.app.ActivityManager.MemoryInfo memInfo =
-                new android.app.ActivityManager.MemoryInfo();
-        am.getMemoryInfo(memInfo);
-
-        long totalRamGb   = memInfo.totalMem / (1024L * 1024L * 1024L);
-        boolean can2b     = totalRamGb >= MODEL_2B_RAM_GB;
-        boolean can4b     = totalRamGb >= MODEL_4B_RAM_GB;
-
-        JSObject result = new JSObject();
-        result.put("totalRamGb",   totalRamGb);
-        result.put("sufficient",   can2b);          // rétrocompat
-        result.put("can_e2b",      can2b);
-        result.put("can_e4b",      can4b);
-        result.put("recommended",  can4b ? "e4b" : can2b ? "e2b" : "cloud");
-        call.resolve(result);
+    public void checkAvailability(PluginCall call) {
+        GenerativeModelOptions opts = buildOptions(false, MAX_TOKENS_SYNTHESIS);
+        GenerativeModel.checkFeatureAvailability(getContext(), opts)
+            .addOnSuccessListener(status -> {
+                JSObject result = new JSObject();
+                switch (status) {
+                    case InferenceAvailability.AVAILABLE:
+                        result.put("available",   true);
+                        result.put("status",      "available");
+                        result.put("downloading", false);
+                        break;
+                    case InferenceAvailability.DOWNLOADABLE:
+                        result.put("available",   false);
+                        result.put("status",      "downloadable");
+                        result.put("downloading", false);
+                        break;
+                    case InferenceAvailability.DOWNLOADING:
+                        result.put("available",   false);
+                        result.put("status",      "downloading");
+                        result.put("downloading", true);
+                        break;
+                    default:
+                        result.put("available",   false);
+                        result.put("status",      "unavailable");
+                        result.put("downloading", false);
+                }
+                call.resolve(result);
+            })
+            .addOnFailureListener(e ->
+                call.reject("CHECK_ERROR", e.getMessage(), e)
+            );
     }
 
 
-    // ── loadModel : charge E2B ou E4B en mémoire ──────────────────────────────
+    // ── prepareModel : télécharge le modèle si besoin + charge le LoRA ───────
     @PluginMethod
-    public void loadModel(PluginCall call) {
-        String type = call.getString("type", "e2b"); // "e2b" ou "e4b"
-        boolean isE4b = "e4b".equals(type);
-
-        File modelFile = getModelFile(isE4b ? MODEL_4B_FILENAME : MODEL_2B_FILENAME);
-        int  maxTokens = isE4b ? MAX_TOKENS_REPORT : MAX_TOKENS_SYNTHESIS;
-
-        if (!modelFile.exists()) {
-            call.reject("MODEL_NOT_FOUND", "Modèle " + type.toUpperCase() + " non téléchargé.");
-            return;
-        }
+    public void prepareModel(PluginCall call) {
+        boolean useReport = Boolean.TRUE.equals(call.getBoolean("report", false));
+        int maxTokens = useReport ? MAX_TOKENS_REPORT : MAX_TOKENS_SYNTHESIS;
 
         executor.execute(() -> {
             try {
-                LlmInference existing = isE4b ? llm4b : llm2b;
-                if (existing != null) { try { existing.close(); } catch (Exception ignored) {} }
+                // Copie le LoRA depuis assets vers le cache interne si nécessaire
+                boolean loraAvailable = ensureLoraExtracted();
 
-                LlmInferenceOptions options = LlmInferenceOptions.builder()
-                        .setModelPath(modelFile.getAbsolutePath())
-                        .setMaxTokens(maxTokens)
-                        .build();
+                GenerativeModelOptions opts = buildOptions(loraAvailable, maxTokens);
 
-                LlmInference llm = LlmInference.createFromOptions(getContext(), options);
-                if (isE4b) llm4b = llm; else llm2b = llm;
-
-                JSObject result = new JSObject();
-                result.put("ok",   true);
-                result.put("type", type);
-                call.resolve(result);
+                // Déclenche le téléchargement du modèle de base si non disponible
+                GenerativeModel.createOrDownload(getContext(), opts)
+                    .addOnSuccessListener(m -> {
+                        model = m;
+                        loraLoaded = loraAvailable;
+                        JSObject result = new JSObject();
+                        result.put("ok",       true);
+                        result.put("loraUsed", loraLoaded);
+                        call.resolve(result);
+                    })
+                    .addOnFailureListener(e ->
+                        call.reject("PREPARE_ERROR", e.getMessage(), e)
+                    );
 
             } catch (Exception e) {
-                call.reject("LOAD_ERROR", "Erreur chargement " + type + " : " + e.getMessage(), e);
+                call.reject("PREPARE_ERROR", e.getMessage(), e);
             }
         });
     }
 
 
-    // ── generate : inférence avec le modèle approprié ────────────────────────
+    // ── generate : inférence Gemma (+ LoRA doctrine si disponible) ───────────
     @PluginMethod
     public void generate(PluginCall call) {
         String system = call.getString("system", "");
         String user   = call.getString("user",   "");
-        String type   = call.getString("type",   "e2b"); // "e2b" ou "e4b"
-        boolean useVault = call.getBoolean("useVault", true);
-        boolean isE4b = "e4b".equals(type);
+        String type   = call.getString("type",   "synthesis");
 
         if (user == null || user.isEmpty()) {
             call.reject("INVALID_PROMPT", "Prompt vide.");
             return;
         }
-
-        LlmInference llm = isE4b ? llm4b : llm2b;
-        // Fallback : si E4B demandé mais non chargé, tente E2B
-        if (llm == null && isE4b && llm2b != null) {
-            llm = llm2b;
-            type = "e2b";
-        }
-        if (llm == null) {
-            call.reject("MODEL_NOT_LOADED", "Aucun modèle chargé. Appelle loadModel() d'abord.");
+        if (model == null) {
+            call.reject("MODEL_NOT_LOADED", "Appelle prepareModel() d'abord.");
             return;
         }
 
-        final LlmInference finalLlm = llm;
-        final String       finalType = type;
-        final String       finalSystem = system;
-
         executor.execute(() -> {
             try {
-                String vaultData = useVault ? getVaultContent() : "";
-                String augmentedSystem = finalSystem;
-                if (!vaultData.isEmpty()) {
-                    augmentedSystem = "RÉFÉRENCES (VAULT) :\n" + vaultData + "\n\nINSTRUCTIONS :\n" + finalSystem;
-                }
+                // Si LoRA chargé, la doctrine est dans les poids — system prompt minimal.
+                // Sinon, injecter le vault dans le contexte (fallback).
+                String contextualSystem = (loraLoaded || system != null && !system.isEmpty())
+                    ? system
+                    : getVaultContent();
 
-                String fullPrompt = buildGemmaPrompt(augmentedSystem, user);
-                String response   = finalLlm.generateResponse(fullPrompt);
+                String fullPrompt = buildGemmaPrompt(contextualSystem, user);
 
-                JSObject result = new JSObject();
-                result.put("ok",        true);
-                result.put("synthesis", response.trim());
-                result.put("local",     true);
-                result.put("model",     finalType);
-                result.put("vaultUsed", !vaultData.isEmpty());
-                call.resolve(result);
+                ContentGenerationRequest request = ContentGenerationRequest.builder()
+                    .setContents(fullPrompt)
+                    .build();
+
+                model.generateContent(request)
+                    .addOnSuccessListener(response -> {
+                        JSObject result = new JSObject();
+                        result.put("ok",        true);
+                        result.put("synthesis", response.getText().trim());
+                        result.put("local",     true);
+                        result.put("loraUsed",  loraLoaded);
+                        result.put("type",      type);
+                        call.resolve(result);
+                    })
+                    .addOnFailureListener(e ->
+                        call.reject("INFERENCE_ERROR", e.getMessage(), e)
+                    );
 
             } catch (Exception e) {
-                call.reject("INFERENCE_ERROR", "Erreur inférence : " + e.getMessage(), e);
+                call.reject("INFERENCE_ERROR", e.getMessage(), e);
             }
         });
     }
 
 
-    // ── downloadModel : télécharge E2B ou E4B ────────────────────────────────
-    @PluginMethod
-    public void downloadModel(PluginCall call) {
-        String type  = call.getString("type", "e2b");
-        boolean isE4b = "e4b".equals(type);
-
-        String url      = isE4b ? MODEL_4B_URL      : MODEL_2B_URL;
-        String filename = isE4b ? MODEL_4B_FILENAME  : MODEL_2B_FILENAME;
-        String label    = isE4b ? "Gemma E4B (~2 Go)" : "Gemma E2B (~800 Mo)";
-
-        File modelFile = getModelFile(filename);
-        if (modelFile.exists() && modelFile.length() > 1_000_000L) {
-            JSObject result = new JSObject();
-            result.put("ok",      true);
-            result.put("already", true);
-            result.put("type",    type);
-            call.resolve(result);
-            return;
-        }
-
-        try {
-            DownloadManager.Request request = new DownloadManager.Request(Uri.parse(url))
-                    .setTitle("Karmic Gochara — " + label)
-                    .setDescription("Téléchargement du modèle IA local")
-                    .setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
-                    .setDestinationUri(Uri.fromFile(modelFile))
-                    .setAllowedOverMetered(false)
-                    .setAllowedOverRoaming(false);
-
-            DownloadManager dm = (DownloadManager)
-                    getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-            long downloadId = dm.enqueue(request);
-
-            JSObject result = new JSObject();
-            result.put("ok",         true);
-            result.put("downloadId", downloadId);
-            result.put("already",    false);
-            result.put("type",       type);
-            call.resolve(result);
-
-        } catch (Exception e) {
-            call.reject("DOWNLOAD_ERROR", e.getMessage(), e);
-        }
-    }
-
-
-    // ── checkDownloadProgress ─────────────────────────────────────────────────
-    @PluginMethod
-    public void checkDownloadProgress(PluginCall call) {
-        long downloadId = call.getLong("downloadId", -1L);
-        if (downloadId == -1) { call.reject("INVALID_ID", "downloadId requis."); return; }
-
-        DownloadManager dm = (DownloadManager)
-                getContext().getSystemService(Context.DOWNLOAD_SERVICE);
-        Cursor cursor = dm.query(new DownloadManager.Query().setFilterById(downloadId));
-
-        JSObject result = new JSObject();
-        if (cursor != null && cursor.moveToFirst()) {
-            int statusIdx = cursor.getColumnIndex(DownloadManager.COLUMN_STATUS);
-            int dlIdx     = cursor.getColumnIndex(DownloadManager.COLUMN_BYTES_DOWNLOADED_SO_FAR);
-            int totalIdx  = cursor.getColumnIndex(DownloadManager.COLUMN_TOTAL_SIZE_BYTES);
-
-            int  status   = statusIdx >= 0 ? cursor.getInt(statusIdx)  : -1;
-            long dlBytes  = dlIdx     >= 0 ? cursor.getLong(dlIdx)     : 0;
-            long total    = totalIdx  >= 0 ? cursor.getLong(totalIdx)  : -1;
-            int  progress = total > 0 ? (int)(dlBytes * 100 / total) : 0;
-
-            result.put("status",   statusToString(status));
-            result.put("progress", progress);
-            result.put("dlMb",     dlBytes / (1024 * 1024));
-            result.put("totalMb",  total   / (1024 * 1024));
-            cursor.close();
-        } else {
-            result.put("status", "unknown");
-            result.put("progress", 0);
-        }
-        call.resolve(result);
-    }
-
-
-    // ── unloadModel ───────────────────────────────────────────────────────────
+    // ── unloadModel : libère la mémoire ───────────────────────────────────────
     @PluginMethod
     public void unloadModel(PluginCall call) {
-        String type   = call.getString("type", "all");
-        if ("e2b".equals(type) || "all".equals(type)) {
-            if (llm2b != null) { try { llm2b.close(); } catch (Exception ignored) {} llm2b = null; }
+        if (model != null) {
+            try { model.close(); } catch (Exception ignored) {}
+            model = null;
         }
-        if ("e4b".equals(type) || "all".equals(type)) {
-            if (llm4b != null) { try { llm4b.close(); } catch (Exception ignored) {} llm4b = null; }
-        }
+        loraLoaded = false;
         JSObject result = new JSObject();
         result.put("ok", true);
         call.resolve(result);
     }
 
 
-    // ── Helpers ───────────────────────────────────────────────────────────────
-    private File getModelFile(String filename) {
-        File dir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
-        if (dir == null) dir = getContext().getFilesDir();
-        return new File(dir, filename);
+    // ── getDeviceMemory : RAM + recommandation ────────────────────────────────
+    @PluginMethod
+    public void getDeviceMemory(PluginCall call) {
+        android.app.ActivityManager am = (android.app.ActivityManager)
+            getContext().getSystemService(Context.ACTIVITY_SERVICE);
+        android.app.ActivityManager.MemoryInfo memInfo =
+            new android.app.ActivityManager.MemoryInfo();
+        am.getMemoryInfo(memInfo);
+
+        long totalRamGb = memInfo.totalMem / (1024L * 1024L * 1024L);
+
+        JSObject result = new JSObject();
+        result.put("totalRamGb",  totalRamGb);
+        result.put("sufficient",  totalRamGb >= 4);
+        result.put("recommended", totalRamGb >= 6 ? "full" : totalRamGb >= 4 ? "standard" : "unavailable");
+        call.resolve(result);
+    }
+
+
+    // ── checkModel / checkModels : rétrocompat JS ─────────────────────────────
+    @PluginMethod
+    public void checkModel(PluginCall call)  { checkAvailability(call); }
+    @PluginMethod
+    public void checkModels(PluginCall call) { checkAvailability(call); }
+
+
+    // ── Helpers privés ────────────────────────────────────────────────────────
+
+    /**
+     * Construit les options ML Kit GenAI.
+     * Si le LoRA est disponible en cache, l'injecte dans les options.
+     */
+    private GenerativeModelOptions buildOptions(boolean withLora, int maxTokens) {
+        GenerativeModelOptions.Builder builder = GenerativeModelOptions.builder()
+            .setInferenceFeature(InferenceFeature.TEXT_GENERATION)
+            .setMaxTokens(maxTokens);
+
+        if (withLora) {
+            File loraFile = getLoraFile();
+            if (loraFile.exists() && loraFile.length() > 0) {
+                builder.setLoraWeightsParameters(
+                    LoraWeightsParameters.builder()
+                        .setWeightsFilePath(loraFile.getAbsolutePath())
+                        .build()
+                );
+            }
+        }
+
+        return builder.build();
     }
 
     /**
-     * Lit récursivement le contenu du dossier assets/vault pour l'injecter dans le prompt.
+     * Copie le LoRA depuis assets/lora/ vers le cache interne au premier lancement.
+     * Retourne true si le fichier est disponible et non vide.
+     */
+    private boolean ensureLoraExtracted() {
+        File dest = getLoraFile();
+        if (dest.exists() && dest.length() > 0) return true;
+
+        try (InputStream is = getContext().getAssets().open(LORA_ASSET_PATH)) {
+            dest.getParentFile().mkdirs();
+            java.io.FileOutputStream fos = new java.io.FileOutputStream(dest);
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = is.read(buf)) != -1) fos.write(buf, 0, n);
+            fos.close();
+            return dest.exists() && dest.length() > 0;
+        } catch (IOException e) {
+            // LoRA non bundlé — fallback vault en contexte
+            return false;
+        }
+    }
+
+    private File getLoraFile() {
+        File cacheDir = new File(getContext().getFilesDir(), "lora");
+        return new File(cacheDir, LORA_CACHE_FILENAME);
+    }
+
+    /**
+     * Fallback : charge le vault depuis assets/karmic_vault/ si LoRA absent.
+     * Utilisé uniquement si lora_adapter.bin n'est pas encore bundlé.
      */
     private String getVaultContent() {
         StringBuilder sb = new StringBuilder();
         try {
-            String[] files = getContext().getAssets().list("vault");
-            if (files == null || files.length == 0) return "";
-
+            String[] files = getContext().getAssets().list("karmic_vault");
+            if (files == null) return "";
             for (String fileName : files) {
-                if (fileName.endsWith(".md")) {
-                    try (InputStream is = getContext().getAssets().open("vault/" + fileName);
-                         BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
-                        String line;
-                        while ((line = reader.readLine()) != null) {
-                            sb.append(line).append("\n");
-                        }
-                        sb.append("\n---\n");
-                    }
+                if (!fileName.endsWith(".md")) continue;
+                try (InputStream is = getContext().getAssets().open("karmic_vault/" + fileName);
+                     BufferedReader reader = new BufferedReader(new InputStreamReader(is))) {
+                    String line;
+                    while ((line = reader.readLine()) != null) sb.append(line).append("\n");
+                    sb.append("\n---\n");
                 }
             }
         } catch (IOException e) {
@@ -330,7 +294,7 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
     /**
-     * Format de prompt Gemma Instruct (Gemma 3 & 4) :
+     * Format prompt Gemma Instruct (Gemma 3/4) :
      * <start_of_turn>user\n{system}\n\n{user}<end_of_turn>\n<start_of_turn>model\n
      */
     private String buildGemmaPrompt(String system, String user) {
@@ -340,22 +304,10 @@ public class GemmaSynthesisPlugin extends Plugin {
         return sb.toString();
     }
 
-    private String statusToString(int status) {
-        switch (status) {
-            case DownloadManager.STATUS_PENDING:    return "pending";
-            case DownloadManager.STATUS_RUNNING:    return "running";
-            case DownloadManager.STATUS_PAUSED:     return "paused";
-            case DownloadManager.STATUS_SUCCESSFUL: return "success";
-            case DownloadManager.STATUS_FAILED:     return "failed";
-            default:                                return "unknown";
-        }
-    }
-
     @Override
     protected void handleOnDestroy() {
         executor.shutdown();
-        if (llm2b != null) { try { llm2b.close(); } catch (Exception ignored) {} }
-        if (llm4b != null) { try { llm4b.close(); } catch (Exception ignored) {} }
+        if (model != null) { try { model.close(); } catch (Exception ignored) {} }
         super.handleOnDestroy();
     }
 }
