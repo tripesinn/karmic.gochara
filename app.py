@@ -760,7 +760,8 @@ def geocode():
 def calculate():
     from astro_calc import calculate_transits
     from ai_interpret import get_synthesis
-    from profiles import check_and_increment_synthesis  # ← AJOUT
+    from profiles import check_and_increment_synthesis
+    from output_validator import SynthesisValidator
 
     profile = session.get("profile")
     if not profile:
@@ -850,7 +851,20 @@ def calculate():
         if synthesis is None:
             raise Exception("L'oracle est temporairement surchargé — réessaie dans quelques secondes.")
 
-        result["synthesis"] = synthesis
+        # Validation doctrinale
+        validation_result = SynthesisValidator().validate(synthesis)
+        if validation_result.get("warnings"):
+            app.logger.warning(
+                "Synthèse %s : warnings validation %s", pseudo, validation_result["warnings"]
+            )
+
+        result["synthesis"]  = synthesis
+        result["valid"]      = validation_result["valid"]
+        result["validation"] = {
+            "score":    validation_result.get("score", 0),
+            "errors":   validation_result.get("errors", []),
+            "warnings": validation_result.get("warnings", []),
+        }
         result["remaining"] = quota["remaining"]
 
         # Sauvegarde la localisation de transit dans la session (toujours)
