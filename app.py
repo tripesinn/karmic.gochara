@@ -77,6 +77,16 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
 
     enriched["porte_visible_deg"]   = _deg((natal.get("Porte Visible ⊙")  or {}).get("display", ""))
     enriched["porte_invisible_deg"] = _deg((natal.get("Porte Invisible ⊗") or {}).get("display", ""))
+
+    moon = natal.get("Lune ☽") or {}
+    moon_lon = moon.get("lon_raw") or moon.get("lon")
+    if moon_lon is not None:
+        enriched["moon_longitude_sid"]   = str(round(float(moon_lon), 6))
+        enriched["chandra_lagna_degree"] = str(round(float(moon_lon) % 30, 6))
+    else:
+        enriched["moon_longitude_sid"]   = ""
+        enriched["chandra_lagna_degree"] = ""
+
     enriched["natal_positions"]     = natal
 
     return enriched
@@ -1161,6 +1171,23 @@ def synthesis_prompt():
     profile = session.get("profile")
     if not profile:
         return jsonify({"error": "Non connecté"}), 401
+
+    # ── Gate paiement (même logique que /calculate) ───────────────────────────
+    pseudo = profile.get("pseudo", "")
+    UNLIMITED_PSEUDOS = {"jero"}
+    if pseudo.lower() not in UNLIMITED_PSEUDOS:
+        plan = profile.get("plan", "free")
+        if plan in ("sub", "essential", "complete"):
+            from profiles import consume_plan_synthesis
+            if not consume_plan_synthesis(pseudo):
+                return jsonify({"error": "quota_exceeded",
+                                "message": "Tu n'as plus de synthèses disponibles sur ton plan."}), 429
+        else:
+            from profiles import check_and_increment_synthesis
+            quota = check_and_increment_synthesis(pseudo)
+            if not quota["allowed"]:
+                return jsonify({"error": "quota_exceeded",
+                                "message": "Tu as atteint ta limite gratuite."}), 429
 
     natal = {
         "name":   profile["name"],

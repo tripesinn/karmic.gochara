@@ -63,6 +63,8 @@ NATAL_COLS = [
     "porte_visible_deg",     # AO (40)
     "porte_invisible_sign",  # AP (41)
     "porte_invisible_house", # AQ (42)
+    "moon_longitude_sid",    # AR (43)
+    "chandra_lagna_degree",  # AS (44)
 ]
 
 SYNTHESIS_QUOTA = 3  # max synthèses par mois (plan free)
@@ -160,6 +162,8 @@ def _row_to_profile(row: list) -> dict:
         "porte_visible_deg":     _safe(40),
         "porte_invisible_sign":  _safe(41),
         "porte_invisible_house": _safe(42),
+        "moon_longitude_sid":    _safe(43),
+        "chandra_lagna_degree":  _safe(44),
     }
 
 
@@ -282,7 +286,7 @@ def update_profile(email: str, data: dict) -> dict | None:
 
 def save_natal_to_sheet(pseudo: str, profile: dict) -> bool:
     """
-    Sauvegarde les données natales calculées dans les colonnes W→AQ.
+    Sauvegarde les données natales calculées dans les colonnes W→AS.
     Appelée après calcul natal à l'inscription ou au premier login.
     """
     ws = _get_sheet()
@@ -293,7 +297,7 @@ def save_natal_to_sheet(pseudo: str, profile: dict) -> bool:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
         natal_row = [str(profile.get(col, "")) for col in NATAL_COLS]
-        ws.update(f"W{i}:AQ{i}", [natal_row])
+        ws.update(f"W{i}:AS{i}", [natal_row])
         return True
     return False
 
