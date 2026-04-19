@@ -11,6 +11,7 @@ Logique :
 
 import os
 from datetime import date, timedelta
+from urllib.parse import quote
 
 import requests as req
 
@@ -346,6 +347,18 @@ def detect_transit_events(profile: dict) -> list[dict]:
 def _build_alert_html(profile: dict, events: list[dict], upgrade_cta: bool = False) -> str:
     name      = profile.get("name") or profile.get("pseudo", "")
     today_str = date.today().strftime("%d/%m/%Y")
+
+    # Contexte du premier événement encodé dans l'URL CTA
+    ctx_url = "/?open=synthesis"
+    if events:
+        e0 = events[0]
+        t_label = PLANET_LABELS.get(e0["transit"], e0["transit"])
+        nak     = e0.get("nakshatra", "")
+        point   = e0.get("natal", "")
+        regime  = e0.get("interpretation", e0.get("kind", ""))
+        ctx_val = quote(f"{t_label}|{nak}|{point}|{regime}", safe="")
+        ctx_url = f"/?open=synthesis&ctx={ctx_val}"
+
     upgrade_block = (
         '<div style="margin-top:20px;padding:16px;border:1px solid #4b0082;border-radius:3px;'
         'text-align:center;background:rgba(75,0,130,0.08)">'
@@ -408,7 +421,7 @@ def _build_alert_html(profile: dict, events: list[dict], upgrade_cta: bool = Fal
   <p style="color:#9090b0;font-size:12px;margin-top:0;">{name} · {today_str} · Astrologie Védique Sidérale</p>
   <table>{rows}</table>
   <div style="margin-top:28px;text-align:center;">
-    <a href="https://karmicgochara.app/?open=synthesis" style="display:inline-block;background:#d4a017;color:#0a0a1a;text-decoration:none;padding:12px 28px;border-radius:3px;font-weight:bold;font-size:14px;letter-spacing:0.08em;">
+    <a href="https://karmicgochara.app{ctx_url}" style="display:inline-block;background:#d4a017;color:#0a0a1a;text-decoration:none;padding:12px 28px;border-radius:3px;font-weight:bold;font-size:14px;letter-spacing:0.08em;">
       ✦ VOIR MON INTERPRÉTATION →
     </a>
     <p style="margin-top:12px;font-size:11px;color:#606080;">

@@ -445,6 +445,7 @@
     </div>
 
     <div id="synthesis-box" style="margin-top: 3rem; text-align: left; display: none; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 20px;">
+        <div id="transit-context-banner" style="display:none; margin-bottom:1.2rem; padding:0.8rem 1rem; border-left:3px solid var(--gold); background:rgba(201,168,76,0.06); font-size:0.88rem; color:var(--text-dim);"></div>
         <div id="synthesis-content" style="line-height: 1.8; font-size: 1.1rem;"></div>
         <div style="margin-top: 1.5rem; text-align: center;">
             <button id="btnEmail" class="btn-secondary" onclick="sendSynthesisEmail()" style="max-width: 260px;">
@@ -1209,7 +1210,39 @@ function showSynthesis(text, remaining) {
     document.getElementById('synthesis-box').scrollIntoView({ behavior:'smooth' });
     showRatingBar();
     chatHistory = [];
-    initChat();
+    // Contexte transit depuis email
+    if (window._emailCtx) {
+        const { transit, nak, point, regime } = window._emailCtx;
+        const banner = document.getElementById('transit-context-banner');
+        if (banner && transit) {
+            const regimeLabels = {
+                'ROM_oppression':       'Activation ROM — test karmique',
+                'Dharma_amplification': 'Activation Dharma — opportunité',
+                'Blessure_activation':  'Activation Chiron — seuil',
+            };
+            banner.innerHTML = `⚡ <strong style="color:var(--gold)">${transit}</strong>`
+                + (nak ? ` dans <strong>${nak}</strong>` : '')
+                + (point ? ` — nakshatra de ton ${point} natal` : '')
+                + (regime ? ` &nbsp;·&nbsp; <em>${regimeLabels[regime] || regime}</em>` : '');
+            banner.style.display = 'block';
+        }
+    }
+    initChat().then(() => {
+        if (window._emailCtx) {
+            const { transit, nak, point } = window._emailCtx;
+            if (transit) {
+                const question = `${transit} est en ce moment dans ${nak || 'mon nakshatra natal'}${point ? ' — nakshatra de mon ' + point + ' natal' : ''}. Qu'est-ce que ça active concrètement pour moi ?`;
+                setTimeout(() => {
+                    const input = document.getElementById('chat-input');
+                    if (input && !input.disabled) {
+                        input.value = question;
+                        sendChatMessage();
+                    }
+                    window._emailCtx = null;
+                }, 800);
+            }
+        }
+    });
 }
 
 function showLocalBadge(isLocal, modelType) {
@@ -1429,10 +1462,15 @@ document.addEventListener('DOMContentLoaded', () => {
     if (l) l.textContent = T.js_modal_consent;
     if (d) d.textContent = T.js_modal_decline;
 
-    // Auto-lancement depuis lien email (?open=synthesis)
+    // Auto-lancement depuis lien email (?open=synthesis&ctx=...)
     const params = new URLSearchParams(window.location.search);
     if (params.get('open') === 'synthesis') {
+        const ctx = params.get('ctx') || '';
         history.replaceState({}, '', window.location.pathname);
+        if (ctx) {
+            const [transit, nak, point, regime] = ctx.split('|');
+            window._emailCtx = { transit, nak, point, regime };
+        }
         const btn = document.getElementById('calc-btn');
         if (btn) setTimeout(() => btn.click(), 600);
     }
