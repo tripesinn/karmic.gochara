@@ -1232,6 +1232,63 @@ def synthesis_prompt():
             "user":    prompts["user"],
         })
 
+    # Hook transit — pas de quota (teaser, même logique que /hook/transit mais retourne prompts)
+    if context == "hook_transit":
+        from astro_calc import calculate_transits
+        from ai_interpret import _aspects_to_text, _build_natal_context
+        from transit_alerts import _active_nak_activations, PLANET_LABELS as _PLANET_LABELS
+        date_str = data.get("date", "")
+        if not date_str:
+            return jsonify({"error": "Date requise"}), 400
+        hour_t   = int(data.get("hour",   12))
+        minute_t = int(data.get("minute", 0))
+        transit_loc_t = {
+            "city": data.get("transit_city") or profile.get("transit_city", TRANSIT_LOC_DEFAULT["city"]),
+            "lat":  float(data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"])),
+            "lon":  float(data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"])),
+            "tz":   data.get("transit_tz")  or profile.get("transit_tz",  TRANSIT_LOC_DEFAULT["tz"]),
+        }
+        natal_t = {
+            "name": profile["name"], "year": profile["year"], "month": profile["month"],
+            "day":  profile["day"],  "hour": profile["hour"], "minute": profile["minute"],
+            "lat":  profile["lat"],  "lon":  profile["lon"],  "tz":     profile["tz"],
+            "city": profile["city"],
+        }
+        try:
+            year_t, month_t, day_t = map(int, date_str.split("-"))
+            chart_t    = calculate_transits(natal_t, transit_loc_t, year_t, month_t, day_t, hour_t, minute_t)
+            enriched_t = _enrich_profile_with_natal(profile, chart_t.get("natal", {}))
+        except Exception as exc:
+            return jsonify({"error": str(exc)}), 500
+        aspects_text    = _aspects_to_text(chart_t.get("aspects", []), max_aspects=3)
+        natal_mini      = _build_natal_context(enriched_t)
+        name_t          = enriched_t.get("name", "")
+        date_label      = chart_t.get("transit_date", date_str)
+        natal_naks      = {"Ketu": enriched_t.get("ketu_nakshatra",""), "Rahu": enriched_t.get("rahu_nakshatra",""), "Chiron": enriched_t.get("chiron_nakshatra","")}
+        transit_for_nak = {k: {"lon": float(v.get("lon_raw",0))} for k,v in chart_t.get("transits",{}).items() if v}
+        nak_active      = _active_nak_activations(natal_naks, transit_for_nak)
+        interp_map      = {"ROM_oppression": "régime ROM — test karmique", "Dharma_amplification": "régime Dharma — expansion", "Blessure_activation": "régime Chiron — transformation"}
+        nak_lines       = [f"{_PLANET_LABELS.get(t,t)} traverse {info['nakshatra']} ({info['lord']}) — {p} natal — {interp_map.get(info['interpretation'],'')}" for (t,p),info in nak_active.items()]
+        nak_ctx         = ("Activations nakshatra actives :\n" + "\n".join(nak_lines) + "\n\n") if nak_lines else ""
+        system_t = (
+            "Tu es @siderealAstro13. Lecteur d'âme karmique védique. "
+            "Style : oraculaire, direct, pas de liste mécanique. "
+            "Zéro degrés, zéro orbes dans le texte. Tutoiement. "
+            "INTERDIT ABSOLU : noms de signes zodiacaux. "
+            "Utilise uniquement les maisons (H1, H3…) et les noms de planètes."
+        )
+        user_t = (
+            f"Thème natal de {name_t} :\n{natal_mini}\n\n"
+            f"Aspects actifs ce jour ({date_label}) — ne pas citer tels quels :\n{aspects_text}\n\n"
+            f"{nak_ctx}"
+            f"Écris un hook de 3 phrases. Pas de titre. Pas d'introduction.\n"
+            f"Phrase 1 : ce qui se réactive dans la mémoire karmique de {name_t} aujourd'hui.\n"
+            f"Phrase 2 : ce que ça touche dans sa blessure profonde.\n"
+            f"Phrase 3 : l'amorce de l'Alternative de Conscience.\n"
+            f"Donne envie d'obtenir la lecture complète. Ton dense et précis."
+        )
+        return jsonify({"ok": True, "context": "hook_transit", "system": system_t, "user": user_t})
+
     # Synthèse complète + Alternative de Conscience : gate paiement
     if pseudo.lower() not in UNLIMITED_PSEUDOS:
         plan = profile.get("plan", "free")

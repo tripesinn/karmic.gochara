@@ -659,32 +659,66 @@ function showPaymentPlans() {
 }
 
 // ── Hook natal ────────────────────────────────────────────────────────────────
-(function initHookNatal() {
+(async function initHookNatal() {
     const hook   = sessionStorage.getItem('hook_natal');
     const engine = sessionStorage.getItem('hook_engine') || 'claude';
-    if (hook) {
-        const box  = document.getElementById('hook-natal-box');
-        const text = document.getElementById('hook-natal-text');
-        if (box && text) {
-            text.textContent = hook;
-            const badge = document.getElementById('natal-engine-badge');
-            if (badge) {
-                if (engine === 'gemma') {
-                    badge.textContent = '⬡ GEMMA LOCAL';
-                    badge.style.cssText = 'background:rgba(180,140,60,0.15);color:var(--gold);border:1px solid rgba(180,140,60,0.3);';
-                } else {
-                    badge.textContent = '☁ CLAUDE';
-                    badge.style.cssText = 'background:rgba(100,120,180,0.12);color:#8899cc;border:1px solid rgba(100,120,180,0.25);';
+    const box  = document.getElementById('hook-natal-box');
+    const text = document.getElementById('hook-natal-text');
+    if (!box || !text) return;
+
+    function applyBadge(eng) {
+        const badge = document.getElementById('natal-engine-badge');
+        if (!badge) return;
+        if (eng === 'gemma') {
+            badge.textContent = '⬡ GEMMA LOCAL';
+            badge.style.cssText = 'background:rgba(180,140,60,0.15);color:var(--gold);border:1px solid rgba(180,140,60,0.3);';
+        } else {
+            badge.textContent = '☁ CLAUDE';
+            badge.style.cssText = 'background:rgba(100,120,180,0.12);color:#8899cc;border:1px solid rgba(100,120,180,0.25);';
+        }
+    }
+    function addExpandLink() {
+        if (text.nextElementSibling?.getAttribute('href') === 'expand:alternative_conscience') return;
+        const link = document.createElement('a');
+        link.href = 'expand:alternative_conscience';
+        link.textContent = '→ Révèle ton Alternative de Conscience';
+        link.style.display = 'block';
+        link.style.marginTop = '0.8rem';
+        text.after(link);
+    }
+
+    const gemmaReady = await Gemma.isAvailable();
+    if (gemmaReady) {
+        box.style.display = 'block';
+        text.innerHTML = '<span class="spinner"></span>';
+        try {
+            const pr = await fetch('/synthesis/prompt', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ context: 'natal' })
+            });
+            const pd = await pr.json();
+            if (pd.system && pd.user) {
+                const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
+                if (gr && gr.synthesis) {
+                    text.innerHTML = '';
+                    text.textContent = gr.synthesis;
+                    applyBadge('gemma');
+                    addExpandLink();
+                    sessionStorage.removeItem('hook_natal');
+                    sessionStorage.removeItem('hook_engine');
+                    return;
                 }
             }
-            const link = document.createElement('a');
-            link.href = 'expand:alternative_conscience';
-            link.textContent = '→ Révèle ton Alternative de Conscience';
-            link.style.display = 'block';
-            link.style.marginTop = '0.8rem';
-            text.after(link);
-            box.style.display = 'block';
-        }
+        } catch(e) { console.warn('Gemma natal fallback:', e); }
+        text.innerHTML = '';
+    }
+
+    if (hook) {
+        text.textContent = hook;
+        applyBadge(engine);
+        addExpandLink();
+        box.style.display = 'block';
         sessionStorage.removeItem('hook_natal');
         sessionStorage.removeItem('hook_engine');
     }
@@ -716,7 +750,41 @@ async function expandTopic(topic) {
         synthBox.appendChild(expandBox);
     }
 
+    function buildExpandCta() {
+        const cta = document.createElement('div');
+        cta.className = 'expand-cta';
+        cta.innerHTML =
+            '<p class="cta-label">Test Gemma · 4,99€</p>' +
+            '<p class="cta-desc">Synthèse complète · 3 questions chatbot · IA locale</p>' +
+            '<button onclick="stripeCheckout(\'test\')" class="btn-primary" style="max-width:280px;margin:0 auto;">' +
+            '<span>Débloquer la Synthèse — 4,99€</span></button>';
+        return cta;
+    }
+
     try {
+        const gemmaReady = await Gemma.isAvailable();
+        if (gemmaReady) {
+            const date = document.getElementById('transit-date')?.value || new Date().toISOString().slice(0,10);
+            const pr = await fetch('/synthesis/prompt', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    context: 'conscience', date, hour: 12, minute: 0,
+                    ...(transitGeo ? { transit_lat: transitGeo.lat, transit_lon: transitGeo.lon, transit_city: transitGeo.city, transit_tz: transitGeo.tz } : {})
+                })
+            });
+            const pd = await pr.json();
+            if (pd.system && pd.user) {
+                const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
+                if (gr && gr.synthesis) {
+                    expandBox.innerHTML = marked.parse(gr.synthesis);
+                    expandBox.appendChild(buildExpandCta());
+                    expandBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    return;
+                }
+            }
+        }
+
         const pseudo = sessionStorage.getItem('currentPseudo') || '';
         const res = await fetch('/expand', {
             method: 'POST',
@@ -725,15 +793,7 @@ async function expandTopic(topic) {
         });
         const data = await res.json();
         expandBox.innerHTML = marked.parse(data.content || '_(aucun contenu)_');
-
-        const cta = document.createElement('div');
-        cta.className = 'expand-cta';
-        cta.innerHTML =
-            '<p class="cta-label">Test Gemma · 4,99€</p>' +
-            '<p class="cta-desc">Synthèse complète · 3 questions chatbot · IA locale</p>' +
-            '<button onclick="stripeCheckout(\'test\')" class="btn-primary" style="max-width:280px;margin:0 auto;">' +
-            '<span>Débloquer la Synthèse — 4,99€</span></button>';
-        expandBox.appendChild(cta);
+        expandBox.appendChild(buildExpandCta());
         expandBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
     } catch(err) {
@@ -769,9 +829,39 @@ async function requestHookTransit() {
     btnText.innerHTML = '<span class="spinner"></span> LECTURE EN COURS…';
     if (box)     box.style.display     = 'block';
     if (text)    text.textContent      = '';
-    if (spinner) spinner.style.display = 'block';
+    if (spinner) spinner.style.display = 'none';
     if (cta)     cta.style.display     = 'none';
 
+    const gemmaReady = await Gemma.isAvailable();
+    if (gemmaReady) {
+        btnText.innerHTML = '<span class="spinner"></span> GEMMA LOCAL…';
+        try {
+            const pr = await fetch('/synthesis/prompt', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    context: 'hook_transit', date, hour: 12, minute: 0,
+                    transit_lat: transitGeo.lat, transit_lon: transitGeo.lon,
+                    transit_city: transitGeo.city, transit_tz: transitGeo.tz,
+                })
+            });
+            const pd = await pr.json();
+            if (pd.system && pd.user) {
+                const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
+                if (gr && gr.synthesis) {
+                    if (text) text.textContent = gr.synthesis;
+                    if (cta) { cta.style.display = 'block'; cta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
+                    btnText.innerHTML = '◆ RELIRE LE SIGNAL';
+                    btn.disabled = false;
+                    return;
+                }
+            }
+        } catch(e) { console.warn('Gemma hook transit fallback:', e); }
+        btnText.innerHTML = '<span class="spinner"></span> LECTURE EN COURS…';
+        if (text) text.textContent = '';
+    }
+
+    if (spinner) spinner.style.display = 'block';
     try {
         const res = await fetch('/hook/transit', {
             method: 'POST',
