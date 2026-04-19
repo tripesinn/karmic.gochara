@@ -395,12 +395,17 @@ def _build_alert_html(profile: dict, events: list[dict]) -> str:
   <h1>✦ Alerte Transit Karmique</h1>
   <p style="color:#9090b0;font-size:12px;margin-top:0;">{name} · {today_str} · Astrologie Védique Sidérale</p>
   <table>{rows}</table>
-  <div class="support" style="margin-top:20px;text-align:center;">
-    <a href="https://buymeacoffee.com/jerome6">☕ Soutenir le projet</a>
+  <div style="margin-top:28px;text-align:center;">
+    <a href="https://karmicgochara.app/" style="display:inline-block;background:#d4a017;color:#0a0a1a;text-decoration:none;padding:12px 28px;border-radius:3px;font-weight:bold;font-size:14px;letter-spacing:0.08em;">
+      ✦ VOIR MON INTERPRÉTATION →
+    </a>
+    <p style="margin-top:12px;font-size:11px;color:#606080;">
+      Connecte-toi · ouvre ton chatbot · pose la question que ça soulève.
+    </p>
   </div>
   <div class="footer">
     Karmic Gochara · DK Ayanamsa · Chandra Lagna · True Nodes · Orbe &lt; 3°<br>
-    Pour gérer tes alertes, connecte-toi sur l'application.
+    <a href="https://karmicgochara.app/" style="color:#4b4b70;text-decoration:none;">Gérer mes alertes</a>
   </div>
 </div>
 </body>
