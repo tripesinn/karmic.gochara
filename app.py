@@ -1290,6 +1290,71 @@ def synthesis_prompt():
         return jsonify({"error": str(exc)}), 500
 
 
+# ── Chatbot karmique : quota + prompt pour Gemma local ───────────────────────
+
+@app.route("/chat/status", methods=["GET"])
+def chat_status():
+    """Retourne le plan et le quota chatbot restant pour l'utilisateur connecté."""
+    from profiles import get_chat_quota
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"plan": "free", "remaining": 0, "limit": 0})
+    pseudo = profile.get("pseudo", "")
+    UNLIMITED_PSEUDOS = {"jero"}
+    if pseudo.lower() in UNLIMITED_PSEUDOS:
+        return jsonify({"plan": "subscription", "remaining": 999, "limit": 999})
+    return jsonify(get_chat_quota(pseudo))
+
+
+@app.route("/chat/ask", methods=["POST"])
+def chat_ask():
+    """
+    Valide le quota chatbot, consomme 1 question si plan test,
+    et retourne {system, user} pour que Gemma génère la réponse localement.
+
+    Body JSON :
+        message : str       — question de l'utilisateur
+        history : list      — [{role, content}, ...] (derniers échanges)
+    """
+    from ai_interpret import build_prompt_chat
+    from profiles import consume_chat_question
+
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"error": "Non connecté"}), 401
+
+    data    = request.get_json() or {}
+    message = data.get("message", "").strip()
+    history = data.get("history", [])
+    lang    = session.get("lang", "fr")
+
+    if not message:
+        return jsonify({"error": "Message vide"}), 400
+
+    pseudo = profile.get("pseudo", "")
+    UNLIMITED_PSEUDOS = {"jero"}
+
+    if pseudo.lower() not in UNLIMITED_PSEUDOS:
+        result = consume_chat_question(pseudo)
+        if not result["ok"]:
+            return jsonify({"error": "quota_exceeded",
+                            "message": "Tu as utilisé toutes tes questions chatbot.",
+                            "upgrade_url": "/stripe/checkout?product=subscription"}), 429
+        remaining = result["remaining"]
+    else:
+        remaining = 999
+
+    enriched = _enrich_profile_with_natal(profile, {})
+    prompts  = build_prompt_chat(message, history, enriched, lang=lang)
+
+    return jsonify({
+        "ok":        True,
+        "system":    prompts["system"],
+        "user":      prompts["user"],
+        "remaining": remaining,
+    })
+
+
 # ── Alertes transit : toggle utilisateur ──────────────────────────────────────
 @app.route("/toggle_alerts", methods=["POST"])
 def toggle_alerts():

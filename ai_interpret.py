@@ -944,3 +944,57 @@ def build_prompt_signal(signal_data: dict, lang: str = "fr") -> dict:
         )
 
     return {"system": system, "user": user_prompt}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# CHATBOT — prompt Gemma multi-tour (dialogue continu avec contexte natal)
+# ══════════════════════════════════════════════════════════════════════════════
+
+def build_prompt_chat(message: str, history: list, profile: dict, lang: str = "fr") -> dict:
+    """
+    Construit le prompt chatbot pour Gemma (inférence locale).
+    history : liste de {role: "user"|"assistant", content: str}
+    Retourne {system, user} pour GemmaSynthesisPlugin.generate().
+    """
+    name = profile.get("name") or profile.get("pseudo", "")
+
+    parts = []
+    for key, label in [
+        ("ketu_nakshatra",    "Ketu"),
+        ("chiron_nakshatra",  "Chiron"),
+        ("rahu_nakshatra",    "Rahu"),
+        ("chandra_lagna_sign","Lagna"),
+    ]:
+        val = profile.get(key, "").strip()
+        if val:
+            parts.append(f"{label}·{val}")
+    natal_ctx = ("PROFIL : " + " | ".join(parts)) if parts else ""
+
+    if lang == "en":
+        system = (
+            f"You are @siderealAstro13, Vedic sidereal karmic astrologer. "
+            f"In dialogue with {name}. Direct oracular tone. "
+            f"Forbidden: zodiac sign names. Max 100 words per answer."
+        )
+        if natal_ctx:
+            system += f"\n{natal_ctx}"
+        hist_lines = []
+        for turn in (history or [])[-6:]:
+            prefix = name if turn.get("role") == "user" else "@siderealAstro13"
+            hist_lines.append(f"{prefix}: {turn.get('content','').strip()}")
+        hist_lines.append(f"{name}: {message}")
+    else:
+        system = (
+            f"Tu es @siderealAstro13, astrologue karmique vedique sideral. "
+            f"En dialogue avec {name}. Ton direct, oraculaire. "
+            f"Interdit : signes zodiacaux. Max 100 mots par reponse."
+        )
+        if natal_ctx:
+            system += f"\n{natal_ctx}"
+        hist_lines = []
+        for turn in (history or [])[-6:]:
+            prefix = name if turn.get("role") == "user" else "@siderealAstro13"
+            hist_lines.append(f"{prefix} : {turn.get('content','').strip()}")
+        hist_lines.append(f"{name} : {message}")
+
+    return {"system": system, "user": "\n".join(hist_lines)}

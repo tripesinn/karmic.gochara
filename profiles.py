@@ -383,6 +383,12 @@ PLAN_SYNTHESES = {
     "free":         0,
 }
 
+PLAN_CHAT_LIMITS = {
+    "test":         3,    # 3 questions chatbot one-shot
+    "subscription": 999,  # illimité
+    "free":         0,
+}
+
 
 def upgrade_plan(pseudo: str, plan: str, stripe_customer_id: str = "") -> bool:
     """
@@ -395,12 +401,15 @@ def upgrade_plan(pseudo: str, plan: str, stripe_customer_id: str = "") -> bool:
     pseudo_lower = pseudo.strip().lower()
     syntheses = PLAN_SYNTHESES.get(plan, 0)
 
+    chat_limit = PLAN_CHAT_LIMITS.get(plan, 0)
+
     for i, row in enumerate(records[1:], start=2):
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
         ws.update(f"T{i}:U{i}", [[plan, str(syntheses)]])
         if stripe_customer_id:
             ws.update(f"V{i}", [[stripe_customer_id]])
+        ws.update(f"W{i}", [[str(chat_limit)]])
         return True
     return False
 
@@ -417,6 +426,51 @@ def downgrade_plan(pseudo: str) -> bool:
         ws.update(f"T{i}:U{i}", [["free", "0"]])
         return True
     return False
+
+
+def get_chat_quota(pseudo: str) -> dict:
+    """Retourne {plan, remaining, limit} pour le chatbot."""
+    ws = _get_sheet()
+    records = ws.get_all_values()
+    pseudo_lower = pseudo.strip().lower()
+    for row in records[1:]:
+        if not row or row[0].strip().lower() != pseudo_lower:
+            continue
+        plan = row[19] if len(row) > 19 else "free"  # col T
+        try:
+            remaining = int(row[22]) if len(row) > 22 and row[22] else 0  # col W
+        except ValueError:
+            remaining = 0
+        return {"plan": plan, "remaining": remaining, "limit": PLAN_CHAT_LIMITS.get(plan, 0)}
+    return {"plan": "free", "remaining": 0, "limit": 0}
+
+
+def consume_chat_question(pseudo: str) -> dict:
+    """
+    Consomme 1 question chatbot pour le plan test.
+    Plan subscription : retourne ok sans décrémenter.
+    Retourne {ok, remaining}.
+    """
+    ws = _get_sheet()
+    records = ws.get_all_values()
+    pseudo_lower = pseudo.strip().lower()
+    for i, row in enumerate(records[1:], start=2):
+        if not row or row[0].strip().lower() != pseudo_lower:
+            continue
+        plan = row[19] if len(row) > 19 else "free"
+        if plan == "subscription":
+            return {"ok": True, "remaining": 999}
+        if plan != "test":
+            return {"ok": False, "remaining": 0}
+        try:
+            remaining = int(row[22]) if len(row) > 22 and row[22] else 0
+        except ValueError:
+            remaining = 0
+        if remaining <= 0:
+            return {"ok": False, "remaining": 0}
+        ws.update(f"W{i}", [[str(remaining - 1)]])
+        return {"ok": True, "remaining": remaining - 1}
+    return {"ok": False, "remaining": 0}
 
 
 def consume_plan_synthesis(pseudo: str) -> bool:
