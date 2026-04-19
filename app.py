@@ -1615,7 +1615,7 @@ def stripe_checkout():
 
     data         = request.get_json() or {}
     product_type = data.get("product_type", "")
-    if product_type not in ("test_gemma", "gemma_unlimited"):
+    if product_type not in ("test", "subscription"):
         return jsonify({"error": "product_type invalide"}), 400
 
     email  = profile.get("email", "")
@@ -1714,8 +1714,8 @@ def stripe_success():
 
     lang = get_lang()
     plan_labels = {
-        "test":         "Test Gemma débloqué — Synthèse + 3 questions ✓",
-        "subscription": "Chatbot Gemma Illimité activé ✓",
+        "test":         "Lecture débloquée — Synthèse complète + 3 questions ✓",
+        "subscription": "Illimité activé ✓",
     }
     message = plan_labels.get(plan, "Paiement confirmé ✓")
 
