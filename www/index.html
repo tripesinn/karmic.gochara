@@ -1170,10 +1170,11 @@ async function sendChatMessage() {
 
     try {
         // 1. Demande le prompt au serveur (valide quota, construit system+user)
+        const gemmaLocal = await Gemma.isAvailable();
         const r = await fetch('/chat/ask', {
             method:  'POST',
             headers: {'Content-Type': 'application/json'},
-            body:    JSON.stringify({message: msg, history: _chatHistory}),
+            body:    JSON.stringify({message: msg, history: _chatHistory, local: gemmaLocal}),
         });
         const data = await r.json();
 

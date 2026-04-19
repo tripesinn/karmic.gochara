@@ -1384,6 +1384,7 @@ def chat_ask():
     data    = request.get_json() or {}
     message = data.get("message", "").strip()
     history = data.get("history", [])
+    local   = bool(data.get("local", False))
     lang    = session.get("lang", "fr")
 
     if not message:
@@ -1393,14 +1394,14 @@ def chat_ask():
     UNLIMITED_PSEUDOS = {"jero"}
 
     if pseudo.lower() not in UNLIMITED_PSEUDOS:
-        result = consume_chat_question(pseudo)
+        result = consume_chat_question(pseudo, local=local)
         if not result["ok"]:
             return jsonify({"error": "quota_exceeded",
                             "message": "Tu as utilisé toutes tes questions chatbot.",
                             "upgrade_url": "/stripe/checkout?product=subscription"}), 429
         remaining = result["remaining"]
     else:
-        remaining = 999
+        remaining = -1
 
     enriched = _enrich_profile_with_natal(profile, {})
     prompts  = build_prompt_chat(message, history, enriched, lang=lang)

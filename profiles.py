@@ -379,13 +379,13 @@ def set_alerts(pseudo: str, enabled: bool) -> bool:
 
 PLAN_SYNTHESES = {
     "test":         1,    # one-shot → 1 synthèse + 3 questions chatbot
-    "subscription": 999,  # illimité (managé côté Edge AI)
+    "subscription": 10,   # 10/mois via serveur (Haiku) — illimité si Gemma local (managé côté Edge AI)
     "free":         0,
 }
 
 PLAN_CHAT_LIMITS = {
     "test":         3,    # 3 questions chatbot one-shot
-    "subscription": 999,  # illimité
+    "subscription": 10,   # 10/mois via serveur (Haiku) — illimité si Gemma local
     "free":         0,
 }
 
@@ -409,7 +409,8 @@ def upgrade_plan(pseudo: str, plan: str, stripe_customer_id: str = "") -> bool:
         ws.update(f"T{i}:U{i}", [[plan, str(syntheses)]])
         if stripe_customer_id:
             ws.update(f"V{i}", [[stripe_customer_id]])
-        ws.update(f"AT{i}", [[str(chat_limit)]])
+        current_month = _current_month_str()[:7]
+        ws.update(f"AT{i}:AU{i}", [[str(chat_limit), current_month]])
         return True
     return False
 
@@ -429,48 +430,76 @@ def downgrade_plan(pseudo: str) -> bool:
 
 
 def get_chat_quota(pseudo: str) -> dict:
-    """Retourne {plan, remaining, limit} pour le chatbot."""
+    """Retourne {plan, remaining, limit, local_unlimited}."""
     ws = _get_sheet()
     records = ws.get_all_values()
     pseudo_lower = pseudo.strip().lower()
+    current_month = _current_month_str()[:7]
     for row in records[1:]:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
-        plan = row[19] if len(row) > 19 else "free"  # col T
+        plan = row[19] if len(row) > 19 else "free"
         try:
-            remaining = int(row[45]) if len(row) > 45 and row[45] else 0  # col AT
+            remaining = int(row[45]) if len(row) > 45 and row[45] else 0
         except ValueError:
             remaining = 0
-        return {"plan": plan, "remaining": remaining, "limit": PLAN_CHAT_LIMITS.get(plan, 0)}
-    return {"plan": "free", "remaining": 0, "limit": 0}
+        if plan == "subscription":
+            reset_month = row[46] if len(row) > 46 else ""
+            if reset_month != current_month:
+                remaining = PLAN_CHAT_LIMITS["subscription"]
+        return {
+            "plan": plan, "remaining": remaining,
+            "limit": PLAN_CHAT_LIMITS.get(plan, 0),
+            "local_unlimited": plan == "subscription",
+        }
+    return {"plan": "free", "remaining": 0, "limit": 0, "local_unlimited": False}
 
 
-def consume_chat_question(pseudo: str) -> dict:
+def consume_chat_question(pseudo: str, local: bool = False) -> dict:
     """
-    Consomme 1 question chatbot pour le plan test.
-    Plan subscription : retourne ok sans décrémenter.
-    Retourne {ok, remaining}.
+    Consomme 1 question chatbot.
+    subscription + local=True  → illimité, pas de décrément
+    subscription + local=False → 10/mois Haiku, reset mensuel col AU
+    test                       → 3 one-shot col AT
+    free                       → refusé
     """
     ws = _get_sheet()
     records = ws.get_all_values()
     pseudo_lower = pseudo.strip().lower()
+    current_month = _current_month_str()[:7]
+
     for i, row in enumerate(records[1:], start=2):
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
         plan = row[19] if len(row) > 19 else "free"
+
         if plan == "subscription":
-            return {"ok": True, "remaining": 999}
+            if local:
+                return {"ok": True, "remaining": -1, "local": True}
+            try:
+                remaining = int(row[45]) if len(row) > 45 and row[45] else 0
+            except ValueError:
+                remaining = 0
+            reset_month = row[46] if len(row) > 46 else ""
+            if reset_month != current_month:
+                remaining = PLAN_CHAT_LIMITS["subscription"]
+                ws.update(f"AU{i}", [[current_month]])
+            if remaining <= 0:
+                return {"ok": False, "remaining": 0, "local": False}
+            ws.update(f"AT{i}", [[str(remaining - 1)]])
+            return {"ok": True, "remaining": remaining - 1, "local": False}
+
         if plan != "test":
-            return {"ok": False, "remaining": 0}
+            return {"ok": False, "remaining": 0, "local": False}
         try:
             remaining = int(row[45]) if len(row) > 45 and row[45] else 0
         except ValueError:
             remaining = 0
         if remaining <= 0:
-            return {"ok": False, "remaining": 0}
+            return {"ok": False, "remaining": 0, "local": False}
         ws.update(f"AT{i}", [[str(remaining - 1)]])
-        return {"ok": True, "remaining": remaining - 1}
-    return {"ok": False, "remaining": 0}
+        return {"ok": True, "remaining": remaining - 1, "local": False}
+    return {"ok": False, "remaining": 0, "local": False}
 
 
 def consume_plan_synthesis(pseudo: str) -> bool:
