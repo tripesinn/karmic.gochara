@@ -266,6 +266,7 @@
         <div style="display:flex; align-items:center; gap:10px; margin-bottom:0.75rem;">
             <span id="synthesis-engine-badge" style="font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em; padding:2px 7px; border-radius:2px;"></span>
         </div>
+        <div id="transit-context-banner" style="display:none; margin-bottom:1.2rem; padding:0.8rem 1rem; border-left:3px solid var(--gold); background:rgba(201,168,76,0.06); font-size:0.88rem; color:var(--text-dim);"></div>
         <div id="synthesis-content" style="line-height: 1.8; font-size: 1.1rem;"></div>
         <div style="margin-top: 1.5rem; text-align: center;">
             <button id="btnEmail" class="btn-secondary" onclick="sendSynthesisEmail()" style="max-width: 260px;">
@@ -288,12 +289,6 @@
             <button class="btn-secondary" onclick="downloadAnnualReport()" id="btn-annual-report" style="max-width: 220px; font-size: 0.82rem;">
                 📄 Rapport annuel PDF
             </button>
-
-            <!-- Gemma local -->
-            <button class="btn-secondary" onclick="openGemmaManager()" id="btn-gemma" style="max-width: 220px; font-size: 0.82rem;">
-                ✦ IA locale (Gemma 3)
-            </button>
-            <span id="gemma-indicator" style="font-size:0.75rem;color:var(--text-dim);"></span>
 
             <!-- Chatbot karmique -->
             <button class="btn-secondary" onclick="openChatbot()" id="btn-chatbot" style="max-width: 220px; font-size: 0.82rem;">
@@ -344,7 +339,7 @@
             <!-- Locked state (free plan) -->
             <div id="chatbot-locked" style="display:none; padding:24px 16px; text-align:center;">
                 <div style="color:var(--text-dim); font-size:0.85rem; margin-bottom:1rem;">
-                    Le chatbot est disponible avec le plan <strong style="color:var(--gold);">Test Gemma</strong> (4,99€) ou <strong style="color:var(--gold);">Gemma Illimité</strong> (9,99€/mois).
+                    Le chatbot est disponible avec le plan <strong style="color:var(--gold);">Lecture</strong> (4,99€) ou <strong style="color:var(--gold);">Illimité</strong> (9,99€/mois).
                 </div>
                 <button class="btn-primary" onclick="stripeCheckout('test')" style="max-width:260px; font-size:0.82rem;">
                     Débloquer 3 questions — 4,99€
@@ -961,6 +956,36 @@ function showSynthesis(text, remaining) {
     document.getElementById('synthesis-box').style.display = 'block';
     document.getElementById('email-status').textContent = '';
     document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
+
+    // Bandeau contexte transit depuis email
+    if (window._emailCtx) {
+        const { transit, nak, point, regime } = window._emailCtx;
+        const banner = document.getElementById('transit-context-banner');
+        if (banner && transit) {
+            const regimeLabels = {
+                'ROM_oppression':       'Activation ROM — test karmique',
+                'Dharma_amplification': 'Activation Dharma — opportunité',
+                'Blessure_activation':  'Activation Chiron — seuil',
+            };
+            banner.innerHTML = `⚡ <strong style="color:var(--gold)">${transit}</strong>`
+                + (nak ? ` dans <strong>${nak}</strong>` : '')
+                + (point ? ` — nakshatra de ton ${point} natal` : '')
+                + (regime ? ` &nbsp;·&nbsp; <em>${regimeLabels[regime] || regime}</em>` : '');
+            banner.style.display = 'block';
+        }
+        // Auto-ouvrir chatbot avec la question sur le transit
+        setTimeout(async () => {
+            if (transit) {
+                await openChatbot();
+                const input = document.getElementById('chatbot-input');
+                if (input && input.style.display !== 'none' && !input.disabled) {
+                    input.value = `${transit} est en ce moment dans ${nak || 'mon nakshatra natal'}${point ? ' — nakshatra de mon ' + point + ' natal' : ''}. Qu'est-ce que ça active concrètement pour moi ?`;
+                    sendChatMessage();
+                }
+            }
+            window._emailCtx = null;
+        }, 900);
+    }
 }
 
 function showLocalBadge(isLocal) {
@@ -985,10 +1010,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const calcBtn = document.getElementById('calc-btn');
     if (calcBtn) calcBtn.onclick = calculateWithRouting;
 
-    // Affiche l'indicateur Gemma si disponible
-    Gemma.checkModel().then(status => {
-        if (status.exists) updateGemmaIndicator(status);
-    });
+    // Auto-lancement depuis lien email (?open=synthesis&ctx=...)
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('open') === 'synthesis') {
+        const ctx = params.get('ctx') || '';
+        history.replaceState({}, '', window.location.pathname);
+        if (ctx) {
+            const [transit, nak, point, regime] = ctx.split('|');
+            window._emailCtx = { transit, nak, point, regime };
+        }
+        const btn = document.getElementById('calc-btn');
+        if (btn) setTimeout(() => btn.click(), 600);
+    }
 
     // Quota chatbot en arrière-plan (badge discret sur le bouton)
     const savedProfile = localStorage.getItem('gochara_profile');
@@ -1204,7 +1237,7 @@ async function sendChatMessage() {
         if (!r.ok || data.error) {
             if (data.error === 'quota_exceeded') {
                 _appendChatBubble('system-err',
-                    'Tu as utilisé toutes tes questions. Passe à Gemma Illimité pour continuer.');
+                    'Tu as utilisé toutes tes questions. Passe à Illimité pour continuer.');
                 document.getElementById('chatbot-input-area').style.display = 'none';
             } else {
                 _appendChatBubble('system-err', data.message || 'Erreur serveur.');
@@ -1220,9 +1253,14 @@ async function sendChatMessage() {
             limit:     3,
         });
 
-        // 2. Inférence Gemma locale
-        const gr = await Gemma.generate(data.system, data.user);
-        const reply = gr.synthesis || '';
+        // 2. Réponse : Haiku serveur (data.answer) ou Gemma local (data.system/user)
+        let reply = '';
+        if (data.answer) {
+            reply = data.answer;
+        } else if (data.system && data.user) {
+            const gr = await Gemma.generate(data.system, data.user);
+            reply = gr.synthesis || '';
+        }
 
         // 3. Affiche la réponse + met à jour l'historique
         _appendChatBubble('assistant', reply);
@@ -1231,7 +1269,7 @@ async function sendChatMessage() {
         if (_chatHistory.length > 12) _chatHistory = _chatHistory.slice(-12);
 
     } catch(e) {
-        _appendChatBubble('system-err', 'Gemma non disponible — vérifie que le modèle est chargé.');
+        _appendChatBubble('system-err', 'Erreur : ' + e.message);
         console.error('Chat error:', e);
     } finally {
         sendBtn.disabled    = false;
