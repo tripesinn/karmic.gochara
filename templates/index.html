@@ -1282,7 +1282,15 @@ function showLocalBadge(isLocal, modelType) {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-    Gemma.checkModels().then(status => { if (status.e2b_exists||status.e4b_exists) updateGemmaIndicator(status); });
+    Gemma.checkModels().then(status => {
+        updateGemmaIndicator(status);
+        // Badge explicite si modèle absent — indique à l'user de recharger après login
+        const ind = document.getElementById('gemma-indicator');
+        if (ind && !status.e2b_loaded && !status.e4b_loaded) {
+            ind.textContent = '☁ IA serveur (Gemma non chargé)';
+            ind.style.color = 'rgba(255,255,255,0.3)';
+        }
+    });
     initLocalAIBanner();
 });
 
