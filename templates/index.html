@@ -310,20 +310,15 @@
     <div id="pricing-section" style="max-width: 420px; margin: 0 auto 4rem; padding: 0 20px;">
         <div style="font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 1.4rem; text-align: center;">✦ Accès &amp; Tarifs</div>
         <div style="display: flex; flex-direction: column; gap: 0.75rem;">
-            <a href="javascript:void(0)" class="btn-plan" onclick="stripeCheckoutPublic('sub')">
-                <span class="plan-label">Abonnement Alertes</span>
-                <span class="plan-price">1,99€<small>/mois</small></span>
-                <span class="plan-desc">Alertes quotidiennes · synthèses illimitées</span>
-            </a>
-            <a href="javascript:void(0)" class="btn-plan" onclick="stripeCheckoutPublic('essential')">
-                <span class="plan-label">Synthèse Essentielle</span>
+            <a href="javascript:void(0)" class="btn-plan" onclick="stripeCheckoutPublic('test')">
+                <span class="plan-label">Test Gemma</span>
                 <span class="plan-price">4,99€</span>
-                <span class="plan-desc">1 lecture complète · accès immédiat</span>
+                <span class="plan-desc">Synthèse complète · 3 questions chatbot · accès immédiat</span>
             </a>
-            <a href="javascript:void(0)" class="btn-plan btn-plan--featured" onclick="stripeCheckoutPublic('complete')">
-                <span class="plan-label">Lecture Complète</span>
-                <span class="plan-price">19,99€</span>
-                <span class="plan-desc">Accès illimité · chatbot · rapport annuel PDF</span>
+            <a href="javascript:void(0)" class="btn-plan btn-plan--featured" onclick="stripeCheckoutPublic('subscription')">
+                <span class="plan-label">Gemma Illimité</span>
+                <span class="plan-price">9,99€<small>/mois</small></span>
+                <span class="plan-desc">Chatbot persistant · mémoire · alertes live · IA locale</span>
             </a>
         </div>
         <div id="pricing-error" style="display:none; color:#ff6b6b; font-size:0.7rem; margin-top:0.75rem; text-align:center; font-family:var(--mono);"></div>
@@ -412,20 +407,15 @@
             ✦ CHOISIR UN PLAN
         </div>
         <div style="display:flex; flex-direction:column; gap:0.75rem; max-width:300px; margin:0 auto;">
-            <button class="btn-plan" onclick="stripeCheckout('sub')">
-                <span class="plan-label">Abonnement Alertes</span>
-                <span class="plan-price">1,99€<small>/mois</small></span>
-                <span class="plan-desc">Alertes quotidiennes + 1 synthèse/mois</span>
-            </button>
-            <button class="btn-plan" onclick="stripeCheckout('essential')">
-                <span class="plan-label">Synthèse Essentielle</span>
+            <button class="btn-plan" onclick="stripeCheckout('test')">
+                <span class="plan-label">Test Gemma</span>
                 <span class="plan-price">4,99€</span>
-                <span class="plan-desc">1 lecture complète · accès immédiat</span>
+                <span class="plan-desc">Synthèse complète · 3 questions chatbot · accès immédiat</span>
             </button>
-            <button class="btn-plan btn-plan--featured" onclick="stripeCheckout('complete')">
-                <span class="plan-label">Lecture Complète</span>
-                <span class="plan-price">19,99€</span>
-                <span class="plan-desc">Accès illimité · rapport annuel PDF</span>
+            <button class="btn-plan btn-plan--featured" onclick="stripeCheckout('subscription')">
+                <span class="plan-label">Gemma Illimité</span>
+                <span class="plan-price">9,99€<small>/mois</small></span>
+                <span class="plan-desc">Chatbot persistant · mémoire · alertes live · IA locale</span>
             </button>
         </div>
         <div id="payment-error" style="display:none; color:#ff6b6b; font-size:0.7rem; margin-top:0.75rem; text-align:center;"></div>
@@ -736,14 +726,13 @@ async function expandTopic(topic) {
         const data = await res.json();
         expandBox.innerHTML = marked.parse(data.content || '_(aucun contenu)_');
 
-        // CTA Stripe 19,99€
         const cta = document.createElement('div');
         cta.className = 'expand-cta';
         cta.innerHTML =
-            '<p class="cta-label">Lecture Complète · Synthèse Essentielle</p>' +
-            '<p class="cta-desc">Porte Visible · Cycles Nodaux · D9 Navamsa · Transits complets</p>' +
-            '<button onclick="stripeCheckout(\'complete\')" class="btn-primary" style="max-width:280px;margin:0 auto;">' +
-            '<span>Débloquer la Synthèse — 19,99€</span></button>';
+            '<p class="cta-label">Test Gemma · 4,99€</p>' +
+            '<p class="cta-desc">Synthèse complète · 3 questions chatbot · IA locale</p>' +
+            '<button onclick="stripeCheckout(\'test\')" class="btn-primary" style="max-width:280px;margin:0 auto;">' +
+            '<span>Débloquer la Synthèse — 4,99€</span></button>';
         expandBox.appendChild(cta);
         expandBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
