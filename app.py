@@ -647,7 +647,7 @@ def login():
         except Exception as exc:
             app.logger.warning("Hook natal login (calcul volée) échoué : %s", exc)
 
-    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal})
+    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
 
 
 @app.route("/register", methods=["POST"])
@@ -708,7 +708,7 @@ def register():
     except Exception as exc:
         app.logger.warning("Hook natal register échoué : %s", exc)
 
-    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal})
+    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
 
 
 @app.route("/logout", methods=["POST"])

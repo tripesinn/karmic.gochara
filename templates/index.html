@@ -355,7 +355,7 @@
     <!-- Hook natal -->
     <div id="hook-natal-box" style="display:none; max-width:600px; margin:0 auto 2.5rem; padding:0 20px;">
         <div style="border-left:2px solid var(--gold-dim); padding:1rem 1.2rem; background:var(--mist);">
-            <div style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:0.6rem; text-transform:uppercase;">✦ Lecture natale</div>
+            <div style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:0.6rem; text-transform:uppercase; display:flex; align-items:center; gap:8px;">✦ Lecture natale <span id="natal-engine-badge" style="font-size:0.6rem; letter-spacing:0.1em; padding:2px 7px; border-radius:2px;"></span></div>
             <div id="hook-natal-text" style="font-style:italic; font-size:1rem; line-height:1.75; color:rgba(245,240,232,0.82);"></div>
         </div>
     </div>
@@ -560,9 +560,11 @@ function toggleRegistration() {
 function login() {
     const pseudo = document.getElementById('pseudo-input').value.trim();
     const errDiv = document.getElementById('login-error');
+    const btn    = document.getElementById('main-action-btn');
     if (!pseudo) { errDiv.textContent = "Pseudo requis."; return; }
     errDiv.style.color = "var(--gold)";
-    errDiv.textContent = "Alignement des énergies...";
+    errDiv.innerHTML = '<span class="spinner"></span> Alignement des énergies…';
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
     fetch('/login', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -572,12 +574,19 @@ function login() {
     .then(data => {
         if (data.ok) {
             if (data.hook_natal) sessionStorage.setItem('hook_natal', data.hook_natal);
+            if (data.hook_engine) sessionStorage.setItem('hook_engine', data.hook_engine);
             sessionStorage.setItem('currentPseudo', data.pseudo || pseudo);
             location.reload();
         } else {
             errDiv.style.color = "#c97a6b";
             errDiv.textContent = data.error || "Inconnu.";
+            if (btn) { btn.disabled = false; btn.style.opacity = ''; }
         }
+    })
+    .catch(() => {
+        errDiv.style.color = "#c97a6b";
+        errDiv.textContent = "Erreur réseau.";
+        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     });
 }
 
@@ -661,13 +670,23 @@ function showPaymentPlans() {
 
 // ── Hook natal ────────────────────────────────────────────────────────────────
 (function initHookNatal() {
-    const hook = sessionStorage.getItem('hook_natal');
+    const hook   = sessionStorage.getItem('hook_natal');
+    const engine = sessionStorage.getItem('hook_engine') || 'claude';
     if (hook) {
         const box  = document.getElementById('hook-natal-box');
         const text = document.getElementById('hook-natal-text');
         if (box && text) {
             text.textContent = hook;
-            // Lien expansible unique sous le texte
+            const badge = document.getElementById('natal-engine-badge');
+            if (badge) {
+                if (engine === 'gemma') {
+                    badge.textContent = '⬡ GEMMA LOCAL';
+                    badge.style.cssText = 'background:rgba(180,140,60,0.15);color:var(--gold);border:1px solid rgba(180,140,60,0.3);';
+                } else {
+                    badge.textContent = '☁ CLAUDE';
+                    badge.style.cssText = 'background:rgba(100,120,180,0.12);color:#8899cc;border:1px solid rgba(100,120,180,0.25);';
+                }
+            }
             const link = document.createElement('a');
             link.href = 'expand:alternative_conscience';
             link.textContent = '→ Révèle ton Alternative de Conscience';
@@ -677,6 +696,7 @@ function showPaymentPlans() {
             box.style.display = 'block';
         }
         sessionStorage.removeItem('hook_natal');
+        sessionStorage.removeItem('hook_engine');
     }
 })();
 
