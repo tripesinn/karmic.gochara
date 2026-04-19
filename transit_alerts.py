@@ -343,9 +343,21 @@ def detect_transit_events(profile: dict) -> list[dict]:
     return events
 
 
-def _build_alert_html(profile: dict, events: list[dict]) -> str:
+def _build_alert_html(profile: dict, events: list[dict], upgrade_cta: bool = False) -> str:
     name      = profile.get("name") or profile.get("pseudo", "")
     today_str = date.today().strftime("%d/%m/%Y")
+    upgrade_block = (
+        '<div style="margin-top:20px;padding:16px;border:1px solid #4b0082;border-radius:3px;'
+        'text-align:center;background:rgba(75,0,130,0.08)">'
+        '<p style="color:#c0a0e0;font-size:13px;margin:0 0 12px;">'
+        "C'était ta seule alerte incluse dans ta Lecture.<br>"
+        'Passe à <strong>Illimit&eacute; &mdash; 9,99&nbsp;&euro;/mois</strong>'
+        ' pour recevoir chaque activation karmique.</p>'
+        '<a href="https://karmicgochara.app/?upgrade=subscription"'
+        ' style="display:inline-block;background:transparent;color:#d4a017;text-decoration:none;'
+        'padding:8px 20px;border:1px solid #d4a017;border-radius:3px;font-size:12px;letter-spacing:0.08em;">'
+        '&#10022; PASSER &Agrave; ILLIMIT&Eacute; &rarr;</a></div>'
+    ) if upgrade_cta else ""
 
     rows = ""
     for e in events:
@@ -403,6 +415,7 @@ def _build_alert_html(profile: dict, events: list[dict]) -> str:
       Connecte-toi · ouvre ton chatbot · pose la question que ça soulève.
     </p>
   </div>
+  {upgrade_block}
   <div class="footer">
     Karmic Gochara · DK Ayanamsa · Chandra Lagna · True Nodes · Orbe &lt; 3°<br>
     <a href="https://karmicgochara.app/" style="color:#4b4b70;text-decoration:none;">Gérer mes alertes</a>
@@ -412,7 +425,7 @@ def _build_alert_html(profile: dict, events: list[dict]) -> str:
 </html>"""
 
 
-def send_alert_email(profile: dict, events: list[dict]) -> bool:
+def send_alert_email(profile: dict, events: list[dict], upgrade_cta: bool = False) -> bool:
     resend_key = os.environ.get("RESEND_API_KEY", "")
     if not resend_key:
         return False
@@ -420,7 +433,7 @@ def send_alert_email(profile: dict, events: list[dict]) -> bool:
     if not email:
         return False
 
-    html      = _build_alert_html(profile, events)
+    html      = _build_alert_html(profile, events, upgrade_cta=upgrade_cta)
     today_str = date.today().strftime("%d/%m/%Y")
 
     try:
@@ -446,21 +459,28 @@ def send_alert_email(profile: dict, events: list[dict]) -> bool:
 
 def run_daily_alerts() -> dict:
     """Point d'entrée principal — appelé par la route /cron/daily."""
-    from profiles import get_all_profiles
+    from profiles import get_all_profiles, get_and_consume_alert
 
     profiles = get_all_profiles()
-    results  = {"total": len(profiles), "processed": 0, "alerted": 0, "errors": 0}
+    results  = {"total": len(profiles), "processed": 0, "alerted": 0, "skipped": 0, "errors": 0}
 
     for profile in profiles:
         if not profile.get("alerts_enabled"):
             continue
         if not profile.get("email"):
             continue
+
+        plan = profile.get("plan", "free")
+        quota = get_and_consume_alert(profile.get("pseudo", ""), plan)
+        if not quota["ok"]:
+            results["skipped"] += 1
+            continue
+
         results["processed"] += 1
         try:
             events = detect_transit_events(profile)
             if events:
-                sent = send_alert_email(profile, events)
+                sent = send_alert_email(profile, events, upgrade_cta=quota["is_last"])
                 if sent:
                     results["alerted"] += 1
         except Exception:

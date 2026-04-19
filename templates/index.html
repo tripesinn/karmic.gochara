@@ -498,10 +498,15 @@
                     onchange="toggleAlerts(this.checked)"
                     style="accent-color: var(--gold); width: 16px; height: 16px;">
                 {{ lang.alerts_label }}
+                {% if session_profile and session_profile.get('plan') == 'test' %}
+                <span style="font-size:0.7rem; color:var(--gold); opacity:0.7;">· 1 incluse</span>
+                {% endif %}
             </label>
+            {% if session_profile and session_profile.get('pseudo','').lower() == 'jero' %}
             <button onclick="testAlert()" style="background:none; border:1px solid var(--border); color:var(--text-dim); font-size:0.75rem; padding:3px 10px; cursor:pointer; border-radius:2px; letter-spacing:0.05em;">
                 TEST →
             </button>
+            {% endif %}
             <span id="alerts-status" style="font-size: 0.78rem; color: var(--text-dim);"></span>
         </div>
 

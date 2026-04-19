@@ -502,6 +502,39 @@ def consume_chat_question(pseudo: str, local: bool = False) -> dict:
     return {"ok": False, "remaining": 0, "local": False}
 
 
+def get_and_consume_alert(pseudo: str, plan: str) -> dict:
+    """
+    Gère le quota d'alertes selon le plan.
+    - free        → refusé
+    - test        → 1 alerte one-shot (col AV, index 47)
+    - subscription → illimité
+
+    Retourne {"ok": bool, "is_last": bool}
+    is_last=True si c'est la dernière alerte disponible (test plan).
+    """
+    if plan == "free":
+        return {"ok": False, "is_last": False}
+    if plan == "subscription":
+        return {"ok": True, "is_last": False}
+
+    # plan == "test" → 1 alerte max
+    ws = _get_sheet()
+    records = ws.get_all_values()
+    pseudo_lower = pseudo.strip().lower()
+    for i, row in enumerate(records[1:], start=2):
+        if not row or row[0].strip().lower() != pseudo_lower:
+            continue
+        try:
+            sent = int(row[47]) if len(row) > 47 and row[47] else 0
+        except ValueError:
+            sent = 0
+        if sent >= 1:
+            return {"ok": False, "is_last": False}
+        ws.update(f"AV{i}", [["1"]])
+        return {"ok": True, "is_last": True}
+    return {"ok": False, "is_last": False}
+
+
 def consume_plan_synthesis(pseudo: str) -> bool:
     """
     Décrémente le compteur plan_syntheses d'un utilisateur.
