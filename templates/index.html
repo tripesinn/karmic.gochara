@@ -296,7 +296,11 @@
             <span class="label-small">{{ lang.birthtime if lang.birthtime else 'Heure de Naissance' }}</span>
             <input id="birth-time" class="login-input" type="time">
             <span class="label-small">{{ lang.birthcity if lang.birthcity else 'Ville de Naissance' }}</span>
-            <input id="birth-city" class="login-input" type="text" placeholder="{{ lang.city_ph if lang.city_ph else 'Ex: Paris' }}">
+            <div style="position:relative;">
+                <input id="birth-city" class="login-input" type="text" placeholder="{{ lang.city_ph if lang.city_ph else 'Ex: Paris' }}"
+                    autocomplete="off" oninput="onBirthCityInput(this.value)">
+                <div id="birth-city-suggestions" style="display:none; position:absolute; top:100%; left:0; right:0; background:#111110; border:1px solid var(--border); z-index:200; max-height:180px; overflow-y:auto;"></div>
+            </div>
             <span class="label-small">{{ lang.email if lang.email else 'Email' }}</span>
             <input id="reg-email" class="login-input" type="email" placeholder="ton@email.com">
         </div>
@@ -1026,7 +1030,44 @@ function showSuggestions(results) {
 function hideSuggestions() { document.getElementById('city-suggestions').style.display = 'none'; }
 document.addEventListener('click', (e) => {
     if (!e.target.closest('#transit-city-input') && !e.target.closest('#city-suggestions')) hideSuggestions();
+    if (!e.target.closest('#birth-city') && !e.target.closest('#birth-city-suggestions')) hideBirthSuggestions();
 });
+
+// ── Autocomplétion ville de naissance ─────────────────────────────────────────
+let _birthCityTimer = null;
+function onBirthCityInput(val) {
+    if (!val.trim()) { hideBirthSuggestions(); return; }
+    clearTimeout(_birthCityTimer);
+    _birthCityTimer = setTimeout(() => fetchBirthCitySuggestions(val.trim()), 350);
+}
+async function fetchBirthCitySuggestions(q) {
+    if (q.length < 2) return;
+    try {
+        const r = await fetch(`/geocode?q=${encodeURIComponent(q)}`);
+        const results = await r.json();
+        showBirthSuggestions(results);
+    } catch { hideBirthSuggestions(); }
+}
+function showBirthSuggestions(results) {
+    const box = document.getElementById('birth-city-suggestions');
+    if (!results.length) { hideBirthSuggestions(); return; }
+    box.innerHTML = '';
+    results.forEach(item => {
+        const name = item.display_name || item.name || '';
+        const div  = document.createElement('div');
+        div.textContent = name;
+        div.style.cssText = 'padding:8px 12px; cursor:pointer; font-size:0.82rem; border-bottom:1px solid var(--border); color:var(--text);';
+        div.onmouseenter = () => div.style.background = '#1a1a18';
+        div.onmouseleave = () => div.style.background = '';
+        div.onclick = () => {
+            document.getElementById('birth-city').value = name;
+            hideBirthSuggestions();
+        };
+        box.appendChild(div);
+    });
+    box.style.display = 'block';
+}
+function hideBirthSuggestions() { const b = document.getElementById('birth-city-suggestions'); if (b) b.style.display = 'none'; }
 
 async function sendSynthesisEmail() {
     if (!lastSynthesis) { alert('Lance d\'abord un calcul pour obtenir ta synthèse.'); return; }
