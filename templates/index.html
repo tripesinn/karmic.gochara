@@ -606,6 +606,10 @@ function register() {
         errDiv.textContent = T.js_err_email;
         return;
     }
+    const btn = document.getElementById('main-action-btn');
+    if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
+    errDiv.style.color = 'var(--gold)';
+    errDiv.innerHTML = '<span class="spinner"></span> ' + (T.js_register_loading || 'Création du profil…');
     fetch('/register', {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
@@ -614,7 +618,16 @@ function register() {
     .then(r => r.json())
     .then(data => {
         if (data.ok) location.reload();
-        else { errDiv.style.color = "#c97a6b"; errDiv.textContent = data.error; }
+        else {
+            errDiv.style.color = "#c97a6b";
+            errDiv.textContent = data.error;
+            if (btn) { btn.disabled = false; btn.style.opacity = ''; }
+        }
+    })
+    .catch(() => {
+        errDiv.style.color = "#c97a6b";
+        errDiv.textContent = T.js_err_network;
+        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
     });
 }
 
