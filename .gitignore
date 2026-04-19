@@ -21,7 +21,6 @@ service_account*.json
 
 # Node / Capacitor
 node_modules/
-www/
 
 # Android (généré — committer uniquement les sources)
 android/.gradle/
