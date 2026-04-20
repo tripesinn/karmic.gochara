@@ -722,6 +722,24 @@ def privacy():
     return render_template("privacy-policy.html")
 
 
+@app.route("/.well-known/assetlinks.json")
+def assetlinks():
+    """Android App Links — permet au système de vérifier le domaine et rouvrir l'app."""
+    data = [{
+        "relation": ["delegate_permission/common.handle_all_urls"],
+        "target": {
+            "namespace": "android_app",
+            "package_name": "com.karmicgochara.app",
+            "sha256_cert_fingerprints": [
+                "93:2B:A1:79:9C:2E:D7:BF:86:B2:2F:86:46:09:56:80:A8:5C:AD:56:D0:27:4D:DE:6F:53:C9:02:00:A1:DF:FE"
+            ]
+        }
+    }]
+    resp = make_response(jsonify(data))
+    resp.headers["Content-Type"] = "application/json"
+    return resp
+
+
 @app.route("/")
 def index():
     tz = pytz.timezone("Europe/Paris")
