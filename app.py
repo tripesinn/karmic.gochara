@@ -1139,7 +1139,7 @@ def hook_transit():
     from astro_calc import calculate_transits
     from ai_interpret import _build_system_prompt, _aspects_to_text, _build_natal_context
     from flask import Response, stream_with_context
-    from google import genai
+    import google.genai as genai
     from google.genai import types
     import json as _json
 
@@ -1681,7 +1681,7 @@ def chat_ask():
         })
 
     # Génération Gemini côté serveur
-    from google import genai
+    import google.genai as genai
     from google.genai import types
     try:
         client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
@@ -1916,7 +1916,7 @@ def expand():
     )
 
     try:
-        from google import genai
+        import google.genai as genai
         from google.genai import types
         client   = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
         model    = os.environ.get("HOOK_MODEL", "gemini-2.5-flash")
