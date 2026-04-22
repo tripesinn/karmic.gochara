@@ -793,45 +793,39 @@ def login():
     cache_key  = f"hook_natal_{pseudo}"
     if session.get(cache_key):
         hook_natal = session[cache_key]
-    elif profile.get("chandra_lagna_sign"):
-        # Natal disponible dans Sheets → hook immédiat
-        try:
-            from ai_interpret import get_hook_natal
-            hook_natal = get_hook_natal(profile)
-            session[cache_key] = hook_natal
-        except Exception as exc:
-            app.logger.warning("Hook natal login échoué : %s", exc)
-    else:
-        # Ancien profil sans natal stocké → calcul à la volée (non bloquant)
-        try:
-            from astro_calc import calculate_transits
-            from profiles import save_natal_to_sheet
-            from ai_interpret import get_hook_natal
-            from datetime import date as _date
 
-            natal_input = {
-                "name":   profile["name"],
-                "year":   profile["year"],   "month":  profile["month"],
-                "day":    profile["day"],    "hour":   profile["hour"],
-                "minute": profile["minute"], "lat":    profile["lat"],
-                "lon":    profile["lon"],    "tz":     profile["tz"],
-                "city":   profile["city"],
-            }
-            today = _date.today()
-            transit_loc = {
-                "city": profile["city"], "lat": profile["lat"],
-                "lon":  profile["lon"],  "tz":  profile["tz"],
-            }
-            natal_result     = calculate_transits(natal_input, transit_loc,
-                                                  today.year, today.month, today.day, 12, 0)
-            enriched         = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
-            save_natal_to_sheet(pseudo, enriched)  # stocké pour la prochaine fois
-            session["profile"] = enriched
-            profile = enriched
+    # Toujours recalculer natal_positions en session (non stocké dans le Sheet)
+    try:
+        from astro_calc import calculate_transits
+        from profiles import save_natal_to_sheet
+        from ai_interpret import get_hook_natal
+        from datetime import date as _date
+
+        natal_input = {
+            "name":   profile["name"],
+            "year":   profile["year"],   "month":  profile["month"],
+            "day":    profile["day"],    "hour":   profile["hour"],
+            "minute": profile["minute"], "lat":    profile["lat"],
+            "lon":    profile["lon"],    "tz":     profile["tz"],
+            "city":   profile["city"],
+        }
+        today = _date.today()
+        transit_loc = {
+            "city": profile["city"], "lat": profile["lat"],
+            "lon":  profile["lon"],  "tz":  profile["tz"],
+        }
+        natal_result = calculate_transits(natal_input, transit_loc,
+                                          today.year, today.month, today.day, 12, 0)
+        enriched = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
+        if not profile.get("chandra_lagna_sign"):
+            save_natal_to_sheet(pseudo, enriched)
+        session["profile"] = enriched
+        profile = enriched
+        if not hook_natal:
             hook_natal = get_hook_natal(profile)
             session[cache_key] = hook_natal
-        except Exception as exc:
-            app.logger.warning("Hook natal login (calcul volée) échoué : %s", exc)
+    except Exception as exc:
+        app.logger.warning("Hook natal login échoué : %s", exc)
 
     return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
 
