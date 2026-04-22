@@ -1296,7 +1296,7 @@ def hook_transit():
         full_text = []
         import gemini_api
         try:
-            for text in gemini_api.stream(system, prompt, max_tokens=500):
+            for text in gemini_api.stream(system, prompt, max_tokens=1024):
                 full_text.append(text)
                 yield f"data: {_json.dumps(text)}\n\n"
             yield f"data: [DONE]\n\n"
@@ -1668,7 +1668,7 @@ def chat_ask():
     # Génération Gemini côté serveur
     import gemini_api
     try:
-        answer = gemini_api.generate(prompts["system"], prompts["user"], max_tokens=600).strip()
+        answer = gemini_api.generate(prompts["system"], prompts["user"], max_tokens=1024).strip()
     except Exception as e:
         app.logger.error("Chat Gemini error: %s", e)
         return jsonify({"error": "generation_failed", "message": str(e)}), 500
@@ -1890,7 +1890,7 @@ def expand():
 
     try:
         import gemini_api
-        content = gemini_api.generate(system, prompt, max_tokens=300)
+        content = gemini_api.generate(system, prompt, max_tokens=1024)
         return jsonify({"content": content})
     except Exception as exc:
         app.logger.error("Erreur expand : %s", exc)
