@@ -131,9 +131,11 @@ def _get_sheet():
             except Exception:
                 ws = spreadsheet.add_worksheet(title="gochara-profiles", rows=1000, cols=len(ALL_COLS) + 5)
 
-    # Créer l'en-tête si la feuille est vide
-    if ws and not ws.row_values(1):
-        ws.append_row(ALL_COLS)
+    # Créer l'en-tête si absente (feuille vide ou en-tête supprimé)
+    if ws:
+        first_row = ws.row_values(1)
+        if not first_row or first_row[0] != ALL_COLS[0]:
+            ws.insert_row(ALL_COLS, 1)
 
     _sheet = ws
     return _sheet
@@ -149,53 +151,52 @@ def _row_to_profile(row: list) -> dict:
             return default
 
     return {
-        "pseudo":               _safe(0),
-        "email":                _safe(1),
-        "name":                 _safe(2),
-        "year":                 _safe(3, int, 1990),
-        "month":                _safe(4, int, 1),
-        "day":                  _safe(5, int, 1),
-        "hour":                 _safe(6, int, 12),
-        "minute":               _safe(7, int, 0),
-        "lat":                  _safe(8, float, 48.8566),
-        "lon":                  _safe(9, float, 2.3522),
-        "tz":                   _safe(10) or "Europe/Paris",
-        "city":                 _safe(11) or "Paris, France",
-        "transit_city":         _safe(12) or "Paris, France",
-        "transit_lat":          _safe(13, float, 48.8566),
-        "transit_lon":          _safe(14, float, 2.3522),
-        "transit_tz":           _safe(15) or "Europe/Paris",
-        # Quota — fallback 0 / mois courant pour anciens profils
-        "syntheses_count":      _safe(16, int, 0),
-        "syntheses_reset_date": _safe(17) or _current_month_str(),
-        "alerts_enabled":       _safe(18, int, 0),
-        "plan":                 _safe(19) or "free",
-        "plan_syntheses":       _safe(20, int, 0),
-        "stripe_customer_id":   _safe(21) or "",
-        # Données natales (colonnes W→AQ, indices 22→42)
-        "chandra_lagna_sign":    _safe(22),
-        "ketu_sign":             _safe(23),
-        "ketu_house":            _safe(24),
-        "ketu_nakshatra":        _safe(25),
-        "rahu_sign":             _safe(26),
-        "rahu_house":            _safe(27),
-        "rahu_nakshatra":        _safe(28),
-        "chiron_sign":           _safe(29),
-        "chiron_house":          _safe(30),
-        "chiron_nakshatra":      _safe(31),
-        "lilith_sign":           _safe(32),
-        "lilith_house":          _safe(33),
-        "saturn_sign":           _safe(34),
-        "saturn_house":          _safe(35),
-        "jupiter_sign":          _safe(36),
-        "jupiter_house":         _safe(37),
-        "porte_visible_sign":    _safe(38),
-        "porte_visible_house":   _safe(39),
-        "porte_visible_deg":     _safe(40),
-        "porte_invisible_sign":  _safe(41),
-        "porte_invisible_house": _safe(42),
-        "moon_longitude_sid":    _safe(43),
-        "chandra_lagna_degree":  _safe(44),
+        "pseudo":                _safe(C["pseudo"]),
+        "email":                 _safe(C["email"]),
+        "name":                  _safe(C["name"]),
+        "year":                  _safe(C["year"], int, 1990),
+        "month":                 _safe(C["month"], int, 1),
+        "day":                   _safe(C["day"], int, 1),
+        "hour":                  _safe(C["hour"], int, 12),
+        "minute":                _safe(C["minute"], int, 0),
+        "lat":                   _safe(C["lat"], float, 48.8566),
+        "lon":                   _safe(C["lon"], float, 2.3522),
+        "tz":                    _safe(C["tz"]) or "Europe/Paris",
+        "city":                  _safe(C["city"]) or "Paris, France",
+        "transit_city":          _safe(C["transit_city"]) or "Paris, France",
+        "transit_lat":           _safe(C["transit_lat"], float, 48.8566),
+        "transit_lon":           _safe(C["transit_lon"], float, 2.3522),
+        "transit_tz":            _safe(C["transit_tz"]) or "Europe/Paris",
+        "transit_date":          _safe(C["transit_date"]) or "",
+        "syntheses_count":       _safe(C["syntheses_count"], int, 0),
+        "syntheses_reset_date":  _safe(C["syntheses_reset_date"]) or _current_month_str(),
+        "alerts_enabled":        _safe(C["alerts_enabled"], int, 0),
+        "plan":                  _safe(C["plan"]) or "free",
+        "plan_syntheses":        _safe(C["plan_syntheses"], int, 0),
+        "stripe_customer_id":    _safe(C["stripe_customer_id"]) or "",
+        "chandra_lagna_sign":    _safe(C["chandra_lagna_sign"]),
+        "ketu_sign":             _safe(C["ketu_sign"]),
+        "ketu_house":            _safe(C["ketu_house"]),
+        "ketu_nakshatra":        _safe(C["ketu_nakshatra"]),
+        "rahu_sign":             _safe(C["rahu_sign"]),
+        "rahu_house":            _safe(C["rahu_house"]),
+        "rahu_nakshatra":        _safe(C["rahu_nakshatra"]),
+        "chiron_sign":           _safe(C["chiron_sign"]),
+        "chiron_house":          _safe(C["chiron_house"]),
+        "chiron_nakshatra":      _safe(C["chiron_nakshatra"]),
+        "lilith_sign":           _safe(C["lilith_sign"]),
+        "lilith_house":          _safe(C["lilith_house"]),
+        "saturn_sign":           _safe(C["saturn_sign"]),
+        "saturn_house":          _safe(C["saturn_house"]),
+        "jupiter_sign":          _safe(C["jupiter_sign"]),
+        "jupiter_house":         _safe(C["jupiter_house"]),
+        "porte_visible_sign":    _safe(C["porte_visible_sign"]),
+        "porte_visible_house":   _safe(C["porte_visible_house"]),
+        "porte_visible_deg":     _safe(C["porte_visible_deg"]),
+        "porte_invisible_sign":  _safe(C["porte_invisible_sign"]),
+        "porte_invisible_house": _safe(C["porte_invisible_house"]),
+        "moon_longitude_sid":    _safe(C["moon_longitude_sid"]),
+        "chandra_lagna_degree":  _safe(C["chandra_lagna_degree"]),
     }
 
 
@@ -607,13 +608,13 @@ def consume_plan_synthesis(pseudo: str) -> bool:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
         
-        plan = row[19] if len(row) > 19 else "free"
+        plan = row[C["plan"]] if len(row) > C["plan"] else "free"
         plan_normalized = plan.lower().replace("é", "e")
         if plan_normalized in ("illimite", "subscription"):
             return True  # Illimité pour les abonnés
 
         try:
-            count = int(row[20]) if len(row) > 20 and row[20] else 0
+            count = int(row[C["plan_syntheses"]]) if len(row) > C["plan_syntheses"] and row[C["plan_syntheses"]] else 0
         except ValueError:
             count = 0
             
