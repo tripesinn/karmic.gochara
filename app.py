@@ -1304,13 +1304,13 @@ def hook_transit():
                 stream=True,
             )
             for chunk in response:
-                if chunk.text:
-                    full_text.append(chunk.text)
-                    yield f"data: {_json.dumps(chunk.text)}\n\n"
-            # Mise en cache après stream complet
-            complete = "".join(full_text)
-            with app.app_context():
-                pass  # session non accessible ici — cache géré côté client
+                try:
+                    text = chunk.text
+                except (ValueError, AttributeError):
+                    continue  # chunk finish_reason sans texte
+                if text:
+                    full_text.append(text)
+                    yield f"data: {_json.dumps(text)}\n\n"
             yield f"data: [DONE]\n\n"
         except Exception as exc:
             app.logger.error("Erreur stream hook transit : %s", exc)
