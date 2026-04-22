@@ -1195,6 +1195,23 @@ def hook_transit():
             yield f"data: [ERROR] {str(exc)}\n\n"
         return Response(stream_with_context(err_stream()), mimetype="text/event-stream")
 
+    # ── Sauvegarde transit_date + localisation en session et Sheet ────────────
+    new_transit = {
+        "transit_city": transit_loc["city"],
+        "transit_lat":  transit_loc["lat"],
+        "transit_lon":  transit_loc["lon"],
+        "transit_tz":   transit_loc["tz"],
+        "transit_date": date_str,
+    }
+    if transit_loc["city"] != profile.get("transit_city") or date_str != profile.get("transit_date"):
+        try:
+            from profiles import update_profile
+            update_profile(profile["email"], {**profile, **new_transit})
+        except Exception:
+            pass
+    session["profile"] = {**profile, **new_transit}
+    session.modified = True
+
     # ── Prompt ────────────────────────────────────────────────────────────────
     aspects_text = _aspects_to_text(chart_data.get("aspects", []), max_aspects=3)
     natal_mini   = _build_natal_context(enriched_profile)
