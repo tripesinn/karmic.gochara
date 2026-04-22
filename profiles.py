@@ -94,13 +94,20 @@ def _get_sheet():
     gc = gspread.authorize(creds)
     spreadsheet = gc.open_by_key(sheet_id)
 
+    ws = None
     try:
-        ws = spreadsheet.sheet1
-    except Exception:
-        ws = spreadsheet.add_worksheet(title="profiles", rows=1000, cols=20)
+        ws = spreadsheet.worksheet("gochara-profiles")
+    except gspread.WorksheetNotFound:
+        try:
+            ws = spreadsheet.worksheet("profiles")
+        except gspread.WorksheetNotFound:
+            try:
+                ws = spreadsheet.sheet1
+            except Exception: # Can be WorksheetNotFound if no sheets
+                ws = spreadsheet.add_worksheet(title="gochara-profiles", rows=1000, cols=len(COLS))
 
     # Créer l'en-tête si la feuille est vide
-    if not ws.row_values(1):
+    if ws and not ws.row_values(1):
         ws.append_row(COLS)
 
     _sheet = ws
