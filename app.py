@@ -1103,11 +1103,12 @@ def calculate():
                 "transit_lat":  transit_loc["lat"],
                 "transit_lon":  transit_loc["lon"],
                 "transit_tz":   transit_loc["tz"],
+                "transit_date": data.get("date", ""),
             }
             session["profile"] = {**profile, **new_transit}
             session.modified = True
-            # Persist dans Google Sheets si la ville a changé
-            if transit_loc["city"] != profile.get("transit_city"):
+            # Persist dans Google Sheets (ville ou date changée)
+            if transit_loc["city"] != profile.get("transit_city") or data.get("date") != profile.get("transit_date"):
                 try:
                     from profiles import update_profile
                     update_profile(profile["email"], {**profile, **new_transit})

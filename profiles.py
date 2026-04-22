@@ -33,46 +33,47 @@ COLS = [
     "transit_lat",          # N  13
     "transit_lon",          # O  14
     "transit_tz",           # P  15
-    "syntheses_count",      # Q  16
-    "syntheses_reset_date", # R  17
-    "alerts_enabled",       # S  18
-    "plan",                 # T  19
-    "plan_syntheses",       # U  20
-    "stripe_customer_id",   # V  21
+    "transit_date",         # Q  16
+    "syntheses_count",      # R  17
+    "syntheses_reset_date", # S  18
+    "alerts_enabled",       # T  19
+    "plan",                 # U  20
+    "plan_syntheses",       # V  21
+    "stripe_customer_id",   # W  22
 ]
 
-# Bloc 2 — Données natales calculées (W–AS, indices 22–44)
+# Bloc 2 — Données natales calculées (X–AT, indices 23–45)
 NATAL_COLS = [
-    "chandra_lagna_sign",    # W  22
-    "ketu_sign",             # X  23
-    "ketu_house",            # Y  24
-    "ketu_nakshatra",        # Z  25
-    "rahu_sign",             # AA 26
-    "rahu_house",            # AB 27
-    "rahu_nakshatra",        # AC 28
-    "chiron_sign",           # AD 29
-    "chiron_house",          # AE 30
-    "chiron_nakshatra",      # AF 31
-    "lilith_sign",           # AG 32
-    "lilith_house",          # AH 33
-    "saturn_sign",           # AI 34
-    "saturn_house",          # AJ 35
-    "jupiter_sign",          # AK 36
-    "jupiter_house",         # AL 37
-    "porte_visible_sign",    # AM 38
-    "porte_visible_house",   # AN 39
-    "porte_visible_deg",     # AO 40
-    "porte_invisible_sign",  # AP 41
-    "porte_invisible_house", # AQ 42
-    "moon_longitude_sid",    # AR 43
-    "chandra_lagna_degree",  # AS 44
+    "chandra_lagna_sign",    # X  23
+    "ketu_sign",             # Y  24
+    "ketu_house",            # Z  25
+    "ketu_nakshatra",        # AA 26
+    "rahu_sign",             # AB 27
+    "rahu_house",            # AC 28
+    "rahu_nakshatra",        # AD 29
+    "chiron_sign",           # AE 30
+    "chiron_house",          # AF 31
+    "chiron_nakshatra",      # AG 32
+    "lilith_sign",           # AH 33
+    "lilith_house",          # AI 34
+    "saturn_sign",           # AJ 35
+    "saturn_house",          # AK 36
+    "jupiter_sign",          # AL 37
+    "jupiter_house",         # AM 38
+    "porte_visible_sign",    # AN 39
+    "porte_visible_house",   # AO 40
+    "porte_visible_deg",     # AP 41
+    "porte_invisible_sign",  # AQ 42
+    "porte_invisible_house", # AR 43
+    "moon_longitude_sid",    # AS 44
+    "chandra_lagna_degree",  # AT 45
 ]
 
-# Bloc 3 — Quotas chatbot et alertes (AT–AV, indices 45–47)
+# Bloc 3 — Quotas chatbot et alertes (AU–AW, indices 46–48)
 QUOTA_COLS = [
-    "chat_remaining",        # AT 45
-    "chat_reset_month",      # AU 46
-    "alert_sent",            # AV 47
+    "chat_remaining",        # AU 46
+    "chat_reset_month",      # AV 47
+    "alert_sent",            # AW 48
 ]
 
 # Liste maître — toutes les colonnes dans l'ordre
@@ -265,6 +266,7 @@ def create_profile(data: dict) -> dict:
         str(data.get("transit_lat", "")),
         str(data.get("transit_lon", "")),
         data.get("transit_tz", "Europe/Paris"),
+        data.get("transit_date", ""),  # transit_date
         "0",                      # syntheses_count
         _current_month_str(),     # syntheses_reset_date
         "0",                      # alerts_enabled
@@ -284,37 +286,45 @@ def update_profile(email: str, data: dict) -> dict | None:
 
     for i, row in enumerate(records[1:], start=2):
         if len(row) > 1 and row[1].strip().lower() == email_lower:
+            def _pick(key, idx, default=""):
+                return data.get(key) if key in data and data.get(key) is not None else (row[idx] if len(row) > idx else default)
+
             # Préserve les colonnes quota existantes
-            existing_count      = row[16] if len(row) > 16 else "0"
-            existing_reset_date = row[17] if len(row) > 17 else _current_month_str()
-            existing_alerts     = row[18] if len(row) > 18 else "0"
+            sc  = C["syntheses_count"]
+            srd = C["syntheses_reset_date"]
+            ae  = C["alerts_enabled"]
+            existing_count      = row[sc]  if len(row) > sc  else "0"
+            existing_reset_date = row[srd] if len(row) > srd else _current_month_str()
+            existing_alerts     = row[ae]  if len(row) > ae  else "0"
 
             new_row = [
-                data.get("pseudo") if "pseudo" in data and data.get("pseudo") is not None else (row[0] if len(row) > 0 else ""),
+                _pick("pseudo",       0),
                 row[1],  # email immuable
-                data.get("name") if "name" in data and data.get("name") is not None else (row[2] if len(row) > 2 else ""),
-                str(data.get("year") if "year" in data and data.get("year") is not None else (row[3] if len(row) > 3 else "")),
-                str(data.get("month") if "month" in data and data.get("month") is not None else (row[4] if len(row) > 4 else "")),
-                str(data.get("day") if "day" in data and data.get("day") is not None else (row[5] if len(row) > 5 else "")),
-                str(data.get("hour") if "hour" in data and data.get("hour") is not None else (row[6] if len(row) > 6 else "")),
-                str(data.get("minute") if "minute" in data and data.get("minute") is not None else (row[7] if len(row) > 7 else "")),
-                str(data.get("lat") if "lat" in data and data.get("lat") is not None else (row[8] if len(row) > 8 else "")),
-                str(data.get("lon") if "lon" in data and data.get("lon") is not None else (row[9] if len(row) > 9 else "")),
-                data.get("tz") if "tz" in data and data.get("tz") is not None else (row[10] if len(row) > 10 else "Europe/Paris"),
-                data.get("city") if "city" in data and data.get("city") is not None else (row[11] if len(row) > 11 else ""),
-                data.get("transit_city") if "transit_city" in data and data.get("transit_city") is not None else (row[12] if len(row) > 12 else ""),
-                str(data.get("transit_lat") if "transit_lat" in data and data.get("transit_lat") is not None else (row[13] if len(row) > 13 else "")),
-                str(data.get("transit_lon") if "transit_lon" in data and data.get("transit_lon") is not None else (row[14] if len(row) > 14 else "")),
-                data.get("transit_tz") if "transit_tz" in data and data.get("transit_tz") is not None else (row[15] if len(row) > 15 else "Europe/Paris"),
+                _pick("name",         2),
+                str(_pick("year",     3)),
+                str(_pick("month",    4)),
+                str(_pick("day",      5)),
+                str(_pick("hour",     6)),
+                str(_pick("minute",   7)),
+                str(_pick("lat",      8)),
+                str(_pick("lon",      9)),
+                _pick("tz",           10, "Europe/Paris"),
+                _pick("city",         11),
+                _pick("transit_city", 12),
+                str(_pick("transit_lat", 13)),
+                str(_pick("transit_lon", 14)),
+                _pick("transit_tz",   15, "Europe/Paris"),
+                _pick("transit_date", 16),
                 existing_count,
                 existing_reset_date,
                 existing_alerts,
             ]
-            # Reconstruire la ligne complète pour le retour afin d'inclure les données natales calculées
-            if len(row) > 19:
-                new_row.extend(row[19:])
+            # Inclure les données natales existantes pour le retour
+            if len(row) > len(new_row):
+                new_row.extend(row[len(new_row):])
 
-            ws.update(f"A{i}:S{i}", [new_row[:19]])
+            end_col = _col(C["alerts_enabled"])
+            ws.update(f"A{i}:{end_col}{i}", [new_row[:C["alerts_enabled"] + 1]])
             return _row_to_profile(new_row)
     return None
 
@@ -332,7 +342,9 @@ def save_natal_to_sheet(pseudo: str, profile: dict) -> bool:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
         natal_row = [str(profile.get(col, "")) for col in NATAL_COLS]
-        ws.update(f"W{i}:AS{i}", [natal_row])
+        c1 = _col(C[NATAL_COLS[0]])
+        c2 = _col(C[NATAL_COLS[-1]])
+        ws.update(f"{c1}{i}:{c2}{i}", [natal_row])
         return True
     return False
 
@@ -353,12 +365,13 @@ def check_and_increment_synthesis(pseudo: str) -> dict:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
 
+        sc = C["syntheses_count"]; srd = C["syntheses_reset_date"]
         try:
-            count = int(row[16]) if len(row) > 16 and row[16] else 0
+            count = int(row[sc]) if len(row) > sc and row[sc] else 0
         except ValueError:
             count = 0
 
-        reset_date = row[17] if len(row) > 17 and row[17] else ""
+        reset_date = row[srd] if len(row) > srd and row[srd] else ""
 
         if reset_date != current_month:
             count = 0
@@ -368,7 +381,7 @@ def check_and_increment_synthesis(pseudo: str) -> dict:
             return {"allowed": False, "remaining": 0}
 
         new_count = count + 1
-        ws.update(f"Q{i}:R{i}", [[str(new_count), current_month]])
+        ws.update(f"{_col(sc)}{i}:{_col(srd)}{i}", [[str(new_count), current_month]])
 
         return {"allowed": True, "remaining": SYNTHESIS_QUOTA - new_count}
 
@@ -405,7 +418,7 @@ def set_alerts(pseudo: str, enabled: bool) -> bool:
     for i, row in enumerate(records[1:], start=2):
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
-        ws.update(f"S{i}", [[str(int(enabled))]])
+        ws.update(f"{_col(C['alerts_enabled'])}{i}", [[str(int(enabled))]])
         return True
     return False
 
@@ -445,9 +458,9 @@ def upgrade_plan(pseudo: str, plan: str, stripe_customer_id: str = "") -> bool:
     for i, row in enumerate(records[1:], start=2):
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
-        ws.update(f"T{i}:U{i}", [[plan, str(syntheses)]])
+        ws.update(f"{_col(C['plan'])}{i}:{_col(C['plan_syntheses'])}{i}", [[plan, str(syntheses)]])
         if stripe_customer_id:
-            ws.update(f"V{i}", [[stripe_customer_id]])
+            ws.update(f"{_col(C['stripe_customer_id'])}{i}", [[stripe_customer_id]])
         current_month = _current_month_str()[:7]
         cr = _col(C["chat_remaining"])
         cm = _col(C["chat_reset_month"])
@@ -465,7 +478,7 @@ def downgrade_plan(pseudo: str) -> bool:
     for i, row in enumerate(records[1:], start=2):
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
-        ws.update(f"T{i}:U{i}", [["free", "0"]])
+        ws.update(f"{_col(C['plan'])}{i}:{_col(C['plan_syntheses'])}{i}", [["free", "0"]])
         return True
     return False
 
@@ -607,6 +620,6 @@ def consume_plan_synthesis(pseudo: str) -> bool:
         if count <= 0:
             return False
             
-        ws.update(f"U{i}", [[str(count - 1)]])
+        ws.update(f"{_col(C['plan_syntheses'])}{i}", [[str(count - 1)]])
         return True
     return False
