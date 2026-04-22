@@ -13,7 +13,8 @@ Hooks :
   build_prompt_only(chart_data, user) → prompt Gemma sans appel API
 """
 
-import anthropic
+import google.genai as genai
+from google.genai import types
 import os
 
 from astro_calc import NAKSHATRAS, NAKSHATRA_LORDS
@@ -57,14 +58,13 @@ def _load_vault(include_keywords: bool = True) -> str | None:
         return None
 
 
-# ── Client singleton ──────────────────────────────────────────────────────────
+# ── Configuration Gemini ──────────────────────────────────────────────────────
 _client = None
 
-
-def _get_client():
+def _get_gemini_client():
     global _client
     if _client is None:
-        _client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        _client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
     return _client
 
 
@@ -449,14 +449,17 @@ Sentence 3: the liberation direction opening (Visible Door/Stage) + a seed of Al
 Integrate the nakshatra and doctrinal regime (ROM/Dharma/Chiron) without uttering these words.
 Tone: dense, precise, as if reading the soul directly. Make them want to know more."""
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
-    msg = _get_client().messages.create(
+    client = _get_gemini_client()
+    hook_model = os.environ.get("HOOK_MODEL", "gemini-flash-latest")
+    response = client.models.generate_content(
         model=hook_model,
-        max_tokens=200,
-        system=system,
-        messages=[{"role": "user", "content": prompt}],
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=system,
+            max_output_tokens=200,
+        )
     )
-    return msg.content[0].text
+    return response.text
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -529,14 +532,17 @@ Sentence 2: what this touches in their core wound (Chiron = opening tool toward 
 Sentence 3: the seed of the Alternative of Consciousness — what changes if {name} chooses differently.
 Make them want the full reading. Dense and precise tone."""
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
-    msg = _get_client().messages.create(
+    client = _get_gemini_client()
+    hook_model = os.environ.get("HOOK_MODEL", "gemini-flash-latest")
+    response = client.models.generate_content(
         model=hook_model,
-        max_tokens=200,
-        system=system,
-        messages=[{"role": "user", "content": prompt}],
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=system,
+            max_output_tokens=200,
+        )
     )
-    return msg.content[0].text
+    return response.text
 # ══════════════════════════════════════════════════════════════════════════════
 # SIGNAL DU JOUR — compact pour TikTok/Web
 # ══════════════════════════════════════════════════════════════════════════════
@@ -721,14 +727,17 @@ MANDATORY STYLE: soul reader, not technical astrologer.
 
 Minimum 300 words. Do not truncate. Language: {lang_name}."""
 
-    synthesis_model = os.environ.get("SYNTHESIS_MODEL", "claude-haiku-4-5-20251001")
-    msg = _get_client().messages.create(
+    client = _get_gemini_client()
+    synthesis_model = os.environ.get("SYNTHESIS_MODEL", "gemini-flash-latest")
+    response = client.models.generate_content(
         model=synthesis_model,
-        max_tokens=4000,
-        system=_build_system_prompt(user, use_vault=True),
-        messages=[{"role": "user", "content": prompt}],
+        contents=prompt,
+        config=types.GenerateContentConfig(
+            system_instruction=_build_system_prompt(user, use_vault=True),
+            max_output_tokens=4000,
+        )
     )
-    return msg.content[0].text
+    return response.text
 
 
 # ══════════════════════════════════════════════════════════════════════════════
