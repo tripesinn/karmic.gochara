@@ -449,7 +449,7 @@ Sentence 3: the liberation direction opening (Visible Door/Stage) + a seed of Al
 Integrate the nakshatra and doctrinal regime (ROM/Dharma/Chiron) without uttering these words.
 Tone: dense, precise, as if reading the soul directly. Make them want to know more."""
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
+    hook_model = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
     msg = _get_client().messages.create(
         model=hook_model,
         max_tokens=200,
@@ -529,7 +529,7 @@ Sentence 2: what this touches in their core wound (Chiron = opening tool toward 
 Sentence 3: the seed of the Alternative of Consciousness — what changes if {name} chooses differently.
 Make them want the full reading. Dense and precise tone."""
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
+    hook_model = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
     msg = _get_client().messages.create(
         model=hook_model,
         max_tokens=200,
@@ -544,26 +544,11 @@ Make them want the full reading. Dense and precise tone."""
 def get_daily_signal(transit_date: str = None) -> dict:
     """
     Génère la Météo Astrologique globale pour le jour (sans user spécifique).
-    Retourne transits majeurs + régime doctrinal du jour.
-
-    Retourne :
-    {
-        "global": {
-            "title": "Météo Astrologique — 17/04/2026",
-            "transits": "Saturne entre en Mula (régent Ketu)...",
-            "regime": "ROM_oppression",
-            "regime_label": "Activation ROM — test karmique"
-        },
-        "hook_generic": "Test karmique majeur aujourd'hui...",
-        "cta": {
-            "text": "Et toi, né sous une Pleine Lune en Lion ?",
-            "subtext": "Découvre ce que ça dit pour TON thème natal",
-            "link": "https://karmicgochara.app/register"
-        }
-    }
+    Retourne transits majeurs + position de la Lune + régime doctrinal du jour.
     """
     from datetime import datetime, date as date_cls
     from transit_alerts import detect_global_nak_transits, PLANET_LABELS
+    from astro_calc import _calc_positions, get_julian_day, lon_to_nakshatra
 
     if not transit_date:
         transit_date = str(date_cls.today())
@@ -574,6 +559,7 @@ def get_daily_signal(transit_date: str = None) -> dict:
         return {"error": "Invalid date format. Use YYYY-MM-DD.",
                 "global": {}, "hook_generic": "", "cta": {}}
 
+    # 1. Détection des transits majeurs (planètes lentes entrant en nakshatra)
     try:
         events = detect_global_nak_transits(transit_date_obj)
     except Exception as exc:
@@ -581,6 +567,18 @@ def get_daily_signal(transit_date: str = None) -> dict:
                 "global": {}, "hook_generic": "", "cta": {}}
 
     primary = events[0] if events else None
+
+    # 2. Position de la Lune pour le signal quotidien (plus dynamique)
+    ref_lat, ref_lon, ref_tz = 48.8566, 2.3522, "Europe/Paris"
+    jd = get_julian_day(transit_date_obj.year, transit_date_obj.month, transit_date_obj.day, 12, 0, ref_tz)
+    pos = _calc_positions(jd, ref_lat, ref_lon)
+    moon_data = pos.get("Lune ☽")
+    
+    moon_info = ""
+    if moon_data:
+        nak = moon_data["nakshatra"]
+        pada = moon_data["pada"]
+        moon_info = f"Lune en {nak} (P{pada})"
 
     title_str = transit_date_obj.strftime("%d/%m/%Y")
     title = f"Météo Astrologique — {title_str}"
@@ -594,10 +592,9 @@ def get_daily_signal(transit_date: str = None) -> dict:
             f"entre en {nakshatra} (régent {primary['lord']}) — {regime_label.lower()}"
         )
     else:
-        nakshatra     = ""
         regime        = "neutre"
         regime_label  = "Jour stable"
-        transits_text = "Aucune activation majeure détectée aujourd'hui."
+        transits_text = f"{moon_info} — Aucune activation majeure des planètes lentes."
 
     return {
         "global": {
@@ -605,6 +602,7 @@ def get_daily_signal(transit_date: str = None) -> dict:
             "transits":     transits_text,
             "regime":       regime,
             "regime_label": regime_label,
+            "moon_nak":     moon_info,
         },
         "hook_generic": _generate_generic_hook(regime),
         "cta": {
@@ -721,7 +719,7 @@ MANDATORY STYLE: soul reader, not technical astrologer.
 
 Minimum 300 words. Do not truncate. Language: {lang_name}."""
 
-    synthesis_model = os.environ.get("SYNTHESIS_MODEL", "claude-haiku-4-5-20251001")
+    synthesis_model = os.environ.get("SYNTHESIS_MODEL", "claude-3-5-haiku-20241022")
     msg = _get_client().messages.create(
         model=synthesis_model,
         max_tokens=4000,

@@ -277,7 +277,7 @@ def calc_portes(saturn_lon: float, uranus_lon: float) -> dict:
 
 def _calc_positions(jd: float, lat: float, lon: float) -> dict:
     _set_ayanamsa()
-    flags = swe.FLG_SIDEREAL | swe.FLG_SPEED
+    flags = swe.FLG_SIDEREAL | swe.FLG_SPEED | swe.FLG_MOSEPH
 
     positions = {}
 

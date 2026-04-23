@@ -1223,7 +1223,7 @@ def hook_transit():
             f"Make them want the full reading. Dense and precise."
         )
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
+    hook_model = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
 
     # ── Stream SSE ────────────────────────────────────────────────────────────
     # On capture le profil enrichi dans une var locale pour le cache post-stream
@@ -1600,7 +1600,7 @@ def chat_ask():
     import anthropic as _anthropic
     try:
         client = _anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        model  = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
+        model  = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
         msg = client.messages.create(
             model=model,
             max_tokens=600,
@@ -1830,7 +1830,7 @@ def expand():
 
     try:
         client   = _anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        model    = os.environ.get("HOOK_MODEL", "claude-haiku-4-5-20251001")
+        model    = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
         response = client.messages.create(
             model=model,
             max_tokens=300,
