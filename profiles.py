@@ -128,14 +128,12 @@ def _get_sheet():
         except gspread.WorksheetNotFound:
             try:
                 ws = spreadsheet.sheet1
-            except Exception:
+            except Exception: # Can be WorksheetNotFound if no sheets
                 ws = spreadsheet.add_worksheet(title="gochara-profiles", rows=1000, cols=len(ALL_COLS) + 5)
 
-    # Créer l'en-tête si absente (feuille vide ou en-tête supprimé)
-    if ws:
-        first_row = ws.row_values(1)
-        if not first_row or first_row[0] != ALL_COLS[0]:
-            ws.insert_row(ALL_COLS, 1)
+    # Créer l'en-tête si la feuille est vide
+    if ws and not ws.row_values(1):
+        ws.append_row(ALL_COLS)
 
     _sheet = ws
     return _sheet
@@ -151,55 +149,6 @@ def _row_to_profile(row: list) -> dict:
             return default
 
     return {
-<<<<<<< HEAD
-        "pseudo":               _safe(0),
-        "email":                _safe(1),
-        "name":                 _safe(2),
-        "year":                 _safe(3, int, 1990),
-        "month":                _safe(4, int, 1),
-        "day":                  _safe(5, int, 1),
-        "hour":                 _safe(6, int, 12),
-        "minute":               _safe(7, int, 0),
-        "lat":                  _safe(8, float, 48.8566),
-        "lon":                  _safe(9, float, 2.3522),
-        "tz":                   _safe(10) or "Europe/Paris",
-        "city":                 _safe(11) or "Paris, France",
-        "transit_city":         _safe(12) or "Paris, France",
-        "transit_lat":          _safe(13, float, 48.8566),
-        "transit_lon":          _safe(14, float, 2.3522),
-        "transit_tz":           _safe(15) or "Europe/Paris",
-        # Quota — fallback 0 / mois courant pour anciens profils
-        "syntheses_count":      _safe(16, int, 0),
-        "syntheses_reset_date": _safe(17) or _current_month_str(),
-        "alerts_enabled":       _safe(18, int, 0),
-        "plan":                 _safe(19) or "free",
-        "plan_syntheses":       _parse_unlimited_int(_safe(20), 0),
-        "stripe_customer_id":   _safe(21) or "",
-        # Données natales (colonnes W→AQ, indices 22→42)
-        "chandra_lagna_sign":    _safe(22),
-        "ketu_sign":             _safe(23),
-        "ketu_house":            _safe(24),
-        "ketu_nakshatra":        _safe(25),
-        "rahu_sign":             _safe(26),
-        "rahu_house":            _safe(27),
-        "rahu_nakshatra":        _safe(28),
-        "chiron_sign":           _safe(29),
-        "chiron_house":          _safe(30),
-        "chiron_nakshatra":      _safe(31),
-        "lilith_sign":           _safe(32),
-        "lilith_house":          _safe(33),
-        "saturn_sign":           _safe(34),
-        "saturn_house":          _safe(35),
-        "jupiter_sign":          _safe(36),
-        "jupiter_house":         _safe(37),
-        "porte_visible_sign":    _safe(38),
-        "porte_visible_house":   _safe(39),
-        "porte_visible_deg":     _safe(40),
-        "porte_invisible_sign":  _safe(41),
-        "porte_invisible_house": _safe(42),
-        "moon_longitude_sid":    _safe(43),
-        "chandra_lagna_degree":  _safe(44),
-=======
         "pseudo":                _safe(C["pseudo"]),
         "email":                 _safe(C["email"]),
         "name":                  _safe(C["name"]),
@@ -246,7 +195,6 @@ def _row_to_profile(row: list) -> dict:
         "porte_invisible_house": _safe(C["porte_invisible_house"]),
         "moon_longitude_sid":    _safe(C["moon_longitude_sid"]),
         "chandra_lagna_degree":  _safe(C["chandra_lagna_degree"]),
->>>>>>> 23f496df0108fe6c9a958f771bd478a73a0bad89
     }
 
 
@@ -672,11 +620,7 @@ def consume_plan_synthesis(pseudo: str) -> bool:
             return True  # Illimité pour les abonnés
 
         try:
-<<<<<<< HEAD
-            count = _parse_unlimited_int(row[20] if len(row) > 20 else "", 0)
-=======
             count = int(row[C["plan_syntheses"]]) if len(row) > C["plan_syntheses"] and row[C["plan_syntheses"]] else 0
->>>>>>> 23f496df0108fe6c9a958f771bd478a73a0bad89
         except ValueError:
             count = 0
             
