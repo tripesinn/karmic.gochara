@@ -6,8 +6,8 @@ import json
 import os
 import requests
 
-_DEFAULT_MODEL = os.environ.get("HOOK_MODEL", "gemini-1.5-flash")
-_DEFAULT_SYNTH  = os.environ.get("SYNTHESIS_MODEL", "gemini-1.5-flash")
+_DEFAULT_MODEL = os.environ.get("HOOK_MODEL", "gemini-2.5-flash")
+_DEFAULT_SYNTH  = os.environ.get("SYNTHESIS_MODEL", "gemini-2.5-flash")
 _BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
 

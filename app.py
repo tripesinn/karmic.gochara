@@ -87,6 +87,14 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
         enriched["moon_longitude_sid"]   = ""
         enriched["chandra_lagna_degree"] = ""
 
+    # Ajout de tous les degrés planétaires pour la carte SVG
+    for p_key in ["Lune ☽", "Soleil ☉", "Mercure ☿", "Vénus ♀", "Mars ♂",
+                  "Jupiter ♃", "Saturne ♄", "Nœud Nord ☊", "Nœud Sud ☋",
+                  "Chiron ⚷", "Lilith ⚸", "Porte Visible ⊙", "Porte Invisible ⊗"]:
+        planet_name = p_key.split(" ")[0].lower()
+        p_data = natal.get(p_key, {})
+        enriched[f"{planet_name}_deg"] = _deg(p_data.get("display", ""))
+
     enriched["natal_positions"]     = natal
 
     return enriched
