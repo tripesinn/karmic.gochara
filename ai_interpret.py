@@ -13,8 +13,8 @@ Hooks :
   build_prompt_only(chart_data, user) → prompt Gemma sans appel API
 """
 
-import anthropic
 import os
+import gemini_api
 
 from astro_calc import NAKSHATRAS, NAKSHATRA_LORDS
 
@@ -57,15 +57,7 @@ def _load_vault(include_keywords: bool = True) -> str | None:
         return None
 
 
-# ── Client singleton ──────────────────────────────────────────────────────────
-_client = None
-
-
-def _get_client():
-    global _client
-    if _client is None:
-        _client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-    return _client
+# ── Configuration Gemini ──────────────────────────────────────────────────────
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -449,14 +441,7 @@ Sentence 3: the liberation direction opening (Visible Door/Stage) + a seed of Al
 Integrate the nakshatra and doctrinal regime (ROM/Dharma/Chiron) without uttering these words.
 Tone: dense, precise, as if reading the soul directly. Make them want to know more."""
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
-    msg = _get_client().messages.create(
-        model=hook_model,
-        max_tokens=200,
-        system=system,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.content[0].text
+    return gemini_api.generate(system, prompt, max_tokens=1024)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -529,14 +514,7 @@ Sentence 2: what this touches in their core wound (Chiron = opening tool toward 
 Sentence 3: the seed of the Alternative of Consciousness — what changes if {name} chooses differently.
 Make them want the full reading. Dense and precise tone."""
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
-    msg = _get_client().messages.create(
-        model=hook_model,
-        max_tokens=200,
-        system=system,
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.content[0].text
+    return gemini_api.generate(system, prompt, max_tokens=1024)
 # ══════════════════════════════════════════════════════════════════════════════
 # SIGNAL DU JOUR — compact pour TikTok/Web
 # ══════════════════════════════════════════════════════════════════════════════
@@ -719,14 +697,7 @@ MANDATORY STYLE: soul reader, not technical astrologer.
 
 Minimum 300 words. Do not truncate. Language: {lang_name}."""
 
-    synthesis_model = os.environ.get("SYNTHESIS_MODEL", "claude-3-5-haiku-20241022")
-    msg = _get_client().messages.create(
-        model=synthesis_model,
-        max_tokens=4000,
-        system=_build_system_prompt(user, use_vault=True),
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return msg.content[0].text
+    return gemini_api.generate(_build_system_prompt(user, use_vault=True), prompt, max_tokens=8192)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

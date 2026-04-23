@@ -87,6 +87,14 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
         enriched["moon_longitude_sid"]   = ""
         enriched["chandra_lagna_degree"] = ""
 
+    # Ajout de tous les degrés planétaires pour la carte SVG
+    for p_key in ["Lune ☽", "Soleil ☉", "Mercure ☿", "Vénus ♀", "Mars ♂",
+                  "Jupiter ♃", "Saturne ♄", "Nœud Nord ☊", "Nœud Sud ☋",
+                  "Chiron ⚷", "Lilith ⚸", "Porte Visible ⊙", "Porte Invisible ⊗"]:
+        planet_name = p_key.split(" ")[0].lower()
+        p_data = natal.get(p_key, {})
+        enriched[f"{planet_name}_deg"] = _deg(p_data.get("display", ""))
+
     enriched["natal_positions"]     = natal
 
     return enriched
@@ -793,71 +801,12 @@ def login():
     cache_key  = f"hook_natal_{pseudo}"
     if session.get(cache_key):
         hook_natal = session[cache_key]
-    elif profile.get("chandra_lagna_sign"):
-        # Natal disponible dans Sheets → hook immédiat
-        try:
-            from ai_interpret import get_hook_natal
-            hook_natal = get_hook_natal(profile)
-            session[cache_key] = hook_natal
-        except Exception as exc:
-            app.logger.warning("Hook natal login échoué : %s", exc)
-    else:
-        # Ancien profil sans natal stocké → calcul à la volée (non bloquant)
-        try:
-            from astro_calc import calculate_transits
-            from profiles import save_natal_to_sheet
-            from ai_interpret import get_hook_natal
-            from datetime import date as _date
 
-            natal_input = {
-                "name":   profile["name"],
-                "year":   profile["year"],   "month":  profile["month"],
-                "day":    profile["day"],    "hour":   profile["hour"],
-                "minute": profile["minute"], "lat":    profile["lat"],
-                "lon":    profile["lon"],    "tz":     profile["tz"],
-                "city":   profile["city"],
-            }
-            today = _date.today()
-            transit_loc = {
-                "city": profile["city"], "lat": profile["lat"],
-                "lon":  profile["lon"],  "tz":  profile["tz"],
-            }
-            natal_result     = calculate_transits(natal_input, transit_loc,
-                                                  today.year, today.month, today.day, 12, 0)
-            enriched         = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
-            save_natal_to_sheet(pseudo, enriched)  # stocké pour la prochaine fois
-            session["profile"] = enriched
-            profile = enriched
-            hook_natal = get_hook_natal(profile)
-            session[cache_key] = hook_natal
-        except Exception as exc:
-            app.logger.warning("Hook natal login (calcul volée) échoué : %s", exc)
-
-    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
-
-
-@app.route("/register", methods=["POST"])
-def register():
-    from profiles import get_profile_by_email, pseudo_exists, create_profile
-    data   = request.get_json() or {}
-    pseudo = (data.get("pseudo") or "").strip()
-    if not pseudo:
-        return jsonify({"ok": False, "error": "Pseudo requis"}), 400
-    try:
-        if pseudo_exists(pseudo):
-            return jsonify({"ok": False, "error": "Pseudo déjà pris"}), 409
-        email = (data.get("email") or "").strip().lower()
-        if email and get_profile_by_email(email):
-            return jsonify({"ok": False, "error": "Email déjà enregistré"}), 409
-        profile = create_profile(data)
-    except Exception as exc:
-        app.logger.error("Erreur Sheets register : %s", exc)
-        return jsonify({"ok": False, "error": str(exc)}), 500
-
-    # ── Calcul natal immédiat + stockage Sheets ───────────────────────────────
+    # Toujours recalculer natal_positions en session (non stocké dans le Sheet)
     try:
         from astro_calc import calculate_transits
         from profiles import save_natal_to_sheet
+        from ai_interpret import get_hook_natal
         from datetime import date as _date
 
         natal_input = {
@@ -869,33 +818,136 @@ def register():
             "city":   profile["city"],
         }
         today = _date.today()
-        # Transit = même lieu que natal, date du jour (on veut juste le natal)
+        transit_loc = {
+            "city": profile["city"], "lat": profile["lat"],
+            "lon":  profile["lon"],  "tz":  profile["tz"],
+        }
+        natal_result = calculate_transits(natal_input, transit_loc,
+                                          today.year, today.month, today.day, 12, 0)
+        enriched = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
+        if not profile.get("chandra_lagna_sign"):
+            save_natal_to_sheet(pseudo, enriched)
+        session["profile"] = enriched
+        profile = enriched
+        if not hook_natal:
+            hook_natal = get_hook_natal(profile)
+            session[cache_key] = hook_natal
+    except Exception as exc:
+        app.logger.warning("Hook natal login échoué : %s", exc)
+
+    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
+
+
+@app.route("/register", methods=["POST"])
+def register():
+    from profiles import get_profile_by_email, pseudo_exists, create_profile
+    data   = request.get_json() or {}
+    pseudo = (data.get("pseudo") or "").strip()
+    if not pseudo:
+        return jsonify({"ok": False, "error": "Pseudo requis"}), 400
+
+    app.logger.info("REGISTER data reçue: %s", data)
+
+    # Normalise : parse birth_date / birth_time si envoyés comme strings
+    if "birth_date" in data and "year" not in data:
+        try:
+            parts = str(data["birth_date"]).split("-")
+            data["year"], data["month"], data["day"] = int(parts[0]), int(parts[1]), int(parts[2])
+        except Exception as e:
+            app.logger.warning("Parse birth_date échoué: %s", e)
+    if "birth_time" in data and "hour" not in data:
+        try:
+            tp = str(data["birth_time"]).split(":")
+            data["hour"], data["minute"] = int(tp[0]), int(tp[1])
+        except Exception as e:
+            app.logger.warning("Parse birth_time échoué: %s", e)
+    # Valeurs par défaut obligatoires
+    data.setdefault("name", pseudo)
+    data.setdefault("city", data.get("birth_city", ""))
+    data.setdefault("lat", 48.8566)
+    data.setdefault("lon", 2.3522)
+    data.setdefault("tz", "Europe/Paris")
+    # Transit = lieu natal par défaut
+    data.setdefault("transit_city", data.get("city", ""))
+    data.setdefault("transit_lat",  data.get("lat", 48.8566))
+    data.setdefault("transit_lon",  data.get("lon", 2.3522))
+    data.setdefault("transit_tz",   data.get("tz", "Europe/Paris"))
+
+    try:
+        if pseudo_exists(pseudo):
+            return jsonify({"ok": False, "error": "Pseudo déjà pris"}), 409
+        email = (data.get("email") or "").strip().lower()
+        if email and get_profile_by_email(email):
+            return jsonify({"ok": False, "error": "Email déjà enregistré"}), 409
+
+        # 1. Create basic profile in sheet
+        profile = create_profile(data)
+        session["pseudo"] = pseudo
+        session["profile"] = profile
+    except Exception as exc:
+        app.logger.error("Erreur Sheets register : %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    # 2. Try to calculate natal and enrich
+    hook_natal = ""
+    try:
+        from astro_calc import calculate_transits
+        from profiles import save_natal_to_sheet
+        from datetime import date as _date
+        from ai_interpret import get_hook_natal
+
+        natal_input = {
+            "name":   profile["name"],
+            "year":   profile["year"],   "month":  profile["month"],
+            "day":    profile["day"],    "hour":   profile["hour"],
+            "minute": profile["minute"], "lat":    profile["lat"],
+            "lon":    profile["lon"],    "tz":     profile["tz"],
+            "city":   profile["city"],
+        }
+        today = _date.today()
         transit_loc = {
             "city": profile["city"], "lat": profile["lat"],
             "lon":  profile["lon"],  "tz":  profile["tz"],
         }
         natal_result     = calculate_transits(natal_input, transit_loc,
                                               today.year, today.month, today.day, 12, 0)
-        enriched_profile = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
-        save_natal_to_sheet(pseudo, enriched_profile)
-        profile = enriched_profile  # profil enrichi en session
+        
+        # Verify result content before enriching
+        if not natal_result.get("natal"):
+            app.logger.error("Calcul natal a retourné un résultat vide pour %s", pseudo)
+        else:
+            enriched_profile = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
+            
+            # 3. Save natal info to sheet and update session
+            if save_natal_to_sheet(pseudo, enriched_profile):
+                profile = enriched_profile
+                session["profile"] = profile
+                app.logger.info("Profil enrichi et sauvegardé pour %s", pseudo)
+            else:
+                app.logger.error("Échec de save_natal_to_sheet pour %s", pseudo)
+                
+            # 4. Generate hook
+            hook_natal = get_hook_natal(profile)
     except Exception as exc:
-        app.logger.warning("Calcul natal register échoué (non bloquant) : %s", exc)
-        # Non bloquant — l'inscription réussit quand même
-
-    session["profile"] = profile
-    session["pseudo"] = pseudo
-
-    # ── Hook natal dès l'inscription ─────────────────────────────────────────
-    hook_natal = ""
-    try:
-        from ai_interpret import get_hook_natal
-        hook_natal = get_hook_natal(profile)
-    except Exception as exc:
-        app.logger.warning("Hook natal register échoué : %s", exc)
+        app.logger.error("Calcul natal register échoué pour %s : %s", pseudo, exc, exc_info=True)
 
     return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
 
+@app.route("/chart/karmic.svg")
+def karmic_chart_svg():
+    profile = session.get("profile")
+    if not profile or "natal_positions" not in profile:
+        return "Non autorisé ou thème non calculé", 401
+    
+    from svg_chart import generate_karmic_chart_svg
+    lang = session.get("lang", "fr")
+    svg_content = generate_karmic_chart_svg(profile["natal_positions"], lang=lang)
+    
+    response = make_response(svg_content)
+    response.headers["Content-Type"] = "image/svg+xml"
+    # Allow caching for 24h as it's a natal chart (doesn't change)
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
 
 @app.route("/logout", methods=["POST"])
 def logout():
@@ -961,7 +1013,8 @@ def calculate():
         quota = {"allowed": True, "remaining": 999}
     else:
         plan = profile.get("plan", "free")
-        if plan in ("test", "subscription"):
+        plan_normalized = plan.lower().replace("é", "e")
+        if plan_normalized in ("test", "subscription", "lecture", "essential", "illimite"):
             # Utilisateur payant — consomme une synthèse plan
             from profiles import consume_plan_synthesis
             allowed = consume_plan_synthesis(pseudo)
@@ -1058,11 +1111,12 @@ def calculate():
                 "transit_lat":  transit_loc["lat"],
                 "transit_lon":  transit_loc["lon"],
                 "transit_tz":   transit_loc["tz"],
+                "transit_date": data.get("date", ""),
             }
             session["profile"] = {**profile, **new_transit}
             session.modified = True
-            # Persist dans Google Sheets si la ville a changé
-            if transit_loc["city"] != profile.get("transit_city"):
+            # Persist dans Google Sheets (ville ou date changée)
+            if transit_loc["city"] != profile.get("transit_city") or data.get("date") != profile.get("transit_date"):
                 try:
                     from profiles import update_profile
                     update_profile(profile["email"], {**profile, **new_transit})
@@ -1093,7 +1147,6 @@ def hook_transit():
     from astro_calc import calculate_transits
     from ai_interpret import _build_system_prompt, _aspects_to_text, _build_natal_context
     from flask import Response, stream_with_context
-    import anthropic as _anthropic
     import json as _json
 
     profile = session.get("profile")
@@ -1147,6 +1200,23 @@ def hook_transit():
         def err_stream():
             yield f"data: [ERROR] {str(exc)}\n\n"
         return Response(stream_with_context(err_stream()), mimetype="text/event-stream")
+
+    # ── Sauvegarde transit_date + localisation en session et Sheet ────────────
+    new_transit = {
+        "transit_city": transit_loc["city"],
+        "transit_lat":  transit_loc["lat"],
+        "transit_lon":  transit_loc["lon"],
+        "transit_tz":   transit_loc["tz"],
+        "transit_date": date_str,
+    }
+    if transit_loc["city"] != profile.get("transit_city") or date_str != profile.get("transit_date"):
+        try:
+            from profiles import update_profile
+            update_profile(profile["email"], {**profile, **new_transit})
+        except Exception as e:
+            app.logger.warning("update_profile hook/transit: %s", e)
+    session["profile"] = {**profile, **new_transit}
+    session.modified = True
 
     # ── Prompt ────────────────────────────────────────────────────────────────
     aspects_text = _aspects_to_text(chart_data.get("aspects", []), max_aspects=3)
@@ -1223,7 +1293,7 @@ def hook_transit():
             f"Make them want the full reading. Dense and precise."
         )
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
+    hook_model = os.environ.get("HOOK_MODEL", "gemini-1.5-flash")
 
     # ── Stream SSE ────────────────────────────────────────────────────────────
     # On capture le profil enrichi dans une var locale pour le cache post-stream
@@ -1232,21 +1302,11 @@ def hook_transit():
 
     def generate():
         full_text = []
-        client = _anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+        import gemini_api
         try:
-            with client.messages.stream(
-                model=hook_model,
-                max_tokens=250,
-                system=system,
-                messages=[{"role": "user", "content": prompt}],
-            ) as stream:
-                for chunk in stream.text_stream:
-                    full_text.append(chunk)
-                    yield f"data: {_json.dumps(chunk)}\n\n"
-            # Mise en cache après stream complet
-            complete = "".join(full_text)
-            with app.app_context():
-                pass  # session non accessible ici — cache géré côté client
+            for text in gemini_api.stream(system, prompt):
+                full_text.append(text)
+                yield f"data: {_json.dumps(text)}\n\n"
             yield f"data: [DONE]\n\n"
         except Exception as exc:
             app.logger.error("Erreur stream hook transit : %s", exc)
@@ -1472,12 +1532,29 @@ def synthesis_prompt():
             f"La troisième phrase : l'amorce de l'Alternative de Conscience — ce qui change si {name_t} choisit autrement.\n"
             f"Donne envie d'obtenir la lecture complète. Ton dense et précis."
         )
+        # Sauvegarde transit_date + localisation
+        new_transit_t = {
+            "transit_city": transit_loc_t["city"],
+            "transit_lat":  transit_loc_t["lat"],
+            "transit_lon":  transit_loc_t["lon"],
+            "transit_tz":   transit_loc_t["tz"],
+            "transit_date": date_str,
+        }
+        if transit_loc_t["city"] != profile.get("transit_city") or date_str != profile.get("transit_date"):
+            try:
+                from profiles import update_profile
+                update_profile(profile["email"], {**profile, **new_transit_t})
+            except Exception as e:
+                app.logger.warning("update_profile hook_transit prompt: %s", e)
+        session["profile"] = {**profile, **new_transit_t}
+        session.modified = True
         return jsonify({"ok": True, "context": "hook_transit", "system": system_t, "user": user_t})
 
     # Synthèse complète + Alternative de Conscience : gate paiement
     if pseudo.lower() not in UNLIMITED_PSEUDOS:
         plan = profile.get("plan", "free")
-        if plan in ("test", "subscription"):
+        plan_normalized = plan.lower().replace("é", "e")
+        if plan_normalized in ("test", "subscription", "lecture", "essential", "illimite"):
             from profiles import consume_plan_synthesis
             if not consume_plan_synthesis(pseudo):
                 return jsonify({"error": "quota_exceeded",
@@ -1596,20 +1673,12 @@ def chat_ask():
             "remaining": remaining,
         })
 
-    # Génération Haiku côté serveur
-    import anthropic as _anthropic
+    # Génération Gemini côté serveur
+    import gemini_api
     try:
-        client = _anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        model  = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
-        msg = client.messages.create(
-            model=model,
-            max_tokens=600,
-            system=prompts["system"],
-            messages=[{"role": "user", "content": prompts["user"]}],
-        )
-        answer = msg.content[0].text.strip()
+        answer = gemini_api.generate(prompts["system"], prompts["user"], max_tokens=1024).strip()
     except Exception as e:
-        app.logger.error("Chat Haiku error: %s", e)
+        app.logger.error("Chat Gemini error: %s", e)
         return jsonify({"error": "generation_failed", "message": str(e)}), 500
 
     return jsonify({
@@ -1781,7 +1850,6 @@ def expand():
     Expansion gratuite unique — topic: alternative_conscience uniquement.
     Limité à 1 appel par session (session['expand_used']).
     """
-    import anthropic as _anthropic
     from ai_interpret import _build_natal_context
 
     # Sécurité : 1 seul expand gratuit par session
@@ -1829,15 +1897,8 @@ def expand():
     )
 
     try:
-        client   = _anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        model    = os.environ.get("HOOK_MODEL", "claude-3-5-haiku-20241022")
-        response = client.messages.create(
-            model=model,
-            max_tokens=300,
-            system=system,
-            messages=[{"role": "user", "content": prompt}]
-        )
-        content = response.content[0].text
+        import gemini_api
+        content = gemini_api.generate(system, prompt, max_tokens=1024)
         return jsonify({"content": content})
     except Exception as exc:
         app.logger.error("Erreur expand : %s", exc)
@@ -1868,7 +1929,7 @@ def stripe_checkout():
     if not email:
         return jsonify({"error": "Email requis pour le paiement"}), 400
 
-    base_url = request.host_url.rstrip("/")
+    base_url = os.environ.get("DEEP_LINK_BASE_URL") or request.host_url.rstrip("/")
     try:
         url = create_checkout_session(product_type, email, pseudo, base_url)
         return jsonify({"url": url})

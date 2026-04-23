@@ -14,7 +14,41 @@ try:
 except ImportError:
     import swisseph_ctypes as swe   # fallback ctypes (pas de compilation)
 from datetime import datetime
+import math
 import pytz
+
+# ── Chiron képlérien (fallback si Swiss Ephemeris n'a pas les fichiers asteroïdes) ──
+_JD_J2000    = 2451545.0
+_CHIRON_A    = 13.6488
+_CHIRON_E    = 0.38214
+_CHIRON_I    = math.radians(6.9310)
+_CHIRON_NODE = math.radians(209.6020)
+_CHIRON_PERI = math.radians(339.3882)
+_CHIRON_M0   = math.radians(27.70)
+_CHIRON_N    = 2 * math.pi / (50.42 * 365.25)
+_DK_T0_JD    = 2442351.809028
+_DK_AYAN_T0  = 28.0
+_PRECESSION  = 50.27 / 3600.0 / 365.25
+
+def _chiron_sid_lon(jd: float) -> float:
+    """Longitude sidérale de Chiron via mécanique képlerienne (précision ~0.5°)."""
+    M = (_CHIRON_M0 + _CHIRON_N * (jd - _JD_J2000)) % (2 * math.pi)
+    E = M
+    for _ in range(50):
+        dE = (M - E + _CHIRON_E * math.sin(E)) / (1 - _CHIRON_E * math.cos(E))
+        E += dE
+        if abs(dE) < 1e-9:
+            break
+    nu  = 2 * math.atan2(
+        math.sqrt(1 + _CHIRON_E) * math.sin(E / 2),
+        math.sqrt(1 - _CHIRON_E) * math.cos(E / 2),
+    )
+    u   = nu + _CHIRON_PERI
+    x   = math.cos(_CHIRON_NODE) * math.cos(u) - math.sin(_CHIRON_NODE) * math.sin(u) * math.cos(_CHIRON_I)
+    y   = math.sin(_CHIRON_NODE) * math.cos(u) + math.cos(_CHIRON_NODE) * math.sin(u) * math.cos(_CHIRON_I)
+    lon_trop = math.degrees(math.atan2(y, x)) % 360
+    ayan = _DK_AYAN_T0 + (jd - _DK_T0_JD) * _PRECESSION
+    return (lon_trop - ayan) % 360
 
 # ── Ayanamsa Centre Galactique DK ───────────────────────────────────────────
 DK_T0_JD   = 2442351.809028   # JD du 31/10/1974 07h25 UTC
@@ -100,6 +134,80 @@ NAKSHATRA_LORDS = [
     "Ketu", "Vénus", "Soleil", "Lune", "Mars", "Rahu", "Jupiter",
     "Saturne", "Mercure",  # 19-27
 ]
+
+# Durées des périodes Vimshottari (en années)
+DASHAS_DURATION = {
+    "Ketu": 7, "Vénus": 20, "Soleil": 6, "Lune": 10,
+    "Mars": 7, "Rahu": 18, "Jupiter": 16, "Saturne": 19, "Mercure": 17
+}
+DASHAS_SEQUENCE = ["Ketu", "Vénus", "Soleil", "Lune", "Mars", "Rahu", "Jupiter", "Saturne", "Mercure"]
+
+
+def calc_vimshottari(moon_lon: float, birth_jd: float) -> list[dict]:
+    """
+    Calcule les périodes de Maha Dasha à partir de la longitude de la Lune.
+    """
+    from datetime import timedelta
+    nak_size = 360.0 / 27.0
+    nak_idx = int(moon_lon / nak_size)
+    rem_in_nak = (nak_idx + 1) * nak_size - moon_lon
+    
+    first_lord = NAKSHATRA_LORDS[nak_idx]
+    first_duration = DASHAS_DURATION[first_lord]
+    
+    # Proportion restante de la première période
+    fraction_remaining = rem_in_nak / nak_size
+    years_remaining = first_duration * fraction_remaining
+    
+    # Conversion JD en datetime (simplifié)
+    from datetime import datetime, timezone
+    # JD 2440587.5 = 1970-01-01 12:00 UTC
+    dt_birth = datetime.fromtimestamp((birth_jd - 2440587.5) * 86400, tz=timezone.utc)
+    
+    current_date = dt_birth + timedelta(days=years_remaining * 365.25)
+    
+    dashas = []
+    # Première période (partielle)
+    dashas.append({
+        "lord": first_lord,
+        "end_date": current_date.strftime("%d/%m/%Y"),
+        "is_current": years_remaining > 0
+    })
+    
+    # Périodes suivantes (cycle de 120 ans)
+    seq_idx = DASHAS_SEQUENCE.index(first_lord)
+    for i in range(1, 9):
+        lord = DASHAS_SEQUENCE[(seq_idx + i) % 9]
+        duration = DASHAS_DURATION[lord]
+        current_date += timedelta(days=duration * 365.25)
+        dashas.append({
+            "lord": lord,
+            "end_date": current_date.strftime("%d/%m/%Y"),
+            "is_current": False # sera ajusté par le front
+        })
+        
+    return dashas
+
+
+def check_sade_sati(saturn_lon: float, moon_lon: float) -> dict:
+    """
+    Vérifie si l'utilisateur est en Sade Sati.
+    Sade Sati = Saturne transite les maisons 12, 1 ou 2 depuis la Lune.
+    """
+    moon_sign_idx = int(moon_lon / 30)
+    saturn_sign_idx = int(saturn_lon / 30)
+    
+    # Distance en signes (0-11)
+    diff = (saturn_sign_idx - moon_sign_idx + 12) % 12
+    
+    if diff == 11:
+        return {"active": True, "phase": "1 (Maison 12 - Prémonition/Pression)"}
+    elif diff == 0:
+        return {"active": True, "phase": "2 (Maison 1 - Pic/Épreuve)"}
+    elif diff == 1:
+        return {"active": True, "phase": "3 (Maison 2 - Conséquences/Bilan)"}
+    else:
+        return {"active": False, "phase": None}
 
 
 def lon_to_nakshatra(lon: float) -> dict:
@@ -282,6 +390,23 @@ def _calc_positions(jd: float, lat: float, lon: float) -> dict:
     positions = {}
 
     for name, pid in PLANETS.items():
+        # Chiron : képlérien en priorité (pas de fichier seas_18.se1 sur Render)
+        if pid == swe.CHIRON:
+            try:
+                c_lon = _chiron_sid_lon(jd)
+                nak_data = lon_to_nakshatra(c_lon)
+                positions[name] = {
+                    "lon": c_lon, "lon_raw": c_lon, "speed": 0.05,
+                    "retrograde": False, "display": lon_to_display(c_lon),
+                    "nakshatra": nak_data["nakshatra"],
+                    "pada": nak_data["pada"], "nak_lord": nak_data["lord"],
+                    "d9": lon_to_d9(c_lon), "d10": lon_to_d10(c_lon), "d60": lon_to_d60(c_lon),
+                }
+            except Exception as _e2:
+                import logging as _log
+                _log.warning("astro_calc: fallback Chiron échoué : %s", _e2)
+                positions[name] = None
+            continue
         try:
             result, _ = swe.calc_ut(jd, pid, flags)
             planet_lon = result[0] % 360
@@ -300,7 +425,9 @@ def _calc_positions(jd: float, lat: float, lon: float) -> dict:
                 "d10":        lon_to_d10(planet_lon),
                 "d60":        lon_to_d60(planet_lon),
             }
-        except Exception:
+        except Exception as _e:
+            import logging as _log
+            _log.warning("astro_calc: calcul échoué pour %s : %s", name, _e)
             positions[name] = None
 
     # ── Nœud Sud ─────────────────────────────────────────────────────────────
@@ -424,6 +551,11 @@ def calculate_transits(natal: dict, transit_loc: dict,
         for n_name, n_data in natal_pos.items():
             if n_data is None:
                 continue
+            
+            # Ignorer le retour de Lilith (Lilith sur elle-même)
+            if t_name == "Lilith ⚸" and n_name == "Lilith ⚸":
+                continue
+                
             n_lon = n_data["lon"]
 
             diff = abs(t_lon - n_lon) % 360
@@ -465,10 +597,24 @@ def calculate_transits(natal: dict, transit_loc: dict,
                 }
         return result
 
+    # ── Timing (Vimshottari Dasha & Sade Sati) ────────────────────────────────
+    moon_natal = natal_pos.get("Lune ☽")
+    sat_transit = transit_pos.get("Saturne ♄")
+    
+    dashas = []
+    if moon_natal:
+        dashas = calc_vimshottari(moon_natal["lon"], natal_jd)
+        
+    sade_sati = {"active": False, "phase": None}
+    if moon_natal and sat_transit:
+        sade_sati = check_sade_sati(sat_transit["lon"], moon_natal["lon"])
+
     return {
         "aspects":       aspects,
         "natal":         _display_dict(natal_pos),
         "transits":      _display_dict(transit_pos),
         "transit_date":  f"{day:02d}/{month:02d}/{year}",
         "transit_time":  f"{hour:02d}h{minute:02d}",
+        "dashas":        dashas,
+        "sade_sati":     sade_sati,
     }
