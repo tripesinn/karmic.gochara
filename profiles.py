@@ -146,7 +146,7 @@ def _row_to_profile(row: list) -> dict:
         "syntheses_reset_date": _safe(17) or _current_month_str(),
         "alerts_enabled":       _safe(18, int, 0),
         "plan":                 _safe(19) or "free",
-        "plan_syntheses":       _safe(20, int, 0),
+        "plan_syntheses":       _parse_unlimited_int(_safe(20), 0),
         "stripe_customer_id":   _safe(21) or "",
         # Données natales (colonnes W→AQ, indices 22→42)
         "chandra_lagna_sign":    _safe(22),
@@ -401,6 +401,14 @@ PLAN_CHAT_LIMITS = {
     "free":         0,
 }
 
+def _parse_unlimited_int(value_str: str, default: int) -> int:
+    """Convertit une chaîne en int, gérant 'UNLIMITED' comme un grand nombre."""
+    if isinstance(value_str, str) and value_str.strip().upper() == "UNLIMITED":
+        return 999999999 # Représente l'illimité
+    try:
+        return int(value_str) if value_str else default
+    except ValueError:
+        return default
 
 def upgrade_plan(pseudo: str, plan: str, stripe_customer_id: str = "") -> bool:
     """
@@ -560,7 +568,7 @@ def consume_plan_synthesis(pseudo: str) -> bool:
         if not row or row[0].strip().lower() != pseudo_lower:
             continue
         try:
-            count = int(row[20]) if len(row) > 20 and row[20] else 0
+            count = _parse_unlimited_int(row[20] if len(row) > 20 else "", 0)
         except ValueError:
             count = 0
         if count <= 0:
