@@ -15,7 +15,7 @@ def _api_key() -> str:
     return os.environ.get("GEMINI_API_KEY", "")
 
 
-def generate(system: str, prompt: str, model: str = "", max_tokens: int = 300) -> str:
+def generate(system: str, prompt: str, model: str = "", max_tokens: int = 4096) -> str:
     """Appel non-streaming, retourne le texte brut."""
     model = model or _DEFAULT_MODEL
     url = f"{_BASE_URL}/{model}:generateContent?key={_api_key()}"
@@ -29,7 +29,7 @@ def generate(system: str, prompt: str, model: str = "", max_tokens: int = 300) -
     return r.json()["candidates"][0]["content"]["parts"][0]["text"]
 
 
-def stream(system: str, prompt: str, model: str = "", max_tokens: int = 300):
+def stream(system: str, prompt: str, model: str = "", max_tokens: int = 4096):
     """Générateur streaming — yield de morceaux de texte."""
     model = model or _DEFAULT_MODEL
     url = f"{_BASE_URL}/{model}:streamGenerateContent?key={_api_key()}&alt=sse"
