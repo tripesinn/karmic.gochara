@@ -1348,7 +1348,7 @@ def hook_transit():
             f"Make them want the full reading. Dense and precise."
         )
 
-    hook_model = os.environ.get("HOOK_MODEL", "gemini-2.0-flash")
+    hook_model = os.environ.get("HOOK_MODEL", "gemini-2.5-flash")
 
     # ── Stream SSE ────────────────────────────────────────────────────────────
     # On capture le profil enrichi dans une var locale pour le cache post-stream

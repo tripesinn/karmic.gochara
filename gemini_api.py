@@ -9,9 +9,9 @@ import time
 import requests
 
 # ── Configuration ─────────────────────────────────────────────────────────────
-_DEFAULT_MODEL = os.environ.get("HOOK_MODEL", "gemini-2.0-flash")
-_DEFAULT_SYNTH = os.environ.get("SYNTHESIS_MODEL", "gemini-2.0-flash")
-_BASE_URL = "https://generativelanguage.googleapis.com/v1/models"
+_DEFAULT_MODEL = os.environ.get("HOOK_MODEL", "gemini-2.5-flash")
+_DEFAULT_SYNTH = os.environ.get("SYNTHESIS_MODEL", "gemini-2.5-flash")
+_BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models"
 
 # ── Mécanisme de Retry ────────────────────────────────────────────────────────
 MAX_RETRIES = 3
