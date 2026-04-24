@@ -1138,6 +1138,20 @@
         const T = {{ lang | tojson }};
         const CURRENT_PSEUDO = "{{ session_user }}";
 
+        // ── Variables Globales ──────────────────────────────────────────────────────
+        let transitGeo = null;
+        let birthGeo = null;
+        let lastSynthesis = '';
+        let chatHistory = [];
+        let _cityTimer = null;
+        let _birthCityTimer = null;
+        let _pendingRating = 0;
+        let calYear = new Date().getFullYear();
+        let calMonth = new Date().getMonth() + 1;
+        let calOpen = false;
+        window._expandUsed = false;
+        window._emailCtx = null;
+
         // ── Persistance Locale ──────────────────────────────────────────────────────
         const KarmicStore = {
             _key() { return 'kg_data_' + (CURRENT_PSEUDO || 'guest'); },
@@ -2070,33 +2084,6 @@
                 btn.disabled = false;
             }
         }
-
-        // ── Monétisation AdMob ────────────────────────────────────────────────────────
-        const AD_UNIT_BANNER = 'ca-app-pub-3940256099942544/6300978111';
-        const AD_UNIT_INTERSTITIAL = 'ca-app-pub-3940256099942544/1033173712';
-
-        const Monetization = {
-            _unlocked: null,
-            async isUnlocked() { if (this._unlocked !== null) return this._unlocked; const p = window.Capacitor?.Plugins?.Unlock; if (!p) { this._unlocked = false; return false; } try { const r = await p.isUnlocked(); this._unlocked = r.unlocked; return r.unlocked; } catch { this._unlocked = false; return false; } },
-            async purchase() { const p = window.Capacitor?.Plugins?.Unlock; if (!p) return false; try { const r = await p.purchase(); if (r.unlocked) { this._unlocked = true; hideBannerAd(); showUnlockSuccess(); } return r.unlocked; } catch (e) { if (e.message !== 'USER_CANCELED') alert('Erreur achat : ' + e.message); return false; } },
-            async restore() { const p = window.Capacitor?.Plugins?.Unlock; if (!p) return false; try { const r = await p.restore(); if (r.unlocked) { this._unlocked = true; hideBannerAd(); } return r.unlocked; } catch { return false; } },
-        };
-
-        async function initAdMob() {
-            const { AdMob } = window.Capacitor?.Plugins ?? {};
-            if (!AdMob) return;
-            if (await Monetization.isUnlocked()) return;
-            try { await AdMob.initialize({ testingDevices: [], initializeForTesting: true }); await AdMob.showBanner({ adId: AD_UNIT_BANNER, adSize: 'BANNER', position: 'BOTTOM_CENTER', margin: 0 }); } catch (e) { console.warn('AdMob:', e); }
-        }
-        function hideBannerAd() { const { AdMob } = window.Capacitor?.Plugins ?? {}; if (AdMob) AdMob.hideBanner().catch(() => { }); }
-        function showUnlockSuccess() { const btn = document.getElementById('btn-unlock'); if (btn) { btn.textContent = T.js_unlock_success; btn.style.color = '#6ab56a'; btn.disabled = true; } }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            if (window.Capacitor?.isNativePlatform?.()) {
-                initAdMob();
-                Monetization.isUnlocked().then(u => { const btn = document.getElementById('btn-unlock'); if (btn) btn.style.display = u ? 'none' : 'block'; if (u) showUnlockSuccess(); });
-            }
-        });
 
         // ── Alertes transit ───────────────────────────────────────────────────────────
         async function toggleAlerts(enabled) {
