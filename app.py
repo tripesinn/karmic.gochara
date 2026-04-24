@@ -1041,12 +1041,16 @@ def calculate():
     profile = session.get("profile")
     if not profile:
         return jsonify({"error": "Non connecté"}), 401
+    
+    data = request.get_json() or {}
+    user_key = data.get("user_key")
+    user_model = data.get("user_model")
 
     # ── Gate paiement ─────────────────────────────────────────────────────────
     pseudo = profile.get("pseudo", "")
     UNLIMITED_PSEUDOS = {"jero"}
 
-    if pseudo.lower() in UNLIMITED_PSEUDOS:
+    if pseudo.lower() in UNLIMITED_PSEUDOS or user_key:
         quota = {"allowed": True, "remaining": 999}
     else:
         plan = profile.get("plan", "free")
@@ -1105,6 +1109,11 @@ def calculate():
 
         # Enrichit le profil avec les positions natales calculées
         enriched_profile = _enrich_profile_with_natal(profile, result.get("natal", {}))
+        
+        if user_key:
+            enriched_profile["user_key"] = user_key
+        if user_model:
+            enriched_profile["user_model"] = user_model
 
         # Retry 3x sur surcharge Anthropic (529 / overloaded_error)
         synthesis = None
@@ -1199,9 +1208,12 @@ def hook_transit():
     cache_key = f"hook_transit_{pseudo}_{date_str}"
     lang      = session.get("lang", "fr")
 
+    user_key = data.get("user_key")
+    user_model = data.get("user_model")
+
     # ── Cache hit → replay streamé token par token ────────────────────────────
     cached = session.get(cache_key)
-    if cached:
+    if cached and not user_key:
         def replay():
             for word in cached.split(" "):
                 yield f"data: {_json.dumps(word + ' ')}\n\n"
@@ -1232,6 +1244,12 @@ def hook_transit():
         year, month, day  = map(int, date_str.split("-"))
         chart_data        = calculate_transits(natal, transit_loc, year, month, day, hour, minute)
         enriched_profile  = _enrich_profile_with_natal(profile, chart_data.get("natal", {}))
+        
+        if user_key:
+            enriched_profile["user_key"] = user_key
+        if user_model:
+            enriched_profile["user_model"] = user_model
+
     except Exception as exc:
         app.logger.error("Erreur calcul hook transit : %s", exc, exc_info=True)
         def err_stream():
@@ -1587,8 +1605,11 @@ def synthesis_prompt():
         session.modified = True
         return jsonify({"ok": True, "context": "hook_transit", "system": system_t, "user": user_t})
 
+    user_key = data.get("user_key")
+    user_model = data.get("user_model")
+
     # Synthèse complète + Alternative de Conscience : gate paiement
-    if pseudo.lower() not in UNLIMITED_PSEUDOS:
+    if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
         if plan_normalized in ("test", "subscription", "lecture", "essential", "illimite"):
@@ -1603,10 +1624,14 @@ def synthesis_prompt():
 
     natal_data = {
         "name":   profile["name"],
-        "year":   profile["year"],   "month":  profile["month"],
-        "day":    profile["day"],    "hour":   profile["hour"],
-        "minute": profile["minute"], "lat":    profile["lat"],
-        "lon":    profile["lon"],    "tz":     profile["tz"],
+        "year":   profile["year"],
+        "month":  profile["month"],
+        "day":    profile["day"],
+        "hour":   profile["hour"],
+        "minute": profile["minute"],
+        "lat":    profile["lat"],
+        "lon":    profile["lon"],
+        "tz":     profile["tz"],
         "city":   profile["city"],
     }
 
@@ -1625,6 +1650,11 @@ def synthesis_prompt():
         year, month, day = map(int, date_str.split("-"))
         chart_data       = calculate_transits(natal_data, transit_loc, year, month, day, hour, minute)
         enriched_profile = _enrich_profile_with_natal(profile, chart_data.get("natal", {}))
+
+        if user_key:
+            enriched_profile["user_key"] = user_key
+        if user_model:
+            enriched_profile["user_model"] = user_model
 
         if context == "conscience":
             prompts = build_prompt_conscience(chart_data, enriched_profile, lang=lang)
@@ -1688,8 +1718,11 @@ def chat_ask():
 
     pseudo = profile.get("pseudo", "")
     UNLIMITED_PSEUDOS = {"jero"}
+    
+    user_key = data.get("user_key")
+    user_model = data.get("user_model")
 
-    if pseudo.lower() not in UNLIMITED_PSEUDOS:
+    if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         result = consume_chat_question(pseudo, local=local)
         if not result["ok"]:
             return jsonify({"error": "quota_exceeded",
@@ -1700,6 +1733,12 @@ def chat_ask():
         remaining = -1
 
     enriched = _enrich_profile_with_natal(profile, {})
+    
+    if user_key:
+        enriched["user_key"] = user_key
+    if user_model:
+        enriched["user_model"] = user_model
+        
     prompts  = build_prompt_chat(message, history, enriched, lang=lang)
 
     if local:
@@ -1889,13 +1928,16 @@ def expand():
     """
     from ai_interpret import _build_natal_context
 
-    # Sécurité : 1 seul expand gratuit par session
-    if session.get("expand_used"):
-        return jsonify({"content": ""}), 429
-
     data   = request.get_json() or {}
     topic  = data.get("topic", "")
     pseudo = data.get("pseudo", "")
+    
+    user_key = data.get("user_key")
+    user_model = data.get("user_model")
+
+    # Sécurité : 1 seul expand gratuit par session, sauf si clé perso fournie
+    if session.get("expand_used") and not user_key:
+        return jsonify({"content": ""}), 429
 
     if topic != "alternative_conscience":
         return jsonify({"content": ""}), 403
@@ -1935,7 +1977,7 @@ def expand():
 
     try:
         import gemini_api
-        content = gemini_api.generate(system, prompt, max_tokens=1024)
+        content = gemini_api.generate(system, prompt, max_tokens=1024, model=user_model, user_key=user_key)
         return jsonify({"content": content})
     except Exception as exc:
         app.logger.error("Erreur expand : %s", exc)

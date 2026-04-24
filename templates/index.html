@@ -692,14 +692,18 @@
 <body>
 
     <header>
-        <div style="color: var(--gold); font-family: var(--display); font-size: 0.8rem; letter-spacing: 0.2em;">KARMIC
-            GOCHARA</div>
-        <select id="lang-select" onchange="setLang(this.value)"
-            style="background: transparent; color: var(--gold); border: 1px solid var(--border); padding: 5px;">
-            {% for code, l in langs.items() %}
-            <option value="{{ code }}" {% if code==lang.code %}selected{% endif %}>{{ l.label }}</option>
-            {% endfor %}
-        </select>
+        <div style="color: var(--gold); font-family: var(--display); font-size: 0.8rem; letter-spacing: 0.2em; display:flex; align-items:center; gap:10px;">
+            KARMIC GOCHARA
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <select id="lang-select" onchange="setLang(this.value)"
+                style="background: transparent; color: var(--gold); border: 1px solid var(--border); padding: 5px;">
+                {% for code, l in langs.items() %}
+                <option value="{{ code }}" {% if code==lang.code %}selected{% endif %}>{{ l.label }}</option>
+                {% endfor %}
+            </select>
+            <button onclick="openSettings()" style="background:transparent; border:none; color:var(--text-dim); cursor:pointer; font-size:1.2rem;" title="Paramètres IA">⚙️</button>
+        </div>
     </header>
 
     <div id="hero-section" style="{% if session_user %}display:none;{% endif %}; position: relative; z-index: 1;">
@@ -2152,7 +2156,74 @@
             </div>
         </div>
     </div>
+
+    <!-- ── Modal Paramètres IA ─────────────────────────────────────────────────── -->
+    <div id="settings-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
+        <div style="background:#0f0f22; border:1px solid var(--gold-dim); padding:2rem; max-width:400px; width:90%; text-align:left;">
+            <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">Paramètres IA (Optionnel)</h4>
+            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">Utilise ta propre clé API Gemini pour des calculs illimités sans restriction de quota.</p>
+            
+            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Clé API Gemini</label>
+            <input type="password" id="custom-api-key" class="login-input" placeholder="AIzaSy...">
+            
+            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Modèle Préféré</label>
+            <select id="custom-model" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85);">
+                <option value="">(Défaut serveur)</option>
+                <option value="gemini-1.5-flash">Gemini 1.5 Flash (Rapide)</option>
+                <option value="gemini-2.0-flash">Gemini 2.0 Flash</option>
+                <option value="gemini-2.5-flash">Gemini 2.5 Flash</option>
+                <option value="gemini-1.5-pro">Gemini 1.5 Pro (Profond)</option>
+                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+            </select>
+            
+            <div style="display:flex; gap:10px; margin-top:1.5rem;">
+                <button class="btn-secondary" onclick="closeSettings()">Annuler</button>
+                <button class="btn-primary" onclick="saveSettings()"><span>Sauvegarder</span></button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        function openSettings() {
+            const saved = KarmicStore.get();
+            document.getElementById('custom-api-key').value = saved.customApiKey || '';
+            document.getElementById('custom-model').value = saved.customModel || '';
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        function saveSettings() {
+            const apiKey = document.getElementById('custom-api-key').value.trim();
+            const model = document.getElementById('custom-model').value;
+            KarmicStore.save({ customApiKey: apiKey, customModel: model });
+            closeSettings();
+        }
+
+        // Helper pour ajouter les clés API à tous les payloads
+        function attachApiKeys(payload) {
+            const saved = KarmicStore.get();
+            if (saved.customApiKey) payload.user_key = saved.customApiKey;
+            if (saved.customModel) payload.user_model = saved.customModel;
+            return payload;
+        }
+
+        // Modification de toutes les fonctions fetch existantes pour utiliser attachApiKeys
+        const originalFetch = window.fetch;
+        window.fetch = function() {
+            let [resource, config] = arguments;
+            if (config && config.body && config.method === 'POST') {
+                try {
+                    const parsedBody = JSON.parse(config.body);
+                    const updatedBody = attachApiKeys(parsedBody);
+                    config.body = JSON.stringify(updatedBody);
+                } catch(e) {}
+            }
+            return originalFetch.apply(this, arguments);
+        };
+
         document.addEventListener('DOMContentLoaded', () => {
             const t = document.getElementById('consent-title');
             const p = document.getElementById('consent-text');

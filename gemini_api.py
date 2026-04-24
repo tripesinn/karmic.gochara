@@ -51,14 +51,14 @@ def _make_request(url: str, payload: dict, stream: bool = False, timeout: int = 
     raise last_exception
 
 
-def _api_key() -> str:
-    return os.environ.get("GEMINI_API_KEY", "")
+def _api_key(override: str = None) -> str:
+    return override or os.environ.get("GEMINI_API_KEY", "")
 
 
-def generate(system: str, prompt: str, model: str = "", max_tokens: int = 8192) -> str:
+def generate(system: str, prompt: str, model: str = "", max_tokens: int = 8192, user_key: str = None) -> str:
     """Appel non-streaming, retourne le texte brut."""
     model = model or _DEFAULT_SYNTH
-    url = f"{_BASE_URL}/{model}:generateContent?key={_api_key()}"
+    url = f"{_BASE_URL}/{model}:generateContent?key={_api_key(user_key)}"
     payload = {
         "system_instruction": {"parts": [{"text": system}]},
         "contents": [{"parts": [{"text": prompt}]}],
@@ -68,10 +68,10 @@ def generate(system: str, prompt: str, model: str = "", max_tokens: int = 8192) 
     return r.json()["candidates"][0]["content"]["parts"][0]["text"]
 
 
-def stream(system: str, prompt: str, model: str = "", max_tokens: int = 4096):
+def stream(system: str, prompt: str, model: str = "", max_tokens: int = 4096, user_key: str = None):
     """Générateur streaming — yield de morceaux de texte."""
     model = model or _DEFAULT_MODEL
-    url = f"{_BASE_URL}/{model}:streamGenerateContent?key={_api_key()}&alt=sse"
+    url = f"{_BASE_URL}/{model}:streamGenerateContent?key={_api_key(user_key)}&alt=sse"
     payload = {
         "system_instruction": {"parts": [{"text": system}]},
         "contents": [{"parts": [{"text": prompt}]}],
