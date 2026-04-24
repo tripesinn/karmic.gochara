@@ -41,6 +41,11 @@
             } catch (e) { console.warn('Failed to clear cache', e); }
         }
 
+        function showHeroSection() {
+            document.getElementById('hero-section').style.display = 'block';
+            document.getElementById('app-section').style.display = 'none';
+        }
+
         function showApp(profile) {
             document.getElementById('hero-section').style.display = 'none';
             document.getElementById('app-section').style.display = 'block';
@@ -85,6 +90,8 @@
             if (cachedProfile && cachedProfile.pseudo) {
                 showApp(cachedProfile);
                 syncProfile();
+            } else {
+                showHeroSection();
             }
         });
     </script>
