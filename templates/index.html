@@ -1990,12 +1990,22 @@
             const section = document.getElementById('chat-section');
             if (!section) return;
             try {
+                const saved = KarmicStore.get();
+                const hasCustomKey = !!saved.customApiKey;
+
                 const r = await fetch('/chat/status');
                 const d = await r.json();
                 const plan = d.plan || 'free';
-                if (plan === 'free' || d.limit === 0) return;
+                
+                if (!hasCustomKey && (plan === 'free' || d.limit === 0)) return;
+                
                 section.style.display = 'block';
-                updateChatQuotaLabel(d.remaining, d.limit, plan);
+                
+                if (hasCustomKey) {
+                    updateChatQuotaLabel(999, 999, 'custom');
+                } else {
+                    updateChatQuotaLabel(d.remaining, d.limit, plan);
+                }
             } catch (e) { /* silencieux */ }
         }
 
