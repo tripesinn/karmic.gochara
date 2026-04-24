@@ -95,7 +95,9 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
         p_data = natal.get(p_key, {})
         enriched[f"{planet_name}_deg"] = _deg(p_data.get("display", ""))
 
-    enriched["natal_positions"]     = natal
+    # On ajoute natal_positions pour l'interprétation immédiate
+    # ATTENTION: à supprimer avant session storage pour limiter la taille du cookie (max 4KB)
+    enriched["natal_positions"] = natal
 
     return enriched
 
@@ -836,11 +838,17 @@ def login():
         enriched = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
         if not profile.get("chandra_lagna_sign"):
             save_natal_to_sheet(pseudo, enriched)
-        session["profile"] = enriched
+        
+        # On garde enriched pour l'interprétation et le retour JSON
         profile = enriched
         if not hook_natal:
             hook_natal = get_hook_natal(profile)
             session[cache_key] = hook_natal
+
+        # Mais on retire les positions lourdes pour le stockage en session (cookie 4KB)
+        profile_session = profile.copy()
+        profile_session.pop("natal_positions", None)
+        session["profile"] = profile_session
     except Exception as exc:
         app.logger.warning("Hook natal login échoué : %s", exc)
 
@@ -930,7 +938,10 @@ def register():
             # 3. Save natal info to sheet and update session
             if save_natal_to_sheet(pseudo, enriched_profile):
                 profile = enriched_profile
-                session["profile"] = profile
+                # On retire les positions lourdes pour le stockage en session (cookie 4KB)
+                profile_session = profile.copy()
+                profile_session.pop("natal_positions", None)
+                session["profile"] = profile_session
                 app.logger.info("Profil enrichi et sauvegardé pour %s", pseudo)
             else:
                 app.logger.error("Échec de save_natal_to_sheet pour %s", pseudo)
@@ -942,6 +953,37 @@ def register():
 
     return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
 
+
+
+@app.route("/chart/karmic.svg")
+def karmic_chart_svg():
+    profile = session.get("profile")
+    if not profile:
+        return "Non autorisé", 401
+
+    natal_pos = profile.get("natal_positions")
+
+    # Recalculer si absent de la session (pour limiter taille cookie)
+    if not natal_pos:
+        try:
+            from astro_calc import calculate_transits
+            # Transit sur le lieu de naissance à la date de naissance pour retrouver le natal pur
+            # On utilise 12h00 par défaut si non spécifié, mais ici on a l'heure exacte du profil
+            res = calculate_transits(profile, profile, profile["year"], profile["month"], profile["day"], profile["hour"], profile["minute"])
+            natal_pos = res.get("natal", {})
+        except Exception as exc:
+            app.logger.error("Erreur recalcul natal pour SVG: %s", exc)
+            return "Erreur calcul", 500
+
+    from svg_chart import generate_karmic_chart_svg
+    lang = session.get("lang", "fr")
+    svg_content = generate_karmic_chart_svg(natal_pos, lang=lang)
+
+    response = make_response(svg_content)
+    response.headers["Content-Type"] = "image/svg+xml"
+    # Allow caching for 24h as it's a natal chart (doesn't change)
+    response.headers["Cache-Control"] = "public, max-age=86400"
+    return response
 
 
 @app.route("/logout", methods=["POST"])
