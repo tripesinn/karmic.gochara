@@ -14,9 +14,106 @@ Hooks :
 """
 
 import os
+import requests
 import gemini_api
 
 from astro_calc import NAKSHATRAS, NAKSHATRA_LORDS
+
+# ── Router Multi-Provider ────────────────────────────────────────────────────
+def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) -> str:
+    """Route la requête vers le provider choisi par l'utilisateur."""
+    provider = user.get("user_provider")
+    user_key = user.get("user_key")
+    model = user.get("user_model")
+
+    if not provider or provider == "gemini" or not user_key:
+        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key)
+        
+    try:
+        if provider == "claude":
+            url = "https://api.anthropic.com/v1/messages"
+            headers = {
+                "x-api-key": user_key,
+                "anthropic-version": "2023-06-01",
+                "content-type": "application/json"
+            }
+            payload = {
+                "model": model or "claude-3-5-sonnet-latest",
+                "max_tokens": max_tokens,
+                "system": system,
+                "messages": [{"role": "user", "content": prompt}]
+            }
+            r = requests.post(url, headers=headers, json=payload, timeout=90)
+            r.raise_for_status()
+            return r.json()["content"][0]["text"]
+            
+        elif provider == "groq":
+            url = "https://api.groq.com/openai/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {user_key}",
+                "Content-Type": "application/json"
+            }
+            payload = {
+                "model": model or "llama-3.3-70b-versatile",
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": max_tokens
+            }
+            r = requests.post(url, headers=headers, json=payload, timeout=90)
+            r.raise_for_status()
+            return r.json()["choices"][0]["message"]["content"]
+            
+        elif provider == "openrouter":
+            url = "https://openrouter.ai/api/v1/chat/completions"
+            headers = {
+                "Authorization": f"Bearer {user_key}",
+                "Content-Type": "application/json",
+                "HTTP-Referer": "https://karmicgochara.app",
+                "X-Title": "Karmic Gochara"
+            }
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": system},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": max_tokens
+            }
+            r = requests.post(url, headers=headers, json=payload, timeout=90)
+            r.raise_for_status()
+            return r.json()["choices"][0]["message"]["content"]
+            
+    except Exception as e:
+        # En cas d'erreur de clé ou d'API, log et fallback sur Gemini
+        print(f"Erreur provider {provider}: {e}")
+        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key)
+        
+    return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key)
+
+
+def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
+    """Route la requête stream vers le provider. 
+    Pour Gemini, on utilise le vrai stream SSE. 
+    Pour les autres, on fait un appel bloquant puis on yield des mots pour simuler le stream."""
+    provider = user.get("user_provider")
+    user_key = user.get("user_key")
+    model = user.get("user_model")
+
+    if not provider or provider == "gemini" or not user_key:
+        for chunk in gemini_api.stream(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key):
+            yield chunk
+        return
+
+    # Simulation de stream pour Claude, Groq et OpenRouter
+    try:
+        full_text = generate_ai(system, prompt, user=user, max_tokens=max_tokens)
+        words = full_text.split(" ")
+        for i, word in enumerate(words):
+            yield word + (" " if i < len(words) - 1 else "")
+    except Exception as e:
+        yield f"[ERROR] {str(e)}"
 
 # ── Import doctrine centralisée ───────────────────────────────────────────────
 from doctrine import (
@@ -441,7 +538,7 @@ Sentence 3: the liberation direction opening (Visible Door/Stage) + a seed of Al
 Integrate the nakshatra and doctrinal regime (ROM/Dharma/Chiron) without uttering these words.
 Tone: dense, precise, as if reading the soul directly. Make them want to know more."""
 
-    return gemini_api.generate(system, prompt, max_tokens=1024, model=user.get("user_model", ""), user_key=user.get("user_key"))
+    return generate_ai(system, prompt, user=user, max_tokens=1024)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -514,7 +611,7 @@ Sentence 2: what this touches in their core wound (Chiron = opening tool toward 
 Sentence 3: the seed of the Alternative of Consciousness — what changes if {name} chooses differently.
 Make them want the full reading. Dense and precise tone."""
 
-    return gemini_api.generate(system, prompt, max_tokens=1024, model=user.get("user_model", ""), user_key=user.get("user_key"))
+    return generate_ai(system, prompt, user=user, max_tokens=1024)
 # ══════════════════════════════════════════════════════════════════════════════
 # SIGNAL DU JOUR — compact pour TikTok/Web
 # ══════════════════════════════════════════════════════════════════════════════
@@ -697,7 +794,7 @@ MANDATORY STYLE: soul reader, not technical astrologer.
 
 Minimum 300 words. Do not truncate. Language: {lang_name}."""
 
-    return gemini_api.generate(_build_system_prompt(user, use_vault=True), prompt, max_tokens=8192, model=user.get("user_model", ""), user_key=user.get("user_key"))
+    return generate_ai(_build_system_prompt(user, use_vault=True), prompt, user=user, max_tokens=8192)
 
 
 # ══════════════════════════════════════════════════════════════════════════════

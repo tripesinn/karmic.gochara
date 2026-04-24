@@ -835,10 +835,19 @@ def login():
         }
         natal_result = calculate_transits(natal_input, transit_loc,
                                           today.year, today.month, today.day, 12, 0)
+
         enriched = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
+
+        user_key = data.get("user_key")
+        user_model = data.get("user_model")
+        user_provider = data.get("user_provider")
+        if user_key: enriched["user_key"] = user_key
+        if user_model: enriched["user_model"] = user_model
+        if user_provider: enriched["user_provider"] = user_provider
+
         if not profile.get("chandra_lagna_sign"):
             save_natal_to_sheet(pseudo, enriched)
-        
+
         # On garde enriched pour l'interprétation et le retour JSON
         profile = enriched
         if not hook_natal:
@@ -848,6 +857,9 @@ def login():
         # Mais on retire les positions lourdes pour le stockage en session (cookie 4KB)
         profile_session = profile.copy()
         profile_session.pop("natal_positions", None)
+        profile_session.pop("user_key", None)
+        profile_session.pop("user_model", None)
+        profile_session.pop("user_provider", None)
         session["profile"] = profile_session
     except Exception as exc:
         app.logger.warning("Hook natal login échoué : %s", exc)
@@ -936,19 +948,29 @@ def register():
             enriched_profile = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
             
             # 3. Save natal info to sheet and update session
+            user_key = data.get("user_key")
+            user_model = data.get("user_model")
+            user_provider = data.get("user_provider")
+
+            if user_key: enriched_profile["user_key"] = user_key
+            if user_model: enriched_profile["user_model"] = user_model
+            if user_provider: enriched_profile["user_provider"] = user_provider
+
             if save_natal_to_sheet(pseudo, enriched_profile):
                 profile = enriched_profile
                 # On retire les positions lourdes pour le stockage en session (cookie 4KB)
                 profile_session = profile.copy()
                 profile_session.pop("natal_positions", None)
+                profile_session.pop("user_key", None)
+                profile_session.pop("user_model", None)
+                profile_session.pop("user_provider", None)
                 session["profile"] = profile_session
                 app.logger.info("Profil enrichi et sauvegardé pour %s", pseudo)
             else:
                 app.logger.error("Échec de save_natal_to_sheet pour %s", pseudo)
-                
+
             # 4. Generate hook
-            hook_natal = get_hook_natal(profile)
-    except Exception as exc:
+            hook_natal = get_hook_natal(profile)    except Exception as exc:
         app.logger.error("Calcul natal register échoué pour %s : %s", pseudo, exc, exc_info=True)
 
     return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
@@ -1045,6 +1067,7 @@ def calculate():
     data = request.get_json() or {}
     user_key = data.get("user_key")
     user_model = data.get("user_model")
+    user_provider = data.get("user_provider")
 
     # ── Gate paiement ─────────────────────────────────────────────────────────
     pseudo = profile.get("pseudo", "")
@@ -1114,6 +1137,8 @@ def calculate():
             enriched_profile["user_key"] = user_key
         if user_model:
             enriched_profile["user_model"] = user_model
+        if user_provider:
+            enriched_profile["user_provider"] = user_provider
 
         # Retry 3x sur surcharge Anthropic (529 / overloaded_error)
         synthesis = None
@@ -1210,6 +1235,7 @@ def hook_transit():
 
     user_key = data.get("user_key")
     user_model = data.get("user_model")
+    user_provider = data.get("user_provider")
 
     # ── Cache hit → replay streamé token par token ────────────────────────────
     cached = session.get(cache_key)
@@ -1249,6 +1275,8 @@ def hook_transit():
             enriched_profile["user_key"] = user_key
         if user_model:
             enriched_profile["user_model"] = user_model
+        if user_provider:
+            enriched_profile["user_provider"] = user_provider
 
     except Exception as exc:
         app.logger.error("Erreur calcul hook transit : %s", exc, exc_info=True)
@@ -1357,10 +1385,11 @@ def hook_transit():
 
     def generate():
         full_text = []
-        import gemini_api
+        from ai_interpret import stream_ai
         try:
-            for text in gemini_api.stream(system, prompt):
-                full_text.append(text)
+            for text in stream_ai(system, prompt, user=_enriched, max_tokens=1024):
+                if not text.startswith("[ERROR]"):
+                    full_text.append(text)
                 yield f"data: {_json.dumps(text)}\n\n"
             yield f"data: [DONE]\n\n"
         except Exception as exc:
@@ -1607,6 +1636,7 @@ def synthesis_prompt():
 
     user_key = data.get("user_key")
     user_model = data.get("user_model")
+    user_provider = data.get("user_provider")
 
     # Synthèse complète + Alternative de Conscience : gate paiement
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
@@ -1655,6 +1685,8 @@ def synthesis_prompt():
             enriched_profile["user_key"] = user_key
         if user_model:
             enriched_profile["user_model"] = user_model
+        if user_provider:
+            enriched_profile["user_provider"] = user_provider
 
         if context == "conscience":
             prompts = build_prompt_conscience(chart_data, enriched_profile, lang=lang)
@@ -1721,6 +1753,7 @@ def chat_ask():
     
     user_key = data.get("user_key")
     user_model = data.get("user_model")
+    user_provider = data.get("user_provider")
 
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         result = consume_chat_question(pseudo, local=local)
@@ -1738,6 +1771,8 @@ def chat_ask():
         enriched["user_key"] = user_key
     if user_model:
         enriched["user_model"] = user_model
+    if user_provider:
+        enriched["user_provider"] = user_provider
         
     prompts  = build_prompt_chat(message, history, enriched, lang=lang)
 
@@ -1749,12 +1784,12 @@ def chat_ask():
             "remaining": remaining,
         })
 
-    # Génération Gemini côté serveur
-    import gemini_api
+    # Génération AI côté serveur
+    from ai_interpret import generate_ai
     try:
-        answer = gemini_api.generate(prompts["system"], prompts["user"], max_tokens=1024).strip()
+        answer = generate_ai(prompts["system"], prompts["user"], user=enriched, max_tokens=1024).strip()
     except Exception as e:
-        app.logger.error("Chat Gemini error: %s", e)
+        app.logger.error("Chat AI error: %s", e)
         return jsonify({"error": "generation_failed", "message": str(e)}), 500
 
     return jsonify({
@@ -1934,6 +1969,7 @@ def expand():
     
     user_key = data.get("user_key")
     user_model = data.get("user_model")
+    user_provider = data.get("user_provider")
 
     # Sécurité : 1 seul expand gratuit par session, sauf si clé perso fournie
     if session.get("expand_used") and not user_key:
@@ -1976,8 +2012,9 @@ def expand():
     )
 
     try:
-        import gemini_api
-        content = gemini_api.generate(system, prompt, max_tokens=1024, model=user_model, user_key=user_key)
+        from ai_interpret import generate_ai
+        user_params = {"user_provider": user_provider, "user_key": user_key, "user_model": user_model}
+        content = generate_ai(system, prompt, user=user_params, max_tokens=1024)
         return jsonify({"content": content})
     except Exception as exc:
         app.logger.error("Erreur expand : %s", exc)
@@ -2015,6 +2052,16 @@ def summarize_chat():
     history = data.get("history", [])
     if not history:
         return jsonify({"ok": False, "error": "Historique de chat vide"}), 400
+        
+    user_key = data.get("user_key")
+    user_model = data.get("user_model")
+    user_provider = data.get("user_provider")
+    
+    enriched = {
+        "user_key": user_key,
+        "user_model": user_model,
+        "user_provider": user_provider
+    }
 
     lang = session.get("lang", "fr")
     # Construit une version texte simple de l'historique
@@ -2036,8 +2083,8 @@ def summarize_chat():
         user_prompt = f"Here is the conversation to summarize:\n\n{transcript}"
 
     try:
-        import gemini_api
-        summary = gemini_api.generate(system_prompt, user_prompt, max_tokens=100)
+        from ai_interpret import generate_ai
+        summary = generate_ai(system_prompt, user_prompt, user=enriched, max_tokens=100)
         return jsonify({"ok": True, "summary": summary.strip()})
     except Exception as exc:
         app.logger.error("Erreur summarize_chat : %s", exc)

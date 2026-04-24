@@ -2159,21 +2159,27 @@
 
     <!-- ── Modal Paramètres IA ─────────────────────────────────────────────────── -->
     <div id="settings-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
-        <div style="background:#0f0f22; border:1px solid var(--gold-dim); padding:2rem; max-width:400px; width:90%; text-align:left;">
+        <div style="background:#0f0f22; border:1px solid var(--gold-dim); padding:2rem; max-width:400px; width:90%; text-align:left; max-height:90vh; overflow-y:auto;">
             <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">Paramètres IA (Optionnel)</h4>
-            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">Utilise ta propre clé API Gemini pour des calculs illimités sans restriction de quota.</p>
+            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">Utilise ta propre clé API pour des calculs illimités sans restriction de quota.</p>
             
-            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Clé API Gemini</label>
-            <input type="password" id="custom-api-key" class="login-input" placeholder="AIzaSy...">
-            
-            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Modèle Préféré</label>
-            <select id="custom-model" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85);">
-                <option value="">(Défaut serveur)</option>
-                <option value="gemini-2.5-flash">Gemini 2.5 Flash (Recommandé)</option>
-                <option value="gemini-1.5-flash">Gemini 1.5 Flash</option>
-                <option value="gemini-1.5-pro">Gemini 1.5 Pro</option>
-                <option value="gemini-2.5-pro">Gemini 2.5 Pro</option>
+            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Provider (Fournisseur)</label>
+            <select id="custom-provider" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85);" onchange="updateProviderFields()">
+                <option value="">Défaut serveur</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="claude">Anthropic Claude</option>
+                <option value="groq">Groq</option>
+                <option value="openrouter">OpenRouter</option>
             </select>
+
+            <div id="provider-fields" style="display:none;">
+                <label id="api-key-label" style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Clé API</label>
+                <input type="password" id="custom-api-key" class="login-input" placeholder="...">
+                
+                <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Modèle Préféré</label>
+                <select id="custom-model-select" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85); display:none;"></select>
+                <input type="text" id="custom-model-text" class="login-input" style="display:none;" placeholder="Ex: anthropic/claude-3.5-sonnet">
+            </div>
             
             <div style="display:flex; gap:10px; margin-top:1.5rem;">
                 <button class="btn-secondary" onclick="closeSettings()">Annuler</button>
@@ -2183,10 +2189,76 @@
     </div>
 
     <script>
+        const MODELS = {
+            'gemini': [
+                {val: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash'},
+                {val: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro'}
+            ],
+            'claude': [
+                {val: 'claude-3-5-sonnet-latest', label: 'Claude 3.5 Sonnet'},
+                {val: 'claude-3-5-haiku-latest', label: 'Claude 3.5 Haiku'}
+            ],
+            'groq': [
+                {val: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B'},
+                {val: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B'}
+            ]
+        };
+
+        function updateProviderFields() {
+            const provider = document.getElementById('custom-provider').value;
+            const fields = document.getElementById('provider-fields');
+            const keyLabel = document.getElementById('api-key-label');
+            const keyInput = document.getElementById('custom-api-key');
+            const sel = document.getElementById('custom-model-select');
+            const txt = document.getElementById('custom-model-text');
+
+            if (!provider) {
+                fields.style.display = 'none';
+                return;
+            }
+            fields.style.display = 'block';
+
+            if (provider === 'gemini') {
+                keyLabel.textContent = 'Clé API Gemini';
+                keyInput.placeholder = 'AIzaSy...';
+            } else if (provider === 'claude') {
+                keyLabel.textContent = 'Clé API Anthropic';
+                keyInput.placeholder = 'sk-ant-...';
+            } else if (provider === 'groq') {
+                keyLabel.textContent = 'Clé API Groq';
+                keyInput.placeholder = 'gsk_...';
+            } else if (provider === 'openrouter') {
+                keyLabel.textContent = 'Clé API OpenRouter';
+                keyInput.placeholder = 'sk-or-v1-...';
+            }
+
+            if (provider === 'openrouter') {
+                sel.style.display = 'none';
+                txt.style.display = 'block';
+            } else {
+                txt.style.display = 'none';
+                sel.style.display = 'block';
+                sel.innerHTML = '';
+                MODELS[provider].forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.val; opt.textContent = m.label;
+                    sel.appendChild(opt);
+                });
+            }
+        }
+
         function openSettings() {
             const saved = KarmicStore.get();
+            document.getElementById('custom-provider').value = saved.customProvider || '';
+            updateProviderFields();
+            
             document.getElementById('custom-api-key').value = saved.customApiKey || '';
-            document.getElementById('custom-model').value = saved.customModel || '';
+            if (saved.customProvider === 'openrouter') {
+                document.getElementById('custom-model-text').value = saved.customModel || '';
+            } else if (saved.customProvider) {
+                document.getElementById('custom-model-select').value = saved.customModel || '';
+            }
+            
             document.getElementById('settings-modal').style.display = 'flex';
         }
 
@@ -2195,15 +2267,20 @@
         }
 
         function saveSettings() {
+            const provider = document.getElementById('custom-provider').value;
             const apiKey = document.getElementById('custom-api-key').value.trim();
-            const model = document.getElementById('custom-model').value;
-            KarmicStore.save({ customApiKey: apiKey, customModel: model });
+            let model = '';
+            if (provider === 'openrouter') model = document.getElementById('custom-model-text').value.trim();
+            else if (provider) model = document.getElementById('custom-model-select').value;
+            
+            KarmicStore.save({ customProvider: provider, customApiKey: apiKey, customModel: model });
             closeSettings();
         }
 
         // Helper pour ajouter les clés API à tous les payloads
         function attachApiKeys(payload) {
             const saved = KarmicStore.get();
+            if (saved.customProvider) payload.user_provider = saved.customProvider;
             if (saved.customApiKey) payload.user_key = saved.customApiKey;
             if (saved.customModel) payload.user_model = saved.customModel;
             return payload;
