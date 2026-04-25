@@ -227,8 +227,8 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
     # ── 3. House dividers + numbers ───────────────────────────────────────────
     inner_r = R_INNER
     for i in range(12):
-        lon  = i * 30.0
-        is_angle = i in (0, 3, 6, 9)   # ASC / IC / DSC / MC
+        lon  = (asc_lon + i * 30.0) % 360.0
+        is_angle = i in (0, 3, 6, 9)   # H1/H4/H7/H10 = ASC/IC/DSC/MC
         x1, y1 = xy(lon, R_ZIN)
         x2, y2 = xy(lon, inner_r)
         sw    = "1.4" if is_angle else "0.5"
