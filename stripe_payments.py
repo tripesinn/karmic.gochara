@@ -6,6 +6,8 @@ Gestion des paiements Stripe :
 """
 
 import os
+from urllib.parse import quote
+
 import stripe
 
 # ── Price IDs (renseignés via variables d'environnement Render) ───────────────
@@ -53,6 +55,8 @@ def create_checkout_session(
             f"product_type inconnu ou variable STRIPE_PRICE manquante pour '{product_type}'."
         )
 
+    safe_pseudo = quote(str(pseudo), safe="")
+
     session = s.checkout.Session.create(
         customer_email=user_email,
         payment_method_types=["card"],
@@ -60,7 +64,7 @@ def create_checkout_session(
         mode=mode_map[product_type],
         success_url=(
             f"{base_url}/stripe/success"
-            f"?session_id={{CHECKOUT_SESSION_ID}}&plan={product_type}&pseudo={pseudo}"
+            f"?session_id={{CHECKOUT_SESSION_ID}}&plan={product_type}&pseudo={safe_pseudo}"
         ),
         cancel_url=f"{base_url}/?payment=cancelled",
         metadata={"pseudo": pseudo, "plan": product_type},
