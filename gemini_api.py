@@ -75,7 +75,7 @@ def stream(system: str, prompt: str, model: str = "", max_tokens: int = 4096, us
     payload = {
         "system_instruction": {"parts": [{"text": system}]},
         "contents": [{"parts": [{"text": prompt}]}],
-        "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.8},
+        "generationConfig": {"maxOutputTokens": max_tokens, "temperature": 0.8, "thinkingConfig": {"thinkingBudget": 0}},
     }
     with _make_request(url, payload, stream=True, timeout=120) as r:
         for line in r.iter_lines():

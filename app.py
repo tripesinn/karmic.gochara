@@ -1252,25 +1252,20 @@ def calculate():
 
 
 # ── CTA Helper ────────────────────────────────────────────────────────────────
-def get_hook_cta(lang: str = "fr") -> dict:
+def get_hook_cta() -> dict:
     """
     Génère la CTA (Call-To-Action) qui accompagne le hook gratuit.
     Injectée à la fin du stream SSE pour créer tension → conversion.
+    Retourne les deux langues pour que le JS choisisse selon document.lang.
     """
     MYPOS_URL = os.environ.get("MYPOS_URL", "https://mypos.com/@karmic-gochara")
-
-    if lang == "en":
-        return {
-            "text": "This diagnosis is incomplete. Your full Alternative of Consciousness, all 5 pillars and your Karmic Map are waiting.",
-            "button": "Get the full analysis — €4.99",
-            "url": MYPOS_URL,
-        }
-    else:
-        return {
-            "text": "Ce diagnostic est incomplet. L'Alternative de Conscience complète, les 5 piliers et ta Carte Karmique t'attendent.",
-            "button": "Voir l'analyse complète — 4,99€",
-            "url": MYPOS_URL,
-        }
+    return {
+        "text_fr": "Ce diagnostic est incomplet. L'Alternative de Conscience complète, les 5 piliers et ta Carte Karmique t'attendent.",
+        "button_fr": "Voir l'analyse complète — 4,99€",
+        "text_en": "This diagnosis is incomplete. Your full Alternative of Consciousness, all 5 pillars and your Karmic Map are waiting.",
+        "button_en": "Get the full analysis — €4.99",
+        "url": MYPOS_URL,
+    }
 
 
 @app.route("/hook/transit", methods=["POST"])
@@ -1476,8 +1471,8 @@ def hook_transit():
                 yield f"data: {_json.dumps(text)}\n\n"
 
             # Injection de la CTA après le hook
-            cta = get_hook_cta(lang=_lang)
-            yield f"data: {_json.dumps('[CTA]')}\n\n"
+            cta = get_hook_cta()
+            yield f"data: [CTA]\n\n"
             yield f"data: {_json.dumps(cta)}\n\n"
             yield f"data: [DONE]\n\n"
         except Exception as exc:
