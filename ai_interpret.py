@@ -38,7 +38,7 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
                 "content-type": "application/json"
             }
             payload = {
-                "model": model or "claude-3-5-sonnet-latest",
+                "model": model or "claude-sonnet-4-6",
                 "max_tokens": max_tokens,
                 "system": system,
                 "messages": [{"role": "user", "content": prompt}]
