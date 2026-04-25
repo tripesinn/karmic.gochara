@@ -989,7 +989,8 @@ def register():
                 app.logger.error("Échec de save_natal_to_sheet pour %s", pseudo)
 
             # 4. Generate hook
-            hook_natal = get_hook_natal(profile)    except Exception as exc:
+            hook_natal = get_hook_natal(profile)
+    except Exception as exc:
         app.logger.error("Calcul natal register échoué pour %s : %s", pseudo, exc, exc_info=True)
 
     return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
