@@ -575,7 +575,7 @@ Sentence 4 stops just before giving the key — it frustrates, it calls for more
 
     # Force le modèle Sonnet pour le hook
     user_with_model = {**(user or {}), "user_model": HOOK_MODEL}
-    return generate_ai(system, prompt, user=user_with_model, max_tokens=600)
+    return generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -644,7 +644,7 @@ Sentence 4 stops before revealing the key. That's what sells the full synthesis.
 
     # Force le modèle Sonnet pour le hook
     user_with_model = {**(user or {}), "user_model": HOOK_MODEL}
-    return generate_ai(system, prompt, user=user_with_model, max_tokens=600)
+    return generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
 # ══════════════════════════════════════════════════════════════════════════════
 # SIGNAL DU JOUR — compact pour TikTok/Web
 # ══════════════════════════════════════════════════════════════════════════════

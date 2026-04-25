@@ -1470,7 +1470,7 @@ def hook_transit():
         full_text = []
         from ai_interpret import stream_ai
         try:
-            for text in stream_ai(system, prompt, user=_enriched, max_tokens=600):
+            for text in stream_ai(system, prompt, user=_enriched, max_tokens=1000):
                 if not text.startswith("[ERROR]"):
                     full_text.append(text)
                 yield f"data: {_json.dumps(text)}\n\n"
