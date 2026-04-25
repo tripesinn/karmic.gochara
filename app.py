@@ -4,6 +4,7 @@ Application Flask — Architecture multi-utilisateurs
 """
 
 import os
+import time
 from datetime import datetime
 
 import pytz
@@ -11,6 +12,10 @@ from flask import Flask, jsonify, make_response, render_template, request, sessi
 from dotenv import load_dotenv
 
 load_dotenv()
+
+# Store des paiements en attente d'activation de session (cas navigateur externe).
+# Clé : pseudo en minuscule, valeur : {"plan": str, "time": float}
+_pending_plan_updates: dict = {}
 
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gochara-secret-2024")
@@ -804,13 +809,18 @@ def login():
     if not profile:
         return jsonify({"ok": False, "error": f"Pseudo '{pseudo}' introuvable. Crée ton profil d'abord."}), 404
 
-    # ── Contournement de la latence de Google Sheets après paiement ───────────
-    if session.get("payment_completed"):
+    # ── Contournement de la latence Sheets après paiement ────────────────────
+    # 1. Store en mémoire (cas navigateur externe — session différente)
+    pending = _pending_plan_updates.pop(pseudo.strip().lower(), None)
+    if pending and time.time() - pending["time"] < 3600:
+        profile["plan"] = pending["plan"]
+        app.logger.info("Login post-paiement (store mémoire) : plan '%s' pour %s", pending["plan"], pseudo)
+    # 2. Drapeau de session (cas WebView — même session)
+    elif session.get("payment_completed"):
         payment_info = session.pop("payment_completed", None)
         if payment_info and payment_info.get("pseudo") == pseudo:
-            # Forcer la mise à jour du plan en mémoire pour la session
             profile["plan"] = payment_info.get("plan", profile["plan"])
-            app.logger.info(f"Login post-paiement : plan forcé à '{profile['plan']}' pour {pseudo}")
+            app.logger.info("Login post-paiement (session) : plan '%s' pour %s", profile["plan"], pseudo)
 
     session["profile"] = profile
     session["pseudo"] = pseudo
@@ -2036,6 +2046,8 @@ def _fulfill_order(pseudo: str, plan: str, stripe_customer_id: str = ""):
     try:
         upgrade_plan(pseudo, plan, stripe_customer_id=stripe_customer_id)
         app.logger.info("Plan upgradé : %s → %s (customer: %s)", pseudo, plan, stripe_customer_id)
+        # Stocker en mémoire pour la récupération cross-session (navigateur externe).
+        _pending_plan_updates[pseudo.strip().lower()] = {"plan": plan, "time": time.time()}
     except Exception as exc:
         app.logger.error("Erreur _fulfill_order pour %s : %s", pseudo, exc)
         raise
@@ -2180,6 +2192,32 @@ def api_complete_payment():
     except Exception as exc:
         app.logger.error("Erreur api_complete_payment pour %s : %s", pseudo, exc)
         return jsonify({"ok": False, "error": "Erreur interne"}), 500
+
+
+@app.route("/api/plan_check", methods=["POST"])
+def api_plan_check():
+    """
+    Vérifie si un paiement est en attente pour ce pseudo (store mémoire).
+    Appelé par le WebView au retour d'un navigateur externe après paiement.
+    Met à jour la session si un plan en attente est trouvé.
+    Body JSON : {"pseudo": "..."}
+    """
+    data   = request.get_json() or {}
+    pseudo = (data.get("pseudo") or "").strip().lower()
+    if not pseudo:
+        return jsonify({"ok": False}), 400
+
+    pending = _pending_plan_updates.pop(pseudo, None)
+    if not pending or time.time() - pending["time"] >= 3600:
+        return jsonify({"ok": False, "plan": None})
+
+    plan = pending["plan"]
+    # Mettre à jour la session courante si l'utilisateur est connecté
+    if "profile" in session:
+        session["profile"]["plan"] = plan
+        session.modified = True
+    app.logger.info("plan_check : plan '%s' appliqué pour %s", plan, pseudo)
+    return jsonify({"ok": True, "plan": plan})
 
 
 @app.route("/api/profile")

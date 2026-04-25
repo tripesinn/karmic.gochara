@@ -1392,6 +1392,10 @@
                 });
                 const data = await res.json();
                 if (data.url) {
+                    // Marquer le paiement comme en cours (survit si Stripe ouvre dans Chrome externe)
+                    const savedProfile = localStorage.getItem('gochara_profile');
+                    const pseudo = savedProfile ? (JSON.parse(savedProfile).pseudo || '') : '';
+                    if (pseudo) sessionStorage.setItem('paymentPending', pseudo);
                     window.location.href = data.url;
                 } else {
                     if (errEl) { errEl.textContent = data.error || T.js_err_payment; errEl.style.display = 'block'; }
@@ -1400,6 +1404,26 @@
                 if (errEl) { errEl.textContent = T.js_err_network; errEl.style.display = 'block'; }
             }
         }
+
+        // Détection retour d'app après paiement dans navigateur externe (Chrome sur Android)
+        document.addEventListener('visibilitychange', async () => {
+            if (document.visibilityState !== 'visible') return;
+            const pseudo = sessionStorage.getItem('paymentPending');
+            if (!pseudo) return;
+            try {
+                const r = await fetch('/api/plan_check', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ pseudo })
+                });
+                const d = await r.json();
+                if (d.ok && d.plan) {
+                    sessionStorage.removeItem('paymentPending');
+                    // Recharger la page pour refléter le nouveau plan
+                    window.location.href = '/?payment=success';
+                }
+            } catch (_) {}
+        });
 
         function showPaymentPlans() {
             const el = document.getElementById('payment-plans');
