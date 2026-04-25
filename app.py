@@ -756,6 +756,15 @@ def index():
     now = datetime.now(tz)
     user = session.get("profile")
     lang = get_lang()
+
+    # Retour depuis Stripe : appliquer le plan si la session en a gardé la trace.
+    if request.args.get("payment") == "success":
+        payment_info = session.get("payment_completed")
+        if payment_info and user and user.get("pseudo") == payment_info.get("pseudo"):
+            user["plan"] = payment_info["plan"]
+            session["profile"] = user
+            session.modified = True
+
     return render_template(
         "index.html",
         user=user,
@@ -2158,14 +2167,12 @@ def api_complete_payment():
 
     try:
         _fulfill_order(pseudo, plan)
-        profile = get_profile_by_pseudo(pseudo)
 
-        # ── Mise à jour de la session actuelle et drapeau pour le login ─────
-        # Met à jour la session en cours au cas où elle ne serait pas perdue.
+        # Mettre le plan directement en session sans relire Sheets (évite la latence de propagation).
         if "profile" in session:
-            session["profile"] = profile
-        
-        # Ajoute un drapeau pour la reconnexion afin de contrer la latence de Sheets.
+            session["profile"]["plan"] = plan
+
+        # Drapeau de secours pour le prochain login (si la session est perdue sur mobile).
         session["payment_completed"] = {"pseudo": pseudo, "plan": plan}
         session.modified = True
 

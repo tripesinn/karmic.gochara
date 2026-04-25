@@ -2336,6 +2336,23 @@
                 history.replaceState({}, '', window.location.pathname);
                 setTimeout(() => showPaymentPlans(), 400);
             }
+            if (params.get('payment') === 'success') {
+                history.replaceState({}, '', window.location.pathname);
+                // Rafraîchir le quota chatbot pour refléter le nouveau plan
+                fetch('/chat/status').then(r => r.json()).then(data => {
+                    const ind = document.getElementById('chatbot-quota-indicator');
+                    if (!ind) return;
+                    if (data.plan === 'subscription' || data.remaining >= 999) {
+                        ind.textContent = '∞';
+                        ind.style.color = 'var(--gold)';
+                    } else if (data.remaining > 0) {
+                        ind.textContent = `${data.remaining}/${data.limit}`;
+                    }
+                    // Masquer le bloc "plan verrouillé" si présent
+                    const locked = document.getElementById('chatbot-locked');
+                    if (locked && data.plan !== 'free') locked.style.display = 'none';
+                }).catch(() => {});
+            }
         });
     </script>
 
