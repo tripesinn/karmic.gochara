@@ -1260,10 +1260,10 @@ def get_hook_cta() -> dict:
     """
     MYPOS_URL = os.environ.get("MYPOS_URL", "https://mypos.com/@karmic-gochara")
     return {
-        "text_fr": "Ce diagnostic est incomplet. L'Alternative de Conscience complète, les 5 piliers et ta Carte Karmique t'attendent.",
-        "button_fr": "Voir l'analyse complète — 4,99€",
-        "text_en": "This diagnosis is incomplete. Your full Alternative of Consciousness, all 5 pillars and your Karmic Map are waiting.",
-        "button_en": "Get the full analysis — €4.99",
+        "text_fr": "Ce Signal n'est qu'un fragment. Ton Alternative de Conscience complète, les 5 piliers et ta Carte Karmique révèlent ce qui se joue vraiment.",
+        "button_fr": "Voir l'analyse complète",
+        "text_en": "This Signal is just a fragment. Your full Alternative of Consciousness, all 5 pillars and your Karmic Map reveal what's truly at play.",
+        "button_en": "Get the full analysis",
         "url": MYPOS_URL,
     }
 

@@ -1764,16 +1764,14 @@
         function renderHookCTA(cta, container) {
             const lang = document.documentElement.lang || 'fr';
             const ctaText = lang === 'en' ? cta.text_en : cta.text_fr;
-            const ctaButton = lang === 'en' ? cta.button_en : cta.button_fr;
-            const ctaUrl = cta.url;
 
             container.innerHTML = `
                 <div class="cta-block">
                     <p class="cta-text">${ctaText}</p>
-                    <a href="${ctaUrl}" target="_blank" class="cta-button">${ctaButton}</a>
                 </div>
             `;
             container.style.display = 'block';
+            showPaymentPlans();
         }
 
         function resetHookTransit() {
