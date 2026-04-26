@@ -192,19 +192,6 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
         svg.append(f'<path d="{_arc_path(CX, CY, R_OUT, R_ZIN, a0, a1)}" '
                    f'fill="{_ELEM[i]}" stroke="{_GOLD_DIM}" stroke-width="0.5"/>')
 
-        # Sign glyph at segment centre
-        sx, sy = xy(lon0 + 15, (R_OUT + R_ZIN) / 2)
-        svg.append(f'<text x="{sx:.1f}" y="{sy:.1f}" fill="{_GOLD}" font-size="17" '
-                   f'text-anchor="middle" dominant-baseline="middle">{_SIGNS[i]}</text>')
-
-        # Degree tick marks (every 5°, longer every 10°)
-        for d in range(0, 30, 5):
-            tick = lon0 + d
-            tick_r = R_OUT - (5 if d % 10 == 0 else 2.5)
-            tx1, ty1 = xy(tick, R_OUT)
-            tx2, ty2 = xy(tick, tick_r)
-            svg.append(f'<line x1="{tx1:.1f}" y1="{ty1:.1f}" x2="{tx2:.1f}" y2="{ty2:.1f}" '
-                       f'stroke="{_GOLD_DIM}" stroke-width="0.8"/>')
 
     # ── 2. Ring boundaries ────────────────────────────────────────────────────
     rings = [
@@ -237,13 +224,32 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
         svg.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
                    f'stroke="{col}" stroke-width="{sw}" {dash}/>')
 
-        # House number label
-        hx, hy = xy(lon + 15, R_ZIN - 16)
-        svg.append(f'<text x="{hx:.1f}" y="{hy:.1f}" fill="{_TEXT_DIM}" font-size="8.5" '
-                   f'text-anchor="middle" dominant-baseline="middle" '
-                   f'font-family="monospace">H{i+1}</text>')
 
-    # ── 4. Natal planets ──────────────────────────────────────────────────────
+    # ── 4. Axes Karma/Dharma et PI/PV ────────────────────────────────────────
+    def _axis(lon_a, lon_b, color, lbl_a, lbl_b, dash="4,3"):
+        x1, y1 = xy(lon_a, R_ZIN)
+        x2, y2 = xy(lon_b, R_ZIN)
+        svg.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}" '
+                   f'stroke="{color}" stroke-width="0.9" opacity="0.55" stroke-dasharray="{dash}"/>')
+        for lbl, lon in ((lbl_a, lon_a), (lbl_b, lon_b)):
+            lx, ly = xy(lon, R_ZIN - 14)
+            svg.append(f'<text x="{lx:.1f}" y="{ly:.1f}" fill="{color}" font-size="7" '
+                       f'text-anchor="middle" dominant-baseline="middle" '
+                       f'font-family="monospace" opacity="0.85">{lbl}</text>')
+
+    ketu_d = natal_positions.get("Nœud Sud ☋")
+    rahu_d = natal_positions.get("Nœud Nord ☊")
+    if ketu_d and rahu_d:
+        _axis(float(ketu_d["lon_raw"]), float(rahu_d["lon_raw"]),
+              _PURPLE, "Karma", "Dharma", dash="5,3")
+
+    pi_d = natal_positions.get("Porte Invisible ⊗")
+    pv_d = natal_positions.get("Porte Visible ⊙")
+    if pi_d and pv_d:
+        _axis(float(pi_d["lon_raw"]), float(pv_d["lon_raw"]),
+              _PURPLE, "PI", "PV", dash="2,3")
+
+    # ── 5. Natal planets ──────────────────────────────────────────────────────
     natal_raw = []
     for name in _IMPORTANT_NATAL:
         d = natal_positions.get(name)
@@ -279,15 +285,6 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
         svg.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{col}" font-size="{fs}" '
                    f'text-anchor="middle" dominant-baseline="middle"{filt}>{sym}</text>')
 
-        # Degree label
-        disp = orig_d.get("display", "")
-        deg_part = disp.split("°")[0].strip() if "°" in disp else ""
-        if deg_part:
-            dx, dy = xy(disp_lon, R_NATAL + 17)
-            svg.append(f'<text x="{dx:.1f}" y="{dy:.1f}" fill="{_TEXT_DIM}" font-size="7" '
-                       f'text-anchor="middle" dominant-baseline="middle" '
-                       f'font-family="monospace">{deg_part}°</text>')
-
     # ── 5. Transit planets ────────────────────────────────────────────────────
     if has_transit:
         tr_raw = []
@@ -315,15 +312,6 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
             px, py = xy(disp_lon, R_TR_SYM)
             svg.append(f'<text x="{px:.1f}" y="{py:.1f}" fill="{col}" font-size="{fs}" '
                        f'text-anchor="middle" dominant-baseline="middle" opacity="0.9">{sym}</text>')
-
-            # Degree label
-            disp = orig_d.get("display", "")
-            deg_part = disp.split("°")[0].strip() if "°" in disp else ""
-            if deg_part:
-                dx, dy = xy(disp_lon, R_TR_SYM - 14)
-                svg.append(f'<text x="{dx:.1f}" y="{dy:.1f}" fill="{col}" font-size="6.5" '
-                           f'text-anchor="middle" dominant-baseline="middle" '
-                           f'font-family="monospace" opacity="0.7">{deg_part}°</text>')
 
     # ── 6. ASC / DSC line + centre ────────────────────────────────────────────
     xa, ya = xy(asc_lon, R_OUT)
