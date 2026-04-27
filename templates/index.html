@@ -1175,6 +1175,7 @@
     <script>
         const T = {{ lang | tojson }};
         const CURRENT_PSEUDO = "{{ session_user }}";
+        const CURRENT_PLAN = "{{ (user.plan if user and user.plan else 'free') }}";
 
         // ── Variables Globales ──────────────────────────────────────────────────────
         let transitGeo = null;
@@ -1771,7 +1772,7 @@
                 </div>
             `;
             container.style.display = 'block';
-            showPaymentPlans();
+            if (CURRENT_PLAN === 'free') showPaymentPlans();
         }
 
         function resetHookTransit() {
