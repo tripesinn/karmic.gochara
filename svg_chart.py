@@ -29,6 +29,12 @@ _ELEM = [
 
 _SIGNS = ["♈","♉","♊","♋","♌","♍","♎","♏","♐","♑","♒","♓"]
 
+_NAKS = [
+    "Asw","Bha","Kri","Roh","Mri","Ard","Pun","Pus","Asl",
+    "Mag","PPh","UPh","Has","Chi","Swa","Vis","Anu","Jye",
+    "Mul","PAs","UAs","Shr","Dha","Sha","PBh","UBh","Rev",
+]
+
 # Planet name → (glyph, natal_color)
 _NATAL_SYM = {
     "Soleil ☀":          ("☀", _GOLD),
@@ -192,10 +198,28 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
         svg.append(f'<path d="{_arc_path(CX, CY, R_OUT, R_ZIN, a0, a1)}" '
                    f'fill="{_ELEM[i]}" stroke="{_GOLD_DIM}" stroke-width="0.5"/>')
 
-        # Sign glyph at segment centre
-        sx, sy = xy(lon0 + 15, (R_OUT + R_ZIN) / 2)
-        svg.append(f'<text x="{sx:.1f}" y="{sy:.1f}" fill="{_GOLD}" font-size="17" '
+        # Sign glyph at segment centre (inner half of band)
+        sx, sy = xy(lon0 + 15, R_ZIN + 16)
+        svg.append(f'<text x="{sx:.1f}" y="{sy:.1f}" fill="{_GOLD}" font-size="15" '
                    f'text-anchor="middle" dominant-baseline="middle">{_SIGNS[i]}</text>')
+
+    # ── 1b. Nakshatras (27 divisions, outer half of band) ─────────────────────
+    NAK_SPAN = 360.0 / 27
+    for n in range(27):
+        lon_s = n * NAK_SPAN
+        lon_m = lon_s + NAK_SPAN / 2
+
+        # Boundary tick on outer rim
+        tx1, ty1 = xy(lon_s, R_OUT)
+        tx2, ty2 = xy(lon_s, R_OUT - 8)
+        svg.append(f'<line x1="{tx1:.1f}" y1="{ty1:.1f}" x2="{tx2:.1f}" y2="{ty2:.1f}" '
+                   f'stroke="{_GOLD_DIM}" stroke-width="0.7"/>')
+
+        # Abbreviated name (outer half of band)
+        nx, ny = xy(lon_m, R_OUT - 14)
+        svg.append(f'<text x="{nx:.1f}" y="{ny:.1f}" fill="{_GOLD_DIM}" font-size="6.5" '
+                   f'text-anchor="middle" dominant-baseline="middle" '
+                   f'font-family="monospace">{_NAKS[n]}</text>')
 
     # ── 2. Ring boundaries ────────────────────────────────────────────────────
     rings = [
