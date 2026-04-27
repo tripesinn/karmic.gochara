@@ -1766,13 +1766,17 @@
             const lang = document.documentElement.lang || 'fr';
             const ctaText = lang === 'en' ? cta.text_en : cta.text_fr;
 
-            container.innerHTML = `
-                <div class="cta-block">
-                    <p class="cta-text">${ctaText}</p>
-                </div>
-            `;
-            container.style.display = 'block';
-            if (CURRENT_PLAN === 'free') showPaymentPlans();
+            if (CURRENT_PLAN === 'free') {
+                container.innerHTML = `
+                    <div class="cta-block">
+                        <p class="cta-text">${ctaText}</p>
+                    </div>
+                `;
+                container.style.display = 'block';
+                showPaymentPlans();
+            } else {
+                container.style.display = 'block';
+            }
         }
 
         function resetHookTransit() {
