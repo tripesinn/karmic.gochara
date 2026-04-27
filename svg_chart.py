@@ -65,6 +65,8 @@ _TRANSIT_COLOR = {
     "Jupiter ♃":   _CYAN,
     "Saturne ♄":   "#aac0c8",
     "Nœud Nord ☊": "#88c4cc",
+    "Chiron ⚷":    _PURPLE,
+    "Lilith ⚸":    _CYAN,
 }
 
 _IMPORTANT_NATAL = [
@@ -78,6 +80,7 @@ _IMPORTANT_NATAL = [
 _IMPORTANT_TRANSIT = [
     "Soleil ☀", "Lune ☽", "Mars ♂", "Vénus ♀",
     "Mercure ☿", "Jupiter ♃", "Saturne ♄", "Nœud Nord ☊",
+    "Chiron ⚷", "Lilith ⚸",
 ]
 
 
@@ -222,6 +225,10 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
                    f'font-family="monospace">{_NAKS[n]}</text>')
 
     # ── 2. Ring boundaries ────────────────────────────────────────────────────
+    # Transit zone: subtle cyan fill to visually separate from natal ring
+    if has_transit:
+        svg.append(f'<circle cx="{CX}" cy="{CY}" r="{R_TR_OUT}" fill="rgba(94,196,212,0.06)"/>')
+
     rings = [
         (R_OUT,    1.5,  _GOLD_MID),
         (R_ZIN,    1.0,  _GOLD_MID),
@@ -229,7 +236,7 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
     ]
     if has_transit:
         rings += [
-            (R_TR_OUT, 0.7, _CYAN_DIM),
+            (R_TR_OUT, 1.2, "rgba(94,196,212,0.45)"),  # cyan border, more visible
             (R_INNER,  0.9, _GOLD_DIM),
         ]
     else:
@@ -329,11 +336,11 @@ def generate_karmic_chart_svg(natal_positions, transit_positions=None, lang='fr'
             name, disp_lon, (sym, col, orig_d) = entry
             orig_lon = float(orig_d.get("lon_raw", disp_lon))
 
-            # Outer tick
-            tx1, ty1 = xy(orig_lon, R_TR_OUT + 1)
-            tx2, ty2 = xy(orig_lon, R_TR_OUT + 9)
+            # Tick at transit ring boundary, pointing inward
+            tx1, ty1 = xy(orig_lon, R_TR_OUT)
+            tx2, ty2 = xy(orig_lon, R_TR_OUT - 11)
             svg.append(f'<line x1="{tx1:.1f}" y1="{ty1:.1f}" x2="{tx2:.1f}" y2="{ty2:.1f}" '
-                       f'stroke="{col}" stroke-width="1" opacity="0.5"/>')
+                       f'stroke="{col}" stroke-width="1.1" opacity="0.6"/>')
 
             # Glyph
             fs = 11 if len(sym) > 1 else 17
