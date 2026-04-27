@@ -27,7 +27,9 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     model = user.get("user_model")
 
     if not provider or provider == "gemini" or not user_key:
-        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key)
+        # Ne pas passer un nom de modèle Claude à l'API Gemini
+        gemini_model = model if model and not model.startswith("claude") else None
+        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=gemini_model, user_key=user_key)
         
     try:
         if provider == "claude":
@@ -102,7 +104,8 @@ def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
     model = user.get("user_model")
 
     if not provider or provider == "gemini" or not user_key:
-        for chunk in gemini_api.stream(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key):
+        gemini_model = model if model and not model.startswith("claude") else None
+        for chunk in gemini_api.stream(system, prompt, max_tokens=max_tokens, model=gemini_model, user_key=user_key):
             yield chunk
         return
 

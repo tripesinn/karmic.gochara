@@ -89,6 +89,24 @@
         #app-section { display: none; padding: 2rem; }
         .date-input { background: #111110; border: 1px solid var(--border); color: #fff; padding: 0.8rem; margin-bottom: 1rem; width: 100%; max-width: 300px; font-family: var(--body); }
 
+        #timing-box {
+            background: rgba(20, 20, 30, 0.4);
+            border: 1px solid var(--border);
+            border-radius: 4px;
+            padding: 1.2rem;
+            margin-top: 2rem;
+        }
+        .dasha-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            font-family: var(--mono);
+            font-size: 0.82rem;
+        }
+        .dasha-row:last-child { border-bottom: none; }
+        .dasha-current { color: var(--gold); font-weight: bold; }
+
         /* Animation de la roue (Spinner) */
         .spinner {
             display: inline-block;
@@ -268,6 +286,14 @@
         </div>
         <div id="transit-context-banner" style="display:none; margin-bottom:1.2rem; padding:0.8rem 1rem; border-left:3px solid var(--gold); background:rgba(201,168,76,0.06); font-size:0.88rem; color:var(--text-dim);"></div>
         <div id="synthesis-content" style="line-height: 1.8; font-size: 1.1rem;"></div>
+        
+        <!-- Bloc Timing (Dashas & Sade Sati) -->
+        <div id="timing-box" style="display:none; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border-dim);">
+            <div style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:1rem;">✦ TIMING KARMIQUE</div>
+            <div id="sade-sati-display" style="margin-bottom:1rem; padding:0.8rem; border-radius:4px; display:none;"></div>
+            <div id="dasha-display" style="font-size:0.9rem; color:var(--text-dim);"></div>
+        </div>
+
         <div style="margin-top: 1.5rem; text-align: center;">
             <button id="btnEmail" class="btn-secondary" onclick="sendSynthesisEmail()" style="max-width: 260px;">
                 📧 Recevoir par email
@@ -889,7 +915,16 @@ async function calculateWithRouting() {
 
             const savedProfile = JSON.parse(localStorage.getItem('gochara_profile') || '{}');
             const chartData = await AstroCalc.calculateTransits({
-                natal:        savedProfile,
+                natal: {
+                    year:   parseInt(savedProfile.year),
+                    month:  parseInt(savedProfile.month),
+                    day:    parseInt(savedProfile.day),
+                    hour:   parseInt(savedProfile.hour || 12),
+                    minute: parseInt(savedProfile.minute || 0),
+                    lat:    parseFloat(savedProfile.lat),
+                    lon:    parseFloat(savedProfile.lon),
+                    tz:     savedProfile.tz || 'Europe/Paris'
+                },
                 date:         date,
                 hour:         12,
                 minute:       0,
@@ -903,6 +938,7 @@ async function calculateWithRouting() {
             const prompts = buildPromptsLocally(chartData, savedProfile);
             const gr = await Gemma.generate(prompts.system, prompts.user);
             showSynthesis(gr.synthesis, null);
+            showTiming(chartData.dashas, chartData.sadeSati);
             showLocalBadge(true);
 
         } else {
@@ -916,6 +952,7 @@ async function calculateWithRouting() {
             const data = await r.json();
             if (data.error) { alert(data.error); return; }
             showSynthesis(data.synthesis, data.remaining);
+            showTiming(data.dashas, data.sade_sati);
             showLocalBadge(false);
         }
     } catch (err) {
@@ -924,6 +961,58 @@ async function calculateWithRouting() {
         btn.disabled      = false;
         btnText.innerHTML = origText;
     }
+}
+
+function showTiming(dashas, sadeSati) {
+    const box = document.getElementById('timing-box');
+    if (!box) return;
+    
+    // Sade Sati
+    const ssDiv = document.getElementById('sade-sati-display');
+    if (sadeSati && sadeSati.active) {
+        ssDiv.style.display = 'block';
+        ssDiv.style.background = 'rgba(180, 80, 60, 0.15)';
+        ssDiv.style.border = '1px solid rgba(180, 80, 60, 0.3)';
+        ssDiv.innerHTML = `<span style="color:#ff6b6b; font-weight:bold;">⚠ SADE SATI ACTIF</span><br>`
+            + `<span style="font-size:0.85rem; color:rgba(245,240,232,0.8);">Phase : ${sadeSati.phase}</span>`;
+    } else {
+        ssDiv.style.display = 'none';
+    }
+    
+    // Dashas
+    const dashaDiv = document.getElementById('dasha-display');
+    if (dashas && dashas.length > 0) {
+        let html = '<div style="margin-bottom:0.5rem; font-family:var(--display); font-size:0.75rem; color:var(--gold);">MAHA DASHAS (Périodes majeures)</div>';
+        const now = new Date();
+        let _found = false;
+        
+        dashas.forEach((d) => {
+            let endDate;
+            if (typeof d.end_date === 'string') {
+                const parts = d.end_date.split('/');
+                endDate = new Date(parts[2], parts[1]-1, parts[0]);
+            } else if (d.endTimestamp) {
+                endDate = new Date(d.endTimestamp);
+            }
+            
+            let isCurrent = false;
+            if (!_found && endDate > now) {
+                isCurrent = true;
+                _found = true;
+            }
+            
+            const dateStr = endDate ? endDate.toLocaleDateString('fr-FR') : '??';
+            html += `<div class="dasha-row ${isCurrent ? 'dasha-current' : ''}">
+                <span>${isCurrent ? '➤ ' : ''}${d.lord}</span>
+                <span>jusqu'au ${dateStr}</span>
+            </div>`;
+        });
+        dashaDiv.innerHTML = html;
+    } else {
+        dashaDiv.innerHTML = 'Données temporelles non disponibles.';
+    }
+    
+    box.style.display = 'block';
 }
 
 function showSynthesis(text, remaining) {
