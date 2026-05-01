@@ -311,6 +311,11 @@ def detect_transit_events(profile: dict) -> list[dict]:
     for pair in yesterday_active - today_active:
         events.append({"type": "fin", "kind": "conjunction", "transit": pair[0], "natal": pair[1]})
 
+    # --- Détection des événements de lunaison (Nouvelle/Pleine Lune) ---
+    lunation_events = detect_lunation_events(profile, natal_pos, today_transit)
+    if lunation_events:
+        events.extend(lunation_events)
+
     # Activations nakshatra : planète lente entre dans le nakshatra natal de Ketu/Rahu/Chiron
     natal_naks = {
         "Ketu":   profile.get("ketu_nakshatra", ""),
@@ -341,6 +346,61 @@ def detect_transit_events(profile: dict) -> list[dict]:
             "interpretation": info["interpretation"],
         })
 
+    return events
+
+
+def detect_lunation_events(profile: dict, natal_pos: dict, transit_pos: dict) -> list[dict]:
+    """
+    Détecte si une Nouvelle ou Pleine Lune a lieu aujourd'hui
+    dans le nakshatra de la Lune natale de l'utilisateur.
+    """
+    from astro_calc import lon_to_nakshatra
+    moon_natal = natal_pos.get("Lune ☽")
+    if not moon_natal:
+        return []
+
+    sun_transit = transit_pos.get("Soleil ☀")
+    moon_transit = transit_pos.get("Lune ☽")
+    if not sun_transit or not moon_transit:
+        return []
+
+    sun_lon = sun_transit["lon"]
+    moon_lon = moon_transit["lon"]
+    natal_moon_nak = moon_natal.get("nakshatra")
+    if not natal_moon_nak:
+        return []
+
+    events = []
+    # Vérifie Nouvelle Lune (conjonction)
+    diff_conj = abs(sun_lon - moon_lon) % 360
+    if diff_conj > 180:
+        diff_conj = 360 - diff_conj
+    
+    if diff_conj <= ORB:
+        lunation_nak = lon_to_nakshatra(moon_lon)["nakshatra"]
+        if lunation_nak == natal_moon_nak:
+            events.append({
+                "type": "debut", "kind": "lunation",
+                "transit": "Nouvelle Lune 🌑", "natal": "Lune ☽",
+                "nakshatra": lunation_nak, "lord": NAKSHATRA_LORDS[NAKSHATRAS.index(lunation_nak)],
+                "interpretation": "Nouvelle Lune dans votre Nakshatra lunaire natal",
+            })
+
+    # Vérifie Pleine Lune (opposition)
+    diff_opp = abs(sun_lon - moon_lon - 180) % 360
+    if diff_opp > 180:
+        diff_opp = 360 - diff_opp
+
+    if diff_opp <= ORB:
+        lunation_nak = lon_to_nakshatra(moon_lon)["nakshatra"]
+        if lunation_nak == natal_moon_nak:
+            events.append({
+                "type": "debut", "kind": "lunation",
+                "transit": "Pleine Lune 🌕", "natal": "Lune ☽",
+                "nakshatra": lunation_nak, "lord": NAKSHATRA_LORDS[NAKSHATRAS.index(lunation_nak)],
+                "interpretation": "Pleine Lune dans votre Nakshatra lunaire natal",
+            })
+            
     return events
 
 
@@ -378,7 +438,16 @@ def _build_alert_html(profile: dict, events: list[dict], upgrade_cta: bool = Fal
         icon     = "▶" if is_debut else "■"
         color    = "#6ab56a" if is_debut else "#e57373"
         t_label  = PLANET_LABELS.get(e["transit"], e["transit"])
-        if e.get("kind") == "nakshatra":
+        
+        if e.get("kind") == "lunation":
+            color     = "#d4a017" # Or
+            icon      = "●"
+            t_label   = e["transit"]
+            nak_name  = e.get("nakshatra", "")
+            lord      = e.get("lord", "")
+            n_label   = f"{nak_name} ({lord}) — nakshatra de ta Lune natale"
+            label     = e.get("interpretation", "Cycle lunaire majeur")
+        elif e.get("kind") == "nakshatra":
             interp    = e.get("interpretation", "")
             color     = _INTERPRETATION_COLORS.get(interp, "#9090b0")
             lord      = e.get("lord", "")
@@ -386,9 +455,10 @@ def _build_alert_html(profile: dict, events: list[dict], upgrade_cta: bool = Fal
             n_label   = f"{nak_name} ({lord}) — {NAK_NATAL_LABELS.get(e['natal'], e['natal'])}"
             label     = _INTERPRETATION_LABELS.get(interp, "Activation nakshatra")
             label     = label if is_debut else label.replace("Activation", "Fin d'activation").replace("activation", "fin d'activation")
-        else:
+        else: # Conjunction
             n_label   = NATAL_LABELS.get(e["natal"], e["natal"])
             label     = "Début de transit" if is_debut else "Fin de transit"
+            
         rows += f"""
         <tr>
           <td style="padding:10px 8px;color:{color};font-size:20px;vertical-align:top;">{icon}</td>
