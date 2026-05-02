@@ -2321,6 +2321,17 @@ def stripe_webhook():
 
         if pseudo and plan:
             _fulfill_order(pseudo, plan, stripe_customer_id=customer)
+            if plan == "test": # "test" corresponds to the "lecture" plan
+                try:
+                    from profiles import get_profile_by_pseudo
+                    from transit_alerts import find_next_major_transit_event, send_next_event_alert_email
+                    profile = get_profile_by_pseudo(pseudo)
+                    if profile:
+                        next_event = find_next_major_transit_event(profile)
+                        if next_event:
+                            send_next_event_alert_email(profile, next_event)
+                except Exception as e:
+                    app.logger.error(f"Failed to send next event alert for {pseudo}: {e}")
 
     elif event["type"] == "customer.subscription.deleted":
         from profiles import get_profile_by_email, downgrade_plan

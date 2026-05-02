@@ -540,6 +540,115 @@ def send_alert_email(profile: dict, events: list[dict], upgrade_cta: bool = Fals
         return False
 
 
+def find_next_major_transit_event(profile: dict, max_days_in_future: int = 365) -> dict | None:
+    """
+    Trouve le prochain événement de transit majeur (conjonction) dans le futur.
+    Retourne l'événement avec sa date.
+    """
+    start_date = date.today()
+    
+    # Need natal positions once
+    natal_pos, _ = _positions_for_day(profile, start_date)
+
+    # Get active conjunctions for yesterday to see what's new today.
+    _, yesterday_transit = _positions_for_day(profile, start_date - timedelta(days=1))
+    yesterday_active = _active_conjunctions(natal_pos, yesterday_transit)
+
+    for i in range(max_days_in_future):
+        current_date = start_date + timedelta(days=i)
+        _, current_transit = _positions_for_day(profile, current_date)
+        current_active = _active_conjunctions(natal_pos, current_transit)
+
+        new_events = current_active - yesterday_active
+        if new_events:
+            pair = list(new_events)[0]
+            event = {
+                "date": current_date.strftime("%d/%m/%Y"),
+                "type": "debut",
+                "kind": "conjunction",
+                "transit": pair[0],
+                "natal": pair[1]
+            }
+            return event
+        
+        yesterday_active = current_active
+    
+    return None
+
+def _build_next_event_alert_html(profile: dict, event: dict) -> str:
+    name = profile.get("name") or profile.get("pseudo", "")
+    event_date = event["date"]
+    t_label = PLANET_LABELS.get(event["transit"], event["transit"])
+    n_label = NATAL_LABELS.get(event["natal"], event["natal"])
+
+    return f"""<!DOCTYPE html>
+<html lang="fr">
+<head><meta charset="UTF-8">
+<style>
+  body {{ font-family: Georgia, serif; background: #0a0a1a; color: #e8e0d0; margin: 0; padding: 20px; }}
+  .container {{ max-width: 620px; margin: 0 auto; background: #0f0f2a;
+                border: 1px solid #4b0082; border-radius: 4px; padding: 30px; }}
+  h1 {{ color: #d4a017; font-size: 19px; border-bottom: 1px solid #4b0082; padding-bottom: 10px; margin-top: 0; }}
+  .event-details {{ margin-top: 20px; padding: 16px; border: 1px solid #d4a017; border-radius: 3px; background: rgba(212, 160, 23, 0.08); text-align: center; }}
+  .footer {{ margin-top: 28px; padding-top: 14px; border-top: 1px solid #4b0082;
+             font-size: 11px; color: #606080; text-align: center; }}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>✦ Votre prochain événement karmique important</h1>
+  <p style="color:#9090b0;font-size:12px;margin-top:0;">{name}, merci pour votre confiance.</p>
+  <p>En tant que membre "Lecture", nous vous informons de votre prochain transit majeur :</p>
+  <div class="event-details">
+    <p style="font-size:16px; color:#d4a017; margin:0 0 10px;">Le {event_date}</p>
+    <p style="font-size:14px; color:#e8e0d0; margin:0;">{t_label} sera en conjonction avec {n_label}.</p>
+    <p style="font-size:12px; color:#9090b0; margin-top:10px;">C'est un moment clé pour votre chemin karmique.</p>
+  </div>
+  <div style="margin-top:28px;text-align:center;">
+    <a href="https://karmicgochara.app/?open=synthesis" style="display:inline-block;background:#d4a017;color:#0a0a1a;text-decoration:none;padding:12px 28px;border-radius:3px;font-weight:bold;font-size:14px;letter-spacing:0.08em;">
+      ✦ EXPLORER MON THÈME NATAL →
+    </a>
+  </div>
+  <div class="footer">
+    Karmic Gochara · DK Ayanamsa · Chandra Lagna · True Nodes · Orbe &lt; 3°<br>
+  </div>
+</div>
+</body>
+</html>"""
+
+def send_next_event_alert_email(profile: dict, event: dict) -> bool:
+    resend_key = os.environ.get("RESEND_API_KEY", "")
+    if not resend_key:
+        return False
+    email = (profile.get("email") or "").strip()
+    if not email:
+        return False
+
+    html = _build_next_event_alert_html(profile, event)
+    
+    try:
+        r = req.post(
+            "https://api.resend.com/emails",
+            headers={
+                "Authorization": f"Bearer {resend_key}",
+                "Content-Type":  "application/json",
+            },
+            json={
+                "from":     "Gochara Karmique <karmic.gochara@astro.jeromemalige.fr>",
+                "reply_to": "astro@jeromemalige.fr",
+                "to":       [email],
+                "subject":  f"✦ Votre prochain événement karmique",
+                "html":     html,
+            },
+            timeout=10,
+        )
+        return r.status_code in (200, 201)
+    except Exception:
+        return False
+
+
+
+
 def run_daily_alerts() -> dict:
     """Point d'entrée principal — appelé par la route /cron/daily."""
     from profiles import get_all_profiles, get_and_consume_alert
