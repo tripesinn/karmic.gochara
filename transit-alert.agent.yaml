@@ -1,0 +1,60 @@
+# transit_alert_agent.yaml
+name: "Transit Alert Agent"
+description: "Generates personalized astrological transit alerts based on a user's natal chart and current ephemeris data."
+input_schema:
+  type: object
+  properties:
+    user_id:
+      type: string
+      description: "The unique identifier for the user."
+    birth_data:
+      type: object
+      properties:
+        year: { type: integer }
+        month: { type: integer }
+        day: { type: integer }
+        hour: { type: integer }
+        minute: { type: integer }
+        lat: { type: number }
+        lon: { type: number }
+        tz: { type: string }
+      required: [year, month, day, hour, minute, lat, lon, tz]
+    current_date:
+      type: string
+      format: "date"
+      description: "The date for which to check transits (YYYY-MM-DD)."
+    subscription_status:
+      type: string
+      enum: ["free", "premium", "expired"]
+  required: [user_id, birth_data, current_date, subscription_status]
+
+output_schema:
+  type: object
+  properties:
+    analysis:
+      type: string
+      description: "The generated emotional narrative with psychological impact of the transit."
+    urgency:
+      type: string
+      enum: ["low", "medium", "high", "critical"]
+      description: "The urgency level of the alert."
+    premium_teaser:
+      type: string
+      description: "A short, engaging teaser of the full insight (if applicable)."
+    recommendations:
+      type: array
+      items:
+        type: string
+      description: "Actionable recommendations for the user."
+    cta_button_text:
+      type: string
+      description: "The text for the call-to-action button."
+    disclaimer:
+      type: string
+      description: "A standard medical and outcomes disclaimer."
+    confidence:
+      type: number
+      minimum: 0.0
+      maximum: 1.0
+      description: "The agent's confidence in the analysis."
+  required: [analysis, urgency, premium_teaser, recommendations, cta_button_text, disclaimer, confidence]

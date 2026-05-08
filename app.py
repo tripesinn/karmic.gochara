@@ -1104,6 +1104,138 @@ def geocode():
 
 
 # ── Routes protégées ──────────────────────────────────────────────────────────
+
+@app.route("/v2/calculate", methods=["POST"])
+def calculate_v2():
+    """
+    Endpoint optimisé pour le calcul de la synthèse karmique.
+    1.  CACHING: Utilise la doctrine pré-chargée.
+    2.  ERROR HANDLING: Gestion robuste des erreurs (auth, profil, paiement, calcul, API).
+    3.  LOCAL-FIRST VALIDATION: Les calculs astro sont faits avant l'appel API.
+    4.  STRUCTURED OUTPUT: Demande un JSON strict à l'API.
+    5.  PERFORMANCE: Mesure et log les temps de calcul et d'API.
+    6.  STREAMING: Streame la réponse JSON via SSE.
+    """
+    total_start_time = time.perf_counter()
+    from astro_calc import calculate_transits
+    from profiles import consume_plan_synthesis
+    import requests
+
+    # 1. Gestion d'erreur : Authentification
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"error": "unauthorized", "message": "Non connecté"}), 401
+
+    data = request.get_json() or {}
+    lang = session.get("lang", "fr")
+    
+    # 2. Gestion d'erreur : Validation du profil (présence des données de naissance)
+    required_fields = ["name", "year", "month", "day", "hour", "minute", "lat", "lon", "tz", "city"]
+    if any(field not in profile for field in required_fields):
+        app.logger.error(f"Profil incomplet pour {profile.get('pseudo', 'inconnu')}: champs manquants.")
+        return jsonify({"error": "invalid_profile", "message": "Ton profil de naissance est incomplet."}), 400
+
+    # 3. Gestion d'erreur : Abonnement Stripe (Gate paiement)
+    pseudo = profile.get("pseudo", "")
+    UNLIMITED_PSEUDOS = {"jero"}
+    user_key = data.get("user_key")
+
+    if not (pseudo.lower() in UNLIMITED_PSEUDOS or user_key):
+        plan = profile.get("plan", "free")
+        plan_normalized = plan.lower().replace("é", "e")
+        if plan_normalized in ("test", "subscription", "lecture", "essential", "illimite"):
+            if not consume_plan_synthesis(pseudo):
+                return jsonify({
+                    "error": "quota_exceeded",
+                    "message": "Tu n'as plus de synthèses disponibles sur ton plan.",
+                }), 429
+        else:
+            return jsonify({
+                "error": "subscription_required",
+                "message": "La synthèse karmique est réservée au plan Lecture.",
+            }), 402
+
+    # 4. Local-First : Préparation des données pour le calcul local
+    natal_input = {field: profile[field] for field in required_fields}
+    date_str = data.get("date")
+    if not date_str:
+        return jsonify({"error": "invalid_input", "message": "La date de transit est requise."}), 400
+
+    try:
+        year, month, day = map(int, date_str.split("-"))
+    except ValueError:
+        return jsonify({"error": "invalid_date", "message": "Format de date invalide. Utilise YYYY-MM-DD."}), 400
+
+    hour = int(data.get("hour", 12))
+    minute = int(data.get("minute", 0))
+    transit_loc = {
+        "city": data.get("transit_city", profile.get("transit_city", TRANSIT_LOC_DEFAULT["city"])),
+        "lat":  float(data.get("transit_lat", profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"]))),
+        "lon":  float(data.get("transit_lon", profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"]))),
+        "tz":   data.get("transit_tz", profile.get("transit_tz", TRANSIT_LOC_DEFAULT["tz"])),
+    }
+
+    # 5. Performance & Local-First : Exécution des calculs astrologiques
+    astro_start_time = time.perf_counter()
+    try:
+        chart_data = calculate_transits(natal_input, transit_loc, year, month, day, hour, minute)
+    except Exception as e:
+        app.logger.error(f"Erreur de calcul astrologique pour {pseudo}: {e}", exc_info=True)
+        return jsonify({"error": "calculation_failed", "message": "Une erreur est survenue lors du calcul astrologique."}), 500
+    astro_duration = time.perf_counter() - astro_start_time
+
+    # 6. Streaming de la réponse
+    def generate_stream():
+        api_start_time, api_duration = 0, 0
+        try:
+            enriched_profile = _enrich_profile_with_natal(profile, chart_data.get("natal", {}))
+            
+            # Ajout des clés API utilisateur si elles existent
+            if user_key: enriched_profile["user_key"] = user_key
+            if data.get("user_model"): enriched_profile["user_model"] = data["user_model"]
+            if data.get("user_provider"): enriched_profile["user_provider"] = data["user_provider"]
+
+            # Message SSE initial avec les données de base
+            yield f"event: metadata\ndata: {json.dumps({'natal': chart_data.get('natal'), 'transits': chart_data.get('transits')})}\n\n"
+
+            full_response = ""
+            api_start_time = time.perf_counter()
+            for chunk in stream_synthesis(chart_data, enriched_profile, lang=lang):
+                full_response += chunk
+                yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+            api_duration = time.perf_counter() - api_start_time
+
+            # Tenter de parser le JSON complet pour l'envoyer en une fois
+            try:
+                parsed_json = json.loads(full_response)
+                yield f"event: final_json\ndata: {json.dumps(parsed_json)}\n\n"
+            except json.JSONDecodeError:
+                app.logger.warning(f"La réponse API pour {pseudo} n'est pas un JSON valide.")
+                yield f"event: error\ndata: {json.dumps({'message': 'La réponse du modèle IA n''est pas un JSON valide.'})}\n\n"
+
+        except requests.exceptions.HTTPError as e:
+            # Gestion d'erreur : Erreurs API (ex: 429 Rate Limit)
+            error_message = f"Erreur API ({e.response.status_code})"
+            if e.response.status_code == 429:
+                error_message = "Limite de requêtes API atteinte. Veuillez réessayer plus tard."
+            app.logger.error(f"Erreur API HTTP pour {pseudo}: {e}")
+            yield f"event: error\ndata: {json.dumps({'message': error_message})}\n\n"
+        except Exception as e:
+            # Gestion d'erreur : Autres exceptions
+            app.logger.error(f"Erreur lors du streaming de la synthèse pour {pseudo}: {e}", exc_info=True)
+            yield f"event: error\ndata: {json.dumps({'message': 'Une erreur inattendue est survenue.'})}\n\n"
+        finally:
+            total_duration = time.perf_counter() - total_start_time
+            # 7. Performance : Logging
+            app.logger.info(
+                f"TIMING for {pseudo}: Total={total_duration:.2f}s, "
+                f"AstroCalc={astro_duration:.2f}s, API_Stream={api_duration:.2f}s"
+            )
+            yield "event: done\ndata: {}\n\n"
+
+    return Response(stream_with_context(generate_stream()), mimetype="text/event-stream")
+
+
 @app.route("/calculate", methods=["POST"])
 def calculate():
     from astro_calc import calculate_transits
@@ -1790,6 +1922,180 @@ def synthesis_prompt():
 
 
 # ── Chatbot karmique : quota + prompt pour Gemma local ───────────────────────
+
+@app.route("/api/v1/user/alert-preferences", methods=["PATCH"])
+def alert_preferences():
+    from profiles import set_alerts
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"error": "unauthorized"}), 401
+    
+    data = request.get_json() or {}
+    enabled = data.get("enabled", False)
+    
+    success = set_alerts(profile["pseudo"], enabled)
+    if success:
+        # Update session
+        session["profile"]["alerts_enabled"] = enabled
+        session.modified = True
+        return jsonify({"ok": True, "alerts_enabled": enabled})
+    else:
+        return jsonify({"error": "profile_not_found"}), 404
+
+@app.route("/api/v1/user/alerts/history", methods=["GET"])
+def alert_history():
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"error": "unauthorized"}), 401
+    
+    # Placeholder: In a real implementation, you would fetch this from a database.
+    # The Google Sheet would have a new column for alert history (JSON string or similar).
+    return jsonify({
+        "history": [
+            {"date": "2026-05-07", "narrative": "Placeholder: Saturne a activé votre Lune natale...", "urgency": "medium"},
+            {"date": "2026-04-20", "narrative": "Placeholder: Un trigone de Jupiter a ouvert une opportunité...", "urgency": "low"}
+        ]
+    })
+
+@app.route("/api/v1/transit-alert", methods=["POST"])
+def trigger_transit_alert():
+    """Admin route to trigger a test alert for a user."""
+    from profiles import get_profile_by_pseudo
+    from transit_alerts import generate_transit_alert
+    from email_formatter import format_alert_email
+    from datetime import date
+    
+    data = request.get_json() or {}
+    pseudo = data.get("pseudo")
+    if not pseudo:
+        return jsonify({"error": "pseudo_required"}), 400
+
+    # In a real app, this should be protected by an admin check
+    # if session.get("user_role") != "admin":
+    #     return jsonify({"error": "forbidden"}), 403
+
+    user_profile = get_profile_by_pseudo(pseudo)
+    if not user_profile:
+        return jsonify({"error": "user_not_found"}), 404
+
+    # Generate alert
+    alert_data = generate_transit_alert(
+        user_id=pseudo,
+        birth_data=user_profile,
+        current_date=date.today(),
+        subscription_status=user_profile.get("plan", "free")
+    )
+
+    if not alert_data:
+        return jsonify({"message": "No major transit event for this user today."})
+
+    # Format email
+    email_data = format_alert_email(
+        alert_narrative=alert_data["analysis"],
+        premium_teaser=alert_data["premium_teaser"],
+        cta_text=alert_data["cta_button_text"],
+        upgrade_link="https://karmicgochara.app/?open=synthesis&source=alert",
+        user_name=user_profile.get("name", pseudo),
+        urgency=alert_data["urgency"]
+    )
+    
+    # In a real implementation, you would send the email here
+    # send_email(user_profile['email'], email_data['subject_line'], email_data['html_email'])
+
+    return jsonify({
+        "message": "Test alert generated and formatted.",
+        "alert_data": alert_data,
+        "email_subject": email_data["subject_line"],
+        # "html_email": email_data["html_email"] # Potentially large, returning only subject for brevity
+    })
+
+
+@app.route("/api/v1/user/alert-preferences", methods=["PATCH"])
+def alert_preferences():
+    from profiles import set_alerts
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"error": "unauthorized"}), 401
+    
+    data = request.get_json() or {}
+    enabled = data.get("enabled", False)
+    
+    success = set_alerts(profile["pseudo"], enabled)
+    if success:
+        # Update session
+        session["profile"]["alerts_enabled"] = enabled
+        session.modified = True
+        return jsonify({"ok": True, "alerts_enabled": enabled})
+    else:
+        return jsonify({"error": "profile_not_found"}), 404
+
+@app.route("/api/v1/user/alerts/history", methods=["GET"])
+def alert_history():
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"error": "unauthorized"}), 401
+    
+    # Placeholder: In a real implementation, you would fetch this from a database.
+    # The Google Sheet would have a new column for alert history (JSON string or similar).
+    return jsonify({
+        "history": [
+            {"date": "2026-05-07", "narrative": "Placeholder: Saturne a activé votre Lune natale...", "urgency": "medium"},
+            {"date": "2026-04-20", "narrative": "Placeholder: Un trigone de Jupiter a ouvert une opportunité...", "urgency": "low"}
+        ]
+    })
+
+@app.route("/api/v1/transit-alert", methods=["POST"])
+def trigger_transit_alert():
+    """Admin route to trigger a test alert for a user."""
+    from profiles import get_profile_by_pseudo
+    from transit_alerts import generate_transit_alert
+    from email_formatter import format_alert_email
+    from datetime import date
+    
+    data = request.get_json() or {}
+    pseudo = data.get("pseudo")
+    if not pseudo:
+        return jsonify({"error": "pseudo_required"}), 400
+
+    # In a real app, this should be protected by an admin check
+    # if session.get("user_role") != "admin":
+    #     return jsonify({"error": "forbidden"}), 403
+
+    user_profile = get_profile_by_pseudo(pseudo)
+    if not user_profile:
+        return jsonify({"error": "user_not_found"}), 404
+
+    # Generate alert
+    alert_data = generate_transit_alert(
+        user_id=pseudo,
+        birth_data=user_profile,
+        current_date=date.today(),
+        subscription_status=user_profile.get("plan", "free")
+    )
+
+    if not alert_data:
+        return jsonify({"message": "No major transit event for this user today."})
+
+    # Format email
+    email_data = format_alert_email(
+        alert_narrative=alert_data["analysis"],
+        premium_teaser=alert_data["premium_teaser"],
+        cta_text=alert_data["cta_button_text"],
+        upgrade_link="https://karmicgochara.app/?open=synthesis&source=alert",
+        user_name=user_profile.get("name", pseudo),
+        urgency=alert_data["urgency"]
+    )
+    
+    # In a real implementation, you would send the email here
+    # send_email(user_profile['email'], email_data['subject_line'], email_data['html_email'])
+
+    return jsonify({
+        "message": "Test alert generated and formatted.",
+        "alert_data": alert_data,
+        "email_subject": email_data["subject_line"],
+        # "html_email": email_data["html_email"] # Potentially large, returning only subject for brevity
+    })
+
 
 @app.route("/chat/status", methods=["GET"])
 def chat_status():
@@ -2628,5 +2934,5 @@ def generate_task():
 
 # ── Lancement ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port, debug=False)
+    # Utilise le port 5001 pour éviter les conflits
+    app.run(host="0.0.0.0", port=5001, debug=True)

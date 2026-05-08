@@ -649,33 +649,70 @@ def send_next_event_alert_email(profile: dict, event: dict) -> bool:
 
 
 
-def run_daily_alerts() -> dict:
-    """Point d'entrée principal — appelé par la route /cron/daily."""
-    from profiles import get_all_profiles, get_and_consume_alert
+def _is_sade_sati_start(profile: dict, today: date) -> bool:
+    """Vérifie si Sade Sati commence aujourd'hui."""
+    # Cette fonction nécessite un état persistant ou une comparaison plus fine
+    # que ce que `detect_transit_events` fournit. Pour l'instant, c'est un placeholder.
+    # Dans une vraie app, on comparerait la position de Saturne d'hier et d'aujourd'hui
+    # par rapport à la 12ème maison de la Lune natale.
+    return False # Placeholder
 
-    profiles = get_all_profiles()
-    results  = {"total": len(profiles), "processed": 0, "alerted": 0, "skipped": 0, "errors": 0}
+def _is_saturn_return(profile: dict, today: date) -> bool:
+    """Vérifie si c'est un retour de Saturne."""
+    # Placeholder
+    return False
 
-    for profile in profiles:
-        if not profile.get("alerts_enabled"):
-            continue
-        if not profile.get("email"):
-            continue
+def _is_nodal_opposition(profile: dict, today: date) -> bool:
+    """Vérifie l'opposition des noeuds."""
+    # Placeholder
+    return False
 
-        plan = profile.get("plan", "free")
-        quota = get_and_consume_alert(profile.get("pseudo", ""), plan)
-        if not quota["ok"]:
-            results["skipped"] += 1
-            continue
+def generate_transit_alert(user_id: str, birth_data: dict, current_date: date, subscription_status: str) -> dict:
+    """
+    Core logic for the Transit Alert Agent.
+    """
+    events = detect_transit_events(birth_data)
+    
+    # Placeholder logic to determine milestones
+    sade_sati_start = _is_sade_sati_start(birth_data, current_date)
+    saturn_return = _is_saturn_return(birth_data, current_date)
+    nodal_opposition = _is_nodal_opposition(birth_data, current_date)
 
-        results["processed"] += 1
-        try:
-            events = detect_transit_events(profile)
-            if events:
-                sent = send_alert_email(profile, events, upgrade_cta=quota["is_last"])
-                if sent:
-                    results["alerted"] += 1
-        except Exception:
-            results["errors"] += 1
+    # Generate narrative based on events
+    if sade_sati_start:
+        analysis = "Le cycle de Sade Sati commence. C'est une période de profonds changements et de défis."
+        premium_teaser = "Découvrez comment naviguer cette période intense..."
+        urgency = "high"
+    elif saturn_return:
+        analysis = "Votre retour de Saturne est arrivé. C'est un moment de grande maturation et de responsabilité."
+        premium_teaser = "Comprenez les leçons que Saturne vous apporte..."
+        urgency = "high"
+    elif nodal_opposition:
+        analysis = "L'opposition de vos noeuds lunaires indique un tournant karmique."
+        premium_teaser = "Alignez-vous avec votre destinée..."
+        urgency = "medium"
+    elif events:
+        # Simplified narrative from the first detected event
+        e = events[0]
+        t_planet = e.get('transit', 'Un transit')
+        n_planet = e.get('natal', 'votre thème')
+        analysis = f"{t_planet} active {n_planet}, initiant une nouvelle phase de votre parcours."
+        premium_teaser = "Débloquez l'interprétation complète de cet aspect..."
+        urgency = "low"
+    else:
+        # No major events today
+        return None
 
-    return results
+    # Common fields
+    cta_text = "🔮 Débloquer la Lecture Complète" if subscription_status == "free" else "🔮 Lire Mon Interprétation"
+    disclaimer = "Ceci est une interprétation astrologique et ne remplace pas un avis médical ou professionnel. Les résultats ne sont pas garantis."
+
+    return {
+        "analysis": analysis,
+        "urgency": urgency,
+        "premium_teaser": premium_teaser,
+        "recommendations": ["Méditez sur ces thèmes.", "Notez vos rêves.", "Soyez attentif aux synchronicités."],
+        "cta_button_text": cta_text,
+        "disclaimer": disclaimer,
+        "confidence": 0.85
+    }

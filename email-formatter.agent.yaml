@@ -1,0 +1,37 @@
+# email_formatter_agent.yaml
+name: "Email Formatter Agent"
+description: "Formats a transit alert narrative into a visually appealing HTML email."
+input_schema:
+  type: object
+  properties:
+    alert_narrative:
+      type: string
+      description: "The core text of the alert."
+    premium_teaser:
+      type: string
+      description: "The teaser text to be displayed prominently."
+    cta_text:
+      type: string
+      description: "Text for the primary call-to-action button."
+    upgrade_link:
+      type: string
+      description: "The URL for the CTA button (e.g., Stripe checkout)."
+    user_name:
+      type: string
+      description: "The first name of the user for personalization."
+    urgency:
+      type: string
+      enum: ["low", "medium", "high", "critical"]
+      description: "The urgency of the alert, used to craft the subject."
+  required: [alert_narrative, premium_teaser, cta_text, upgrade_link, user_name, urgency]
+
+output_schema:
+  type: object
+  properties:
+    html_email:
+      type: string
+      description: "The full, ready-to-send HTML content of the email."
+    subject_line:
+      type: string
+      description: "A compelling subject line combining emotion and urgency."
+  required: [html_email, subject_line]

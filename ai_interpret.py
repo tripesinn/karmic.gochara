@@ -852,6 +852,95 @@ Minimum 300 words. Do not truncate. Language: {lang_name}."""
     return generate_ai(_build_system_prompt(user, use_vault=True), prompt, user=user, max_tokens=4000)
 
 
+def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr"):
+    """
+    Génère la synthèse karmique complète en streaming avec sortie JSON structurée.
+    Modèle : Opus pour la meilleure qualité doctrinal.
+    """
+    user = user or {}
+    lang = user.get("lang", lang)
+    user = {**user, "user_model": SYNTHESIS_MODEL}
+
+    aspects_text  = _aspects_to_text(chart_data.get("aspects", []))
+    natal_context = _build_natal_context(user)
+    date          = chart_data.get("transit_date", "")
+    name          = user.get("name", "l'utilisateur")
+
+    if lang == "fr":
+        prompt = f"""Tu ES @siderealAstro13.
+Analyse les données de transit pour {name} ({date}) et retourne une réponse JSON stricte.
+
+Thème natal de référence :
+{natal_context}
+
+Aspects actifs (données brutes pour ton analyse) :
+{aspects_text}
+
+SCHEMA JSON DE SORTIE OBLIGATOIRE :
+{{
+  "analysis": {{
+    "title": "Synthèse Karmique du {date}",
+    "karmic_memory": "...",
+    "wound_processing": "...",
+    "karmic_trial": "...",
+    "consciousness_alternative": "..."
+  }},
+  "recommendations": ["Action 1...", "Action 2...", "Action 3..."],
+  "confidence": "Élevée|Moyenne|Faible",
+  "disclaimer": "Cette analyse est une interprétation..."
+}}
+
+INSTRUCTIONS :
+1.  Remplis les sections de `analysis` en suivant la doctrine :
+    - `karmic_memory`: Le piège karmique (ROM) qui se rejoue.
+    - `wound_processing`: La blessure (RAM/Chiron) qui est activée.
+    - `karmic_trial`: L'épreuve (Lilith) que la période rend insupportable.
+    - `consciousness_alternative`: Le changement de conscience, l'action à poser.
+2.  `recommendations`: Fournis 3 actions concrètes et courtes.
+3.  `confidence`: Évalue ta confiance dans l'analyse.
+4.  `disclaimer`: Ajoute un avertissement standard.
+5.  Écris en français, directement à {name} ("tu", "ton"). Ne cite jamais les aspects bruts.
+"""
+    else:
+        prompt = f"""You ARE @siderealAstro13.
+Analyze the transit data for {name} ({date}) and return a strict JSON response.
+
+Natal reference chart:
+{natal_context}
+
+Active aspects (raw data for your analysis):
+{aspects_text}
+
+MANDATORY JSON OUTPUT SCHEMA:
+{{
+  "analysis": {{
+    "title": "Karmic Synthesis for {date}",
+    "karmic_memory": "...",
+    "wound_processing": "...",
+    "karmic_trial": "...",
+    "consciousness_alternative": "..."
+  }},
+  "recommendations": ["Action 1...", "Action 2...", "Action 3..."],
+  "confidence": "High|Medium|Low",
+  "disclaimer": "This analysis is an interpretation..."
+}}
+
+INSTRUCTIONS:
+1.  Fill the `analysis` sections following the doctrine:
+    - `karmic_memory`: The karmic trap (ROM) being replayed.
+    - `wound_processing`: The wound (RAM/Chiron) being activated.
+    - `karmic_trial`: The trial (Lilith) that the period makes unbearable.
+    - `consciousness_alternative`: The shift in consciousness, the action to take.
+2.  `recommendations`: Provide 3 concrete, short actions.
+3.  `confidence`: Assess your confidence in the analysis.
+4.  `disclaimer`: Add a standard disclaimer.
+5.  Write in English, directly to {name} ("you", "your"). Never quote raw aspects.
+"""
+
+    # Utilise stream_ai pour la réponse en streaming
+    yield from stream_ai(_build_system_prompt(user, use_vault=True), prompt, user=user, max_tokens=4000)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # PROMPT GEMMA — retourne prompt sans appel API (inférence locale Android)
 # ══════════════════════════════════════════════════════════════════════════════
