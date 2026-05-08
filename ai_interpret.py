@@ -190,16 +190,16 @@ Structure obligatoire :
 1. MIROIR : Ce que {name} vit concrètement EN CE MOMENT — comportement reconnaissable, pas de jargon astro.
 2. BLESSURE : Ce que cette période réveille dans sa blessure profonde — sensation, pas mécanique.
 3. FRICTION : Ce que la période rend insupportable ou répétitif — l'endroit qui frotte le plus.
-4. PORTE ENTROUVERTE : Amorce l'Alternative de Conscience SANS la révéler.
-   La phrase doit être incomplète, suspendue — elle indique qu'une clé existe mais s'arrête avant de la donner.
-   Format : "Ce que tu dois comprendre sur [thème central], c'est que..."  ou équivalent — puis STOP.
+4. PORTE OUVERTE : Révèle l'Alternative de Conscience.
+   La phrase doit être complète et donner une clé de compréhension concrète.
+   Format : "Ce que tu dois comprendre sur [thème central], c'est..." et tu termines la phrase.
 
 RÈGLES ABSOLUES :
 - 4 phrases. Pas 3. Pas 5.
 - Tutoiement direct.
 - Zéro jargon astro (pas de "ton Ketu", "ta Porte Invisible", "ton Chiron").
-- La phrase 4 NE CONCLUT PAS. Elle suspend. Elle frustre. Elle appelle la suite.
-- Le hook ne délivre PAS l'Alternative de Conscience — il la rend désirable.
+- La phrase 4 CONCLUT. Elle donne une piste claire.
+- Le hook délivre une première clé, une piste pour l'Alternative de Conscience.
 """
 
 HOOK_PROMPT_EN = """You ARE @siderealAstro13. Generate a hook of EXACTLY 4 sentences.
@@ -208,16 +208,16 @@ Mandatory structure:
 1. MIRROR: What {name} is concretely living RIGHT NOW — recognizable behavior, no astro jargon.
 2. WOUND: What this period reawakens in their deep wound — sensation, not mechanics.
 3. FRICTION: What the period makes unbearable or repetitive — where it chafes most.
-4. OPEN DOOR: Begin the Alternative of Consciousness WITHOUT revealing it.
-   The sentence must be incomplete, suspended — it signals a key exists but stops before giving it.
-   Format: "What you need to understand about [core theme] is that..." then STOP.
+4. OPEN DOOR: Reveal the Alternative of Consciousness.
+   The sentence must be complete and give a concrete key to understanding.
+   Format: "What you need to understand about [core theme] is that..." then FINISH the sentence.
 
 ABSOLUTE RULES:
 - 4 sentences. Not 3. Not 5.
 - Direct address: "you", "your".
 - Zero astro jargon (no "your Ketu", "your Invisible Door", "your Chiron").
-- Sentence 4 does NOT conclude. It suspends. It frustrates. It calls for more.
-- The hook does NOT deliver the Alternative of Consciousness — it makes it desirable.
+- Sentence 4 CONCLUDES. It gives a clear direction.
+- The hook delivers a first key, a hint for the Alternative of Consciousness.
 """
 
 # ══════════════════════════════════════════════════════════════════════════════
