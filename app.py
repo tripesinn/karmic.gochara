@@ -11,7 +11,7 @@ import pytz
 from flask import Flask, jsonify, make_response, render_template, request, session, send_from_directory
 from dotenv import load_dotenv
 
-load_dotenv()
+load_dotenv(dotenv_path=".env")
 
 # Store des paiements en attente d'activation de session (cas navigateur externe).
 # Clé : pseudo en minuscule, valeur : {"plan": str, "time": float}
@@ -2291,6 +2291,91 @@ def api_profile():
     if not profile:
         return jsonify({"ok": False, "error": "Non authentifié"}), 401
     return jsonify({"ok": True, "profile": profile})
+
+
+# ── Nouvel Endpoint Orchestrateur ──────────────────────────────────────────────
+@app.route("/api/v1/karmic-analysis", methods=["POST"])
+def karmic_analysis_orchestrator():
+    """
+    Endpoint orchestrateur qui intègre les différentes logiques (astro, doctrine, paiement)
+    pour fournir une analyse karmique complète.
+    """
+    from astro_calc import calculate_transits
+    from ai_interpret import get_synthesis
+
+    # 1. Vérification de la session utilisateur
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"error": "Utilisateur non authentifié"}), 401
+
+    data = request.get_json() or {}
+    user_query = data.get("user_query")
+    if not user_query:
+        return jsonify({"error": "Le paramètre 'user_query' est requis"}), 400
+
+    # 2. Vérification du statut de paiement (logique de base)
+    # Dans une implémentation réelle, on vérifierait un abonnement actif via Stripe.
+    plan = profile.get("plan", "free").lower()
+    if plan not in ["lecture", "illimité", "subscription", "test", "essential"]:
+        return jsonify({
+            "error": "Accès refusé",
+            "message": "Cette fonctionnalité requiert un plan payant.",
+            "recommendations": ["Veuillez souscrire à un plan pour continuer."]
+        }), 403
+
+    # 3. Calculs astrologiques
+    try:
+        # Utilise la date et le lieu de transit actuels du profil, ou la date du jour par défaut
+        today = datetime.now(pytz.timezone(profile.get("transit_tz", "Europe/Paris")))
+        date_str = profile.get("transit_date", today.strftime("%Y-%m-%d"))
+        year, month, day = map(int, date_str.split("-"))
+        hour = today.hour
+        minute = today.minute
+
+        natal_data = {k: profile.get(k) for k in ["name", "year", "month", "day", "hour", "minute", "lat", "lon", "tz", "city"]}
+        transit_loc = {
+            "city": profile.get("transit_city", natal_data["city"]),
+            "lat":  profile.get("transit_lat", natal_data["lat"]),
+            "lon":  profile.get("transit_lon", natal_data["lon"]),
+            "tz":   profile.get("transit_tz", natal_data["tz"]),
+        }
+        
+        astrological_data = calculate_transits(natal_data, transit_loc, year, month, day, hour, minute)
+    except Exception as e:
+        app.logger.error(f"Erreur de calcul astrologique: {e}", exc_info=True)
+        return jsonify({"error": "Erreur lors du calcul astrologique."}), 500
+
+    # 4. Interprétation basée sur la doctrine et la requête utilisateur
+    try:
+        # Enrichir le profil avec les données natales pour l'interprétation
+        enriched_profile = _enrich_profile_with_natal(profile, astrological_data.get("natal", {}))
+        
+        # NOTE: La fonction get_synthesis est utilisée ici comme un analogue de l'agent de doctrine.
+        # Idéalement, une nouvelle fonction serait créée, qui prendrait `user_query` en compte
+        # pour une réponse plus ciblée. Pour l'instant, nous réutilisons la synthèse existante.
+        lang = session.get("lang", "fr")
+        karmic_analysis = get_synthesis(astrological_data, enriched_profile, lang=lang)
+
+        # Recommandations statiques pour l'exemple
+        recommendations = [
+            "Méditez sur les aspects de votre Nœud Sud (Ketu) pour comprendre les schémas passés.",
+            "Observez comment les transits actuels activent votre blessure originelle (Chiron).",
+            "L'action consciente (Dharma) est la clé de la libération."
+        ]
+    except Exception as e:
+        app.logger.error(f"Erreur d'interprétation de la doctrine: {e}", exc_info=True)
+        return jsonify({"error": "Erreur lors de l'interprétation karmique."}), 500
+
+    # 5. Réponse finale
+    return jsonify({
+        "karmic_analysis": karmic_analysis,
+        "recommendations": recommendations,
+        "astrological_context": {
+            "transit_date": astrological_data.get("transit_date"),
+            "sade_sati_status": astrological_data.get("sade_sati"),
+            "active_dasha": astrological_data.get("dashas", [{}])[0].get("lord")
+        }
+    })
 
 
 # ── Stripe : webhook (méthode de secours) ─────────────────────────────────────

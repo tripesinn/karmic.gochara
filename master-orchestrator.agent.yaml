@@ -1,0 +1,57 @@
+# 1. Master Orchestrator Agent Configuration
+name: master-orchestrator
+display_name: Karmic Gochara Master Orchestrator
+description: >
+  Acts as the central router. Receives the initial user request and orchestrates the
+  workflow by calling specialized agents in sequence (Astrological -> Doctrine)
+  to generate a complete karmic analysis.
+
+schema:
+  input:
+    type: object
+    properties:
+      birthdate:
+        type: string
+        format: date-time
+        description: The user's full date and time of birth.
+      user_query:
+        type: string
+        description: The user's specific question or area of focus.
+    required: [birthdate, user_query]
+  output:
+    type: object
+    properties:
+      karmic_analysis:
+        type: string
+        format: markdown
+        description: The final, synthesized karmic interpretation.
+      recommendations:
+        type: array
+        items:
+          type: string
+        description: Actionable recommendations or points of reflection.
+    required: [karmic_analysis]
+
+orchestration:
+  flow:
+    - step: 1
+      agent: astrological-agent
+      input:
+        birthdate: "{{input.birthdate}}"
+        query_context: "{{input.user_query}}"
+      output_alias: astrological_data
+    - step: 2
+      agent: doctrine-agent
+      input:
+        astrological_data: "{{astrological_data}}"
+        user_profile: "{{user_profile}}" # Assumes user_profile is fetched
+      output_alias: doctrine_insights
+    - step: 3
+      agent: response-synthesis-agent # (Implied final step)
+      input:
+        astrological_data: "{{astrological_data}}"
+        doctrine_insights: "{{doctrine_insights}}"
+        user_query: "{{input.user_query}}"
+      output:
+        karmic_analysis: "{{output.karmic_analysis}}"
+        recommendations: "{{output.recommendations}}"

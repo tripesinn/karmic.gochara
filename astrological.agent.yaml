@@ -1,0 +1,44 @@
+# 2. Astrological Agent Configuration
+name: astrological-agent
+display_name: Astrological Calculation Agent
+description: >
+  A specialized agent that performs raw astrological calculations. It takes birth
+  data and returns a structured set of astrological data points without
+  interpretation.
+
+schema:
+  input:
+    type: object
+    properties:
+      birthdate:
+        type: string
+        format: date-time
+        description: The user's full date and time of birth.
+      query_context:
+        type: string
+        description: The context of the user's query to focus calculations.
+    required: [birthdate]
+  output:
+    type: object
+    properties:
+      dasha:
+        type: object
+        description: Current major and minor planetary periods (Dasha).
+      nakshatra:
+        type: object
+        description: Key Nakshatra (lunar mansion) placements.
+      divisional_charts:
+        type: object
+        description: Calculated divisional charts (Vargas) relevant to the query.
+      lunar_phase:
+        type: string
+        description: The phase of the moon at the time of birth.
+    required: [dasha, nakshatra]
+
+dependencies:
+  local_code:
+    - type: python_function_call
+      description: >
+        Invokes local Python functions (e.g., from astro_calc.py) to perform
+        all core astrological computations. This agent does not contain its
+        own calculation logic.

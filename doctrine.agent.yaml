@@ -1,0 +1,47 @@
+# 3. Doctrine Agent Configuration
+name: doctrine-agent
+display_name: Karmic Doctrine Interpretation Agent
+description: >
+  Interprets raw astrological data through the specific lens of the Karmic
+  Gochara doctrine. It applies proprietary logic to translate planetary
+  positions into karmic insights.
+
+schema:
+  input:
+    type: object
+    properties:
+      astrological_data:
+        type: object
+        description: The structured astrological data from the Astrological Agent.
+      user_profile:
+        type: object
+        description: User-specific context, such as past readings or stated goals.
+    required: [astrological_data]
+  output:
+    type: object
+    properties:
+      doctrine_interpretation:
+        type: string
+        format: markdown
+        description: The interpretation of the astrological data based on the doctrine.
+      sade_sati_phase:
+        type: string
+        description: Identifies the current phase of Sade Sati, if applicable.
+      karmic_insight:
+        type: string
+        description: A concise summary of the key karmic lesson or theme.
+    required: [doctrine_interpretation, karmic_insight]
+
+dependencies:
+  local_code:
+    - type: knowledge_base_reference
+      source: doctrine.py
+      description: >
+        References the structures, rules, and interpretive frameworks defined
+        within the local doctrine.py file.
+
+safety_rules:
+  - rule: no_medical_advice
+    description: >
+      The agent must not provide any interpretation related to health, medical
+      diagnoses, or physical well-being.

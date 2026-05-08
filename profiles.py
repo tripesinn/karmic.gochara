@@ -425,16 +425,20 @@ def set_alerts(pseudo: str, enabled: bool) -> bool:
 # ── Gestion plans Stripe ───────────────────────────────────────────────────────
 
 PLAN_SYNTHESES = {
+    "test":     1,    # one-shot
     "lecture":  1,    # one-shot → 1 synthèse + 3 questions chatbot
     "essential": 1,   # legacy name for lecture
+    "subscription": -1, # illimité
     "illimite": -1,   # illimité
     "illimité": -1,   # legacy/manual name with accent
     "free":     0,
 }
 
 PLAN_CHAT_LIMITS = {
+    "test":     3,    # 3 questions chatbot one-shot
     "lecture":  3,    # 3 questions chatbot one-shot
     "essential": 3,
+    "subscription": 10, # illimité
     "illimite": 10,   # 10/mois via serveur (Gemini) — illimité si IA local
     "illimité": 10,
     "free":     0,

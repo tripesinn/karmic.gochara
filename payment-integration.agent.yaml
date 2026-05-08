@@ -1,0 +1,48 @@
+# 4. Payment and Integration Agent Configuration
+name: payment-integration-agent
+display_name: Payment & User Data Integration Agent
+description: >
+  Handles all external service communications, including payment verification
+  with Stripe and user data retrieval from Google Sheets.
+
+schema:
+  input:
+    type: object
+    properties:
+      user_id:
+        type: string
+        description: The unique identifier for the user.
+      action:
+        type: string
+        enum: [check_subscription, create_checkout_session, get_user_data]
+        description: The specific operation to perform.
+    required: [user_id, action]
+  output:
+    type: object
+    properties:
+      subscription_status:
+        type: string
+        enum: [active, inactive, past_due, none]
+        description: The user's current subscription status.
+      checkout_url:
+        type: string
+        format: uri
+        description: A Stripe checkout URL for the user to complete a payment.
+      user_data:
+        type: object
+        description: The user's data retrieved from Google Sheets.
+    # Note: Output fields are conditional based on the input 'action'.
+
+external_apis:
+  - name: Stripe
+    description: Used for all payment and subscription management tasks.
+    authentication: API Key
+    operations:
+      - check_subscription
+      - create_checkout_session
+  - name: Google Sheets
+    description: Used to read and update user data and preferences.
+    authentication: OAuth 2.0 or Service Account
+    operations:
+      - get_user_data
+      - update_user_data

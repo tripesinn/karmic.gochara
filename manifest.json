@@ -1,0 +1,16 @@
+{
+    "name": "com.ubuntu.developer.tripesin.karmicgochara",
+    "description": "Une application d'astrologie karmique personnalisée pour explorer les influences cosmiques sur votre parcours de vie.",
+    "framework": "ubuntu-sdk-24.04",
+    "architecture": "arm64",
+    "hooks": {
+        "karmicgochara": {
+            "apparmor": "apparmor.json",
+            "desktop": "karmicgochara.desktop"
+        }
+    },
+    "maintainer": "Votre Nom <votre.email@example.com>",
+    "title": "Karmic Gochara",
+    "version": "1.0.0",
+    "icon": "store_assets/icon_512x512.png"
+}
