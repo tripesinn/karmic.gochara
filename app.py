@@ -1137,7 +1137,7 @@ def calculate_v2():
 
     # 3. Gestion d'erreur : Abonnement Stripe (Gate paiement)
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero"}
+    UNLIMITED_PSEUDOS = {"jero", "marie"}
     user_key = data.get("user_key")
 
     if not (pseudo.lower() in UNLIMITED_PSEUDOS or user_key):
@@ -1254,7 +1254,7 @@ def calculate():
 
     # ── Gate paiement ─────────────────────────────────────────────────────────
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero"}
+    UNLIMITED_PSEUDOS = {"jero", "marie"}
 
     if pseudo.lower() in UNLIMITED_PSEUDOS or user_key:
         quota = {"allowed": True, "remaining": 999}
@@ -1762,7 +1762,7 @@ def synthesis_prompt():
         return jsonify({"error": "Non connecté"}), 401
 
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero"}
+    UNLIMITED_PSEUDOS = {"jero", "marie"}
 
     # Lecture natale — pas de quota (pas de synthèse consommée)
     if context == "natal":
@@ -2010,93 +2010,6 @@ def trigger_transit_alert():
     })
 
 
-@app.route("/api/v1/user/alert-preferences", methods=["PATCH"])
-def alert_preferences():
-    from profiles import set_alerts
-    profile = session.get("profile")
-    if not profile:
-        return jsonify({"error": "unauthorized"}), 401
-    
-    data = request.get_json() or {}
-    enabled = data.get("enabled", False)
-    
-    success = set_alerts(profile["pseudo"], enabled)
-    if success:
-        # Update session
-        session["profile"]["alerts_enabled"] = enabled
-        session.modified = True
-        return jsonify({"ok": True, "alerts_enabled": enabled})
-    else:
-        return jsonify({"error": "profile_not_found"}), 404
-
-@app.route("/api/v1/user/alerts/history", methods=["GET"])
-def alert_history():
-    profile = session.get("profile")
-    if not profile:
-        return jsonify({"error": "unauthorized"}), 401
-    
-    # Placeholder: In a real implementation, you would fetch this from a database.
-    # The Google Sheet would have a new column for alert history (JSON string or similar).
-    return jsonify({
-        "history": [
-            {"date": "2026-05-07", "narrative": "Placeholder: Saturne a activé votre Lune natale...", "urgency": "medium"},
-            {"date": "2026-04-20", "narrative": "Placeholder: Un trigone de Jupiter a ouvert une opportunité...", "urgency": "low"}
-        ]
-    })
-
-@app.route("/api/v1/transit-alert", methods=["POST"])
-def trigger_transit_alert():
-    """Admin route to trigger a test alert for a user."""
-    from profiles import get_profile_by_pseudo
-    from transit_alerts import generate_transit_alert
-    from email_formatter import format_alert_email
-    from datetime import date
-    
-    data = request.get_json() or {}
-    pseudo = data.get("pseudo")
-    if not pseudo:
-        return jsonify({"error": "pseudo_required"}), 400
-
-    # In a real app, this should be protected by an admin check
-    # if session.get("user_role") != "admin":
-    #     return jsonify({"error": "forbidden"}), 403
-
-    user_profile = get_profile_by_pseudo(pseudo)
-    if not user_profile:
-        return jsonify({"error": "user_not_found"}), 404
-
-    # Generate alert
-    alert_data = generate_transit_alert(
-        user_id=pseudo,
-        birth_data=user_profile,
-        current_date=date.today(),
-        subscription_status=user_profile.get("plan", "free")
-    )
-
-    if not alert_data:
-        return jsonify({"message": "No major transit event for this user today."})
-
-    # Format email
-    email_data = format_alert_email(
-        alert_narrative=alert_data["analysis"],
-        premium_teaser=alert_data["premium_teaser"],
-        cta_text=alert_data["cta_button_text"],
-        upgrade_link="https://karmicgochara.app/?open=synthesis&source=alert",
-        user_name=user_profile.get("name", pseudo),
-        urgency=alert_data["urgency"]
-    )
-    
-    # In a real implementation, you would send the email here
-    # send_email(user_profile['email'], email_data['subject_line'], email_data['html_email'])
-
-    return jsonify({
-        "message": "Test alert generated and formatted.",
-        "alert_data": alert_data,
-        "email_subject": email_data["subject_line"],
-        # "html_email": email_data["html_email"] # Potentially large, returning only subject for brevity
-    })
-
-
 @app.route("/chat/status", methods=["GET"])
 def chat_status():
     """Retourne le plan et le quota chatbot restant pour l'utilisateur connecté."""
@@ -2105,7 +2018,7 @@ def chat_status():
     if not profile:
         return jsonify({"plan": "free", "remaining": 0, "limit": 0})
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero"}
+    UNLIMITED_PSEUDOS = {"jero", "marie"}
     if pseudo.lower() in UNLIMITED_PSEUDOS:
         return jsonify({"plan": "subscription", "remaining": 999, "limit": 999})
     return jsonify(get_chat_quota(pseudo))
@@ -2138,7 +2051,7 @@ def chat_ask():
         return jsonify({"error": "Message vide"}), 400
 
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero"}
+    UNLIMITED_PSEUDOS = {"jero", "marie"}
     
     user_key = data.get("user_key")
     user_model = data.get("user_model")
