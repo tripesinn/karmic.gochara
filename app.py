@@ -17,6 +17,8 @@ load_dotenv(dotenv_path=".env")
 # Clé : pseudo en minuscule, valeur : {"plan": str, "time": float}
 _pending_plan_updates: dict = {}
 
+UNLIMITED_PSEUDOS = {"jero", "marie"}
+
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gochara-secret-2024")
 app.config["JSON_AS_ASCII"] = False
@@ -1137,7 +1139,6 @@ def calculate_v2():
 
     # 3. Gestion d'erreur : Abonnement Stripe (Gate paiement)
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero", "marie"}
     user_key = data.get("user_key")
 
     if not (pseudo.lower() in UNLIMITED_PSEUDOS or user_key):
@@ -1254,7 +1255,6 @@ def calculate():
 
     # ── Gate paiement ─────────────────────────────────────────────────────────
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero", "marie"}
 
     if pseudo.lower() in UNLIMITED_PSEUDOS or user_key:
         quota = {"allowed": True, "remaining": 999}
@@ -1762,7 +1762,6 @@ def synthesis_prompt():
         return jsonify({"error": "Non connecté"}), 401
 
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero", "marie"}
 
     # Lecture natale — pas de quota (pas de synthèse consommée)
     if context == "natal":
@@ -2018,7 +2017,6 @@ def chat_status():
     if not profile:
         return jsonify({"plan": "free", "remaining": 0, "limit": 0})
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero", "marie"}
     if pseudo.lower() in UNLIMITED_PSEUDOS:
         return jsonify({"plan": "subscription", "remaining": 999, "limit": 999})
     return jsonify(get_chat_quota(pseudo))
@@ -2051,7 +2049,6 @@ def chat_ask():
         return jsonify({"error": "Message vide"}), 400
 
     pseudo = profile.get("pseudo", "")
-    UNLIMITED_PSEUDOS = {"jero", "marie"}
     
     user_key = data.get("user_key")
     user_model = data.get("user_model")
@@ -2273,8 +2270,9 @@ def expand():
     user_model = data.get("user_model")
     user_provider = data.get("user_provider")
 
-    # Sécurité : 1 seul expand gratuit par session, sauf si clé perso fournie
-    if session.get("expand_used") and not user_key:
+    # Sécurité : 1 seul expand gratuit par session, sauf si clé perso fournie ou utilisateur illimité
+    is_unlimited = pseudo.lower() in UNLIMITED_PSEUDOS
+    if session.get("expand_used") and not user_key and not is_unlimited:
         return jsonify({"content": ""}), 429
 
     if topic != "alternative_conscience":
@@ -2291,9 +2289,6 @@ def expand():
 
     if not profile:
         return jsonify({"content": "Profil introuvable."}), 404
-
-    session["expand_used"] = True
-    session.modified = True
 
     natal_ctx = _build_natal_context(profile)
     name      = profile.get("name", "")
@@ -2317,6 +2312,12 @@ def expand():
         from ai_interpret import generate_ai
         user_params = {"user_provider": user_provider, "user_key": user_key, "user_model": user_model}
         content = generate_ai(system, prompt, user=user_params, max_tokens=1024)
+        
+        # On ne marque 'utilisé' que si l'appel a réussi (et on ne bloque pas les illimités)
+        if not is_unlimited:
+            session["expand_used"] = True
+            session.modified = True
+            
         return jsonify({"content": content})
     except Exception as exc:
         app.logger.error("Erreur expand : %s", exc)
