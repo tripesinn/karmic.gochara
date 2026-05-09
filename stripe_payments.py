@@ -11,8 +11,8 @@ from urllib.parse import quote
 import stripe
 
 # ── Price IDs (renseignés via variables d'environnement Render) ───────────────
-PRICE_LECTURE   = os.environ.get("STRIPE_PRICE_LECTURE",   "")
-PRICE_UNLIMITED = os.environ.get("STRIPE_PRICE_UNLIMITED", "")
+PRICE_LECTURE   = os.environ.get("STRIPE_PRICE_TEST_GEMMA",   "")
+PRICE_UNLIMITED = os.environ.get("STRIPE_PRICE_GEMMA_UNLIMITED", "")
 
 PLAN_LABELS = {
     "test":         "Lecture",

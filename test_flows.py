@@ -20,7 +20,12 @@ class TestAppFlows(unittest.TestCase):
         self.mock_user_lecture = {
             "pseudo": "testuser",
             "email": "test@example.com",
-            "plan": "test"
+            "plan": "test",
+            "name": "testuser",
+            "year": 2000, "month": 1, "day": 1,
+            "hour": 12, "minute": 0, "lat": 48.8566,
+            "lon": 2.3522, "tz": "Europe/Paris",
+            "city": "Paris"
         }
 
     @patch("profiles.get_profile_by_pseudo")
