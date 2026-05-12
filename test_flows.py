@@ -6,6 +6,7 @@ sys.modules['google'] = MagicMock()
 sys.modules['google.oauth2'] = MagicMock()
 sys.modules['google.oauth2.service_account'] = MagicMock()
 
+import os
 import unittest
 from unittest.mock import patch
 from app import app
@@ -13,6 +14,13 @@ from app import app
 class TestAppFlows(unittest.TestCase):
 
     def setUp(self):
+        # Set dummy environment variables to avoid Stripe/Google errors
+        os.environ["STRIPE_PRICE_TEST_GEMMA"] = "price_dummy_lecture"
+        os.environ["STRIPE_PRICE_GEMMA_UNLIMITED"] = "price_dummy_unlimited"
+        os.environ["KARMIC_STRIPE_SECRET_KEY"] = "sk_test_dummy"
+        os.environ["GOOGLE_CREDENTIALS_JSON"] = "{}"
+        os.environ["SHEET_ID"] = "dummy_sheet_id"
+
         self.client = app.test_client()
         self.client.testing = True
 
