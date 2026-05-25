@@ -24,6 +24,25 @@ from astro_calc import NAKSHATRAS, NAKSHATRA_LORDS
 
 # ── Router Multi-Provider ────────────────────────────────────────────────────
 _SERVER_ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+_SERVER_GROK_KEY = os.environ.get("GROK_API_KEY", "")
+
+def _call_grok(system: str, prompt: str, model: str, api_key: str, max_tokens: int) -> str:
+    url = "https://api.x.ai/v1/chat/completions"
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+    }
+    payload = {
+        "model": model or "grok-beta",
+        "max_tokens": max_tokens,
+        "messages": [
+            {"role": "system", "content": system},
+            {"role": "user", "content": prompt}
+        ],
+    }
+    r = requests.post(url, headers=headers, json=payload, timeout=120)
+    r.raise_for_status()
+    return r.json()["choices"][0]["message"]["content"]
 
 
 def _call_claude(system: str, prompt: str, model: str, api_key: str, max_tokens: int) -> str:
@@ -54,6 +73,8 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     if not provider or (not user_key and provider not in ["local", "claude", "gemini"]):
         if model and model.startswith("claude") and _SERVER_ANTHROPIC_KEY:
             return _call_claude(system, prompt, model, _SERVER_ANTHROPIC_KEY, max_tokens)
+        if model and model.startswith("grok") and _SERVER_GROK_KEY:
+            return _call_grok(system, prompt, model, _SERVER_GROK_KEY, max_tokens)
         # Fallback sur Gemini sans modèle custom pour éviter un 404
         return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=None, user_key=user_key)
 
@@ -141,12 +162,16 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     except Exception as e:
         # En cas d'erreur de clé ou d'API, log et fallback sur le serveur (Claude par défaut)
         print(f"Erreur provider {provider}: {e}")
-        if _SERVER_ANTHROPIC_KEY:
+        if _SERVER_GROK_KEY:
+            return _call_grok(system, prompt, "grok-beta", _SERVER_GROK_KEY, max_tokens)
+        elif _SERVER_ANTHROPIC_KEY:
             return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
         return "Erreur lors de la génération (serveur non configuré)."
         
     # Provider inconnu -> serveur par défaut
-    if _SERVER_ANTHROPIC_KEY:
+    if _SERVER_GROK_KEY:
+        return _call_grok(system, prompt, "grok-beta", _SERVER_GROK_KEY, max_tokens)
+    elif _SERVER_ANTHROPIC_KEY:
         return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
     return "Erreur lors de la génération (aucun provider valide)."
 
@@ -225,7 +250,7 @@ def _load_vault(include_keywords: bool = True) -> str | None:
 # ══════════════════════════════════════════════════════════════════════════════
 # MODEL ASSIGNMENT — Router par cas d'usage
 # ══════════════════════════════════════════════════════════════════════════════
-HOOK_MODEL = os.environ.get("HOOK_MODEL", "claude-3-5-sonnet-latest")        # Hook gratuit — rapide, cheap
+HOOK_MODEL = os.environ.get("HOOK_MODEL", "grok-beta")        # Hook gratuit — rapide, cheap
 SYNTHESIS_MODEL = os.environ.get("SYNTHESIS_MODEL", "claude-3-opus-latest")     # Synthèse payante — meilleure qualité doctrinal
 
 # ══════════════════════════════════════════════════════════════════════════════
