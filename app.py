@@ -2383,8 +2383,13 @@ def expand():
     )
 
     try:
-        from ai_interpret import generate_ai
-        user_params = {"user_provider": user_provider, "user_key": user_key, "user_model": user_model}
+        from ai_interpret import generate_ai, HOOK_MODEL
+        # Default to HOOK_MODEL if no user_model provided, so it correctly routes to Claude instead of Gemini (which lacks the server key)
+        user_params = {
+            "user_provider": user_provider, 
+            "user_key": user_key, 
+            "user_model": user_model or HOOK_MODEL
+        }
         content = generate_ai(system, prompt, user=user_params, max_tokens=1024)
         
         # On ne marque 'utilisé' que si l'appel a réussi (et on ne bloque pas les illimités)
