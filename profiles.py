@@ -269,7 +269,7 @@ def create_profile(data: dict) -> dict:
         "0",                      # syntheses_count
         _current_month_str(),     # syntheses_reset_date
         "0",                      # alerts_enabled
-        "free",                   # plan
+        "pro",                    # plan
         "0",                      # plan_syntheses
         "",                       # stripe_customer_id
     ]

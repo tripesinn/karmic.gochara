@@ -16,7 +16,9 @@ Hooks :
 import os
 import json
 import requests
+import threading
 import gemini_api
+from rag_memory import save_reading, retrieve_context
 
 from astro_calc import NAKSHATRAS, NAKSHATRA_LORDS
 
@@ -64,7 +66,8 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
             headers = {
                 "Content-Type": "application/json"
             }
-            if user_key and user_key != "dummy":
+            if user_key and user_key.strip() != "dummy":
+                user_key = user_key.strip()
                 if user_key.startswith("http"):
                     url = f"{user_key.rstrip('/')}/chat/completions"
                 else:
@@ -134,9 +137,14 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     except Exception as e:
         # En cas d'erreur de clé ou d'API, log et fallback sur Gemini
         print(f"Erreur provider {provider}: {e}")
-        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key)
+        # Si on utilisait le provider local, on efface le modèle et la clé pour le fallback Gemini
+        fb_model = None if provider == "local" else model
+        fb_key = None if provider == "local" else user_key
+        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=fb_model, user_key=fb_key)
         
-    return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key)
+    fb_model = None if provider == "local" else model
+    fb_key = None if provider == "local" else user_key
+    return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=fb_model, user_key=fb_key)
 
 
 def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
@@ -613,8 +621,9 @@ def get_hook_natal(user: dict, lang: str = "fr") -> str:
 Thème natal de {name} :
 {natal_mini}
 
-CONTEXTE : Hook au login (natal seul, zéro transits). Tu dois créer une tension qui donne envie de rentrer dans l'appli.
-La phrase 4 s'arrête juste avant de donner la clé — elle fruste, elle appelle la suite."""
+CONTEXTE : Lecture natale au login. Tu dois fournir une analyse profonde et complètement ORIGINALE à chaque fois. 
+Choisis de te concentrer sur un aspect spécifique et inattendu du thème (une planète différente, une maison particulière, etc.) pour garantir que cette lecture soit unique.
+La phrase 4 DOIT donner la clé complète et terminer la pensée."""
     else:
         hook_template = HOOK_PROMPT_EN.format(name=name)
         prompt = f"""{hook_template}
@@ -622,12 +631,26 @@ La phrase 4 s'arrête juste avant de donner la clé — elle fruste, elle appell
 Natal chart of {name}:
 {natal_mini}
 
-CONTEXT: Hook at login (natal only, zero transits). You must create tension that makes them want to enter the app.
-Sentence 4 stops just before giving the key — it frustrates, it calls for more."""
+CONTEXT: Natal reading at login. You must provide a profound and completely ORIGINAL analysis every time.
+Choose to focus on a specific and unexpected aspect of the chart (a different planet, a particular house, etc.) to ensure this reading is unique.
+Sentence 4 MUST give the complete key and finish the thought."""
+
+    pseudo = user.get("pseudo", "")
+    rag_context = retrieve_context(pseudo, "analyse natale et blessure profonde", limit=2)
+    if rag_context:
+        if lang == "fr":
+            prompt += f"\n\nCONTEXTE KARMIQUE PASSÉ (SOUVENIRS DE LECTURES PRÉCÉDENTES) :\n{rag_context}\n\nPrends en compte cette évolution dans ta nouvelle analyse pour ne pas te répéter et montrer que tu suis l'utilisateur."
+        else:
+            prompt += f"\n\nPAST KARMIC CONTEXT (MEMORIES OF PREVIOUS READINGS) :\n{rag_context}\n\nTake this evolution into account in your new analysis to avoid repetition and show you follow the user."
 
     # Force le modèle Sonnet pour le hook
     user_with_model = {**(user or {}), "user_model": HOOK_MODEL}
-    return generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
+    result = generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
+    
+    if result and not result.startswith("[ERROR]"):
+        threading.Thread(target=save_reading, args=(pseudo, result, "hook_natal")).start()
+        
+    return result
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -679,8 +702,8 @@ Thème natal de {name} :
 Aspects actifs ce jour ({date}) — ne pas citer tels quels dans le texte :
 {aspects_text}
 
-CONTEXTE : Tu dois créer une tension irrésolvable. Le hook livre un diagnostic incomplet qui crée du désir.
-La phrase 4 s'arrête avant de révéler la clé. C'est ça qui vend la synthèse."""
+CONTEXTE : Lecture des transits du jour. Fournis une analyse percutante de l'aspect le plus saillant.
+La phrase 4 DOIT donner la clé complète de l'Alternative de Conscience et terminer la pensée."""
     else:
         hook_template = HOOK_PROMPT_EN.format(name=name)
         prompt = f"""{hook_template}
@@ -691,12 +714,25 @@ Natal chart of {name}:
 Active aspects today ({date}) — do not quote as-is in text:
 {aspects_text}
 
-CONTEXT: You must create unresolvable tension. The hook delivers incomplete diagnosis that creates desire.
-Sentence 4 stops before revealing the key. That's what sells the full synthesis."""
+CONTEXT: Daily transit reading. Provide a striking analysis of the most salient aspect today.
+Sentence 4 MUST give the complete key to the Alternative of Consciousness and finish the thought."""
+
+    pseudo = user.get("pseudo", "")
+    rag_context = retrieve_context(pseudo, "transit et friction du moment", limit=2)
+    if rag_context:
+        if lang == "fr":
+            prompt += f"\n\nCONTEXTE KARMIQUE PASSÉ (SOUVENIRS DE LECTURES) :\n{rag_context}\n\nPrends en compte cette évolution dans ta nouvelle analyse des transits."
+        else:
+            prompt += f"\n\nPAST KARMIC CONTEXT (MEMORIES) :\n{rag_context}\n\nTake this evolution into account in your new transit analysis."
 
     # Force le modèle Sonnet pour le hook
     user_with_model = {**(user or {}), "user_model": HOOK_MODEL}
-    return generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
+    result = generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
+
+    if result and not result.startswith("[ERROR]"):
+        threading.Thread(target=save_reading, args=(pseudo, result, "hook_transit", date)).start()
+
+    return result
 # ══════════════════════════════════════════════════════════════════════════════
 # SIGNAL DU JOUR — compact pour TikTok/Web
 # ══════════════════════════════════════════════════════════════════════════════
@@ -971,8 +1007,25 @@ INSTRUCTIONS:
 5.  Write in English, directly to {name} ("you", "your"). Never quote raw aspects.
 """
 
-    # Utilise stream_ai pour la réponse en streaming
-    yield from stream_ai(_build_system_prompt(user, use_vault=True), prompt, user=user, max_tokens=4000)
+    pseudo = user.get("pseudo", "")
+    rag_context = retrieve_context(pseudo, "synthèse complète et blessure karmique", limit=3)
+    if rag_context:
+        if lang == "fr":
+            prompt += f"\n\nCONTEXTE KARMIQUE PASSÉ (SOUVENIRS) :\n{rag_context}\n\nPrends en compte cette évolution dans ta nouvelle synthèse globale."
+        else:
+            prompt += f"\n\nPAST KARMIC CONTEXT (MEMORIES) :\n{rag_context}\n\nTake this evolution into account in your new global synthesis."
+
+    # Utilise stream_ai pour la réponse en streaming et capture pour la sauvegarde
+    def wrapped_stream():
+        full_result = []
+        for chunk in stream_ai(_build_system_prompt(user, use_vault=True), prompt, user=user, max_tokens=4000):
+            full_result.append(chunk)
+            yield chunk
+        final_text = "".join(full_result)
+        if final_text and not final_text.startswith("[ERROR]"):
+            threading.Thread(target=save_reading, args=(pseudo, final_text, "synthesis", date)).start()
+
+    yield from wrapped_stream()
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1244,6 +1297,12 @@ def build_prompt_chat(message: str, history: list, profile: dict, lang: str = "f
         )
         if natal_ctx:
             system += f"\n{natal_ctx}"
+            
+        pseudo = profile.get("pseudo", "")
+        rag_context = retrieve_context(pseudo, message, limit=3)
+        if rag_context:
+            system += f"\n\nPAST KARMIC CONTEXT (RAG) :\n{rag_context}\nUse these memories if relevant."
+
         hist_lines = []
         for turn in (history or [])[-6:]:
             prefix = name if turn.get("role") == "user" else "@siderealAstro13"
@@ -1257,6 +1316,12 @@ def build_prompt_chat(message: str, history: list, profile: dict, lang: str = "f
         )
         if natal_ctx:
             system += f"\n{natal_ctx}"
+        
+        pseudo = profile.get("pseudo", "")
+        rag_context = retrieve_context(pseudo, message, limit=3)
+        if rag_context:
+            system += f"\n\nSOUVENIRS KARMIQUES (RAG) :\n{rag_context}\nSers-toi de ces souvenirs si cela est pertinent pour répondre."
+
         hist_lines = []
         for turn in (history or [])[-6:]:
             prefix = name if turn.get("role") == "user" else "@siderealAstro13"

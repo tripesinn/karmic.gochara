@@ -158,48 +158,55 @@ LANGS = {
         "transit_title": "⏱ Transits — Date de consultation",
         "support_title": "☕ Soutenir le projet",
         "support_label": "Buy me a coffee",
-        "hero_title": "Ton", "hero_em": "Karma", "hero_sub_a": "écrit dans les étoiles",
-        "hero_subtitle": "Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa",
+        "hero_eyebrow": "@siderealAstro13 · Astrologie Karmique",
+        "doctrine_pro": "La Doctrine (Gochara PRO)",
+        "return_app": "RETOURNER À L'APPLICATION",
+        "hero_title": "Des", "hero_em": "vérités chirurgicales", "hero_sub_a": "sur ton ciel d'aujourd'hui. Sans filtres.",
+        "hero_subtitle": "Analyse immédiate de tes transits. Sans jargon.",
         "hero_ketu": "Nœud Sud · mémoires passées · schémas de résistance",
         "hero_chiron": "Chiron · blessure originelle · clé de la Porte Visible",
-        "hero_stage": "Dharma · lieu de libération · action incarnée",
+        "hero_stage": "Voie évolutive · action consciente · guérison",
         "hero_hook1": "Ton <strong>Ketu</strong> révèle la prison de mémoires passées.",
         "hero_hook2": "Ton <strong>Chiron</strong> est la clé qui ouvre la porte.",
-        "hero_hook3": "Ton <strong>Stage</strong> est la scène qui t'attend.",
+        "hero_hook3": "Ta <strong>Porte Visible</strong> est la scène qui t'attend.",
         "hero_cta": "Accéder à ta synthèse",
         "geo_auto": "Position auto ou saisir une ville…",
         "pillar1_title": "Mémoire Karmique",
         "pillar2_title": "Blessure Originelle",
-        "pillar3_title": "Mise en Scène",
+        "pillar3_title": "La Scène",
         # Pricing table
         "pricing_title": "✦ Accès & Tarifs",
         "pricing_free": "Gratuit",
         "pricing_lecture": "Lecture",
         "pricing_unlimited": "Illimité",
         "pricing_per_month": "/mois",
-        "feat_signal": "Signal du Jour",
-        "feat_natal": "Lecture natale",
-        "feat_synthesis": "Synthèse karmique complète",
-        "feat_chatbot": "Chatbot karmique",
-        "feat_chatbot_lecture": "3 questions",
-        "feat_chatbot_unlimited": "illimité si IA locale · sinon 10/mois",
-        "feat_alerts": "Alertes live & mémoire",
-        "feat_local_ai": "IA locale (Edge AI)",
-        "feat_local_ai_note": "si présent sur l'appareil",
+        "feat_signal": "Daily Reading",
+        "feat_natal": "Thème natal karmique",
+        "feat_synthesis": "Synthèse Complète",
+        "feat_chatbot": "Astro Chat Bot",
+        "feat_calendar": "Calendrier interactif",
+        "feat_multiprofile": "Multi-profil (Entourage)",
         # App section labels
         "section_natal": "✦ Lecture natale",
-        "section_signal": "◆ Signal du jour",
+        "section_signal": "◆ Daily Reading",
         "loading_aspects": "Lecture des aspects…",
+        "ai_settings_title": "Paramètres IA (Optionnel)",
+        "ai_settings_desc": "Utilise ta propre clé API pour des calculs illimités sans restriction de quota.",
+        "ai_provider": "Provider (Fournisseur)",
+        "ai_provider_default": "Défaut serveur",
+        "ai_provider_local": "Serveur Personnalisé (Ngrok/URL)",
+        "ai_api_key": "Clé API",
+        "ai_model_pref": "Modèle Préféré",
         "transit_location": "LIEU DE TRANSIT",
         "geo_use_location": "Utiliser ma position actuelle",
         "btn_signal": "◆ VOIR LE SIGNAL DU JOUR",
         "btn_reading": "✦ OBTENIR LA LECTURE COMPLÈTE",
         "btn_choose_plan": "✦ CHOISIR UN PLAN",
         "plan_lecture_desc": "Synthèse complète · 3 questions chatbot · accès immédiat",
-        "plan_unlimited_desc": "Chatbot illimité si IA locale · sinon 10/mois · alertes live",
+        "plan_unlimited_desc": "La Doctrine complète (Mémoire, Blessure, La Scène)",
         "rating_label": "Cette lecture t'a-t-elle touché ?",
         "alerts_label": "🔔 Alertes transit par email",
-        "interp_credit": "Interprétation @siderealastro13",
+        "interp_credit": "Interpretation @siderealastro13",
         # JS UI strings (injected via window.T)
         "js_err_pseudo": "Pseudo requis.",
         "js_login_loading": "Alignement des énergies…",
@@ -219,9 +226,9 @@ LANGS = {
         "js_chat_upgrade_hint": "Passe à Illimité pour continuer.",
         "js_expand_link": "→ Révèle ton Alternative de Conscience",
         "js_expand_loading": "Lecture en cours…",
-        "js_cta_label": "Lecture · 4,99€",
-        "js_cta_desc": "Synthèse complète · 3 questions chatbot · accès immédiat",
-        "js_cta_btn": "Débloquer la Synthèse — 4,99€",
+        "js_cta_label": "Gochara PRO · 9,99€",
+        "js_cta_desc": "Synthèse complète · Astro Chatbot · Calendrier",
+        "js_cta_btn": "Débloque la version PRO — 9,99€",
         "js_err_select_date": "Sélectionne une date.",
         "js_err_select_loc": "Sélectionne un lieu de transit.",
         "js_transit_loading": "LECTURE EN COURS…",
@@ -257,6 +264,13 @@ LANGS = {
         "js_gemma_loading": "GEMMA LOCAL…",
     },
     "en": {
+        "ai_settings_title": "AI Settings (Optional)",
+        "ai_settings_desc": "Use your own API key for unlimited calculations without quota restrictions.",
+        "ai_provider": "Provider",
+        "ai_provider_default": "Default Server",
+        "ai_provider_local": "Custom Server (Ngrok/URL)",
+        "ai_api_key": "API Key",
+        "ai_model_pref": "Preferred Model",
         "code": "en", "label": "🇬🇧 EN",
         "title": "Karmic Gochara",
         "login": "Login",
@@ -304,36 +318,37 @@ LANGS = {
         "transit_title": "⏱ Transits — Consultation date",
         "support_title": "☕ Support the project",
         "support_label": "Buy me a coffee",
-        "hero_title": "Your", "hero_em": "Karma", "hero_sub_a": "written in the stars",
-        "hero_subtitle": "Sidereal Vedic Astrology · Chandra Lagna · DK Ayanamsa",
+        "hero_eyebrow": "@siderealAstro13 · Karmic Astrology",
+        "doctrine_pro": "The Doctrine (Gochara PRO)",
+        "return_app": "RETURN TO APP",
+        "hero_title": "Surgical", "hero_em": "truths", "hero_sub_a": "about your sky today. Unfiltered.",
+        "hero_subtitle": "Immediate transit analysis. No jargon.",
         "hero_ketu": "South Node · past memories · resistance patterns",
         "hero_chiron": "Chiron · original wound · key to the Visible Door",
-        "hero_stage": "Dharma · place of liberation · embodied action",
+        "hero_stage": "Evolutionary path · conscious action · healing",
         "hero_hook1": "Your <strong>Ketu</strong> reveals the prison of past memories.",
         "hero_hook2": "Your <strong>Chiron</strong> is the key that opens the door.",
-        "hero_hook3": "Your <strong>Stage</strong> is the scene waiting for you.",
+        "hero_hook3": "Your <strong>Visible Door</strong> is the stage waiting for you.",
         "hero_cta": "Access your synthesis",
         "geo_auto": "Auto position or type a city…",
         "pillar1_title": "Karmic Memory",
         "pillar2_title": "Core Wound",
+        "pillar3_title": "The Stage",
         # Pricing table
         "pricing_title": "✦ Access & Plans",
         "pricing_free": "Free",
         "pricing_lecture": "Reading",
         "pricing_unlimited": "Unlimited",
         "pricing_per_month": "/mo",
-        "feat_signal": "Daily Signal",
-        "feat_natal": "Natal Reading",
-        "feat_synthesis": "Complete Karmic Synthesis",
-        "feat_chatbot": "Karmic Chatbot",
-        "feat_chatbot_lecture": "3 questions",
-        "feat_chatbot_unlimited": "unlimited if local AI · otherwise 10/mo",
-        "feat_alerts": "Live alerts & memory",
-        "feat_local_ai": "Local AI (Edge AI)",
-        "feat_local_ai_note": "if available on device",
+        "feat_signal": "Daily Reading",
+        "feat_natal": "Karmic Natal Chart",
+        "feat_synthesis": "Complete Synthesis",
+        "feat_chatbot": "Astro Chat Bot",
+        "feat_calendar": "Interactive Calendar",
+        "feat_multiprofile": "Multi-profile (Entourage)",
         # App section labels
         "section_natal": "✦ Natal Reading",
-        "section_signal": "◆ Daily Signal",
+        "section_signal": "◆ Daily Reading",
         "loading_aspects": "Reading aspects…",
         "transit_location": "TRANSIT LOCATION",
         "geo_use_location": "Use my current location",
@@ -341,7 +356,7 @@ LANGS = {
         "btn_reading": "✦ GET FULL READING",
         "btn_choose_plan": "✦ CHOOSE A PLAN",
         "plan_lecture_desc": "Complete synthesis · 3 chatbot questions · immediate access",
-        "plan_unlimited_desc": "Unlimited chatbot if local AI · otherwise 10/mo · live alerts",
+        "plan_unlimited_desc": "The full Doctrine (Memory, Wound, The Stage)",
         "rating_label": "Did this reading resonate?",
         "alerts_label": "🔔 Transit alerts by email",
         "interp_credit": "Interpretation @siderealastro13",
@@ -364,9 +379,9 @@ LANGS = {
         "js_chat_upgrade_hint": "Upgrade to Unlimited to continue.",
         "js_expand_link": "→ Reveal your Consciousness Alternative",
         "js_expand_loading": "Reading in progress…",
-        "js_cta_label": "Reading · €4.99",
-        "js_cta_desc": "Complete synthesis · 3 chatbot questions · immediate access",
-        "js_cta_btn": "Unlock Synthesis — €4.99",
+        "js_cta_label": "Gochara PRO · $9.9",
+        "js_cta_desc": "Complete synthesis · Astro Chatbot · Calendar",
+        "js_cta_btn": "Unlock PRO version — $9.9",
         "js_err_select_date": "Select a date.",
         "js_err_select_loc": "Select a transit location.",
         "js_transit_loading": "READING IN PROGRESS…",
@@ -403,6 +418,13 @@ LANGS = {
         "pillar3_title": "The Stage",
     },
     "es": {
+        "ai_settings_title": "Configuraciones de IA (Opcional)",
+        "ai_settings_desc": "Usa tu propia clave de API para cálculos ilimitados sin restricciones de cuota.",
+        "ai_provider": "Proveedor",
+        "ai_provider_default": "Servidor Predeterminado",
+        "ai_provider_local": "Servidor Personalizado (Ngrok/URL)",
+        "ai_api_key": "Clave de API",
+        "ai_model_pref": "Modelo Preferido",
         "code": "es", "label": "🇪🇸 ES",
         "title": "Gochara Kármico",
         "login": "Conexión",
@@ -450,11 +472,14 @@ LANGS = {
         "transit_title": "⏱ Tránsitos — Fecha de consulta",
         "support_title": "☕ Apoyar el proyecto",
         "support_label": "Invítame a un café",
+        "hero_eyebrow": "@siderealAstro13 · Astrología Kármica",
+        "doctrine_pro": "La Doctrina (Gochara PRO)",
+        "return_app": "VOLVER A LA APLICACIÓN",
         "hero_title": "Tu", "hero_em": "Karma", "hero_sub_a": "escrito en las estrellas",
         "hero_subtitle": "Astrología Védica Sideral · Chandra Lagna · DK Ayanamsa",
         "hero_ketu": "Nodo Sur · memorias pasadas · patrones de resistencia",
         "hero_chiron": "Chiron · herida original · llave de la Puerta Visible",
-        "hero_stage": "Dharma · lugar de liberación · acción encarnada",
+        "hero_stage": "Vía evolutiva · acción consciente · curación",
         "hero_hook1": "Tu <strong>Ketu</strong> revela la prisión de memorias pasadas.",
         "hero_hook2": "Tu <strong>Chiron</strong> es la llave que abre la puerta.",
         "hero_hook3": "Tu <strong>Stage</strong> es el escenario que te espera.",
@@ -465,6 +490,13 @@ LANGS = {
         "pillar3_title": "La Escena",
     },
     "pt": {
+        "ai_settings_title": "Configurações de IA (Opcional)",
+        "ai_settings_desc": "Use sua própria chave de API para cálculos ilimitados sem restrições de cota.",
+        "ai_provider": "Fornecedor",
+        "ai_provider_default": "Servidor Padrão",
+        "ai_provider_local": "Servidor Personalizado (Ngrok/URL)",
+        "ai_api_key": "Chave de API",
+        "ai_model_pref": "Modelo Preferido",
         "code": "pt", "label": "🇧🇷 PT",
         "title": "Gochara Kármico",
         "login": "Conexão",
@@ -509,14 +541,17 @@ LANGS = {
         "calc_ephem": "Calculando efemérides…",
         "calc_sideral": "Cálculo sideral Djwhal Khul…",
         "calc_karmic": "Interpretação kármica védica em andamento…",
-        "transit_title": "⏱ Trânsitos — Data de consulta",
+        "transit_title": "⏱ Tránsitos — Data de consulta",
         "support_title": "☕ Apoiar o projeto",
-        "support_label": "Me pague um café",
+        "support_label": "Compre-me um café",
+        "hero_eyebrow": "@siderealAstro13 · Astrologia Cármica",
+        "doctrine_pro": "A Doutrina (Gochara PRO)",
+        "return_app": "VOLTAR PARA O APLICATIVO",
         "hero_title": "Seu", "hero_em": "Karma", "hero_sub_a": "escrito nas estrelas",
         "hero_subtitle": "Astrologia Védica Sideral · Chandra Lagna · DK Ayanamsa",
         "hero_ketu": "Nodo Sul · memórias passadas · padrões de resistência",
         "hero_chiron": "Chiron · ferida original · chave da Porta Visível",
-        "hero_stage": "Dharma · lugar de libertação · ação encarnada",
+        "hero_stage": "Caminho evolutivo · ação consciente · cura",
         "hero_hook1": "Seu <strong>Ketu</strong> revela a prisão de memórias passadas.",
         "hero_hook2": "Seu <strong>Chiron</strong> é a chave que abre a porta.",
         "hero_hook3": "Seu <strong>Stage</strong> é o palco que te espera.",
@@ -527,6 +562,13 @@ LANGS = {
         "pillar3_title": "O Palco",
     },
     "de": {
+        "ai_settings_title": "KI-Einstellungen (Optional)",
+        "ai_settings_desc": "Verwende deine eigene API-Schlüssel für unbegrenzte Berechnungen ohne Quoteneinschränkungen.",
+        "ai_provider": "Anbieter",
+        "ai_provider_default": "Standardserver",
+        "ai_provider_local": "Benutzerdefinierter Server (Ngrok/URL)",
+        "ai_api_key": "API-Schlüssel",
+        "ai_model_pref": "Bevorzugtes Modell",
         "code": "de", "label": "🇩🇪 DE",
         "title": "Karmisches Gochara",
         "login": "Anmeldung",
@@ -572,13 +614,16 @@ LANGS = {
         "calc_sideral": "Siderale Berechnung Djwhal Khul…",
         "calc_karmic": "Vedische karmische Interpretation läuft…",
         "transit_title": "⏱ Transite — Beratungsdatum",
-        "support_title": "☕ Projekt unterstützen",
-        "support_label": "Kauf mir einen Kaffee",
+        "support_title": "☕ Das Projekt unterstützen",
+        "support_label": "Spendier mir einen Kaffee",
+        "hero_eyebrow": "@siderealAstro13 · Karmische Astrologie",
+        "doctrine_pro": "Die Doktrin (Gochara PRO)",
+        "return_app": "ZURÜCK ZUR APP",
         "hero_title": "Dein", "hero_em": "Karma", "hero_sub_a": "in den Sternen geschrieben",
         "hero_subtitle": "Siderische Vedische Astrologie · Chandra Lagna · DK Ayanamsa",
         "hero_ketu": "Südknoten · vergangene Erinnerungen · Widerstandsmuster",
         "hero_chiron": "Chiron · ursprüngliche Wunde · Schlüssel zur Sichtbaren Tür",
-        "hero_stage": "Dharma · Ort der Befreiung · verkörperte Handlung",
+        "hero_stage": "Evolutionärer Weg · bewusste Handlung · Heilung",
         "hero_hook1": "Dein <strong>Ketu</strong> enthüllt das Gefängnis vergangener Erinnerungen.",
         "hero_hook2": "Dein <strong>Chiron</strong> ist der Schlüssel, der die Tür öffnet.",
         "hero_hook3": "Deine <strong>Stage</strong> ist die Bühne, die auf dich wartet.",
@@ -589,6 +634,13 @@ LANGS = {
         "pillar3_title": "Die Bühne",
     },
     "nl": {
+        "ai_settings_title": "AI-instellingen (Optioneel)",
+        "ai_settings_desc": "Gebruik je eigen API-sleutel voor onbeperkte berekeningen zonder quotumbeperkingen.",
+        "ai_provider": "Provider",
+        "ai_provider_default": "Standaardserver",
+        "ai_provider_local": "Aangepaste Server (Ngrok/URL)",
+        "ai_api_key": "API-sleutel",
+        "ai_model_pref": "Voorkeursmodel",
         "code": "nl", "label": "🇳🇱 NL",
         "title": "Karmische Gochara",
         "login": "Inloggen",
@@ -634,13 +686,16 @@ LANGS = {
         "calc_sideral": "Siderale berekening Djwhal Khul…",
         "calc_karmic": "Vedische karmische interpretatie bezig…",
         "transit_title": "⏱ Transieten — Consultatiedatum",
-        "support_title": "☕ Project steunen",
-        "support_label": "Koop me een koffie",
+        "support_title": "☕ Het project steunen",
+        "support_label": "Koop een koffie voor me",
+        "hero_eyebrow": "@siderealAstro13 · Karmische Astrologie",
+        "doctrine_pro": "De Leer (Gochara PRO)",
+        "return_app": "TERUG NAAR DE APP",
         "hero_title": "Jouw", "hero_em": "Karma", "hero_sub_a": "geschreven in de sterren",
         "hero_subtitle": "Siderische Vedische Astrologie · Chandra Lagna · DK Ayanamsa",
         "hero_ketu": "Zuidknoop · herinneringen uit het verleden · weerstandspatronen",
         "hero_chiron": "Chiron · oorspronkelijke wond · sleutel tot de Zichtbare Deur",
-        "hero_stage": "Dharma · plek van bevrijding · belichaamde actie",
+        "hero_stage": "Evolutionair pad · bewuste actie · genezing",
         "hero_hook1": "Jouw <strong>Ketu</strong> onthult de gevangenis van herinneringen.",
         "hero_hook2": "Jouw <strong>Chiron</strong> is de sleutel die de deur opent.",
         "hero_hook3": "Jouw <strong>Stage</strong> is het podium dat op je wacht.",
@@ -651,6 +706,13 @@ LANGS = {
         "pillar3_title": "Het Podium",
     },
     "it": {
+        "ai_settings_title": "Impostazioni IA (Opzionale)",
+        "ai_settings_desc": "Usa la tua propria chiave API per calcoli illimitati senza restrizioni di quota.",
+        "ai_provider": "Fornitore",
+        "ai_provider_default": "Server predefinito",
+        "ai_provider_local": "Server Personalizzato (Ngrok/URL)",
+        "ai_api_key": "Chiave API",
+        "ai_model_pref": "Modello preferito",
         "code": "it", "label": "🇮🇹 IT",
         "title": "Gochara Karmico",
         "login": "Accesso",
@@ -696,13 +758,16 @@ LANGS = {
         "calc_sideral": "Calcolo siderale Djwhal Khul…",
         "calc_karmic": "Interpretazione karmica vedica in corso…",
         "transit_title": "⏱ Transiti — Data di consultazione",
-        "support_title": "☕ Supporta il progetto",
+        "support_title": "☕ Sostieni il progetto",
         "support_label": "Offrimi un caffè",
+        "hero_eyebrow": "@siderealAstro13 · Astrologia Karmica",
+        "doctrine_pro": "La Dottrina (Gochara PRO)",
+        "return_app": "TORNA ALL'APP",
         "hero_title": "Il tuo", "hero_em": "Karma", "hero_sub_a": "scritto nelle stelle",
         "hero_subtitle": "Astrologia Vedica Siderale · Chandra Lagna · DK Ayanamsa",
         "hero_ketu": "Nodo Sud · memorie passate · schemi di resistenza",
         "hero_chiron": "Chiron · ferita originale · chiave della Porta Visibile",
-        "hero_stage": "Dharma · luogo di liberazione · azione incarnata",
+        "hero_stage": "Percorso evolutivo · azione consapevole · guarigione",
         "hero_hook1": "Il tuo <strong>Ketu</strong> rivela la prigione delle memorie passate.",
         "hero_hook2": "Il tuo <strong>Chiron</strong> è la chiave che apre la porta.",
         "hero_hook3": "Il tuo <strong>Stage</strong> è la scena che ti aspetta.",
@@ -830,7 +895,8 @@ def login():
     # ── Hook natal : généré au login depuis données Sheets ───────────────────
     # Le profil contient chandra_lagna_sign si natal déjà calculé à l'inscription
     hook_natal = ""
-    cache_key  = f"hook_natal_{pseudo}"
+    user_lang = session.get("lang", "fr")
+    cache_key  = f"hook_natal_{pseudo}_{user_lang}"
     if session.get(cache_key):
         hook_natal = session[cache_key]
 
@@ -869,10 +935,9 @@ def login():
         if not profile.get("chandra_lagna_sign"):
             save_natal_to_sheet(pseudo, enriched)
 
-        # On garde enriched pour l'interprétation et le retour JSON
         profile = enriched
-        if not hook_natal:
-            hook_natal = get_hook_natal(profile)
+        if not hook_natal and profile.get("plan", "free") != "free":
+            hook_natal = get_hook_natal(profile, lang=user_lang)
             session[cache_key] = hook_natal
 
         # Mais on retire les positions lourdes pour le stockage en session (cookie 4KB)
@@ -990,8 +1055,9 @@ def register():
             else:
                 app.logger.error("Échec de save_natal_to_sheet pour %s", pseudo)
 
-            # 4. Generate hook
-            hook_natal = get_hook_natal(profile)
+            # 4. Generate hook only if pro
+            if profile.get("plan", "free") != "free":
+                hook_natal = get_hook_natal(profile, lang=user_lang)
     except Exception as exc:
         app.logger.error("Calcul natal register échoué pour %s : %s", pseudo, exc, exc_info=True)
 
@@ -1392,9 +1458,9 @@ def get_hook_cta() -> dict:
     """
     MYPOS_URL = os.environ.get("MYPOS_URL", "https://mypos.com/@karmic-gochara")
     return {
-        "text_fr": "Ce Signal n'est qu'un fragment. Ton Alternative de Conscience complète, les 5 piliers et ta Carte Karmique révèlent ce qui se joue vraiment.",
+        "text_fr": "Ce Daily Reading n'est qu'un fragment. Ton Alternative de Conscience complète, les 5 piliers et ta Carte Karmique révèlent ce qui se joue vraiment.",
         "button_fr": "Voir l'analyse complète",
-        "text_en": "This Signal is just a fragment. Your full Alternative of Consciousness, all 5 pillars and your Karmic Map reveal what's truly at play.",
+        "text_en": "This Daily Reading is just a fragment. Your full Alternative of Consciousness, all 5 pillars and your Karmic Map reveal what's truly at play.",
         "button_en": "Get the full analysis",
         "url": MYPOS_URL,
     }
@@ -1432,8 +1498,8 @@ def hook_transit():
         return jsonify({"ok": False, "error": "Date requise"}), 400
 
     pseudo    = profile.get("pseudo", "")
-    cache_key = f"hook_transit_{pseudo}_{date_str}"
     lang      = session.get("lang", "fr")
+    cache_key = f"hook_transit_{pseudo}_{date_str}_{lang}"
 
     user_key = data.get("user_key")
     user_model = data.get("user_model")
@@ -1853,6 +1919,7 @@ def synthesis_prompt():
     user_provider = data.get("user_provider")
 
     # Synthèse complète + Alternative de Conscience : gate paiement
+    is_free = False
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
@@ -1862,9 +1929,8 @@ def synthesis_prompt():
                 return jsonify({"error": "quota_exceeded",
                                 "message": "Tu n'as plus de synthèses disponibles sur ton plan."}), 429
         else:
-            return jsonify({"error": "quota_exceeded",
-                            "message": "La synthèse karmique est réservée au plan Lecture.",
-                            "upgrade_url": "/stripe/checkout?product=test"}), 429
+            # Free tier: allowed but limited to 3 blocks
+            is_free = True
 
     natal_data = {
         "name":   profile["name"],
@@ -1905,7 +1971,7 @@ def synthesis_prompt():
         if context == "conscience":
             prompts = build_prompt_conscience(chart_data, enriched_profile, lang=lang)
         else:
-            prompts = build_prompt_only(chart_data, enriched_profile, lang=lang)
+            prompts = build_prompt_only(chart_data, enriched_profile, lang=lang, is_free=is_free)
 
         return jsonify({
             "ok":           True,
@@ -2087,6 +2153,14 @@ def chat_ask():
     from ai_interpret import generate_ai
     try:
         answer = generate_ai(prompts["system"], prompts["user"], user=enriched, max_tokens=1024).strip()
+        
+        # Sauvegarde asynchrone dans RAG
+        if pseudo:
+            from rag_memory import save_reading
+            import threading
+            content_to_save = f"User: {message}\nAssistant: {answer}"
+            threading.Thread(target=save_reading, args=(pseudo, content_to_save, "chat")).start()
+
     except Exception as e:
         app.logger.error("Chat AI error: %s", e)
         return jsonify({"error": "generation_failed", "message": str(e)}), 500
@@ -2844,6 +2918,72 @@ def generate_task():
     resp.headers["Content-Type"] = "application/json"
     resp.headers["Content-Disposition"] = f'attachment; filename="karmic_{user["name"]}.task"'
     return resp
+@app.route("/api/prefetch_year", methods=["POST"])
+def prefetch_year():
+    """Précalcule et retourne tous les transits pour une année entière."""
+    from astro_calc import calculate_transits
+    from datetime import date, timedelta
+    
+    data = request.get_json() or {}
+    year = int(data.get("year", datetime.now().year))
+    
+    profile = session.get("profile")
+    if not profile:
+        natal = data.get("natal")
+        if not natal:
+            return jsonify({"error": "Non connecté ou coordonnées natales manquantes"}), 401
+    else:
+        natal = {
+            "name":   profile.get("name", ""),
+            "year":   profile["year"],
+            "month":  profile["month"],
+            "day":    profile["day"],
+            "hour":   profile["hour"],
+            "minute": profile["minute"],
+            "lat":    profile["lat"],
+            "lon":    profile["lon"],
+            "tz":     profile["tz"],
+            "city":   profile.get("city", ""),
+        }
+        
+    transit_loc = data.get("transit_loc")
+    if not transit_loc:
+        transit_loc = TRANSIT_LOC_DEFAULT
+        
+    results = {}
+    
+    start_date = date(year, 1, 1)
+    end_date = date(year, 12, 31)
+    
+    current_date = start_date
+    while current_date <= end_date:
+        try:
+            res = calculate_transits(
+                natal=natal,
+                transit_loc=transit_loc,
+                year=current_date.year, 
+                month=current_date.month, 
+                day=current_date.day,
+                hour=12, 
+                minute=0
+            )
+            
+            if profile:
+                try:
+                    from ai_interpret import build_prompt_only
+                    enriched_profile = _enrich_profile_with_natal(profile, res.get("natal", {}))
+                    prompts = build_prompt_only(res, enriched_profile, lang=session.get("lang", "fr"))
+                    res["prompts"] = prompts
+                except Exception as e:
+                    pass
+
+            date_key = current_date.strftime("%Y-%m-%d")
+            results[date_key] = res
+        except Exception as e:
+            pass
+        current_date += timedelta(days=1)
+        
+    return jsonify(results), 200
 
 
 # ── Lancement ─────────────────────────────────────────────────────────────────

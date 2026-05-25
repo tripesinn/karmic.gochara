@@ -133,3 +133,26 @@ document.addEventListener('DOMContentLoaded', () => {
 2. Add error handling for cases where the task data is incomplete or malformed
 3. Implement caching strategies to reduce server load
 4. Add visual indicators when hooks are successfully processed
+## Beta Release & Freemium Adjustments (May 2026)
+
+### 1. Freemium vs Pro Access
+- Renamed "Signal du Jour" (Daily Signal) to **"Daily Reading"**.
+- Locked the **Natal Reading** exclusively to the Pro plan. Freemium users only see the Daily Reading.
+- In the current closed beta phase, all new users are automatically granted the `pro` plan in `profiles.py` to allow full testing without manual upgrades.
+
+### 2. Terminology Updates
+- Replaced "Dharma" with **"The Stage"** (La Scène) as the third pillar of the doctrine to avoid confusion. The three pillars are now: Karmic Memory, Core Wound, and The Stage.
+
+### 3. Translation & Caching Fixes
+- Fixed a bug where the cached `hook_natal` and `hook_transit` were not language-aware. The cache keys in `app.py` now include the `lang` parameter (e.g., `hook_natal_{pseudo}_{lang}`).
+- Added missing translations in `app.py` and `index.html` for `hero_eyebrow` (e.g., `@siderealAstro13 · Karmic Astrology`), `doctrine_pro` (The Doctrine), and `return_app`.
+
+### 4. Deployment
+- The app is currently deployed and running on Google Cloud Run (`gochara-api`).
+
+## Beta Release & Freemium Adjustments (May 2026)
+*(Continuing previous section)*
+
+### 5. AI Assistant Ecosystem (karmic-gochara-plugin)
+- Set up a customized **karmic-gochara-plugin** for the local LLM/Agentic ecosystem.
+- Integrated various agentic skills specific to this codebase including `api-design-principles`, `architecture`, `backend-dev-guidelines`, `frontend-developer`, `python-fastapi-development`, and `typescript-expert` to structure our development workflows effectively.

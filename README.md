@@ -9,6 +9,16 @@
 
 ---
 
+## 🟢 Current Project Status (May 2026)
+This project is currently deployed on Google Cloud Run (`gochara-api`) as a web application and is entering a **Closed Beta Testing** phase. 
+- **User Recruitment**: Beta testers are being recruited on Reddit and X.com. 
+- **Beta Access**: To simplify testing, all new users created during this phase automatically default to the `pro` plan (in `profiles.py`), bypassing Stripe/Apple Pay integrations for now.
+- **Freemium Model**: The app has a Freemium tier that provides only the **"Daily Reading"** (short 4-sentence hook: Mirror, Wound, Friction, Open Door). The **"Natal Reading"** and full 4-act **"Complete Synthesis"** are locked behind the PRO plan.
+- **Doctrine Update**: The 3 pillars are now **Karmic Memory** (Ketu), **Core Wound** (Chiron), and **The Stage / La Scène** (replaces "Dharma").
+- **Multi-language**: Fully supports EN, FR, ES, PT, DE, NL, IT. Caching bugs with language switching on `hook_natal` and `hook_transit` have been fixed.
+
+---
+
 ## 🚀 Le Concept : "Open Engine, Hidden Recipe"
 
 Ce projet suit un modèle de développement hybride :

@@ -1,9 +1,11 @@
-# Déploiement — Gochara Karmique sur Render
+# Déploiement — Gochara Karmique sur Google Cloud Run
+
+L'application est conçue pour tourner avec son backend sur **Google Cloud Run**, qui est l'architecture parfaite pour une application iOS/Android premium en production. Cloud Run est robuste, ne s'endort jamais (contrairement aux versions gratuites de Render), et est très économique car il s'adapte automatiquement au trafic.
 
 ## Ce qu'il vous faut
 - Un compte **GitHub** (gratuit) — https://github.com
-- Un compte **Render** (gratuit) — https://render.com
-- Une clé API **Anthropic** — https://console.anthropic.com
+- Un compte **Google Cloud Platform (GCP)** — https://console.cloud.google.com
+- Une clé API **Anthropic** (si Claude est encore utilisé en backup) — https://console.anthropic.com
 
 ---
 
@@ -11,60 +13,46 @@
 
 1. Sur GitHub → **New repository**
 2. Nom : `gochara-karmique` (privé recommandé)
-3. Copiez tous les fichiers du projet dans ce dépôt :
-   ```
-   app.py
-   astro_calc.py
-   ai_interpret.py
-   requirements.txt
-   Procfile
-   render.yaml
-   .env.example
-   templates/
-       index.html
-   ```
+3. Copiez tous les fichiers du projet dans ce dépôt (le fichier `.dockerignore` empêchera les dossiers iOS/Android inutiles de ralentir le serveur).
 4. Faites un commit et push.
 
 ---
 
-## Étape 2 — Déployer sur Render
+## Étape 2 — Déployer sur Google Cloud Run
 
-1. Sur Render → **New → Web Service**
-2. Connectez votre dépôt GitHub `gochara-karmique`
-3. Render détecte automatiquement `render.yaml` — vérifiez :
-   - **Build Command** : `pip install -r requirements.txt`
-   - **Start Command** : `gunicorn app:app --bind 0.0.0.0:$PORT --workers 2 --timeout 120`
-   - **Environment** : Python
-4. Dans **Environment Variables**, ajoutez :
-   - Clé : `ANTHROPIC_API_KEY`
-   - Valeur : votre clé `sk-ant-...`
-5. Cliquez **Deploy** — le build prend 2-3 minutes.
+Google Cloud Run peut lire votre dépôt GitHub, construire automatiquement le conteneur grâce au fichier `Dockerfile` inclus, et le déployer.
 
-Votre URL sera du type : `https://gochara-karmique.onrender.com`
+1. Connectez-vous à la [Console Google Cloud](https://console.cloud.google.com/).
+2. Créez un nouveau projet (ex: `gochara-karmique-prod`).
+3. Cherchez **Cloud Run** dans la barre de recherche supérieure.
+4. Cliquez sur **Créer un service**.
+5. Cochez **"Déployer en continu une nouvelle révision à partir d'un dépôt source"** et cliquez sur **"Configurer Cloud Build"**.
+6. Connectez votre compte GitHub et sélectionnez votre dépôt `gochara-karmique`.
+7. Dans les paramètres de compilation, choisissez **"Dockerfile"** (il détectera automatiquement le fichier à la racine).
+8. Configuration du service :
+   - **Nom du service** : `gochara-api`
+   - **Région** : Choisissez celle la plus proche de vos utilisateurs (ex: `europe-west9` pour Paris).
+   - **Authentification** : Cochez **"Autoriser les appels non authentifiés"** (pour que votre app mobile puisse s'y connecter).
+9. Dans l'onglet **"Conteneurs, variables, secrets"** :
+   - Allez dans la section **"Variables"**.
+   - Ajoutez `ANTHROPIC_API_KEY` (si utilisée) avec votre clé `sk-ant-...`.
+   - Si vous avez d'autres clés (Google, Stripe), ajoutez-les ici.
+10. Cliquez sur **Créer**.
+
+Le premier build prendra quelques minutes. Cloud Run vous fournira ensuite une URL robuste (ex: `https://gochara-api-xxx-ew.a.run.app`).
+
+---
+
+## Étape 3 — Lier l'Application Mobile
+
+Une fois l'URL Google Cloud Run obtenue, vous devrez configurer votre application mobile (le code source `app.js` ou les requêtes Fetch) pour qu'elle pointe vers cette URL de production plutôt que vers `localhost` lors de la compilation finale de l'application via Capacitor.
 
 ---
 
 ## Notes importantes
 
-**Démarrage à froid** : Sur le plan gratuit Render, l'app s'endort après 15 min d'inactivité.
-Le premier accès peut prendre ~30 secondes. C'est normal.
+**Robustesse** : Sur Google Cloud Run, votre backend Python ne s'occupe que des mathématiques (calculs d'éphémérides avec SwissEph) et de l'interrogation de la base de données. Il peut traiter des milliers de requêtes simultanément.
 
-**Chiron** : Si les calculs de Chiron échouent (fichiers éphémérides manquants),
-il sera marqué `N/A` dans les aspects. Les autres planètes calculent sans problème.
+**Chiron** : Si les calculs de Chiron échouent (fichiers éphémérides manquants), il sera marqué `N/A` dans les aspects. Les autres planètes calculent sans problème.
 
-**Moonrise Chart** : Implémenté en Chandra Lagna (ASC = début du signe de la Lune natale),
-fidèle à la logique védique du système.
-
-**Djwhal Khul** : Ayanamsa natif Swiss Ephemeris (SE_SIDM_DJWHAL_KHUL = constante 6).
-
----
-
-## Test en local (optionnel)
-
-```bash
-pip install -r requirements.txt
-cp .env.example .env
-# Éditez .env avec votre clé Anthropic
-python app.py
-# → ouvrez http://localhost:5000
-```
+**Moonrise Chart** : Implémenté en Chandra Lagna (ASC = début du signe de la Lune natale), fidèle à la logique védique du système.

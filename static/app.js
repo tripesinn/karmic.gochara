@@ -516,10 +516,17 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                 }
 
                 const pseudo = sessionStorage.getItem('currentPseudo') || '';
+                const saved = KarmicStore.get();
                 const res = await fetch(API_BASE + '/expand', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic, pseudo })
+                    body: JSON.stringify({ 
+                        topic, 
+                        pseudo,
+                        user_provider: saved.customProvider,
+                        user_key: saved.customApiKey,
+                        user_model: saved.customModel
+                    })
                 });
                 const data = await res.json();
                 expandBox.innerHTML = marked.parse(data.content || '_(aucun contenu)_');
