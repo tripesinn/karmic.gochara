@@ -481,6 +481,8 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
             }
 
             function buildExpandCta() {
+                const saved = KarmicStore.get();
+                if (CURRENT_PLAN !== 'free' || saved.customApiKey) return null;
                 const cta = document.createElement('div');
                 cta.className = 'expand-cta';
                 cta.innerHTML =
@@ -508,7 +510,8 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                         const gr = await NativeAI.generate(pd.system, pd.user);
                         if (gr && gr.synthesis) {
                             expandBox.innerHTML = marked.parse(gr.synthesis);
-                            expandBox.appendChild(buildExpandCta());
+                            const cta = buildExpandCta();
+                            if (cta) expandBox.appendChild(cta);
                             expandBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
                             return;
                         }
@@ -530,7 +533,8 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                 });
                 const data = await res.json();
                 expandBox.innerHTML = marked.parse(data.content || '_(aucun contenu)_');
-                expandBox.appendChild(buildExpandCta());
+                const cta = buildExpandCta();
+                if (cta) expandBox.appendChild(cta);
                 expandBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
 
             } catch (err) {
