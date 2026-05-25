@@ -50,15 +50,19 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     user_key = user.get("user_key")
     model = user.get("user_model")
 
-    if not provider or provider == "gemini" or (not user_key and provider != "local"):
-        # Modèle Claude sans clé user → clé serveur si disponible
+    # Si pas de provider, ou si on a un provider externe mais pas de clé
+    if not provider or (not user_key and provider not in ["local", "claude", "gemini"]):
         if model and model.startswith("claude") and _SERVER_ANTHROPIC_KEY:
             return _call_claude(system, prompt, model, _SERVER_ANTHROPIC_KEY, max_tokens)
-        gemini_model = model if model and not model.startswith("claude") else None
-        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=gemini_model, user_key=user_key)
+        # Fallback sur Gemini sans modèle custom pour éviter un 404
+        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=None, user_key=user_key)
 
     try:
-        if provider == "claude":
+        if provider == "gemini":
+            gemini_model = model if model and not model.startswith("claude") else None
+            return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=gemini_model, user_key=user_key)
+
+        elif provider == "claude":
             return _call_claude(system, prompt, model or "claude-sonnet-4-6", user_key, max_tokens)
             
         elif provider == "local":
@@ -135,16 +139,11 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
             return r.json()["choices"][0]["message"]["content"]
             
     except Exception as e:
-        # En cas d'erreur de clé ou d'API, log et fallback sur Gemini
+        # En cas d'erreur de clé ou d'API, log et fallback sur Gemini avec le modèle par défaut
         print(f"Erreur provider {provider}: {e}")
-        # Si on utilisait le provider local, on efface le modèle et la clé pour le fallback Gemini
-        fb_model = None if provider == "local" else model
-        fb_key = None if provider == "local" else user_key
-        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=fb_model, user_key=fb_key)
+        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=None, user_key=None)
         
-    fb_model = None if provider == "local" else model
-    fb_key = None if provider == "local" else user_key
-    return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=fb_model, user_key=fb_key)
+    return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=None, user_key=None)
 
 
 def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
@@ -643,8 +642,9 @@ Sentence 4 MUST give the complete key and finish the thought."""
         else:
             prompt += f"\n\nPAST KARMIC CONTEXT (MEMORIES OF PREVIOUS READINGS) :\n{rag_context}\n\nTake this evolution into account in your new analysis to avoid repetition and show you follow the user."
 
-    # Force le modèle Sonnet pour le hook
-    user_with_model = {**(user or {}), "user_model": HOOK_MODEL}
+    # Force le modèle Sonnet pour le hook si aucun n'est précisé
+    user_model = user.get("user_model") if user else None
+    user_with_model = {**(user or {}), "user_model": user_model or HOOK_MODEL}
     result = generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
     
     if result and not result.startswith("[ERROR]"):
@@ -725,8 +725,9 @@ Sentence 4 MUST give the complete key to the Alternative of Consciousness and fi
         else:
             prompt += f"\n\nPAST KARMIC CONTEXT (MEMORIES) :\n{rag_context}\n\nTake this evolution into account in your new transit analysis."
 
-    # Force le modèle Sonnet pour le hook
-    user_with_model = {**(user or {}), "user_model": HOOK_MODEL}
+    # Modèle Sonnet forcé si non précisé
+    user_model = user.get("user_model") if user else None
+    user_with_model = {**(user or {}), "user_model": user_model or HOOK_MODEL}
     result = generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
 
     if result and not result.startswith("[ERROR]"):
@@ -834,8 +835,9 @@ def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr") -> str:
     user = user or {}
     lang = user.get("lang", lang)
 
-    # Force le modèle Opus pour la synthèse payante
-    user = {**user, "user_model": SYNTHESIS_MODEL}
+    # Force le modèle Opus pour la synthèse payante, sauf si customisé
+    user_model = user.get("user_model") if user else None
+    user = {**user, "user_model": user_model or SYNTHESIS_MODEL}
 
     aspects_text  = _aspects_to_text(chart_data.get("aspects", []))
     natal_context = _build_natal_context(user)
@@ -929,7 +931,8 @@ def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr"):
     """
     user = user or {}
     lang = user.get("lang", lang)
-    user = {**user, "user_model": SYNTHESIS_MODEL}
+    user_model = user.get("user_model")
+    user = {**user, "user_model": user_model or SYNTHESIS_MODEL}
 
     aspects_text  = _aspects_to_text(chart_data.get("aspects", []))
     natal_context = _build_natal_context(user)
