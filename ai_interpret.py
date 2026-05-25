@@ -14,6 +14,7 @@ Hooks :
 """
 
 import os
+import json
 import requests
 import gemini_api
 
@@ -47,7 +48,7 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     user_key = user.get("user_key")
     model = user.get("user_model")
 
-    if not provider or provider == "gemini" or not user_key:
+    if not provider or provider == "gemini" or (not user_key and provider != "local"):
         # Modèle Claude sans clé user → clé serveur si disponible
         if model and model.startswith("claude") and _SERVER_ANTHROPIC_KEY:
             return _call_claude(system, prompt, model, _SERVER_ANTHROPIC_KEY, max_tokens)
@@ -57,6 +58,40 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     try:
         if provider == "claude":
             return _call_claude(system, prompt, model or "claude-sonnet-4-6", user_key, max_tokens)
+            
+        elif provider == "local":
+            url = "http://127.0.0.1:8000/v1/chat/completions"
+            headers = {
+                "Content-Type": "application/json"
+            }
+            if user_key and user_key != "dummy":
+                if user_key.startswith("http"):
+                    url = f"{user_key.rstrip('/')}/chat/completions"
+                else:
+                    headers["Authorization"] = f"Bearer {user_key}"
+            
+            # vLLM local n'a chargé que phi-4
+            local_model = "mlx-community/phi-4-4bit"
+            if model and not (model.startswith("claude") or model.startswith("gemini")):
+                local_model = model
+                
+            payload = {
+                "model": local_model,
+                "messages": [
+                    {"role": "system", "content": system + "\n\nCRITICAL: Never repeat the same phrase or sentence twice. If you have nothing new to say, finish your response immediately."},
+                    {"role": "user", "content": prompt}
+                ],
+                "max_tokens": max_tokens,
+                "frequency_penalty": 0.5,
+                "presence_penalty": 0.5
+            }
+            print(f"--- DEBUG VLLM ---", flush=True)
+            print(f"URL VLLM: {url}", flush=True)
+            print(f"Payload: {json.dumps(payload, ensure_ascii=False, indent=2)}", flush=True)
+            print(f"------------------", flush=True)
+            r = requests.post(url, headers=headers, json=payload, timeout=120)
+            r.raise_for_status()
+            return r.json()["choices"][0]["message"]["content"]
             
         elif provider == "groq":
             url = "https://api.groq.com/openai/v1/chat/completions"
@@ -112,7 +147,7 @@ def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
     user_key = user.get("user_key")
     model = user.get("user_model")
 
-    if not provider or provider == "gemini" or not user_key:
+    if not provider or provider == "gemini" or (not user_key and provider != "local"):
         if model and model.startswith("claude") and _SERVER_ANTHROPIC_KEY:
             full_text = generate_ai(system, prompt, user=user, max_tokens=max_tokens)
             words = full_text.split(" ")
@@ -527,7 +562,7 @@ def _get_nak_lord(nak_name: str) -> str:
 # HOOK NATAL — affiché dès le login (natal seul, pas de transit)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_hook_natal(user: dict) -> str:
+def get_hook_natal(user: dict, lang: str = "fr") -> str:
     """
     Génère un hook de 3-4 phrases (Mirror → Wound → Friction → Open Door) basé uniquement sur le thème natal.
     Appelé dès le login — zéro calcul de transit requis.
@@ -537,7 +572,6 @@ def get_hook_natal(user: dict) -> str:
     Retourne une chaîne HTML-safe prête à afficher.
     """
     user = user or {}
-    lang = user.get("lang", "fr")
     name = user.get("name", "")
 
     cl     = user.get("chandra_lagna_sign", "")
@@ -945,7 +979,7 @@ INSTRUCTIONS:
 # PROMPT GEMMA — retourne prompt sans appel API (inférence locale Android)
 # ══════════════════════════════════════════════════════════════════════════════
 
-def build_prompt_only(chart_data: dict, user: dict = None, lang: str = "fr") -> dict:
+def build_prompt_only(chart_data: dict, user: dict = None, lang: str = "fr", is_free: bool = False) -> dict:
     """
     Construit le prompt compact SANS appeler Claude.
     Optimisé pour Gemma 4 Mini (< 1500 tokens).
@@ -965,8 +999,30 @@ def build_prompt_only(chart_data: dict, user: dict = None, lang: str = "fr") -> 
     lil  = user.get("lilith_sign", "")
     natal_mini = f"Chandra Lagna {cl}, Ketu {ketu}, Rahu {rahu}, Chiron {chi}, Lilith {lil}." if cl else ""
 
-    if lang == "en":
-        user_prompt = f"""Karmic transit analysis for {name} — {date}.
+    if is_free:
+        user_prompt = f"""Transit pour {name} — {date}.
+Natal : {natal_mini}
+Aspects : {aspects_text}
+
+RÉPONSE - 3 BLOCS SEULEMENT:
+
+**Point chaud:** (3-4 phrases max)
+Décris EXACTEMENT ce qui explose en ce moment. Sois spécifique aux positions.
+Pas de généralités. Chaque phrase = une vérité chirurgicale.
+
+**Action:** (1-2 phrases, impératif)
+UNE SEULE chose à faire. Précise (lieu, timing, objet). 
+Pas de "travaille sur toi-même" vague.
+
+**Deadline:** (date ou période précise)
+Quand la fenêtre se ferme. Pourquoi cette date.
+
+STYLE: Pas de jargon astro externe. Langage direct, français courant.
+LONGUEUR: 200 mots max, total."""
+        system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts."
+    else:
+        if lang == "en":
+            user_prompt = f"""Karmic transit analysis for {name} — {date}.
 Natal: {natal_mini}
 Active aspects:
 {aspects_text}
@@ -976,8 +1032,8 @@ MEMORY (ROM): What karmic trap replays?
 WOUND (RAM): What core wound activates? How does Chiron open the path to the Visible Door?
 TRIAL (Lilith): What is unbearable right now?
 ACTION: One clear shift — what to stop, what to activate."""
-    else:
-        user_prompt = f"""Analyse karmique de transit pour {name} — {date}.
+        else:
+            user_prompt = f"""Analyse karmique de transit pour {name} — {date}.
 Natal : {natal_mini}
 Aspects actifs :
 {aspects_text}
@@ -988,15 +1044,15 @@ Explique concrètement comment elle influence la mémoire karmique ou la blessur
 BLESSURE : Chiron est l'outil d'ouverture de la Porte Visible — montre ce mouvement.
 Tutoiement. Direct. 200 mots max."""
 
-    system = (
-        "Tu es @siderealAstro13. "
-        "ROM (Ketu)=Mémoires passées/automatisme. "
-        "RAM (Chiron)=Traitement actif de la blessure, outil d'ouverture de la Porte Visible (guérison/Stage). "  # CORR L683
-        "Porte Invisible=Prison inconsciente/refoulement. "
-        "LILITH=Point de rupture/épreuve. "
-        "ACTION=Dharma/Bascule. "
-        "Tutoie l'utilisateur. Sois direct. 200 mots max."
-    )
+        system = (
+            "Tu es @siderealAstro13. "
+            "ROM (Ketu)=Mémoires passées/automatisme. "
+            "RAM (Chiron)=Traitement actif de la blessure, outil d'ouverture de la Porte Visible (guérison/Stage). "
+            "Porte Invisible=Prison inconsciente/refoulement. "
+            "LILITH=Point de rupture/épreuve. "
+            "ACTION=Dharma/Bascule. "
+            "Tutoie l'utilisateur. Sois direct. 200 mots max."
+        )
 
     return {"system": system, "user": user_prompt}
 

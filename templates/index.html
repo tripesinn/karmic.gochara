@@ -16,711 +16,7 @@
         href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital@0;1&family=DM+Mono:wght@300;400&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <style>
-        :root {
-            --bg: #0c0a08;
-            --gold: #c9a84c;
-            --gold-dim: #8a6f30;
-            --text: #f5f0e8;
-            --text-dim: #8a8678;
-            --border: #2a2820;
-            --void: #1a1410;
-            --glyph: rgba(201, 168, 76, 0.18);
-            --mist: rgba(201, 168, 76, 0.06);
-            --display: 'Cinzel', serif;
-            --body: 'Cormorant Garamond', Georgia, serif;
-            --mono: 'DM Mono', monospace;
-        }
-
-        *,
-        *::before,
-        *::after {
-            box-sizing: border-box;
-        }
-
-        body {
-            background: var(--bg);
-            color: var(--text);
-            font-family: var(--body);
-            margin: 0;
-            text-align: center;
-            font-size: 18px;
-            line-height: 1.7;
-            overflow-x: hidden;
-        }
-
-        body::before {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            background:
-                radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 30% at 80% 80%, rgba(139, 58, 42, 0.07) 0%, transparent 60%);
-        }
-
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            pointer-events: none;
-            z-index: 0;
-            opacity: 0.35;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-        }
-
-        header {
-            padding: 1.2rem 1.5rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-bottom: 1px solid rgba(201, 168, 76, 0.12);
-            position: relative;
-            z-index: 10;
-        }
-
-        .hero-sigil {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 24px;
-            opacity: 0;
-            animation: fadeUp 1s ease 0.2s forwards;
-        }
-
-        .hero-eyebrow {
-            font-family: var(--mono);
-            font-size: 11px;
-            letter-spacing: 0.22em;
-            text-transform: uppercase;
-            color: var(--gold-dim);
-            opacity: 0;
-            animation: fadeUp 1s ease 0.4s forwards;
-        }
-
-        .hero-title {
-            font-family: var(--display);
-            font-size: clamp(28px, 7vw, 52px);
-            font-weight: 400;
-            letter-spacing: 0.04em;
-            line-height: 1.15;
-            color: var(--text);
-            margin: 14px 0 6px;
-            opacity: 0;
-            animation: fadeUp 1s ease 0.6s forwards;
-        }
-
-        .hero-title em {
-            font-style: italic;
-            color: var(--gold);
-            font-family: 'Cormorant Garamond', serif;
-            font-size: 1.05em;
-            font-weight: 300;
-        }
-
-        .hero-subtitle-line {
-            font-size: 15px;
-            font-weight: 300;
-            font-style: italic;
-            color: rgba(245, 240, 232, 0.55);
-            margin-top: 10px;
-            opacity: 0;
-            animation: fadeUp 1s ease 0.8s forwards;
-            font-family: var(--mono);
-            letter-spacing: 0.05em;
-        }
-
-        .gold-rule {
-            width: 50px;
-            height: 1px;
-            background: var(--gold);
-            margin: 26px auto;
-            opacity: 0;
-            animation: fadeUp 1s ease 1s forwards;
-        }
-
-        .hero-hook {
-            padding: 0 0 40px;
-            opacity: 0;
-            animation: fadeUp 1s ease 1.1s forwards;
-        }
-
-        .hero-hook p {
-            font-size: 19px;
-            font-style: italic;
-            color: rgba(245, 240, 232, 0.78);
-            max-width: 480px;
-            margin: 0 auto 8px;
-        }
-
-        .hero-hook strong {
-            color: var(--gold);
-            font-weight: 400;
-        }
-
-        .pillars {
-            display: grid;
-            grid-template-columns: 1fr 1fr 1fr;
-            gap: 14px;
-            max-width: 620px;
-            margin: 0 auto 44px;
-            padding: 0 20px;
-        }
-
-        @media (max-width: 540px) {
-            .pillars {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .pillar {
-            border: 1px solid var(--glyph);
-            border-top: 2px solid var(--gold-dim);
-            padding: 20px 16px;
-            background: var(--mist);
-            text-align: left;
-            transition: border-color 0.3s, background 0.3s;
-        }
-
-        .pillar:hover {
-            border-color: var(--gold);
-            background: rgba(201, 168, 76, 0.08);
-        }
-
-        .pillar-glyph {
-            font-family: var(--mono);
-            font-size: 10px;
-            letter-spacing: 0.2em;
-            text-transform: uppercase;
-            color: var(--gold-dim);
-            margin-bottom: 8px;
-            display: block;
-        }
-
-        .pillar h3 {
-            font-family: var(--display);
-            font-size: 13px;
-            font-weight: 400;
-            letter-spacing: 0.06em;
-            color: var(--text);
-            margin-bottom: 6px;
-        }
-
-        .pillar p {
-            font-size: 14px;
-            font-style: italic;
-            color: rgba(245, 240, 232, 0.5);
-            line-height: 1.4;
-            margin: 0;
-        }
-
-        .login-card {
-            border: 1px solid var(--glyph);
-            padding: 2.2rem 2rem;
-            max-width: 420px;
-            margin: 0 auto 3rem;
-            background: rgba(201, 168, 76, 0.04);
-            position: relative;
-        }
-
-        .login-card::before {
-            content: '';
-            position: absolute;
-            top: -1px;
-            left: 40px;
-            right: 40px;
-            height: 2px;
-            background: linear-gradient(90deg, transparent, var(--gold), transparent);
-        }
-
-        .login-input {
-            width: 100%;
-            padding: 0.85rem;
-            margin-bottom: 1.2rem;
-            background: rgba(12, 10, 8, 0.6);
-            border: 1px solid rgba(201, 168, 76, 0.2);
-            color: var(--text);
-            outline: none;
-            box-sizing: border-box;
-            font-family: var(--body);
-            font-size: 16px;
-            transition: border-color 0.25s;
-            border-radius: 0;
-        }
-
-        .login-input:focus {
-            border-color: var(--gold);
-            background: rgba(12, 10, 8, 0.85);
-        }
-
-        .login-input::placeholder {
-            color: rgba(245, 240, 232, 0.25);
-            font-style: italic;
-        }
-
-        .btn-primary {
-            background: transparent;
-            border: 1px solid var(--gold);
-            color: var(--gold);
-            padding: 0.9rem 1.5rem;
-            cursor: pointer;
-            font-family: var(--display);
-            font-size: 0.72rem;
-            letter-spacing: 0.16em;
-            text-transform: uppercase;
-            width: 100%;
-            margin-bottom: 10px;
-            position: relative;
-            overflow: hidden;
-            transition: color 0.3s;
-        }
-
-        .btn-primary::before {
-            content: '';
-            position: absolute;
-            inset: 0;
-            background: var(--gold);
-            transform: scaleX(0);
-            transform-origin: left;
-            transition: transform 0.35s ease;
-        }
-
-        .btn-primary:hover {
-            color: var(--bg);
-        }
-
-        .btn-primary:hover::before {
-            transform: scaleX(1);
-        }
-
-        .btn-primary span,
-        .btn-primary #btn-text {
-            position: relative;
-            z-index: 1;
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.7;
-            cursor: wait;
-        }
-
-        .btn-secondary {
-            background: transparent;
-            border: 1px solid rgba(201, 168, 76, 0.2);
-            color: var(--text-dim);
-            padding: 0.85rem 1.5rem;
-            cursor: pointer;
-            font-family: var(--display);
-            font-size: 0.7rem;
-            letter-spacing: 0.1em;
-            text-transform: uppercase;
-            width: 100%;
-            transition: border-color 0.25s;
-        }
-
-        .btn-secondary:hover {
-            border-color: var(--gold-dim);
-        }
-
-        #app-section {
-            display: none;
-            padding: 2rem;
-        }
-
-        .date-input {
-            background: #111110;
-            border: 1px solid var(--border);
-            color: #fff;
-            padding: 0.8rem;
-            margin-bottom: 1rem;
-            width: 100%;
-            max-width: 300px;
-            font-family: var(--body);
-        }
-
-        .spinner {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to {
-                transform: rotate(360deg);
-            }
-        }
-
-        @keyframes fadeUp {
-            from {
-                opacity: 0;
-                transform: translateY(18px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .registration-area {
-            display: none;
-            margin-top: 1.5rem;
-            padding-top: 1.5rem;
-            border-top: 1px solid rgba(201, 168, 76, 0.15);
-            text-align: left;
-        }
-
-        .label-small {
-            font-size: 0.65rem;
-            color: var(--gold-dim);
-            font-family: var(--mono);
-            margin-bottom: 5px;
-            display: block;
-            letter-spacing: 0.18em;
-            text-transform: uppercase;
-        }
-
-        #btn-coffee {
-            position: fixed;
-            bottom: 18px;
-            right: 18px;
-            z-index: 999;
-            background: var(--gold);
-            color: #000;
-            border: none;
-            padding: 8px 16px;
-            font-family: var(--display);
-            font-size: 0.7rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-            transition: opacity 0.2s;
-        }
-
-        #btn-coffee:hover {
-            opacity: 0.85;
-        }
-
-        #btn-x {
-            position: fixed;
-            bottom: 18px;
-            left: 18px;
-            z-index: 999;
-            background: #000;
-            color: #fff;
-            border: 1px solid var(--border);
-            padding: 8px 14px;
-            font-family: var(--display);
-            font-size: 0.7rem;
-            font-weight: bold;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            transition: opacity 0.2s;
-        }
-
-        #btn-x:hover {
-            opacity: 0.75;
-        }
-
-        /* ── Synthèse markdown ───────────────────────────────────────────── */
-        #synthesis-content strong {
-            color: var(--gold);
-            font-weight: 600;
-        }
-
-        #synthesis-content em {
-            color: rgba(245, 240, 232, 0.7);
-            font-style: italic;
-        }
-
-        #synthesis-content h2 {
-            font-family: var(--display);
-            font-size: 1rem;
-            letter-spacing: 0.1em;
-            color: var(--gold);
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 0.3rem;
-            margin-top: 1.8rem;
-        }
-
-        #synthesis-content h3 {
-            font-family: var(--display);
-            font-size: 0.85rem;
-            letter-spacing: 0.08em;
-            color: var(--gold-dim);
-            margin-top: 1.2rem;
-        }
-
-        /* ── Liens expansibles (hook + synthèse) ────────────────────────────── */
-        #synthesis-content a[href^="expand:"],
-        #hook-natal-text a[href^="expand:"] {
-            color: var(--gold);
-            text-decoration: none;
-            background: rgba(201, 168, 76, 0.10);
-            border: 1px solid rgba(201, 168, 76, 0.30);
-            padding: 0.05em 0.55em 0.12em;
-            font-family: var(--mono);
-            font-size: 0.78em;
-            letter-spacing: 0.04em;
-            cursor: pointer;
-            display: inline-block;
-            margin: 3px 2px;
-            transition: background 0.2s, border-color 0.2s, color 0.2s;
-            white-space: nowrap;
-        }
-
-        #synthesis-content a[href^="expand:"]:hover,
-        #hook-natal-text a[href^="expand:"]:hover {
-            background: rgba(201, 168, 76, 0.22);
-            border-color: var(--gold);
-            color: var(--text);
-        }
-
-        #synthesis-content a[href^="expand:"].used,
-        #hook-natal-text a[href^="expand:"].used {
-            opacity: 0.35;
-            pointer-events: none;
-            cursor: default;
-        }
-
-        .expand-box {
-            margin: 1rem 0;
-            padding: 1rem 1.2rem;
-            border-left: 2px solid var(--gold);
-            background: rgba(201, 168, 76, 0.05);
-            font-size: 0.95em;
-            text-align: left;
-            animation: fadeUp 0.4s ease forwards;
-        }
-
-        .expand-cta {
-            margin-top: 1.5rem;
-            padding: 1.2rem;
-            border: 1px solid var(--gold-dim);
-            background: rgba(201, 168, 76, 0.07);
-            text-align: center;
-        }
-
-        .expand-cta p {
-            margin: 0 0 0.8rem;
-        }
-
-        .expand-cta .cta-label {
-            font-family: var(--mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.15em;
-            color: var(--gold-dim);
-            text-transform: uppercase;
-        }
-
-        .expand-cta .cta-desc {
-            font-size: 0.88rem;
-            color: var(--text-dim);
-            font-style: italic;
-        }
-
-        /* ── Plans paiement ──────────────────────────────────────────────── */
-        .btn-plan {
-            display: flex;
-            flex-direction: column;
-            align-items: flex-start;
-            width: 100%;
-            padding: 0.75rem 1rem;
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-            cursor: pointer;
-            transition: border-color 0.2s, background 0.2s;
-            text-align: left;
-            gap: 0.2rem;
-            text-decoration: none;
-        }
-
-        .btn-plan:hover {
-            border-color: var(--gold);
-            background: rgba(201, 168, 76, 0.05);
-        }
-
-        .btn-plan--featured {
-            border-color: var(--gold-dim);
-        }
-
-        .plan-label {
-            font-family: var(--mono);
-            font-size: 0.7rem;
-            letter-spacing: 0.12em;
-            color: var(--gold);
-            text-transform: uppercase;
-        }
-
-        .plan-price {
-            font-family: var(--mono);
-            font-size: 1.1rem;
-            color: var(--text);
-        }
-
-        .plan-price small {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-        }
-
-        .plan-desc {
-            font-size: 0.65rem;
-            color: var(--text-dim);
-            font-family: var(--mono);
-            letter-spacing: 0.05em;
-        }
-
-        /* ── Notation synthèse dataset ───────────────────────────────────────────── */
-        #rating-bar {
-            display: none;
-            margin-top: 1.5rem;
-            padding: 1rem 1.2rem;
-            border: 1px solid rgba(201, 168, 76, 0.15);
-            background: rgba(201, 168, 76, 0.04);
-            text-align: center;
-            animation: fadeUp 0.4s ease forwards;
-        }
-
-        #rating-bar .rating-label {
-            font-family: var(--mono);
-            font-size: 0.65rem;
-            letter-spacing: 0.18em;
-            color: var(--text-dim);
-            text-transform: uppercase;
-            margin-bottom: 0.8rem;
-            display: block;
-        }
-
-        .btn-rate {
-            background: transparent;
-            border: 1px solid var(--border);
-            color: var(--text);
-            padding: 0.5rem 1.4rem;
-            cursor: pointer;
-            font-size: 1.2rem;
-            margin: 0 6px;
-            transition: border-color 0.2s, background 0.2s;
-        }
-
-        .btn-rate:hover {
-            border-color: var(--gold);
-            background: rgba(201, 168, 76, 0.08);
-        }
-
-        .btn-rate.selected {
-            border-color: var(--gold);
-            background: rgba(201, 168, 76, 0.12);
-        }
-
-        /* ── Modal consent RGPD ─────────────────────────────────────────────────── */
-        #consent-modal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            z-index: 9999;
-            background: rgba(0, 0, 0, 0.75);
-            align-items: center;
-            justify-content: center;
-        }
-
-        #consent-modal.active {
-            display: flex;
-        }
-
-        #consent-box {
-            background: #0f0f22;
-            border: 1px solid var(--gold-dim);
-            padding: 2rem;
-            max-width: 380px;
-            width: 90%;
-            text-align: left;
-        }
-
-        #consent-box h4 {
-            font-family: var(--display);
-            font-size: 0.85rem;
-            letter-spacing: 0.1em;
-            color: var(--gold);
-            margin: 0 0 0.8rem;
-        }
-
-        #consent-box p {
-            font-size: 0.82rem;
-            color: var(--text-dim);
-            margin: 0 0 1.2rem;
-            line-height: 1.6;
-        }
-
-        #consent-box label {
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            font-size: 0.8rem;
-            color: var(--text-dim);
-            cursor: pointer;
-            margin-bottom: 1.2rem;
-        }
-
-        #consent-box input[type=checkbox] {
-            accent-color: var(--gold);
-            margin-top: 2px;
-            flex-shrink: 0;
-        }
-
-        #consent-actions {
-            display: flex;
-            gap: 10px;
-        }
-
-        #consent-actions button {
-            flex: 1;
-        }
-
-        .cta-block {
-            padding: 1.5rem;
-            border: 1px solid rgba(201, 168, 76, 0.3);
-            border-radius: 8px;
-            background: rgba(201, 168, 76, 0.05);
-            text-align: center;
-        }
-
-        .cta-text {
-            color: #aaa;
-            font-size: 0.95rem;
-            margin: 0 0 1.2rem 0;
-            line-height: 1.6;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 12px 28px;
-            background: transparent;
-            border: 1px solid #c9a44c;
-            color: #c9a44c;
-            border-radius: 6px;
-            font-family: var(--mono);
-            font-size: 0.9rem;
-            letter-spacing: 0.5px;
-            text-decoration: none;
-            transition: background 0.2s, color 0.2s;
-        }
-
-        .cta-button:hover {
-            background: #c9a44c;
-            color: #080808;
-        }
-    </style>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 
 <body>
@@ -753,43 +49,14 @@
                 <line x1="53.5" y1="10.5" x2="10.5" y2="53.5" stroke="#c9a84c" stroke-width="0.3" opacity="0.2" />
                 <path d="M32 10 L36 22 L32 19 L28 22 Z" fill="#c9a84c" opacity="0.7" />
             </svg>
-            <p class="hero-eyebrow">@siderealAstro13 · Doctrine Évolutive Synthétique</p>
+            <p class="hero-eyebrow">{{ lang.hero_eyebrow if lang.hero_eyebrow else '@siderealAstro13 · Astrologie Karmique' }}</p>
             <h1 class="hero-title">
                 {{ lang.hero_title if lang.hero_title else 'Ton' }}
                 <em>{{ lang.hero_em if lang.hero_em else 'Karma' }}</em><br>
                 {{ lang.hero_sub_a if lang.hero_sub_a else 'écrit dans les étoiles' }}
             </h1>
-            <p class="hero-subtitle-line">{{ lang.hero_subtitle if lang.hero_subtitle else 'Astrologie Védique Sidérale
+            <p class="hero-subtitle-line" style="margin-bottom: 2rem;">{{ lang.hero_subtitle if lang.hero_subtitle else 'Astrologie Védique Sidérale
                 · Chandra Lagna · DK Ayanamsa' }}</p>
-            <div class="gold-rule"></div>
-        </div>
-
-        <div class="hero-hook">
-            <p>{{ lang.hero_hook1 | safe if lang.hero_hook1 else 'Ton <strong>Ketu</strong> révèle la prison de mémoires
-                passées.' | safe }}</p>
-            <p>{{ lang.hero_hook2 | safe if lang.hero_hook2 else 'Ton <strong>Chiron</strong> est la clé qui ouvre la
-                porte.' | safe }}</p>
-            <p>{{ lang.hero_hook3 | safe if lang.hero_hook3 else 'Ton <strong>Stage</strong> est la scène qui
-                t\'attend.' | safe }}</p>
-        </div>
-
-        <div class="pillars">
-            <div class="pillar">
-                <span class="pillar-glyph">☋ ROM</span>
-                <h3>{{ lang.pillar1_title if lang.pillar1_title else 'Mémoire Karmique' }}</h3>
-                <p>{{ lang.hero_ketu if lang.hero_ketu else 'Nœud Sud · mémoires passées · schémas de résistance' }}</p>
-            </div>
-            <div class="pillar">
-                <span class="pillar-glyph">⚷ RAM</span>
-                <h3>{{ lang.pillar2_title if lang.pillar2_title else 'Blessure Originelle' }}</h3>
-                <p>{{ lang.hero_chiron if lang.hero_chiron else 'Chiron · blessure originelle · clé de la Porte Visible'
-                    }}</p>
-            </div>
-            <div class="pillar">
-                <span class="pillar-glyph">☉ Stage</span>
-                <h3>{{ lang.pillar3_title if lang.pillar3_title else 'Mise en Scène' }}</h3>
-                <p>{{ lang.hero_stage if lang.hero_stage else 'Dharma · lieu de libération · action incarnée' }}</p>
-            </div>
         </div>
 
         {% if payment_success %}
@@ -798,7 +65,7 @@
             <p style="margin: 0 0 1rem 0; font-family: var(--display); font-size: 0.9rem;">{{ payment_success }}</p>
             <a href="https://karmicgochara.app"
                 style="display: inline-block; padding: 0.6rem 1.2rem; background: #6ab56a; color: #000; text-decoration: none; font-family: var(--display); font-size: 0.75rem; font-weight: bold; border-radius: 2px;">
-                RETOURNER À L'APPLICATION
+                {{ lang.return_app if lang.return_app else 'RETOURNER À L\'APPLICATION' }}
             </a>
         </div>
         {% endif %}
@@ -833,6 +100,36 @@
             </div>
         </div>
 
+        <!-- ── Doctrine PRO ──────────────────────────────────────────────────── -->
+        <div style="max-width: 600px; margin: 3rem auto 3rem; text-align: center; padding: 0 20px;">
+            <div class="gold-rule" style="margin-bottom: 2rem;"></div>
+            <div style="font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 1.4rem;">
+                {{ lang.doctrine_pro if lang.doctrine_pro else 'La Doctrine (Gochara PRO)' }}
+            </div>
+            <div class="hero-hook">
+                <p>{{ lang.hero_hook1 | safe if lang.hero_hook1 else 'Ton <strong>Ketu</strong> révèle la prison de mémoires passées.' | safe }}</p>
+                <p>{{ lang.hero_hook2 | safe if lang.hero_hook2 else 'Ton <strong>Chiron</strong> est la clé qui ouvre la porte.' | safe }}</p>
+                <p>{{ lang.hero_hook3 | safe if lang.hero_hook3 else 'Ton <strong>Stage</strong> est la scène qui t\'attend.' | safe }}</p>
+            </div>
+            <div class="pillars" style="margin-top: 2rem;">
+                <div class="pillar">
+                    <span class="pillar-glyph">☋ ROM</span>
+                    <h3>{{ lang.pillar1_title if lang.pillar1_title else 'Mémoire Karmique' }}</h3>
+                    <p>{{ lang.hero_ketu if lang.hero_ketu else 'Nœud Sud · mémoires passées · schémas de résistance' }}</p>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-glyph">⚷ RAM</span>
+                    <h3>{{ lang.pillar2_title if lang.pillar2_title else 'Blessure Originelle' }}</h3>
+                    <p>{{ lang.hero_chiron if lang.hero_chiron else 'Chiron · blessure originelle · clé de la Porte Visible' }}</p>
+                </div>
+                <div class="pillar">
+                    <span class="pillar-glyph">☉ Visible Door</span>
+                    <h3>{{ lang.pillar3_title if lang.pillar3_title else 'The Stage' }}</h3>
+                    <p>{{ lang.hero_stage if lang.hero_stage else 'Voie évolutive · action consciente · guérison' }}</p>
+                </div>
+            </div>
+        </div>
+
         <!-- ── Pricing public ────────────────────────────────────────────────── -->
         <div id="pricing-section" style="max-width: 520px; margin: 0 auto 4rem; padding: 0 20px;">
             <div
@@ -840,7 +137,6 @@
                 {{ lang.pricing_title }}</div>
             <table style="width:100%; border-collapse:collapse; font-family:var(--mono); font-size:0.72rem;">
                 <thead>
-                    <tr>
                         <th
                             style="text-align:left; padding:0.5rem 0.6rem; color:var(--text-dim); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.15);">
                         </th>
@@ -848,13 +144,8 @@
                             style="text-align:center; padding:0.5rem 0.6rem; color:var(--text-dim); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.15);">
                             {{ lang.pricing_free }}</th>
                         <th
-                            style="text-align:center; padding:0.5rem 0.6rem; color:var(--gold); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.15);">
-                            {{ lang.pricing_lecture }}<br><span style="font-size:0.9em;">4,99€</span></th>
-                        <th
                             style="text-align:center; padding:0.5rem 0.6rem; color:var(--gold); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.4); background:rgba(201,168,76,0.04);">
-                            {{ lang.pricing_unlimited }}<br><span style="font-size:0.9em;">9,99€<span
-                                    style="font-size:0.75em; color:var(--text-dim);">{{ lang.pricing_per_month
-                                    }}</span></span></th>
+                            Gochara PRO<br><span style="font-size:0.9em;">9,99€</span></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -862,9 +153,6 @@
                         <td
                             style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
                             {{ lang.feat_signal }}</td>
-                        <td
-                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
-                            ✓</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
                             ✓</td>
@@ -880,9 +168,6 @@
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
                             —</td>
                         <td
-                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
-                            ✓</td>
-                        <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
                             ✓</td>
                     </tr>
@@ -893,9 +178,6 @@
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
                             —</td>
-                        <td
-                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
-                            ✓</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
                             ✓</td>
@@ -908,19 +190,13 @@
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
                             —</td>
                         <td
-                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-dim);">
-                            {{ lang.feat_chatbot_lecture }}</td>
-                        <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
-                            {{ lang.feat_chatbot_unlimited }}</td>
+                            ✓</td>
                     </tr>
                     <tr>
                         <td
                             style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
-                            {{ lang.feat_alerts }}</td>
-                        <td
-                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
-                            —</td>
+                            {{ lang.feat_calendar }}</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
                             —</td>
@@ -929,12 +205,15 @@
                             ✓</td>
                     </tr>
                     <tr>
-                        <td style="padding:0.55rem 0.6rem; color:var(--text-dim);">{{ lang.feat_local_ai }}</td>
-                        <td style="text-align:center; padding:0.55rem 0.6rem; color:rgba(255,255,255,0.2);">—</td>
-                        <td style="text-align:center; padding:0.55rem 0.6rem; color:rgba(255,255,255,0.2);">—</td>
                         <td
-                            style="text-align:center; padding:0.55rem 0.6rem; color:var(--text-dim); font-size:0.65rem; background:rgba(201,168,76,0.04);">
-                            {{ lang.feat_local_ai_note }}</td>
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            {{ lang.feat_multiprofile }}</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
                     </tr>
                 </tbody>
             </table>
@@ -971,6 +250,7 @@
         </div>
 
         <div id="view-gochara">
+            {% if session_profile and session_profile.get('plan', 'free') != 'free' %}
             <!-- Hook natal -->
             <div id="hook-natal-box" style="display:none; max-width:600px; margin:0 auto 2.5rem; padding:0 20px;">
                 <div style="border-left:2px solid var(--gold-dim); padding:1rem 1.2rem; background:var(--mist);">
@@ -984,6 +264,7 @@
                     </div>
                 </div>
             </div>
+            {% endif %}
 
             <!-- Hook transit -->
             <div id="hook-transit-box" style="display:none; max-width:600px; margin:0 auto 2rem; padding:0 20px;">
@@ -1052,14 +333,9 @@
                     {{ lang.btn_choose_plan }}
                 </div>
                 <div style="display:flex; flex-direction:column; gap:0.75rem; max-width:300px; margin:0 auto;">
-                    <button class="btn-plan" onclick="stripeCheckout('test')">
-                        <span class="plan-label">{{ lang.pricing_lecture }}</span>
-                        <span class="plan-price">4,99€</span>
-                        <span class="plan-desc">{{ lang.plan_lecture_desc }}</span>
-                    </button>
                     <button class="btn-plan btn-plan--featured" onclick="stripeCheckout('subscription')">
-                        <span class="plan-label">{{ lang.pricing_unlimited }}</span>
-                        <span class="plan-price">9,99€<small>{{ lang.pricing_per_month }}</small></span>
+                        <span class="plan-label">Gochara PRO</span>
+                        <span class="plan-price">9,99€</span>
                         <span class="plan-desc">{{ lang.plan_unlimited_desc }}</span>
                     </button>
                 </div>
@@ -1140,7 +416,7 @@
                 <span id="alerts-status" style="font-size: 0.78rem; color: var(--text-dim);"></span>
             </div>
 
-            {% if enable_features %}
+            {% if enable_features and session_profile and session_profile.get('plan', 'free') != 'free' %}
             <div id="calendar-panel" style="display:none; margin-top: 1.5rem;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
                     <button onclick="shiftMonth(-1)" class="btn-secondary"
@@ -1173,1095 +449,17 @@
     </a>
 
     <script>
-        const T = {{ lang | tojson }};
-        const CURRENT_PSEUDO = "{{ session_user }}";
-        const CURRENT_PLAN = "{{ (user.plan if user and user.plan else 'free') }}";
-
-        // ── Variables Globales ──────────────────────────────────────────────────────
-        let transitGeo = null;
-        let birthGeo = null;
-        let lastSynthesis = '';
-        let chatHistory = [];
-        let _cityTimer = null;
-        let _birthCityTimer = null;
-        let _pendingRating = 0;
-        let calYear = new Date().getFullYear();
-        let calMonth = new Date().getMonth() + 1;
-        let calOpen = false;
-        window._expandUsed = false;
-        window._emailCtx = null;
-
-        // ── Persistance Locale ──────────────────────────────────────────────────────
-        const KarmicStore = {
-            _key() { return 'kg_data_' + (CURRENT_PSEUDO || 'guest'); },
-            save(data) {
-                const current = this.get();
-                localStorage.setItem(this._key(), JSON.stringify({ ...current, ...data }));
-            },
-            get() {
-                try {
-                    return JSON.parse(localStorage.getItem(this._key()) || '{}');
-                } catch { return {}; }
-            },
-            clear() {
-                localStorage.removeItem(this._key());
-            }
+        window.SERVER_DATA = {
+            lang: {{ lang | tojson | safe }},
+            session_user: "{{ session_user | default('') }}",
+            plan: "{{ user.plan if user and user.plan else 'free' }}",
+            transit_city: {{ user.transit_city | tojson | safe if user and user.transit_city else 'null' }},
+            transit_lat: {{ user.transit_lat | default(48.8566) }},
+            transit_lon: {{ user.transit_lon | default(2.3522) }},
+            transit_tz: {{ user.transit_tz | tojson | safe if user and user.transit_tz else '"Europe/Paris"' | safe }}
         };
-
-        // ── Local AI ──────────────────────────────────────────────────────────────────
-        // Chrome Built-in AI (window.LanguageModel) — Chrome 127+ desktop avec flag
-        const ChromeAI = {
-            _api() { return window.LanguageModel || window.ai?.languageModel || null; },
-            async isAvailable() {
-                try {
-                    const api = this._api();
-                    if (!api) return false;
-                    const av = await api.availability();
-                    return av === 'available';
-                } catch { return false; }
-            },
-            async generate(system, user) {
-                const api = this._api();
-                const session = await api.create({ systemPrompt: system, temperature: 0.7, topK: 40 });
-                try {
-                    const raw = await session.prompt(user);
-                    return { ok: true, synthesis: raw.trim(), local: true, model: 'chrome-ai' };
-                } finally { try { session.destroy(); } catch { } }
-            },
-        };
-
-        const Gemma = {
-            plugin() { return window.Capacitor?.Plugins?.GemmaSynthesis ?? null; },
-            isWeb() { return !this.plugin(); },
-            async checkModels() { try { if (this.isWeb()) return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false }; return await this.plugin().checkModels(); } catch { return { e2b_exists: false, e2b_loaded: false, e4b_exists: false, e4b_loaded: false }; } },
-            async isAvailable() { try { if (await ChromeAI.isAvailable()) return true; const r = await this.checkModels(); return r.e2b_loaded || r.e4b_loaded; } catch { return false; } },
-            async generate(s, u, type = 'e2b') { if (await ChromeAI.isAvailable()) return ChromeAI.generate(s, u); if (!this.isWeb()) return await this.plugin().generate({ system: s, user: u, type }); throw new Error('Aucun modèle local disponible'); },
-        };
-
-        // ── Monétisation AdMob & Unlock ──────────────────────────────────────────────
-        const AD_UNIT_BANNER = 'ca-app-pub-3940256099942544/6300978111';
-        const AD_UNIT_INTERSTITIAL = 'ca-app-pub-3940256099942544/1033173712';
-
-        const Monetization = {
-            _unlocked: null,
-            async isUnlocked() { if (this._unlocked !== null) return this._unlocked; const p = window.Capacitor?.Plugins?.Unlock; if (!p) { this._unlocked = false; return false; } try { const r = await p.isUnlocked(); this._unlocked = r.unlocked; return r.unlocked; } catch { this._unlocked = false; return false; } },
-            async purchase() { const p = window.Capacitor?.Plugins?.Unlock; if (!p) return false; try { const r = await p.purchase(); if (r.unlocked) { this._unlocked = true; hideBannerAd(); showUnlockSuccess(); } return r.unlocked; } catch (e) { if (e.message !== 'USER_CANCELED') alert('Erreur achat : ' + e.message); return false; } },
-            async restore() { const p = window.Capacitor?.Plugins?.Unlock; if (!p) return false; try { const r = await p.restore(); if (r.unlocked) { this._unlocked = true; hideBannerAd(); } return r.unlocked; } catch { return false; } },
-        };
-
-        async function initAdMob() {
-            const { AdMob } = window.Capacitor?.Plugins ?? {};
-            if (!AdMob) return;
-            if (await Monetization.isUnlocked()) return;
-            try { await AdMob.initialize({ testingDevices: [], initializeForTesting: true }); await AdMob.showBanner({ adId: AD_UNIT_BANNER, adSize: 'BANNER', position: 'BOTTOM_CENTER', margin: 0 }); } catch (e) { console.warn('AdMob:', e); }
-        }
-        function hideBannerAd() { const { AdMob } = window.Capacitor?.Plugins ?? {}; if (AdMob) AdMob.hideBanner().catch(() => { }); }
-        function showUnlockSuccess() { const btn = document.getElementById('btn-unlock'); if (btn) { btn.textContent = T.js_unlock_success; btn.style.color = '#6ab56a'; btn.disabled = true; } }
-
-        function switchTab(tabId) {
-            const gocharaBtn = document.getElementById('tab-gochara');
-            const carteBtn = document.getElementById('tab-carte');
-            const viewGochara = document.getElementById('view-gochara');
-            const viewCarte = document.getElementById('view-carte');
-
-            if (tabId === 'carte') {
-                carteBtn.style.color = 'var(--gold)';
-                carteBtn.style.borderBottomColor = 'var(--gold)';
-                gocharaBtn.style.color = 'var(--text-dim)';
-                gocharaBtn.style.borderBottomColor = 'transparent';
-                viewGochara.style.display = 'none';
-                viewCarte.style.display = 'block';
-                // Passer la date de transit sélectionnée pour afficher les planètes du jour
-                const tDate = document.getElementById('transit-date')?.value || '';
-                const tHour = new Date().getHours();
-                const chartParams = tDate
-                    ? `date=${tDate}&hour=${tHour}&t=${Date.now()}`
-                    : `t=${Date.now()}`;
-                document.getElementById('karmic-chart-img').src = '/chart/karmic.svg?' + chartParams;
-            } else {
-                gocharaBtn.style.color = 'var(--gold)';
-                gocharaBtn.style.borderBottomColor = 'var(--gold)';
-                carteBtn.style.color = 'var(--text-dim)';
-                carteBtn.style.borderBottomColor = 'transparent';
-                viewCarte.style.display = 'none';
-                viewGochara.style.display = 'block';
-            }
-        }
-
-        function setLang(code) {
-            fetch('/set_lang', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ lang: code })
-            }).then(() => location.reload());
-        }
-
-        function toggleRegistration() {
-            const fields = document.getElementById('registration-fields');
-            const mainBtn = document.getElementById('main-action-btn');
-            const toggleBtn = document.getElementById('toggle-reg-btn');
-            const errDiv = document.getElementById('login-error');
-            if (fields.style.display === 'none' || fields.style.display === '') {
-                fields.style.display = 'block';
-                mainBtn.innerHTML = T.js_toggle_register;
-                mainBtn.onclick = register;
-                toggleBtn.innerHTML = T.js_toggle_login;
-            } else {
-                fields.style.display = 'none';
-                mainBtn.innerHTML = "{{ lang.login if lang.login else 'CONNEXION' }}";
-                mainBtn.onclick = login;
-                toggleBtn.innerHTML = "{{ lang.create_profile if lang.create_profile else 'CRÉER UN PROFIL' }}";
-            }
-            errDiv.textContent = "";
-        }
-
-        function login() {
-            const pseudo = document.getElementById('pseudo-input').value.trim();
-            const errDiv = document.getElementById('login-error');
-            const btn = document.getElementById('main-action-btn');
-            if (!pseudo) { errDiv.textContent = T.js_err_pseudo; return; }
-            errDiv.style.color = "var(--gold)";
-            errDiv.innerHTML = '<span class="spinner"></span> ' + T.js_login_loading;
-            if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
-            fetch('/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ pseudo: pseudo })
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.ok) {
-                        if (data.hook_natal) sessionStorage.setItem('hook_natal', data.hook_natal);
-                        if (data.hook_engine) sessionStorage.setItem('hook_engine', data.hook_engine);
-                        sessionStorage.setItem('currentPseudo', data.pseudo || pseudo);
-                        location.reload();
-                    } else {
-                        errDiv.style.color = "#c97a6b";
-                        errDiv.textContent = data.error || T.js_err_unknown;
-                        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-                    }
-                })
-                .catch(() => {
-                    errDiv.style.color = "#c97a6b";
-                    errDiv.textContent = T.js_err_network;
-                    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-                });
-        }
-
-        function register() {
-            const pseudo = document.getElementById('pseudo-input').value.trim();
-            const birthDate = document.getElementById('birth-date').value;
-            const birthTime = document.getElementById('birth-time').value;
-            const birthCity = document.getElementById('birth-city').value.trim();
-            const email = document.getElementById('reg-email').value.trim();
-            const errDiv = document.getElementById('login-error');
-            if (!pseudo || !birthDate || !birthTime || !birthCity) {
-                errDiv.style.color = "#c97a6b";
-                errDiv.textContent = T.js_err_birth;
-                return;
-            }
-            if (!email || !email.includes('@')) {
-                errDiv.style.color = "#c97a6b";
-                errDiv.textContent = T.js_err_email;
-                return;
-            }
-            const btn = document.getElementById('main-action-btn');
-            if (btn) { btn.disabled = true; btn.style.opacity = '0.6'; }
-            errDiv.style.color = 'var(--gold)';
-            errDiv.innerHTML = '<span class="spinner"></span> ' + (T.js_register_loading || 'Création du profil…');
-            const [year, month, day] = birthDate.split('-').map(Number);
-            const [hour, minute] = birthTime.split(':').map(Number);
-            const payload = {
-                pseudo, email,
-                name: pseudo,
-                year, month, day, hour, minute,
-                city: birthGeo ? birthGeo.city : birthCity,
-                lat: birthGeo ? birthGeo.lat : 48.8566,
-                lon: birthGeo ? birthGeo.lon : 2.3522,
-                tz: birthGeo ? birthGeo.tz : 'Europe/Paris',
-            };
-            fetch('/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            })
-                .then(r => r.json())
-                .then(data => {
-                    if (data.ok) location.reload();
-                    else {
-                        errDiv.style.color = "#c97a6b";
-                        errDiv.textContent = data.error;
-                        if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-                    }
-                })
-                .catch(() => {
-                    errDiv.style.color = "#c97a6b";
-                    errDiv.textContent = T.js_err_network;
-                    if (btn) { btn.disabled = false; btn.style.opacity = ''; }
-                });
-        }
-
-        // ── Stripe checkout ───────────────────────────────────────────────────────────
-        async function stripeCheckoutPublic(plan) {
-            const errEl = document.getElementById('pricing-error');
-            if (errEl) errEl.style.display = 'none';
-            try {
-                const res = await fetch('/stripe/checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ plan })
-                });
-                const data = await res.json();
-                if (data.url) {
-                    window.location.href = data.url;
-                } else {
-                    if (errEl) { errEl.textContent = data.error || T.js_err_payment; errEl.style.display = 'block'; }
-                }
-            } catch (e) {
-                if (errEl) { errEl.textContent = T.js_err_network; errEl.style.display = 'block'; }
-            }
-        }
-
-        async function stripeCheckout(plan) {
-            const errEl = document.getElementById('payment-error');
-            if (errEl) errEl.style.display = 'none';
-            try {
-                const res = await fetch('/stripe/checkout', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ product_type: plan })
-                });
-                const data = await res.json();
-                if (data.url) {
-                    // Marquer le paiement comme en cours (survit si Stripe ouvre dans Chrome externe)
-                    const savedProfile = localStorage.getItem('gochara_profile');
-                    const pseudo = savedProfile ? (JSON.parse(savedProfile).pseudo || '') : '';
-                    if (pseudo) sessionStorage.setItem('paymentPending', pseudo);
-                    window.location.href = data.url;
-                } else {
-                    if (errEl) { errEl.textContent = data.error || T.js_err_payment; errEl.style.display = 'block'; }
-                }
-            } catch (e) {
-                if (errEl) { errEl.textContent = T.js_err_network; errEl.style.display = 'block'; }
-            }
-        }
-
-        // Détection retour d'app après paiement dans navigateur externe (Chrome sur Android)
-        document.addEventListener('visibilitychange', async () => {
-            if (document.visibilityState !== 'visible') return;
-            const pseudo = sessionStorage.getItem('paymentPending');
-            if (!pseudo) return;
-            try {
-                const r = await fetch('/api/plan_check', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ pseudo })
-                });
-                const d = await r.json();
-                if (d.ok && d.plan) {
-                    sessionStorage.removeItem('paymentPending');
-                    // Recharger la page pour refléter le nouveau plan
-                    window.location.href = '/?payment=success';
-                }
-            } catch (_) {}
-        });
-
-        function showPaymentPlans() {
-            const el = document.getElementById('payment-plans');
-            if (el) {
-                el.style.display = 'block';
-                el.scrollIntoView({ behavior: 'smooth', block: 'center' });
-            }
-        }
-
-        // ── Nettoyage sortie Gemma pour les hooks (3 phrases max, pas de markdown) ────
-        function cleanHook(text) {
-            if (!text) return '';
-            return text
-                .replace(/^#{1,3}\s*\d+[\.\:\-]\s*/gm, '')   // ## 1. ## 2. etc.
-                .replace(/^\d+[\.\:\-]\s+/gm, '')              // 1. 2. 3. en début de ligne
-                .replace(/\*\*([^*]+)\*\*/g, '$1')             // **bold**
-                .replace(/\*([^*]+)\*/g, '$1')                 // *italic*
-                .replace(/\n{2,}/g, ' ')                       // sauts de ligne multiples → espace
-                .replace(/\n/g, ' ')                           // sauts de ligne simples → espace
-                .replace(/\s{2,}/g, ' ')                       // espaces multiples
-                .trim()
-                .split(/(?<=[.!?])\s+/)                        // découpe en phrases
-                .slice(0, 3)                                   // garde les 3 premières
-                .join(' ');
-        }
-
-        // ── Hook natal ────────────────────────────────────────────────────────────────
-        (async function initHookNatal() {
-            const hook = sessionStorage.getItem('hook_natal');
-            const engine = sessionStorage.getItem('hook_engine') || 'claude';
-            const box = document.getElementById('hook-natal-box');
-            const text = document.getElementById('hook-natal-text');
-            if (!box || !text) return;
-
-            function applyBadge(eng) {
-                const badge = document.getElementById('natal-engine-badge');
-                if (!badge) return;
-                if (eng === 'gemma' || eng === 'chrome-ai') {
-                    badge.textContent = T.js_badge_local;
-                    badge.style.cssText = 'background:rgba(180,140,60,0.15);color:var(--gold);border:1px solid rgba(180,140,60,0.3);';
-                } else {
-                    badge.textContent = T.js_badge_claude;
-                    badge.style.cssText = 'background:rgba(100,120,180,0.12);color:#8899cc;border:1px solid rgba(100,120,180,0.25);';
-                }
-            }
-            function addExpandLink() {
-                if (text.nextElementSibling?.getAttribute('href') === 'expand:alternative_conscience') return;
-                const link = document.createElement('a');
-                link.href = 'expand:alternative_conscience';
-                link.textContent = T.js_expand_link;
-                link.style.display = 'block';
-                link.style.marginTop = '0.8rem';
-                text.after(link);
-            }
-
-            const gemmaReady = await Gemma.isAvailable();
-            if (gemmaReady) {
-                box.style.display = 'block';
-                text.innerHTML = '<span class="spinner"></span>';
-                try {
-                    const pr = await fetch('/synthesis/prompt', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ context: 'natal' })
-                    });
-                    const pd = await pr.json();
-                    if (pd.system && pd.user) {
-                        const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
-                        if (gr && gr.synthesis) {
-                            text.innerHTML = '';
-                            text.textContent = cleanHook(gr.synthesis);
-                            applyBadge('gemma');
-                            addExpandLink();
-                            sessionStorage.removeItem('hook_natal');
-                            sessionStorage.removeItem('hook_engine');
-                            return;
-                        }
-                    }
-                } catch (e) { console.warn('Gemma natal fallback:', e); }
-                text.innerHTML = '';
-            }
-
-            if (hook) {
-                text.textContent = hook;
-                applyBadge(engine);
-                addExpandLink();
-                box.style.display = 'block';
-                sessionStorage.removeItem('hook_natal');
-                sessionStorage.removeItem('hook_engine');
-            }
-        })();
-
-        // ── Expand topic (1 clic limité) ──────────────────────────────────────────────
-        window._expandUsed = false;
-
-        async function expandTopic(topic) {
-            if (window._expandUsed) return;
-            window._expandUsed = true;
-
-            // Grise tous les liens expand
-            document.querySelectorAll('a[href^="expand:"]').forEach(a => a.classList.add('used'));
-
-            const clickedLink = document.querySelector('a[href="expand:' + topic + '"]');
-            const hookBox = document.getElementById('hook-natal-box');
-            const synthBox = document.getElementById('synthesis-content');
-
-            const expandBox = document.createElement('div');
-            expandBox.className = 'expand-box';
-            expandBox.innerHTML = '<span class="spinner"></span> ' + T.js_expand_loading;
-
-            if (clickedLink) {
-                clickedLink.insertAdjacentElement('afterend', expandBox);
-            } else if (hookBox) {
-                hookBox.querySelector('div').appendChild(expandBox);
-            } else if (synthBox) {
-                synthBox.appendChild(expandBox);
-            }
-
-            function buildExpandCta() {
-                const cta = document.createElement('div');
-                cta.className = 'expand-cta';
-                cta.innerHTML =
-                    '<p class="cta-label">' + T.js_cta_label + '</p>' +
-                    '<p class="cta-desc">' + T.js_cta_desc + '</p>' +
-                    '<button onclick="stripeCheckout(\'test\')" class="btn-primary" style="max-width:280px;margin:0 auto;">' +
-                    '<span>' + T.js_cta_btn + '</span></button>';
-                return cta;
-            }
-
-            try {
-                const gemmaReady = await Gemma.isAvailable();
-                if (gemmaReady) {
-                    const date = document.getElementById('transit-date')?.value || new Date().toISOString().slice(0, 10);
-                    const pr = await fetch('/synthesis/prompt', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            context: 'conscience', date, hour: 12, minute: 0,
-                            ...(transitGeo ? { transit_lat: transitGeo.lat, transit_lon: transitGeo.lon, transit_city: transitGeo.city, transit_tz: transitGeo.tz } : {})
-                        })
-                    });
-                    const pd = await pr.json();
-                    if (pd.system && pd.user) {
-                        const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
-                        if (gr && gr.synthesis) {
-                            expandBox.innerHTML = marked.parse(gr.synthesis);
-                            expandBox.appendChild(buildExpandCta());
-                            expandBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            return;
-                        }
-                    }
-                }
-
-                const pseudo = sessionStorage.getItem('currentPseudo') || '';
-                const res = await fetch('/expand', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ topic, pseudo })
-                });
-                const data = await res.json();
-                expandBox.innerHTML = marked.parse(data.content || '_(aucun contenu)_');
-                expandBox.appendChild(buildExpandCta());
-                expandBox.scrollIntoView({ behavior: 'smooth', block: 'center' });
-
-            } catch (err) {
-                expandBox.innerHTML = '⚠ Erreur de connexion.';
-                window._expandUsed = false;
-                document.querySelectorAll('a[href^="expand:"]').forEach(a => a.classList.remove('used'));
-            }
-        }
-
-        // Délégation clic liens expand:
-        document.addEventListener('click', e => {
-            const a = e.target.closest('a[href^="expand:"]');
-            if (!a) return;
-            e.preventDefault();
-            const topic = a.getAttribute('href').replace('expand:', '');
-            expandTopic(topic);
-        });
-
-        // ── Hook transit SSE ──────────────────────────────────────────────────────────
-        async function requestHookTransit() {
-            const date = document.getElementById('transit-date').value;
-            const btn = document.getElementById('hook-btn');
-            const btnText = document.getElementById('hook-btn-text');
-            if (!date) { alert(T.js_err_select_date); return; }
-            if (!transitGeo) { alert(T.js_err_select_loc); return; }
-
-            const spinner = document.getElementById('hook-transit-spinner');
-            const text = document.getElementById('hook-transit-text');
-            const box = document.getElementById('hook-transit-box');
-            const cta = document.getElementById('synthesis-cta');
-
-            btn.disabled = true;
-            btnText.innerHTML = '<span class="spinner"></span> ' + T.js_transit_loading;
-            if (box) box.style.display = 'block';
-            if (text) text.textContent = '';
-            if (spinner) spinner.style.display = 'none';
-            if (cta) cta.style.display = 'none';
-
-            const gemmaReady = await Gemma.isAvailable();
-            if (gemmaReady) {
-                btnText.innerHTML = '<span class="spinner"></span> ' + T.js_gemma_loading;
-                try {
-                    const pr = await fetch('/synthesis/prompt', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            context: 'hook_transit', date, hour: 12, minute: 0,
-                            transit_lat: transitGeo.lat, transit_lon: transitGeo.lon,
-                            transit_city: transitGeo.city, transit_tz: transitGeo.tz,
-                        })
-                    });
-                    const pd = await pr.json();
-                    if (pd.system && pd.user) {
-                        const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
-                        if (gr && gr.synthesis) {
-                            if (text) text.textContent = cleanHook(gr.synthesis);
-                            if (cta) { cta.style.display = 'block'; cta.scrollIntoView({ behavior: 'smooth', block: 'center' }); }
-                            btnText.innerHTML = T.js_transit_reread;
-                            btn.disabled = false;
-                            return;
-                        }
-                    }
-                } catch (e) { console.warn('Gemma hook transit fallback:', e); }
-                btnText.innerHTML = '<span class="spinner"></span> ' + T.js_transit_loading;
-                if (text) text.textContent = '';
-            }
-
-            if (spinner) spinner.style.display = 'block';
-            try {
-                const res = await fetch('/hook/transit', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        date, hour: 12, minute: 0,
-                        transit_lat: transitGeo.lat, transit_lon: transitGeo.lon,
-                        transit_city: transitGeo.city, transit_tz: transitGeo.tz,
-                    })
-                });
-                if (!res.ok) throw new Error('Erreur réseau ' + res.status);
-
-                const reader = res.body.getReader();
-                const decoder = new TextDecoder();
-                let buffer = '';
-                if (spinner) spinner.style.display = 'none';
-
-                let ctaData = null;
-                let nextIsCta = false;
-                while (true) {
-                    const { done, value } = await reader.read();
-                    if (done) break;
-                    buffer += decoder.decode(value, { stream: true });
-                    const lines = buffer.split('\n');
-                    buffer = lines.pop();
-                    for (const line of lines) {
-                        if (!line.startsWith('data: ')) continue;
-                        const payload = line.slice(6).trim();
-                        if (payload === '[DONE]') {
-                            // Show CTA if available, otherwise show synthesis button
-                            if (ctaData && cta) {
-                                renderHookCTA(ctaData, cta);
-                            } else if (cta) {
-                                cta.style.display = 'block';
-                            }
-                            if (cta) cta.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                            btnText.innerHTML = T.js_transit_reread;
-                            btn.disabled = false;
-                            return;
-                        }
-                        if (payload.startsWith('[ERROR]')) {
-                            btnText.innerHTML = '◆ VOIR LE SIGNAL DU JOUR';
-                            btn.disabled = false;
-                            return;
-                        }
-                        if (payload === '[CTA]') {
-                            nextIsCta = true;
-                            continue;
-                        }
-                        if (nextIsCta) {
-                            nextIsCta = false;
-                            try { ctaData = JSON.parse(payload); } catch (e) { console.error('CTA parse error:', e); }
-                            continue;
-                        }
-                        // Regular hook text chunk
-                        try { const chunk = JSON.parse(payload); if (text) text.textContent += chunk; } catch { }
-                    }
-                }
-            } catch (e) {
-                console.warn('Hook transit échoué :', e);
-                btnText.innerHTML = '◆ VOIR LE SIGNAL DU JOUR';
-            } finally {
-                btn.disabled = false;
-                if (spinner) spinner.style.display = 'none';
-            }
-        }
-
-        function renderHookCTA(cta, container) {
-            const lang = document.documentElement.lang || 'fr';
-            const ctaText = lang === 'en' ? cta.text_en : cta.text_fr;
-
-            if (CURRENT_PLAN === 'free') {
-                container.innerHTML = `
-                    <div class="cta-block">
-                        <p class="cta-text">${ctaText}</p>
-                    </div>
-                `;
-                container.style.display = 'block';
-                showPaymentPlans();
-            } else {
-                container.style.display = 'block';
-            }
-        }
-
-        function resetHookTransit() {
-            const cta = document.getElementById('synthesis-cta');
-            const text = document.getElementById('hook-transit-text');
-            const box = document.getElementById('hook-transit-box');
-            const btn = document.getElementById('hook-btn-text');
-            if (cta) {
-                cta.style.display = 'none';
-                cta.innerHTML = `
-                    <button id="calc-btn" class="btn-primary"
-                        style="max-width: 300px; border-color: var(--gold); color: var(--gold);"
-                        onclick="calculateWithRouting()">
-                        <span id="btn-text">${T.btn_reading || 'Voir l\'analyse complète'}</span>
-                    </button>
-                    <div
-                        style="font-family:var(--mono); font-size:0.65rem; color:var(--text-dim); letter-spacing:0.15em; margin-top:0.5rem;">
-                        ${T.interp_credit || ''}
-                    </div>
-                `;
-            }
-            if (text) text.textContent = '';
-            if (box) box.style.display = 'none';
-            if (btn) btn.innerHTML = '◆ VOIR LE SIGNAL DU JOUR';
-            document.getElementById('hook-btn').disabled = false;
-            // Cacher aussi les plans paiement
-            const plans = document.getElementById('payment-plans');
-            if (plans) plans.style.display = 'none';
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            // Restauration depuis le Store
-            const saved = KarmicStore.get();
-            const currentTransitDate = document.getElementById('transit-date')?.value;
-            
-            if (saved.lastSynthesis && saved.lastDate === currentTransitDate) {
-                showSynthesis(saved.lastSynthesis, null);
-                if (saved.chatHistory && saved.chatHistory.length > 0) {
-                    chatHistory = saved.chatHistory;
-                    chatHistory.forEach(msg => addChatBubble(msg.role, msg.content));
-                }
-            }
-
-            // Pré-charger la ville de transit depuis le profil sauvegardé
-            {% if user and user.transit_city %}
-            transitGeo = {
-                city: {{ user.transit_city | tojson }},
-                lat:  {{ user.transit_lat | default(48.8566) }},
-                lon:  {{ user.transit_lon | default(2.3522) }},
-                tz:   {{ user.transit_tz | default('Europe/Paris') | tojson }},
-            };
-            const cityInput = document.getElementById('transit-city-input');
-            if (cityInput) {
-                cityInput.value = transitGeo.city;
-                document.getElementById('geo-icon').textContent = '✓';
-            }
-            {% endif %}
-
-            const dateInput = document.getElementById('transit-date');
-            if (dateInput) dateInput.addEventListener('change', resetHookTransit);
-        });
-
-
-        function useGeolocation() {
-            const icon = document.getElementById('geo-icon');
-            const input = document.getElementById('transit-city-input');
-            if (!navigator.geolocation) { input.placeholder = T.js_geo_unsupported; return; }
-            icon.textContent = '⏳';
-            input.value = ''; input.placeholder = T.js_geo_locating; input.disabled = true;
-            navigator.geolocation.getCurrentPosition(
-                async (pos) => {
-                    const lat = pos.coords.latitude;
-                    const lon = pos.coords.longitude;
-                    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                    try {
-                        const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language={{ lang.code if lang.code else 'fr' }}`);
-                        const d = await r.json();
-                        const city = d.address?.city || d.address?.town || d.address?.village || d.address?.county || 'Position GPS';
-                        const country = d.address?.country || '';
-                        transitGeo = { lat, lon, city: `${city}, ${country}`.trim().replace(/,$/, ''), tz };
-                    } catch {
-                        transitGeo = { lat, lon, city: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, tz };
-                    }
-                    icon.textContent = '✓';
-                    input.value = transitGeo.city;
-                    input.disabled = false;
-                    resetHookTransit();
-                },
-                (err) => {
-                    icon.textContent = '📍';
-                    input.disabled = false;
-                    input.value = '';
-                    input.placeholder = err.code === 1 ? T.js_geo_denied : T.js_geo_error;
-                },
-                { timeout: 10000 }
-            );
-        }
-
-        function onCityInput(val) {
-            if (!val.trim()) { transitGeo = null; hideSuggestions(); return; }
-            clearTimeout(_cityTimer);
-            _cityTimer = setTimeout(() => fetchCitySuggestions(val.trim()), 350);
-        }
-
-        async function fetchCitySuggestions(q) {
-            if (q.length < 2) return;
-            try {
-                const r = await fetch(`/geocode?q=${encodeURIComponent(q)}`);
-                const results = await r.json();
-                showSuggestions(results);
-            } catch (e) { hideSuggestions(); }
-        }
-
-        function showSuggestions(results) {
-            const box = document.getElementById('city-suggestions');
-            if (!results.length) { hideSuggestions(); return; }
-            box.innerHTML = '';
-            results.forEach(item => {
-                const name = item.display_name || item.name || '';
-                const lat = parseFloat(item.lat);
-                const lon = parseFloat(item.lon);
-                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                const div = document.createElement('div');
-                div.textContent = name;
-                div.style.cssText = 'padding:8px 12px; cursor:pointer; font-size:0.82rem; border-bottom:1px solid var(--border); color:var(--text);';
-                div.onmouseenter = () => div.style.background = '#1a1a18';
-                div.onmouseleave = () => div.style.background = '';
-                div.onclick = () => {
-                    transitGeo = { lat, lon, city: name, tz };
-                    document.getElementById('transit-city-input').value = name;
-                    document.getElementById('geo-icon').textContent = '✓';
-                    hideSuggestions();
-                    resetHookTransit();
-                };
-                box.appendChild(div);
-            });
-            box.style.display = 'block';
-        }
-
-        function hideSuggestions() { document.getElementById('city-suggestions').style.display = 'none'; }
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('#transit-city-input') && !e.target.closest('#city-suggestions')) hideSuggestions();
-            if (!e.target.closest('#birth-city') && !e.target.closest('#birth-city-suggestions')) hideBirthSuggestions();
-        });
-
-        // ── Autocomplétion ville de naissance ─────────────────────────────────────────
-        function onBirthCityInput(val) {
-            if (!val.trim()) { hideBirthSuggestions(); return; }
-            clearTimeout(_birthCityTimer);
-            _birthCityTimer = setTimeout(() => fetchBirthCitySuggestions(val.trim()), 350);
-        }
-        async function fetchBirthCitySuggestions(q) {
-            if (q.length < 2) return;
-            try {
-                const r = await fetch(`/geocode?q=${encodeURIComponent(q)}`);
-                const results = await r.json();
-                showBirthSuggestions(results);
-            } catch { hideBirthSuggestions(); }
-        }
-        function showBirthSuggestions(results) {
-            const box = document.getElementById('birth-city-suggestions');
-            if (!results.length) { hideBirthSuggestions(); return; }
-            box.innerHTML = '';
-            results.forEach(item => {
-                const name = item.display_name || item.name || '';
-                const lat = parseFloat(item.lat);
-                const lon = parseFloat(item.lon);
-                const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-                const div = document.createElement('div');
-                div.textContent = name;
-                div.style.cssText = 'padding:8px 12px; cursor:pointer; font-size:0.82rem; border-bottom:1px solid var(--border); color:var(--text);';
-                div.onmouseenter = () => div.style.background = '#1a1a18';
-                div.onmouseleave = () => div.style.background = '';
-                div.onclick = () => {
-                    birthGeo = { lat, lon, city: name, tz };
-                    document.getElementById('birth-city').value = name;
-                    hideBirthSuggestions();
-                };
-                box.appendChild(div);
-            });
-            box.style.display = 'block';
-        }
-        function hideBirthSuggestions() { const b = document.getElementById('birth-city-suggestions'); if (b) b.style.display = 'none'; }
-
-        async function sendSynthesisEmail() {
-            if (!lastSynthesis) { alert('Lance d\'abord un calcul pour obtenir ta synthèse.'); return; }
-            const btn = document.getElementById('btnEmail');
-            const status = document.getElementById('email-status');
-            btn.disabled = true;
-            status.style.color = 'var(--text-dim)';
-            status.textContent = T.js_email_sending;
-            try {
-                const res = await fetch('/send_synthesis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ synthesis: lastSynthesis }),
-                });
-                const data = await res.json();
-                if (data.ok) { status.textContent = T.js_email_sent; status.style.color = '#6a9f6a'; }
-                else { status.textContent = '✗ Erreur : ' + (data.error || 'inconnu'); status.style.color = '#c06060'; }
-            } catch {
-                status.textContent = '✗ Erreur réseau.'; status.style.color = '#c06060';
-            } finally { btn.disabled = false; }
-        }
-
-        function logout() { fetch('/logout', { method: 'POST' }).then(() => location.reload()); }
-
-        if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js');
-
-
-        // ── Calculate avec routage Gemma/Claude ──────────────────────────────────────
-        async function calculateWithRouting() {
-            const date = document.getElementById('transit-date').value;
-            if (!date) return;
-            const btn = document.getElementById('calc-btn');
-            const btnText = document.getElementById('btn-text');
-            const origText = btnText.innerHTML;
-            btn.disabled = true;
-
-            const payload = { date, hour: 12, minute: 0 };
-            if (transitGeo) { payload.transit_lat = transitGeo.lat; payload.transit_lon = transitGeo.lon; payload.transit_city = transitGeo.city; payload.transit_tz = transitGeo.tz; }
-
-            const gemmaReady = await Gemma.isAvailable();
-
-            try {
-                if (gemmaReady) {
-                    btnText.innerHTML = '<span class="spinner"></span> ' + T.js_calc_loading;
-                    const pr = await fetch('/synthesis/prompt', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    const pd = await pr.json();
-                    if (pd.error === 'quota_exceeded') { showPaymentPlans(); return; }
-                    if (pd.error) throw new Error(pd.error);
-                    btnText.innerHTML = '<span class="spinner"></span> ' + T.js_gemma_loading;
-                    const gr = await Gemma.generate(pd.system, pd.user, 'e2b');
-                    showSynthesis(gr.synthesis, null);
-                    showLocalBadge(true, gr.model ?? 'e2b');
-                } else {
-                    btnText.innerHTML = '<span class="spinner"></span> ' + T.js_calc_reading;
-                    const r = await fetch('/calculate', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
-                    const data = await r.json();
-                    if (data.error === 'quota_exceeded') {
-                        showPaymentPlans();
-                        return;
-                    }
-                    if (data.error) { alert(data.error); return; }
-                    showSynthesis(data.synthesis, data.remaining);
-                    showLocalBadge(false);
-                }
-            } catch (err) {
-                alert('Erreur : ' + err.message);
-            } finally {
-                btn.disabled = false;
-                btnText.innerHTML = origText;
-            }
-        }
-
-        function showSynthesis(text, remaining) {
-            lastSynthesis = text;
-            document.getElementById('synthesis-content').innerHTML = marked.parse(text || '');
-            document.getElementById('synthesis-box').style.display = 'block';
-            document.getElementById('email-status').textContent = '';
-            document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
-            showRatingBar();
-
-            // Persistance de la synthèse
-            KarmicStore.save({
-                lastSynthesis: text,
-                lastDate: document.getElementById('transit-date')?.value
-            });
-
-            chatHistory = [];
-            KarmicStore.save({ chatHistory: [] });
-
-            // Contexte transit depuis email
-            if (window._emailCtx) {
-                const { transit, nak, point, regime } = window._emailCtx;
-                const banner = document.getElementById('transit-context-banner');
-                if (banner && transit) {
-                    const regimeLabels = {
-                        'ROM_oppression': 'Activation ROM — test karmique',
-                        'Dharma_amplification': 'Activation Dharma — opportunité',
-                        'Blessure_activation': 'Activation Chiron — seuil',
-                    };
-                    banner.innerHTML = `⚡ <strong style="color:var(--gold)">${transit}</strong>`
-                        + (nak ? ` dans <strong>${nak}</strong>` : '')
-                        + (point ? ` — nakshatra de ton ${point} natal` : '')
-                        + (regime ? ` &nbsp;·&nbsp; <em>${regimeLabels[regime] || regime}</em>` : '');
-                    banner.style.display = 'block';
-                }
-            }
-            initChat().then(() => {
-                if (window._emailCtx) {
-                    const { transit, nak, point } = window._emailCtx;
-                    if (transit) {
-                        const question = `${transit} est en ce moment dans ${nak || 'mon nakshatra natal'}${point ? ' — nakshatra de mon ' + point + ' natal' : ''}. Qu'est-ce que ça active concrètement pour moi ?`;
-                        setTimeout(() => {
-                            const input = document.getElementById('chat-input');
-                            if (input && !input.disabled) {
-                                input.value = question;
-                                sendChatMessage();
-                            }
-                            window._emailCtx = null;
-                        }, 800);
-                    }
-                }
-            });
-        }
-
-        function showLocalBadge(isLocal, modelType) {
-            let badge = document.getElementById('local-badge');
-            if (!badge) {
-                badge = document.createElement('span');
-                badge.id = 'local-badge';
-                badge.style.cssText = 'font-size:0.72rem;padding:2px 8px;border-radius:2px;margin-left:8px;';
-                const box = document.getElementById('synthesis-box').querySelector('div');
-                if (box) box.prepend(badge);
-            }
-            if (isLocal) { badge.textContent = T.js_badge_local; badge.style.cssText += 'background:#1a2a1a;color:#6ab56a;border:1px solid #2a4a2a;'; }
-            else { badge.textContent = '☁ Claude'; badge.style.cssText += 'background:#1a1a2a;color:#9090b0;border:1px solid #2a2a4a;'; }
-        }
-
-        // ── Chatbot karmique ──────────────────────────────────────────────────────────
-
-        async function initChat() {
-            const section = document.getElementById('chat-section');
-            if (!section) return;
-            try {
-                const saved = KarmicStore.get();
-                const hasCustomKey = !!saved.customApiKey;
-
-                const r = await fetch('/chat/status');
-                const d = await r.json();
-                const plan = d.plan || 'free';
-                
-                if (!hasCustomKey && (plan === 'free' || d.limit === 0)) return;
-                
-                section.style.display = 'block';
-                
-                if (hasCustomKey) {
-                    updateChatQuotaLabel(999, 999, 'custom');
-                } else {
-                    updateChatQuotaLabel(d.remaining, d.limit, plan);
-                }
-            } catch (e) { /* silencieux */ }
-        }
-
-        function updateChatQuotaLabel(remaining, limit, plan) {
-            const el = document.getElementById('chat-quota-label');
-            if (!el) return;
-            if (remaining === -1 || remaining === 999) {
-                el.textContent = T.js_chat_unlimited || '∞ Questions illimitées';
-            } else if (remaining <= 0) {
-                el.textContent = (T.js_chat_exhausted || 'Questions épuisées (0/{limit})').replace('{limit}', limit);
-                document.getElementById('chat-input').disabled = true;
-                document.getElementById('chat-send-btn').disabled = true;
-                const hint = document.getElementById('chat-upgrade-hint');
-                if (hint) { hint.style.display = 'block'; hint.textContent = T.js_chat_upgrade_hint || 'Passe à Illimité pour continuer.'; }
-            } else {
-                el.textContent = (T.js_chat_remaining || '{n}/{limit} questions').replace('{n}', remaining).replace('{limit}', limit);
-            }
-        }
-
-        function addChatBubble(role, text) {
-            const hist = document.getElementById('chat-history');
-            if (!hist) return;
-            const isUser = role === 'user';
-            const div = document.createElement('div');
-            div.style.cssText = `display:flex; justify-content:${isUser ? 'flex-end' : 'flex-start'};`;
-            const bubble = document.createElement('div');
-            bubble.style.cssText = `max-width:80%; padding:0.6rem 1rem; border-radius:6px; font-size:0.95rem; line-height:1.6;
-        background:${isUser ? 'rgba(201,168,76,0.15)' : 'var(--surface)'}; border:1px solid var(--border); color:var(--text);`;
-            
-            // Sécurité marked
-            if (window.marked) bubble.innerHTML = marked.parse(text);
-            else bubble.textContent = text;
-            
-            div.appendChild(bubble);
-            hist.appendChild(div);
-            hist.scrollTop = hist.scrollHeight;
-        }
-
-        async function sendChatMessage() {
-            const input = document.getElementById('chat-input');
-            const btn = document.getElementById('chat-send-btn');
-            const msg = input.value.trim();
-            if (!msg) return;
-
-            input.value = '';
-            btn.disabled = true;
-            addChatBubble('user', msg);
-
-            const localAvailable = await Gemma.isAvailable();
-            chatHistory.push({ role: 'user', content: msg });
-            KarmicStore.save({ chatHistory });
-
-            try {
-                const r = await fetch('/chat/ask', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ message: msg, history: chatHistory.slice(-6), local: localAvailable }),
-                });
-                const d = await r.json();
-
-                if (d.error === 'quota_exceeded') {
-                    addChatBubble('assistant', T.js_chat_exhausted || 'Tu as utilisé toutes tes questions.');
-                    document.getElementById('chat-input').disabled = true;
-                    btn.disabled = true;
-                    return;
-                }
-                if (d.error) { addChatBubble('assistant', '⚠ ' + d.message); btn.disabled = false; return; }
-
-                let answer = '';
-                if (d.answer) {
-                    answer = d.answer;
-                } else if (d.system && d.user) {
-                    const gr = await Gemma.generate(d.system, d.user);
-                    answer = gr.synthesis || gr.answer || '';
-                }
-
-                chatHistory.push({ role: 'assistant', content: answer });
-                KarmicStore.save({ chatHistory });
-                addChatBubble('assistant', answer);
-                updateChatQuotaLabel(d.remaining, null, null);
-            } catch (e) {
-                addChatBubble('assistant', '⚠ ' + (e.message || 'Erreur'));
-            } finally {
-                btn.disabled = false;
-            }
-        }
-
-        // ── Alertes transit ───────────────────────────────────────────────────────────
-        async function toggleAlerts(enabled) {
-            const status = document.getElementById('alerts-status');
-            status.textContent = T.js_alerts_updating;
-            try {
-                const res = await fetch('/toggle_alerts', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ enabled }) });
-                const data = await res.json();
-                if (data.ok) { status.textContent = enabled ? T.js_alerts_enabled : T.js_alerts_disabled; status.style.color = '#6a9f6a'; }
-                else { status.textContent = '✗ ' + (data.error || 'Erreur'); status.style.color = '#c06060'; document.getElementById('alerts-toggle').checked = !enabled; }
-            } catch { status.textContent = T.js_email_network_err; status.style.color = '#c06060'; document.getElementById('alerts-toggle').checked = !enabled; }
-        }
-
-        async function testAlert() {
-            const status = document.getElementById('alerts-status');
-            status.textContent = '⟳ Envoi test…'; status.style.color = 'var(--gold)';
-            try {
-                const res = await fetch('/alert/test', { method: 'POST' });
-                const data = await res.json();
-                if (data.ok) { status.textContent = '✓ Email envoyé (' + data.events + ' événement(s)) → ' + data.email; status.style.color = '#6a9f6a'; }
-                else { status.textContent = '✗ ' + (data.error || 'Erreur'); status.style.color = '#c06060'; }
-            } catch { status.textContent = '✗ Erreur réseau'; status.style.color = '#c06060'; }
-        }
-
-        // ── Calendrier mensuel ────────────────────────────────────────────────────────
-        const MONTH_FR = T.js_months;
-
-        function toggleCalendar() { const panel = document.getElementById('calendar-panel'); calOpen = !calOpen; panel.style.display = calOpen ? 'block' : 'none'; if (calOpen) loadCalendar(); }
-        function shiftMonth(delta) { calMonth += delta; if (calMonth > 12) { calMonth = 1; calYear++; } if (calMonth < 1) { calMonth = 12; calYear--; } loadCalendar(); }
-
-        async function loadCalendar() {
-            const title = document.getElementById('calendar-title'), loading = document.getElementById('calendar-loading'), content = document.getElementById('calendar-content');
-            title.textContent = `${MONTH_FR[calMonth]} ${calYear}`; loading.style.display = 'block'; content.innerHTML = '';
-            try {
-                const res = await fetch(`/calendar?year=${calYear}&month=${calMonth}`); const data = await res.json();
-                loading.style.display = 'none';
-                if (data.error) { content.innerHTML = `<p style="color:#c06060;">${data.error}</p>`; return; }
-                const days = data.days || {};
-                if (!Object.keys(days).length) { content.innerHTML = '<p style="color:var(--text-dim);text-align:center;font-size:0.85rem;">' + T.js_calendar_empty + '</p>'; return; }
-                let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-                for (const [dateKey, events] of Object.entries(days).sort()) {
-                    const day = dateKey.split('-')[2];
-                    html += `<div style="background:#0f0f22;border:1px solid var(--border);border-radius:3px;padding:10px 14px;"><div style="color:var(--gold);font-size:0.78rem;font-family:var(--display);margin-bottom:6px;">${day} ${MONTH_FR[calMonth]} ${calYear}</div>`;
-                    for (const e of events) { const retro = e.retrograde ? '<span style="color:#c06060;">℞</span>' : ''; html += `<div style="display:flex;gap:8px;align-items:baseline;margin-top:4px;"><span style="color:${e.transit_color};font-size:0.85rem;font-weight:bold;">${e.transit_label} ${retro}</span><span style="color:var(--text-dim);font-size:0.75rem;">⊕</span><span style="color:${e.natal_color};font-size:0.82rem;">${e.natal_label}</span><span style="color:var(--text-dim);font-size:0.72rem;margin-left:auto;">${e.orb}°</span></div>`; }
-                    html += '</div>';
-                }
-                html += '</div>'; content.innerHTML = html;
-            } catch { loading.style.display = 'none'; content.innerHTML = '<p style="color:#c06060;">Erreur de connexion.</p>'; }
-        }
-
-        async function downloadAnnualReport() {
-            const btn = document.getElementById('btn-annual-report'), orig = btn.textContent; btn.disabled = true; btn.textContent = T.js_report_loading;
-            try { const res = await fetch('/report/annual'); if (!res.ok) { const data = await res.json().catch(() => ({})); alert('Erreur : ' + (data.error || res.statusText)); return; } const blob = await res.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `karmic_gochara_${new Date().getFullYear()}.pdf`; a.click(); URL.revokeObjectURL(url); }
-            catch { alert(T.js_report_err); }
-            finally { btn.disabled = false; btn.textContent = orig; }
-        }
     </script>
+    <script src="/static/app.js"></script>
     <!-- ── Modal consent RGPD ──────────────────────────────────────────────────── -->
     <div id="consent-modal">
         <div id="consent-box">
@@ -2283,12 +481,13 @@
     <!-- ── Modal Paramètres IA ─────────────────────────────────────────────────── -->
     <div id="settings-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
         <div style="background:#0f0f22; border:1px solid var(--gold-dim); padding:2rem; max-width:400px; width:90%; text-align:left; max-height:90vh; overflow-y:auto;">
-            <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">Paramètres IA (Optionnel)</h4>
-            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">Utilise ta propre clé API pour des calculs illimités sans restriction de quota.</p>
+            <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">{{ lang.ai_settings_title if lang.ai_settings_title else 'Paramètres IA (Optionnel)' }}</h4>
+            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">{{ lang.ai_settings_desc if lang.ai_settings_desc else 'Utilise ta propre clé API pour des calculs illimités sans restriction de quota.' }}</p>
             
-            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Provider (Fournisseur)</label>
-            <select id="custom-provider" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85);" onchange="updateProviderFields()">
-                <option value="">Défaut serveur</option>
+            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">{{ lang.ai_provider if lang.ai_provider else 'Provider (Fournisseur)' }}</label>
+            <select id="custom-provider" class="login-input" style="appearance:none; background:rgba(12,10,8,0.85) url('data:image/svg+xml;utf8,<svg fill=%22%23c9a84c%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 10px center; padding-right:30px; color-scheme:dark;" onchange="updateProviderFields()">
+                <option value="">{{ lang.ai_provider_default if lang.ai_provider_default else 'Défaut serveur' }}</option>
+                <option value="local">{{ lang.ai_provider_local if lang.ai_provider_local else 'Serveur Local' }} (vLLM)</option>
                 <option value="gemini">Google Gemini</option>
                 <option value="claude">Anthropic Claude</option>
                 <option value="groq">Groq</option>
@@ -2296,13 +495,26 @@
             </select>
 
             <div id="provider-fields" style="display:none;">
-                <label id="api-key-label" style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Clé API</label>
-                <input type="password" id="custom-api-key" class="login-input" placeholder="...">
+                <label id="api-key-label" style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">{{ lang.ai_api_key if lang.ai_api_key else 'Clé API' }}</label>
+                <div style="position: relative; display: block; margin-bottom: 1rem;">
+                    <input type="password" id="custom-api-key" class="login-input" placeholder="..." style="margin-bottom: 0; padding-right: 40px;">
+                    <span id="toggle-eye" onclick="var input=document.getElementById('custom-api-key'); if(input.type==='password'){input.type='text'; this.textContent='🙈';}else{input.type='password'; this.textContent='👁️';}" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none;">👁️</span>
+                </div>
                 
-                <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Modèle Préféré</label>
-                <select id="custom-model-select" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85); display:none;"></select>
+                <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">{{ lang.ai_model_pref if lang.ai_model_pref else 'Modèle Préféré' }}</label>
+                <select id="custom-model-select" class="login-input" style="appearance:none; background:rgba(12,10,8,0.85) url('data:image/svg+xml;utf8,<svg fill=%22%23c9a84c%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 10px center; padding-right:30px; display:none; color-scheme:dark;"></select>
                 <input type="text" id="custom-model-text" class="login-input" style="display:none;" placeholder="Ex: anthropic/claude-3.5-sonnet">
             </div>
+            
+            {% if session_profile %}
+            <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+                <h4 style="font-family:var(--display); font-size:1rem; color:var(--gold); margin:0 0 0.5rem;">Mode Hors-Ligne (1 An)</h4>
+                <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:1rem; line-height:1.4;">Télécharge tous les calculs astronomiques de l'année en cours pour utiliser l'app sans connexion internet (100% Local).</p>
+                <button id="btn-download-offline" class="btn-secondary" style="width:100%; justify-content:center;" onclick="downloadOfflineYear()">
+                    <span id="offline-btn-text">⬇️ Télécharger l'année</span>
+                </button>
+            </div>
+            {% endif %}
             
             <div style="display:flex; gap:10px; margin-top:1.5rem;">
                 <button class="btn-secondary" onclick="closeSettings()">Annuler</button>
@@ -2313,6 +525,9 @@
 
     <script>
         const MODELS = {
+            'local': [
+                {val: 'mlx-community/phi-4-4bit', label: 'Phi-4 (14B Local)'}
+            ],
             'gemini': [
                 {val: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash'},
                 {val: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro'}
@@ -2341,7 +556,10 @@
             }
             fields.style.display = 'block';
 
-            if (provider === 'gemini') {
+            if (provider === 'local') {
+                keyLabel.textContent = 'URL vLLM (ex: https://xxx.ngrok.app/v1) ou laisser vide';
+                keyInput.placeholder = 'https://.../v1';
+            } else if (provider === 'gemini') {
                 keyLabel.textContent = 'Clé API Gemini';
                 keyInput.placeholder = 'AIzaSy...';
             } else if (provider === 'claude') {
