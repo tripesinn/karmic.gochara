@@ -85,10 +85,10 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
                 "frequency_penalty": 0.5,
                 "presence_penalty": 0.5
             }
-            print(f"--- DEBUG VLLM ---", flush=True)
+            print("--- DEBUG VLLM ---", flush=True)
             print(f"URL VLLM: {url}", flush=True)
             print(f"Payload: {json.dumps(payload, ensure_ascii=False, indent=2)}", flush=True)
-            print(f"------------------", flush=True)
+            print("------------------", flush=True)
             r = requests.post(url, headers=headers, json=payload, timeout=120)
             r.raise_for_status()
             return r.json()["choices"][0]["message"]["content"]

@@ -68,20 +68,31 @@ def filter_doctrine_aspects(aspects):
     filtered.sort(key=lambda x: x.get("orb", 99))
     return filtered[:12]  # Top 12 aspects
 
-def generate_prompt(data):
+def generate_prompt(data, natal_info=None):
+    if natal_info is None:
+        natal_info = NATAL
+        
     natal = data["natal"]
     transits = data["transits"]
     aspects = data["aspects"]
     now = datetime.datetime.now()
 
     # Dasha
-    try:
-        dasha = calc_vimshottari(NATAL["year"], NATAL["month"], NATAL["day"],
-                                  NATAL["hour"], NATAL["minute"],
-                                  NATAL["lat"], NATAL["lon"], NATAL["tz"])
-        dasha_str = f"{dasha.get('maha','?')} / {dasha.get('antar','?')} / {dasha.get('pratyantar','?')}"
-        dasha_end = dasha.get("antar_end", "?")
-    except:
+    dashas = data.get("dashas", [])
+    current_dasha = None
+    for d in dashas:
+        try:
+            d_end = datetime.datetime.strptime(d.get("end_date", ""), "%d/%m/%Y")
+            if now <= d_end:
+                current_dasha = d
+                break
+        except ValueError:
+            pass
+            
+    if current_dasha:
+        dasha_str = current_dasha.get("lord", "?")
+        dasha_end = current_dasha.get("end_date", "?")
+    else:
         dasha_str = "non calculé"
         dasha_end = "?"
 
@@ -121,7 +132,7 @@ def generate_prompt(data):
     prompt = f"""═══════════════════════════════════════════════════════
 KARMIC GOCHARA — DOCTRINE ÉVOLUTIVE SYNTHÉTIQUE
 Transit du {now.strftime('%d/%m/%Y à %Hh%M')}
-Thème natal : {NATAL['day']}/{NATAL['month']}/{NATAL['year']} {NATAL['hour']}h{NATAL['minute']:02d} — {NATAL['location']}
+Thème natal : {natal_info['day']}/{natal_info['month']}/{natal_info['year']} {natal_info['hour']}h{natal_info['minute']:02d} — {natal_info['location']}
 Système : Djwhal Khul sidéral · Chandra Lagna · Vrais Nœuds
 ═══════════════════════════════════════════════════════
 
@@ -164,24 +175,21 @@ Jupiter transit : {jup_t.get('display','?')} — {jup_t.get('nakshatra','?')}
 ═══════════════════════════════════════════════════════
 MISSION POUR L'IA :
 
-Tu es l'intelligence siderealAstro13, experte en Doctrine Évolutive Synthétique.
-Analyse ces données en 4 blocs :
+RÉPONSE - 3 BLOCS SEULEMENT:
 
-1. DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé en ce moment ?
-   Quel automatisme défensif est à l'œuvre ?
+**Point chaud:** (3-4 phrases max)
+Décris EXACTEMENT ce qui explose en ce moment. Sois spécifique aux positions.
+Pas de généralités. Chaque phrase = une vérité chirurgicale.
 
-2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ?
-   Comment Chiron (RAM) peut-il ouvrir le passage vers le Stage ?
+**Action:** (1-2 phrases, impératif)
+UNE SEULE chose à faire. Précise (lieu, timing, objet).
+Pas de "travaille sur toi-même" vague.
 
-3. ÉPREUVE LILITH : Quelle friction karmique est en cours ?
-   Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
+**Deadline:** (date ou période précise)
+Quand la fenêtre se ferme. Pourquoi cette date.
 
-4. ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis,
-   chirurgical, actionnable — ce que l'âme doit comprendre MAINTENANT
-   pour avancer vers son Stage.
-
-Style : direct, technique, non-astro-jargon dans les conclusions.
-Longueur : 400-600 mots. Pas de généralités. Chaque phrase = une vérité chirurgicale.
+STYLE: Pas de jargon astro externe. Langage direct, français courant.
+LONGUEUR: 200 mots max, total.
 ═══════════════════════════════════════════════════════
 """
     return prompt
