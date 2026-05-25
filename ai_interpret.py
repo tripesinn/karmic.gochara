@@ -34,7 +34,7 @@ def _call_claude(system: str, prompt: str, model: str, api_key: str, max_tokens:
         "content-type": "application/json",
     }
     payload = {
-        "model": model or "claude-sonnet-4-6",
+        "model": model or "claude-3-5-sonnet-20241022",
         "max_tokens": max_tokens,
         "system": system,
         "messages": [{"role": "user", "content": prompt}],
@@ -63,7 +63,7 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
             return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=gemini_model, user_key=user_key)
 
         elif provider == "claude":
-            return _call_claude(system, prompt, model or "claude-sonnet-4-6", user_key, max_tokens)
+            return _call_claude(system, prompt, model or "claude-3-5-sonnet-20241022", user_key, max_tokens)
             
         elif provider == "local":
             url = "http://127.0.0.1:8000/v1/chat/completions"
@@ -142,12 +142,12 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
         # En cas d'erreur de clé ou d'API, log et fallback sur le serveur (Claude par défaut)
         print(f"Erreur provider {provider}: {e}")
         if _SERVER_ANTHROPIC_KEY:
-            return _call_claude(system, prompt, "claude-sonnet-4-6", _SERVER_ANTHROPIC_KEY, max_tokens)
+            return _call_claude(system, prompt, "claude-3-5-sonnet-20241022", _SERVER_ANTHROPIC_KEY, max_tokens)
         return "Erreur lors de la génération (serveur non configuré)."
         
     # Provider inconnu -> serveur par défaut
     if _SERVER_ANTHROPIC_KEY:
-        return _call_claude(system, prompt, "claude-sonnet-4-6", _SERVER_ANTHROPIC_KEY, max_tokens)
+        return _call_claude(system, prompt, "claude-3-5-sonnet-20241022", _SERVER_ANTHROPIC_KEY, max_tokens)
     return "Erreur lors de la génération (aucun provider valide)."
 
 
@@ -225,8 +225,8 @@ def _load_vault(include_keywords: bool = True) -> str | None:
 # ══════════════════════════════════════════════════════════════════════════════
 # MODEL ASSIGNMENT — Router par cas d'usage
 # ══════════════════════════════════════════════════════════════════════════════
-HOOK_MODEL = "claude-sonnet-4-6"        # Hook gratuit — rapide, cheap
-SYNTHESIS_MODEL = "claude-opus-4-7"     # Synthèse payante — meilleure qualité doctrinal
+HOOK_MODEL = os.environ.get("HOOK_MODEL", "claude-3-5-sonnet-20241022")        # Hook gratuit — rapide, cheap
+SYNTHESIS_MODEL = os.environ.get("SYNTHESIS_MODEL", "claude-3-opus-20240229")     # Synthèse payante — meilleure qualité doctrinal
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HOOK PROMPTS — Mirror → Wound → Friction → Open Door
