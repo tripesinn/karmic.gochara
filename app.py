@@ -837,9 +837,14 @@ def index():
             session["profile"] = user
             session.modified = True
 
+    # Injecte 'illimite' si le pseudo est dans la liste VIP
+    display_user = dict(user) if user else {}
+    if display_user.get("pseudo", "").lower() in UNLIMITED_PSEUDOS:
+        display_user["plan"] = "illimite"
+
     return render_template(
         "index.html",
-        user=user,
+        user=display_user,
         today_iso=now.strftime("%Y-%m-%d"),
         now_hour=now.hour,
         now_minute=now.minute,

@@ -139,11 +139,17 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
             return r.json()["choices"][0]["message"]["content"]
             
     except Exception as e:
-        # En cas d'erreur de clé ou d'API, log et fallback sur Gemini avec le modèle par défaut
+        # En cas d'erreur de clé ou d'API, log et fallback sur le serveur (Claude par défaut)
         print(f"Erreur provider {provider}: {e}")
-        return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=None, user_key=None)
+        if _SERVER_ANTHROPIC_KEY:
+            return _call_claude(system, prompt, "claude-sonnet-4-6", _SERVER_ANTHROPIC_KEY, max_tokens)
+        return "Erreur lors de la génération (serveur non configuré)."
         
-    return gemini_api.generate(system, prompt, max_tokens=max_tokens, model=None, user_key=None)
+    # Provider inconnu -> serveur par défaut
+    if _SERVER_ANTHROPIC_KEY:
+        return _call_claude(system, prompt, "claude-sonnet-4-6", _SERVER_ANTHROPIC_KEY, max_tokens)
+    return "Erreur lors de la génération (aucun provider valide)."
+
 
 
 def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
@@ -643,8 +649,8 @@ Sentence 4 MUST give the complete key and finish the thought."""
             prompt += f"\n\nPAST KARMIC CONTEXT (MEMORIES OF PREVIOUS READINGS) :\n{rag_context}\n\nTake this evolution into account in your new analysis to avoid repetition and show you follow the user."
 
     # Force le modèle Sonnet pour le hook si aucun n'est précisé
-    user_model = user.get("user_model") if user else None
-    user_with_model = {**(user or {}), "user_model": user_model or HOOK_MODEL}
+    # Force le modèle et le provider du serveur pour le hook, car il doit être rapide et précis
+    user_with_model = {**(user or {}), "user_provider": None, "user_key": None, "user_model": HOOK_MODEL}
     result = generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
     
     if result and not result.startswith("[ERROR]"):
@@ -726,8 +732,8 @@ Sentence 4 MUST give the complete key to the Alternative of Consciousness and fi
             prompt += f"\n\nPAST KARMIC CONTEXT (MEMORIES) :\n{rag_context}\n\nTake this evolution into account in your new transit analysis."
 
     # Modèle Sonnet forcé si non précisé
-    user_model = user.get("user_model") if user else None
-    user_with_model = {**(user or {}), "user_model": user_model or HOOK_MODEL}
+    # Force le modèle et le provider du serveur pour le hook, car il doit être rapide et précis
+    user_with_model = {**(user or {}), "user_provider": None, "user_key": None, "user_model": HOOK_MODEL}
     result = generate_ai(system, prompt, user=user_with_model, max_tokens=1000)
 
     if result and not result.startswith("[ERROR]"):
