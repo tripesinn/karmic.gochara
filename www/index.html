@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,1530 +12,701 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gochara">
     <link rel="apple-touch-icon" href="static/icons/icon-192.png">
-    <link rel="icon" href="static/icons/icon-192.png" type="image/png">
-    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital@0;1&family=DM+Mono:wght@300;400&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500;600&family=EB+Garamond:ital@0;1&family=DM+Mono:wght@300;400&display=swap"
+        rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="astro_prompts.js"></script>
-    <style>
-        :root {
-            --bg: #0c0a08; --gold: #c9a84c; --gold-dim: #8a6f30; --text: #f5f0e8;
-            --text-dim: #8a8678; --border: #2a2820; --void: #1a1410;
-            --glyph: rgba(201,168,76,0.18); --mist: rgba(201,168,76,0.06);
-            --display: 'Cinzel', serif; --body: 'Cormorant Garamond', Georgia, serif;
-            --mono: 'DM Mono', monospace;
-        }
-        *, *::before, *::after { box-sizing: border-box; }
-        body { background: var(--bg); color: var(--text); font-family: var(--body); margin: 0; text-align: center; font-size: 18px; line-height: 1.7; overflow-x: hidden; }
-
-        /* Gradient + grain background */
-        body::before {
-            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
-            background:
-                radial-gradient(ellipse 60% 50% at 50% 0%, rgba(201,168,76,0.06) 0%, transparent 70%),
-                radial-gradient(ellipse 40% 30% at 80% 80%, rgba(139,58,42,0.07) 0%, transparent 60%);
-        }
-        body::after {
-            content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.35;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-        }
-
-        header { padding: 1.2rem 1.5rem; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(201,168,76,0.12); position: relative; z-index: 10; }
-
-        /* ── Hero ── */
-        .hero-sigil { width: 56px; height: 56px; margin: 0 auto 24px; opacity: 0; animation: fadeUp 1s ease 0.2s forwards; }
-        .hero-eyebrow { font-family: var(--mono); font-size: 11px; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-dim); opacity: 0; animation: fadeUp 1s ease 0.4s forwards; }
-        .hero-title { font-family: var(--display); font-size: clamp(28px, 7vw, 52px); font-weight: 400; letter-spacing: 0.04em; line-height: 1.15; color: var(--text); margin: 14px 0 6px; opacity: 0; animation: fadeUp 1s ease 0.6s forwards; }
-        .hero-title em { font-style: italic; color: var(--gold); font-family: 'Cormorant Garamond', serif; font-size: 1.05em; font-weight: 300; }
-        .hero-subtitle-line { font-size: 15px; font-weight: 300; font-style: italic; color: rgba(245,240,232,0.55); margin-top: 10px; opacity: 0; animation: fadeUp 1s ease 0.8s forwards; font-family: var(--mono); letter-spacing: 0.05em; }
-        .gold-rule { width: 50px; height: 1px; background: var(--gold); margin: 26px auto; opacity: 0; animation: fadeUp 1s ease 1s forwards; }
-
-        /* ── Hook ── */
-        .hero-hook { padding: 0 0 40px; opacity: 0; animation: fadeUp 1s ease 1.1s forwards; }
-        .hero-hook p { font-size: 19px; font-style: italic; color: rgba(245,240,232,0.78); max-width: 480px; margin: 0 auto 8px; }
-        .hero-hook strong { color: var(--gold); font-weight: 400; }
-
-        /* ── Pillars ── */
-        .pillars { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; max-width: 620px; margin: 0 auto 44px; padding: 0 20px; }
-        @media (max-width: 540px) { .pillars { grid-template-columns: 1fr; } }
-        .pillar { border: 1px solid var(--glyph); border-top: 2px solid var(--gold-dim); padding: 20px 16px; background: var(--mist); text-align: left; transition: border-color 0.3s, background 0.3s; }
-        .pillar:hover { border-color: var(--gold); background: rgba(201,168,76,0.08); }
-        .pillar-glyph { font-family: var(--mono); font-size: 10px; letter-spacing: 0.2em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 8px; display: block; }
-        .pillar h3 { font-family: var(--display); font-size: 13px; font-weight: 400; letter-spacing: 0.06em; color: var(--text); margin-bottom: 6px; }
-        .pillar p { font-size: 14px; font-style: italic; color: rgba(245,240,232,0.5); line-height: 1.4; margin: 0; }
-
-        /* ── Login card ── */
-        .login-card { border: 1px solid var(--glyph); padding: 2.2rem 2rem; max-width: 420px; margin: 0 auto 3rem; background: rgba(201,168,76,0.04); position: relative; }
-        .login-card::before { content: ''; position: absolute; top: -1px; left: 40px; right: 40px; height: 2px; background: linear-gradient(90deg, transparent, var(--gold), transparent); }
-        
-        .login-input { width: 100%; padding: 0.85rem; margin-bottom: 1.2rem; background: rgba(12,10,8,0.6); border: 1px solid rgba(201,168,76,0.2); color: var(--text); outline: none; box-sizing: border-box; font-family: var(--body); font-size: 16px; transition: border-color 0.25s; border-radius: 0; }
-        .login-input:focus { border-color: var(--gold); background: rgba(12,10,8,0.85); }
-        .login-input::placeholder { color: rgba(245,240,232,0.25); font-style: italic; }
-
-        .btn-primary {
-            background: transparent; border: 1px solid var(--gold); color: var(--gold);
-            padding: 0.9rem 1.5rem; cursor: pointer;
-            font-family: var(--display); font-size: 0.72rem; letter-spacing: 0.16em; text-transform: uppercase;
-            width: 100%; margin-bottom: 10px;
-            position: relative; overflow: hidden; transition: color 0.3s;
-        }
-        .btn-primary::before { content: ''; position: absolute; inset: 0; background: var(--gold); transform: scaleX(0); transform-origin: left; transition: transform 0.35s ease; }
-        .btn-primary:hover { color: var(--bg); }
-        .btn-primary:hover::before { transform: scaleX(1); }
-        .btn-primary span, .btn-primary #btn-text { position: relative; z-index: 1; }
-        .btn-primary:disabled { opacity: 0.7; cursor: wait; }
-
-        .btn-secondary { background: transparent; border: 1px solid rgba(201,168,76,0.2); color: var(--text-dim); padding: 0.85rem 1.5rem; cursor: pointer; font-family: var(--display); font-size: 0.7rem; letter-spacing: 0.1em; text-transform: uppercase; width: 100%; transition: border-color 0.25s; }
-        .btn-secondary:hover { border-color: var(--gold-dim); }
-        
-        #app-section { display: none; padding: 2rem; }
-        .date-input { background: #111110; border: 1px solid var(--border); color: #fff; padding: 0.8rem; margin-bottom: 1rem; width: 100%; max-width: 300px; font-family: var(--body); }
-
-        #timing-box {
-            background: rgba(20, 20, 30, 0.4);
-            border: 1px solid var(--border);
-            border-radius: 4px;
-            padding: 1.2rem;
-            margin-top: 2rem;
-        }
-        .dasha-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 4px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            font-family: var(--mono);
-            font-size: 0.82rem;
-        }
-        .dasha-row:last-child { border-bottom: none; }
-        .dasha-current { color: var(--gold); font-weight: bold; }
-
-        /* Animation de la roue (Spinner) */
-        .spinner {
-            display: inline-block;
-            width: 12px;
-            height: 12px;
-            border: 2px solid rgba(255,255,255,0.3);
-            border-radius: 50%;
-            border-top-color: #fff;
-            animation: spin 1s ease-in-out infinite;
-            margin-right: 10px;
-            vertical-align: middle;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        @keyframes fadeUp { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
-
-        .registration-area { display: none; margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(201,168,76,0.15); text-align: left; }
-        .label-small { font-size: 0.65rem; color: var(--gold-dim); font-family: var(--mono); margin-bottom: 5px; display: block; letter-spacing: 0.18em; text-transform: uppercase; }
-
-        #btn-coffee {
-            position: fixed; bottom: 18px; right: 18px; z-index: 999;
-            background: var(--gold); color: #000;
-            border: none; padding: 8px 16px;
-            font-family: var(--display); font-size: 0.7rem;
-            font-weight: bold; cursor: pointer;
-            text-decoration: none; display: inline-block;
-            transition: opacity 0.2s;
-        }
-        #btn-coffee:hover { opacity: 0.85; }
-        #btn-x {
-            position: fixed; bottom: 18px; left: 18px; z-index: 999;
-            background: #000; color: #fff;
-            border: 1px solid var(--border); padding: 8px 14px;
-            font-family: var(--display); font-size: 0.7rem;
-            font-weight: bold; cursor: pointer;
-            text-decoration: none; display: inline-flex; align-items: center; gap: 6px;
-            transition: opacity 0.2s;
-        }
-        #btn-x:hover { opacity: 0.75; }
-    </style>
+    <link rel="stylesheet" href="static/style.css">
 </head>
+
 <body>
 
-<header>
-    <div style="color: var(--gold); font-family: var(--display); font-size: 0.8rem; letter-spacing: 0.2em;">KARMIC GOCHARA</div>
-    <select id="lang-select" onchange="setLang(this.value)" style="background: transparent; color: var(--gold); border: 1px solid var(--border); padding: 5px;">
-        
-        <option value="fr" selected>🇫🇷 FR</option>
-        
-        <option value="en" >🇬🇧 EN</option>
-        
-        <option value="es" >🇪🇸 ES</option>
-        
-        <option value="pt" >🇧🇷 PT</option>
-        
-        <option value="de" >🇩🇪 DE</option>
-        
-        <option value="nl" >🇳🇱 NL</option>
-        
-        <option value="it" >🇮🇹 IT</option>
-        
-    </select>
-</header>
+    <header>
+        <div style="color: var(--gold); font-family: var(--display); font-size: 0.8rem; letter-spacing: 0.2em; display:flex; align-items:center; gap:10px;">
+            KARMIC GOCHARA
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <select id="lang-select" onchange="setLang(this.value)"
+                style="background: transparent; color: var(--gold); border: 1px solid var(--border); padding: 5px;">
+                
+                <option value="fr" selected>🇫🇷 FR</option>
+                
+                <option value="en" >🇬🇧 EN</option>
+                
+                <option value="es" >🇪🇸 ES</option>
+                
+                <option value="pt" >🇧🇷 PT</option>
+                
+                <option value="de" >🇩🇪 DE</option>
+                
+                <option value="nl" >🇳🇱 NL</option>
+                
+                <option value="it" >🇮🇹 IT</option>
+                
+            </select>
+            <button onclick="openSettings()" style="background:transparent; border:none; color:var(--text-dim); cursor:pointer; font-size:1.2rem;" title="Paramètres IA">⚙️</button>
+        </div>
+    </header>
 
-<div id="hero-section" style="position: relative; z-index: 1;">
+    <div id="hero-section" style="; position: relative; z-index: 1;">
 
-    <!-- Sigil -->
-    <div style="padding: 60px 0 0;">
-        <svg class="hero-sigil" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <circle cx="32" cy="32" r="30" stroke="#c9a84c" stroke-width="0.6" opacity="0.5"/>
-            <circle cx="32" cy="32" r="22" stroke="#c9a84c" stroke-width="0.4" opacity="0.4"/>
-            <circle cx="32" cy="32" r="3" fill="#c9a84c" opacity="0.8"/>
-            <line x1="32" y1="2" x2="32" y2="62" stroke="#c9a84c" stroke-width="0.4" opacity="0.3"/>
-            <line x1="2" y1="32" x2="62" y2="32" stroke="#c9a84c" stroke-width="0.4" opacity="0.3"/>
-            <line x1="10.5" y1="10.5" x2="53.5" y2="53.5" stroke="#c9a84c" stroke-width="0.3" opacity="0.2"/>
-            <line x1="53.5" y1="10.5" x2="10.5" y2="53.5" stroke="#c9a84c" stroke-width="0.3" opacity="0.2"/>
-            <path d="M32 10 L36 22 L32 19 L28 22 Z" fill="#c9a84c" opacity="0.7"/>
+        <div style="padding: 60px 0 0;">
+            <svg class="hero-sigil" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="32" cy="32" r="30" stroke="#c9a84c" stroke-width="0.6" opacity="0.5" />
+                <circle cx="32" cy="32" r="22" stroke="#c9a84c" stroke-width="0.4" opacity="0.4" />
+                <circle cx="32" cy="32" r="3" fill="#c9a84c" opacity="0.8" />
+                <line x1="32" y1="2" x2="32" y2="62" stroke="#c9a84c" stroke-width="0.4" opacity="0.3" />
+                <line x1="2" y1="32" x2="62" y2="32" stroke="#c9a84c" stroke-width="0.4" opacity="0.3" />
+                <line x1="10.5" y1="10.5" x2="53.5" y2="53.5" stroke="#c9a84c" stroke-width="0.3" opacity="0.2" />
+                <line x1="53.5" y1="10.5" x2="10.5" y2="53.5" stroke="#c9a84c" stroke-width="0.3" opacity="0.2" />
+                <path d="M32 10 L36 22 L32 19 L28 22 Z" fill="#c9a84c" opacity="0.7" />
+            </svg>
+            <p class="hero-eyebrow">@siderealAstro13 · Doctrine Évolutive Synthétique</p>
+            <h1 class="hero-title">
+                Ton
+                <em>Karma</em><br>
+                écrit dans les étoiles
+            </h1>
+            <p class="hero-subtitle-line">Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa</p>
+            <div class="gold-rule"></div>
+        </div>
+
+        <div class="hero-hook">
+            <p>Ton <strong>Ketu</strong> révèle la prison de mémoires passées.</p>
+            <p>Ton <strong>Chiron</strong> est la clé qui ouvre la porte.</p>
+            <p>Ton <strong>Stage</strong> est la scène qui t'attend.</p>
+        </div>
+
+        <div class="pillars">
+            <div class="pillar">
+                <span class="pillar-glyph">☋ ROM</span>
+                <h3>Mémoire Karmique</h3>
+                <p>Nœud Sud · mémoires passées · schémas de résistance</p>
+            </div>
+            <div class="pillar">
+                <span class="pillar-glyph">⚷ RAM</span>
+                <h3>Blessure Originelle</h3>
+                <p>Chiron · blessure originelle · clé de la Porte Visible</p>
+            </div>
+            <div class="pillar">
+                <span class="pillar-glyph">☉ Stage</span>
+                <h3>Mise en Scène</h3>
+                <p>Dharma · lieu de libération · action incarnée</p>
+            </div>
+        </div>
+
+        
+
+        <div class="login-card">
+            <input id="pseudo-input" class="login-input" type="text"
+                placeholder="Ton pseudo…">
+
+            <div id="registration-fields" class="registration-area">
+                <span class="label-small">Date naissance :</span>
+                <input id="birth-date" class="login-input" type="date">
+                <span class="label-small">Heure naissance :</span>
+                <input id="birth-time" class="login-input" type="time">
+                <span class="label-small">Ville naissance :</span>
+                <div style="position:relative;">
+                    <input id="birth-city" class="login-input" type="text"
+                        placeholder="Cherche ta ville…" autocomplete="off"
+                        oninput="onBirthCityInput(this.value)">
+                    <div id="birth-city-suggestions"
+                        style="display:none; position:absolute; top:100%; left:0; right:0; background:#111110; border:1px solid var(--border); z-index:200; max-height:180px; overflow-y:auto;">
+                    </div>
+                </div>
+                <span class="label-small">Email :</span>
+                <input id="reg-email" class="login-input" type="email" placeholder="ton@email.com">
+            </div>
+
+            <button id="main-action-btn" class="btn-primary" onclick="login()"><span>Connexion</span></button>
+            <button id="toggle-reg-btn" class="btn-secondary" onclick="toggleRegistration()">Créer un profil</button>
+            <div id="login-error" style="color: #c97a6b; margin-top: 15px; font-size: 0.88rem; font-style: italic;">
+            </div>
+        </div>
+
+        <!-- ── Pricing public ────────────────────────────────────────────────── -->
+        <div id="pricing-section" style="max-width: 520px; margin: 0 auto 4rem; padding: 0 20px;">
+            <div
+                style="font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 1.4rem; text-align: center;">
+                ✦ Accès & Tarifs</div>
+            <table style="width:100%; border-collapse:collapse; font-family:var(--mono); font-size:0.72rem;">
+                <thead>
+                    <tr>
+                        <th
+                            style="text-align:left; padding:0.5rem 0.6rem; color:var(--text-dim); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.15);">
+                        </th>
+                        <th
+                            style="text-align:center; padding:0.5rem 0.6rem; color:var(--text-dim); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.15);">
+                            Gratuit</th>
+                        <th
+                            style="text-align:center; padding:0.5rem 0.6rem; color:var(--gold); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.15);">
+                            Lecture<br><span style="font-size:0.9em;">4,99€</span></th>
+                        <th
+                            style="text-align:center; padding:0.5rem 0.6rem; color:var(--gold); font-weight:normal; border-bottom:1px solid rgba(201,168,76,0.4); background:rgba(201,168,76,0.04);">
+                            Illimité<br><span style="font-size:0.9em;">9,99€<span
+                                    style="font-size:0.75em; color:var(--text-dim);">/mois</span></span></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            Signal du Jour</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
+                            ✓</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
+                            ✓</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            Lecture natale</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
+                            ✓</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            Synthèse karmique complète</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
+                            ✓</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            Chatbot karmique</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:var(--text-dim);">
+                            3 questions</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            illimité si IA locale · sinon 10/mois</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            Alertes live & mémoire</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
+                    </tr>
+                    <tr>
+                        <td style="padding:0.55rem 0.6rem; color:var(--text-dim);">IA locale (Edge AI)</td>
+                        <td style="text-align:center; padding:0.55rem 0.6rem; color:rgba(255,255,255,0.2);">—</td>
+                        <td style="text-align:center; padding:0.55rem 0.6rem; color:rgba(255,255,255,0.2);">—</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; color:var(--text-dim); font-size:0.65rem; background:rgba(201,168,76,0.04);">
+                            si présent sur l'appareil</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div id="app-section" style="">
+        <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
+            <span style="color: var(--gold); font-family: var(--display);">✦ None</span>
+            <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">[ Déconnexion ]</button>
+        </div>
+
+        <!-- Tabs (Gochara / Carte) -->
+        <div
+            style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; font-family: var(--display);">
+            <button id="tab-gochara" onclick="switchTab('gochara')"
+                style="background:none; border:none; color:var(--gold); font-size:1rem; letter-spacing:0.1em; cursor:pointer; border-bottom: 2px solid var(--gold); padding-bottom:4px;">◆ Gochara</button>
+            <button id="tab-carte" onclick="switchTab('carte')"
+                style="background:none; border:none; color:var(--text-dim); font-size:1rem; letter-spacing:0.1em; cursor:pointer; border-bottom: 2px solid transparent; padding-bottom:4px;">✦ Carte Karmique</button>
+        </div>
+
+        <div id="view-carte" style="display: none; max-width: 600px; margin: 0 auto 3rem; text-align: center;">
+            <img id="karmic-chart-img" src="/chart/karmic.svg"
+                style="width: 100%; max-width: 500px; height: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5);"
+                alt="Carte Karmique"
+                onerror="this.style.display='none'; document.getElementById('karmic-chart-err').style.display='block';">
+            <div id="karmic-chart-err"
+                style="display: none; color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">
+                Lance un calcul…
+            </div>
+        </div>
+
+        <div id="view-gochara">
+            <!-- Hook natal -->
+            <div id="hook-natal-box" style="display:none; max-width:600px; margin:0 auto 2.5rem; padding:0 20px;">
+                <div style="border-left:2px solid var(--gold-dim); padding:1rem 1.2rem; background:var(--mist);">
+                    <div
+                        style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:0.6rem; text-transform:uppercase; display:flex; align-items:center; gap:8px;">
+                        ✦ Lecture natale <span id="natal-engine-badge"
+                            style="font-size:0.6rem; letter-spacing:0.1em; padding:2px 7px; border-radius:2px;"></span>
+                    </div>
+                    <div id="hook-natal-text"
+                        style="font-style:italic; font-size:1rem; line-height:1.75; color:rgba(245,240,232,0.82);">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Hook transit -->
+            <div id="hook-transit-box" style="display:none; max-width:600px; margin:0 auto 2rem; padding:0 20px;">
+                <div style="border-left:2px solid var(--gold); padding:1rem 1.2rem; background:rgba(201,168,76,0.06);">
+                    <div
+                        style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:0.6rem; text-transform:uppercase;">
+                        ◆ Signal du jour</div>
+                    <div id="hook-transit-text"
+                        style="font-style:italic; font-size:1rem; line-height:1.75; color:rgba(245,240,232,0.88);">
+                    </div>
+                    <div id="hook-transit-spinner"
+                        style="display:none; color:var(--text-dim); font-size:0.82rem; margin-top:0.5rem;">
+                        <span class="spinner"></span> <span id="hook-transit-spinner-text">Lecture des aspects…</span>
+                    </div>
+                </div>
+            </div>
+
+            <input type="date" id="transit-date" class="date-input" value="">
+            <br>
+            <div style="max-width: 300px; margin: 0 auto; position: relative;">
+                <div
+                    style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--display); letter-spacing: 0.05em; text-align: left; margin-bottom: 4px;">
+                    LIEU DE TRANSIT</div>
+                <div style="display: flex; gap: 8px;">
+                    <button id="geo-btn" class="btn-secondary"
+                        style="width: auto; padding: 0.85rem 1rem; flex-shrink: 0;" onclick="useGeolocation()"
+                        title="Utiliser ma position actuelle">
+                        <span id="geo-icon">📍</span>
+                    </button>
+                    <div style="flex: 1; position: relative;">
+                        <input id="transit-city-input" class="login-input" type="text" autocomplete="off"
+                            placeholder="Position auto ou saisir une ville…"
+                            style="margin-bottom: 0; font-size: 0.85rem;" oninput="onCityInput(this.value)"
+                            onfocus="onCityInput(this.value)">
+                        <div id="city-suggestions"
+                            style="display:none; position:absolute; top:100%; left:0; right:0; background:#111110; border:1px solid var(--border); z-index:100; max-height:180px; overflow-y:auto;">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <br>
+
+            <!-- Étape 1 : hook transit -->
+            <button id="hook-btn" class="btn-primary" style="max-width: 300px;" onclick="requestHookTransit()">
+                <span id="hook-btn-text">◆ VOIR LE SIGNAL DU JOUR</span>
+            </button>
+
+            <!-- Étape 2 : synthèse complète -->
+            <div id="synthesis-cta" style="display:none; margin-top:1rem;">
+                <button id="calc-btn" class="btn-primary"
+                    style="max-width: 300px; border-color: var(--gold); color: var(--gold);"
+                    onclick="calculateWithRouting()">
+                    <span id="btn-text">✦ OBTENIR LA LECTURE COMPLÈTE</span>
+                </button>
+                <div
+                    style="font-family:var(--mono); font-size:0.65rem; color:var(--text-dim); letter-spacing:0.15em; margin-top:0.5rem;">
+                    Interprétation @siderealastro13
+                </div>
+            </div>
+
+            <!-- Étape 3 : plans paiement -->
+            <div id="payment-plans" style="display:none; margin-top:1.5rem;">
+                <div
+                    style="font-family:var(--mono); font-size:0.7rem; color:var(--gold); letter-spacing:0.15em; margin-bottom:1rem; text-align:center;">
+                    ✦ CHOISIR UN PLAN
+                </div>
+                <div style="display:flex; flex-direction:column; gap:0.75rem; max-width:300px; margin:0 auto;">
+                    <button class="btn-plan" onclick="stripeCheckout('test')">
+                        <span class="plan-label">Lecture</span>
+                        <span class="plan-price">4,99€</span>
+                        <span class="plan-desc">Synthèse complète · 3 questions chatbot · accès immédiat</span>
+                    </button>
+                    <button class="btn-plan btn-plan--featured" onclick="stripeCheckout('subscription')">
+                        <span class="plan-label">Illimité</span>
+                        <span class="plan-price">9,99€<small>/mois</small></span>
+                        <span class="plan-desc">Chatbot illimité si IA locale · sinon 10/mois · alertes live</span>
+                    </button>
+                </div>
+                <div id="payment-error"
+                    style="display:none; color:#ff6b6b; font-size:0.7rem; margin-top:0.75rem; text-align:center;"></div>
+            </div>
+
+            <div id="synthesis-box"
+                style="margin-top: 3rem; text-align: left; display: none; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 20px;">
+                <div id="transit-context-banner"
+                    style="display:none; margin-bottom:1.2rem; padding:0.8rem 1rem; border-left:3px solid var(--gold); background:rgba(201,168,76,0.06); font-size:0.88rem; color:var(--text-dim);">
+                </div>
+                <div id="synthesis-content" style="line-height: 1.8; font-size: 1.1rem;"></div>
+                <div style="margin-top: 1.5rem; text-align: center;">
+                    <button id="btnEmail" class="btn-secondary" onclick="sendSynthesisEmail()"
+                        style="max-width: 260px;">
+                        📧 Recevoir par email
+                    </button>
+                    <span id="email-status"
+                        style="display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-dim);"></span>
+                </div>
+                <!-- Rating bar -->
+                <div id="rating-bar">
+                    <span class="rating-label">Cette lecture t'a-t-elle touché ?</span>
+                    <button id="btn-rate-up" class="btn-rate" onclick="rateUp()">👍</button>
+                    <button id="btn-rate-down" class="btn-rate" onclick="rateDown()">👎</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── Chatbot karmique ── -->
+        <div id="chat-section" style="display:none; max-width:800px; margin:2rem auto 0; padding:0 20px;">
+            <div style="border-top:1px solid var(--border); padding-top:1.5rem;">
+                <p id="chat-quota-label" style="font-size:0.85rem; color:var(--text-dim); margin:0 0 1rem;"></p>
+                <div id="chat-history"
+                    style="display:flex; flex-direction:column; gap:1rem; margin-bottom:1rem; max-height:420px; overflow-y:auto;">
+                </div>
+                <div style="display:flex; gap:8px; align-items:flex-end;">
+                    <textarea id="chat-input" rows="2"
+                        placeholder="Ta question…"
+                        style="flex:1; background:var(--surface); border:1px solid var(--border); color:var(--text); border-radius:4px; padding:0.6rem 0.8rem; font-size:0.95rem; resize:none; font-family:inherit;"
+                        onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage();}"></textarea>
+                    <button id="chat-send-btn" onclick="sendChatMessage()"
+                        style="background:var(--gold); color:#111; border:none; border-radius:4px; padding:0.6rem 1.2rem; font-size:0.9rem; cursor:pointer; letter-spacing:0.08em; white-space:nowrap;">
+                        ENVOYER
+                    </button>
+                </div>
+                <p id="chat-upgrade-hint"
+                    style="display:none; margin-top:0.8rem; font-size:0.85rem; color:var(--text-dim); text-align:center;">
+                </p>
+            </div>
+        </div>
+
+        <!-- Outils supplémentaires -->
+        <div style="max-width: 800px; margin: 2.5rem auto 0; padding: 0 20px;">
+            <div
+                style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;">
+
+                
+
+                <label
+                    style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-dim);">
+                    <input type="checkbox" id="alerts-toggle"  onchange="toggleAlerts(this.checked)"
+                        style="accent-color: var(--gold); width: 16px; height: 16px;">
+                    🔔 Alertes transit par email
+                    
+                </label>
+                
+                <span id="alerts-status" style="font-size: 0.78rem; color: var(--text-dim);"></span>
+            </div>
+
+            
+        </div>
+    </div> <!-- Fin view-gochara -->
+    </div> <!-- Fin app-section -->
+
+    <a id="btn-coffee" href="https://buymeacoffee.com/jerome6" target="_blank" rel="noopener">
+        ☕ Buy me a coffee
+    </a>
+
+    <a id="btn-x" href="https://x.com/siderealAstro13" target="_blank" rel="noopener">
+        <svg width="14" height="14" viewBox="0 0 1200 1227" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path
+                d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z" />
         </svg>
-        <p class="hero-eyebrow">@siderealAstro13 · Doctrine Évolutive Synthétique</p>
-        <h1 class="hero-title">
-            Ton
-            <em>Karma</em><br>
-            écrit dans les étoiles
-        </h1>
-        <p class="hero-subtitle-line">Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa</p>
-        <div class="gold-rule"></div>
-    </div>
+        @siderealAstro13
+    </a>
 
-    <!-- Hook -->
-    <div class="hero-hook">
-        <p>Ton <strong>Ketu</strong> révèle la prison de mémoires passées.</p>
-        <p>Ton <strong>Chiron</strong> est la clé qui ouvre la porte.</p>
-        <p>Ton <strong>Stage</strong> est la scène qui t'attend.</p>
-    </div>
-
-    <!-- Pillars -->
-    <div class="pillars">
-        <div class="pillar">
-            <span class="pillar-glyph">☋ ROM</span>
-            <h3>Mémoire Karmique</h3>
-            <p>Nœud Sud · mémoires passées · schémas de résistance</p>
-        </div>
-        <div class="pillar">
-            <span class="pillar-glyph">⚷ RAM</span>
-            <h3>Porte Invisible</h3>
-            <p>Chiron · blessure originelle · clé de la Porte Visible</p>
-        </div>
-        <div class="pillar">
-            <span class="pillar-glyph">☉ Stage</span>
-            <h3>Mise en Scène</h3>
-            <p>Dharma · lieu de libération · action incarnée</p>
-        </div>
-    </div>
-
-    <!-- Login card -->
-    <div class="login-card">
-        <input id="pseudo-input" class="login-input" type="text" placeholder="Ton pseudo…">
-
-        <div id="registration-fields" class="registration-area">
-            <span class="label-small">Date naissance :</span>
-            <input id="birth-date" class="login-input" type="date">
-
-            <span class="label-small">Heure naissance :</span>
-            <input id="birth-time" class="login-input" type="time">
-
-            <span class="label-small">Ville naissance :</span>
-            <input id="birth-city" class="login-input" type="text" placeholder="Cherche ta ville…">
-        </div>
-
-        <button id="main-action-btn" class="btn-primary" onclick="login()"><span>Connexion</span></button>
-        <button id="toggle-reg-btn" class="btn-secondary" onclick="toggleRegistration()">Créer un profil</button>
-
-        <div id="login-error" style="color: #c97a6b; margin-top: 15px; font-size: 0.88rem; font-style: italic;"></div>
-    </div>
-</div>
-
-<div id="app-section" style="display:none;">
-    <div style="display: flex; justify-content: space-between; margin-bottom: 2rem;">
-        <span style="color: var(--gold); font-family: var(--display);">✦ <span id="user-name-display">None</span></span>
-        <button onclick="logout()" style="background:none; border:none; color:var(--text-dim); cursor:pointer;">[ Déconnexion ]</button>
-    </div>
-    
-    <input type="date" id="transit-date" class="date-input" value="">
-    <br>
-    <div style="max-width: 300px; margin: 0 auto; position: relative;">
-        <div style="font-size: 0.7rem; color: var(--text-dim); font-family: var(--display); letter-spacing: 0.05em; text-align: left; margin-bottom: 4px;">LIEU DE TRANSIT</div>
-        <div style="display: flex; gap: 8px;">
-            <button id="geo-btn" class="btn-secondary" style="width: auto; padding: 0.85rem 1rem; flex-shrink: 0;" onclick="useGeolocation()" title="Utiliser ma position actuelle">
-                <span id="geo-icon">📍</span>
-            </button>
-            <div style="flex: 1; position: relative;">
-                <input id="transit-city-input" class="login-input" type="text" autocomplete="off"
-                    placeholder="Position auto ou saisir une ville…"
-                    style="margin-bottom: 0; font-size: 0.85rem;"
-                    oninput="onCityInput(this.value)"
-                    onfocus="onCityInput(this.value)">
-                <div id="city-suggestions" style="display:none; position:absolute; top:100%; left:0; right:0; background:#111110; border:1px solid var(--border); z-index:100; max-height:180px; overflow-y:auto;"></div>
-            </div>
-        </div>
-    </div>
-    <br>
-    <button id="calc-btn" class="btn-primary" style="max-width: 300px;" onclick="calculate()">
-        <span id="btn-text">✦ Calculer »</span>
-    </button>
-
-    <!-- Hook natal Gemma -->
-    <div id="natal-hook-box" style="display:none; margin: 1.5rem auto 0; text-align:left; max-width:800px; padding:0 20px;">
-        <div style="border-top:1px solid var(--border); padding-top:1rem; margin-bottom:0.5rem; display:flex; align-items:center; gap:10px;">
-            <span style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim);">✦ PROFIL KARMIQUE</span>
-            <span id="natal-engine-badge" style="font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em; padding:2px 7px; border-radius:2px;"></span>
-        </div>
-        <div id="natal-hook-content" style="line-height:1.8; font-size:1.05rem; color:rgba(245,240,232,0.85);"></div>
-    </div>
-
-    <div id="synthesis-box" style="margin-top: 3rem; text-align: left; display: none; max-width: 800px; margin-left: auto; margin-right: auto; padding: 0 20px;">
-        <div style="display:flex; align-items:center; gap:10px; margin-bottom:0.75rem;">
-            <span id="synthesis-engine-badge" style="font-family:var(--mono); font-size:0.6rem; letter-spacing:0.1em; padding:2px 7px; border-radius:2px;"></span>
-        </div>
-        <div id="transit-context-banner" style="display:none; margin-bottom:1.2rem; padding:0.8rem 1rem; border-left:3px solid var(--gold); background:rgba(201,168,76,0.06); font-size:0.88rem; color:var(--text-dim);"></div>
-        <div id="synthesis-content" style="line-height: 1.8; font-size: 1.1rem;"></div>
-        
-        <!-- Bloc Timing (Dashas & Sade Sati) -->
-        <div id="timing-box" style="display:none; margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border-dim);">
-            <div style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:1rem;">✦ TIMING KARMIQUE</div>
-            <div id="sade-sati-display" style="margin-bottom:1rem; padding:0.8rem; border-radius:4px; display:none;"></div>
-            <div id="dasha-display" style="font-size:0.9rem; color:var(--text-dim);"></div>
-        </div>
-
-        <div style="margin-top: 1.5rem; text-align: center;">
-            <button id="btnEmail" class="btn-secondary" onclick="sendSynthesisEmail()" style="max-width: 260px;">
-                📧 Recevoir par email
-            </button>
-            <span id="email-status" style="display: block; margin-top: 0.5rem; font-size: 0.85rem; color: var(--text-dim);"></span>
-        </div>
-    </div>
-
-    <!-- ── Outils supplémentaires ───────────────────────────────────────────── -->
-    <div style="max-width: 800px; margin: 2.5rem auto 0; padding: 0 20px;">
-        <div style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;">
-
-            <!-- Calendrier mensuel -->
-            <button class="btn-secondary" onclick="toggleCalendar()" style="max-width: 220px; font-size: 0.82rem;">
-                📅 Calendrier mensuel
-            </button>
-
-            <!-- Rapport PDF annuel -->
-            <button class="btn-secondary" onclick="downloadAnnualReport()" id="btn-annual-report" style="max-width: 220px; font-size: 0.82rem;">
-                📄 Rapport annuel PDF
-            </button>
-
-            <!-- Chatbot karmique -->
-            <button class="btn-secondary" onclick="openChatbot()" id="btn-chatbot" style="max-width: 220px; font-size: 0.82rem;">
-                💬 Chatbot karmique
-            </button>
-            <span id="chatbot-quota-indicator" style="font-size:0.75rem;color:var(--text-dim);"></span>
-
-            <!-- Toggle alertes -->
-            <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; font-size: 0.82rem; color: var(--text-dim);">
-                <input type="checkbox" id="alerts-toggle"
-
-                    onchange="toggleAlerts(this.checked)"
-                    style="accent-color: var(--gold); width: 16px; height: 16px;">
-                🔔 Alertes transit par email
+    <script src="static/app.js"></script>
+    <!-- ── Modal consent RGPD ──────────────────────────────────────────────────── -->
+    <div id="consent-modal">
+        <div id="consent-box">
+            <h4 id="consent-title"></h4>
+            <p id="consent-text"></p>
+            <label>
+                <input type="checkbox" id="consent-check">
+                <span id="consent-label-text"></span>
             </label>
-            <span id="alerts-status" style="font-size: 0.78rem; color: var(--text-dim);"></span>
-        </div>
-
-        <!-- ── Panel Chatbot karmique ──────────────────────────────────────── -->
-        <div id="chatbot-panel" style="display:none; margin-top:1.5rem; background:#0f0f0a; border:1px solid var(--border); border-radius:3px; overflow:hidden;">
-            <!-- Header -->
-            <div style="display:flex; align-items:center; justify-content:space-between; padding:12px 16px; border-bottom:1px solid var(--border);">
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span style="color:var(--gold);font-family:var(--display);font-size:0.85rem;">✦ Chatbot karmique</span>
-                    <span id="chatbot-engine-badge" style="font-family:var(--mono);font-size:0.6rem;letter-spacing:0.1em;padding:2px 7px;border-radius:2px;background:rgba(180,140,60,0.15);color:var(--gold);border:1px solid rgba(180,140,60,0.3);">⬡ GEMMA LOCAL</span>
-                </div>
-                <div style="display:flex; align-items:center; gap:10px;">
-                    <span id="chatbot-remaining-badge" style="font-size:0.72rem; color:var(--text-dim);"></span>
-                    <button onclick="closeChatbot()" style="background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:1.1rem;padding:0 4px;">✕</button>
-                </div>
+            <div id="consent-actions">
+                <button class="btn-secondary" id="consent-decline-btn" onclick="submitRating(false)"
+                    style="font-size:0.7rem;"></button>
+                <button class="btn-primary" onclick="submitRating(true)"
+                    style="font-size:0.7rem;"><span>Confirmer</span></button>
             </div>
-            <!-- Messages -->
-            <div id="chatbot-messages" style="height:320px; overflow-y:auto; padding:16px; display:flex; flex-direction:column; gap:12px;">
-                <div id="chatbot-welcome" style="text-align:center; color:var(--text-dim); font-size:0.82rem; padding:2rem 1rem;">
-                    Pose ta question — je réponds depuis ton profil natal.
-                </div>
-            </div>
-            <!-- Input -->
-            <div id="chatbot-input-area" style="padding:12px 16px; border-top:1px solid var(--border); display:flex; gap:8px;">
-                <input id="chatbot-input" type="text" placeholder="Ta question karmique…"
-                    style="flex:1; background:#0a0a12; border:1px solid var(--border); border-radius:2px; color:var(--text); font-size:0.88rem; padding:0.5rem 0.75rem; font-family:var(--body); outline:none;"
-                    onkeydown="if(event.key==='Enter' && !event.shiftKey){event.preventDefault();sendChatMessage();}"
-                >
-                <button onclick="sendChatMessage()" id="chatbot-send-btn" class="btn-secondary" style="width:auto; padding:0.5rem 1rem; font-size:0.82rem;">
-                    →
-                </button>
-            </div>
-            <!-- Locked state (free plan) -->
-            <div id="chatbot-locked" style="display:none; padding:24px 16px; text-align:center;">
-                <div style="color:var(--text-dim); font-size:0.85rem; margin-bottom:1rem;">
-                    Le chatbot est disponible avec le plan <strong style="color:var(--gold);">Lecture</strong> (4,99€) ou <strong style="color:var(--gold);">Illimité</strong> (9,99€/mois).
-                </div>
-                <button class="btn-primary" onclick="stripeCheckout('test')" style="max-width:260px; font-size:0.82rem;">
-                    Débloquer 3 questions — 4,99€
-                </button>
-            </div>
-        </div>
-
-        <!-- ── Panel Gemma Manager ─────────────────────────────────────────── -->
-        <div id="gemma-panel" style="display:none; margin-top:1.5rem; background:#0f0f22; border:1px solid var(--border); border-radius:3px; padding:16px;">
-            <div style="color:var(--gold);font-family:var(--display);font-size:0.85rem;margin-bottom:10px;">✦ Gemma 3 - Inférence locale</div>
-            <div id="gemma-status-text" style="font-size:0.82rem;color:var(--text-dim);margin-bottom:12px;">Vérification…</div>
-            <div style="display:flex;gap:8px;flex-wrap:wrap;">
-                <button class="btn-secondary" onclick="gemmaDownload()" id="btn-gemma-dl" style="width:auto;padding:0.6rem 1rem;font-size:0.78rem;">
-                    ✦ Télécharger le modèle (~2.2 Go)
-                </button>
-                <button class="btn-secondary" onclick="gemmaPickFile()" id="btn-gemma-pick" style="width:auto;padding:0.6rem 1rem;font-size:0.78rem;">
-                    ✦ Sélectionner le fichier (.task)
-                </button>
-                <button class="btn-secondary" onclick="gemmaLoad()" id="btn-gemma-load" style="width:auto;padding:0.6rem 1rem;font-size:0.78rem;display:none;">
-                    ▶ Charger en mémoire
-                </button>
-            </div>
-            <div id="gemma-dl-progress" style="margin-top:10px;display:none;">
-                <div style="background:#1a1a2a;border-radius:2px;height:6px;overflow:hidden;">
-                    <div id="gemma-progress-bar" style="height:100%;background:var(--gold);width:0%;transition:width 0.3s;"></div>
-                </div>
-                <div id="gemma-progress-text" style="font-size:0.75rem;color:var(--text-dim);margin-top:4px;"></div>
-            </div>
-            <p style="font-size:0.75rem;color:var(--text-dim);margin-top:12px;margin-bottom:0;">
-                Une fois chargé, la synthèse karmique est générée directement sur ton appareil — sans appel serveur, sans internet requis.
-            </p>
-        </div>
-
-        <!-- ── Panel calendrier ─────────────────────────────────────────────── -->
-        <div id="calendar-panel" style="display:none; margin-top: 1.5rem;">
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
-                <button onclick="shiftMonth(-1)" class="btn-secondary" style="width:auto; padding: 0.5rem 1rem; font-size: 0.82rem;">← Préc.</button>
-                <span id="calendar-title" style="color: var(--gold); font-family: var(--display); font-size: 1rem;"></span>
-                <button onclick="shiftMonth(1)" class="btn-secondary" style="width:auto; padding: 0.5rem 1rem; font-size: 0.82rem;">Suiv. →</button>
-            </div>
-            <div id="calendar-loading" style="display:none; text-align:center; color: var(--text-dim); font-size:0.85rem;">Calcul en cours…</div>
-            <div id="calendar-content"></div>
         </div>
     </div>
-</div>
 
-<a id="btn-coffee" href="https://buymeacoffee.com/jerome6" target="_blank" rel="noopener">
-    ☕ Buy me a coffee
-</a>
-
-<a id="btn-x" href="https://x.com/siderealAstro13" target="_blank" rel="noopener">
-    <svg width="14" height="14" viewBox="0 0 1200 1227" fill="currentColor" xmlns="http://www.w3.org/2000/svg"><path d="M714.163 519.284L1160.89 0H1055.03L667.137 450.887L357.328 0H0L468.492 681.821L0 1226.37H105.866L515.491 750.218L842.672 1226.37H1200L714.137 519.284H714.163ZM569.165 687.828L521.697 619.934L144.011 79.6944H306.615L611.412 515.685L658.88 583.579L1055.08 1150.3H892.476L569.165 687.854V687.828Z"/></svg>
-    @siderealAstro13
-</a>
-
-<script>
-/**
- * Standalone Session Manager (Local Mode)
- * Checks localStorage for a profile and toggles UI accordingly.
- */
-document.addEventListener('DOMContentLoaded', () => {
-    const savedProfile = localStorage.getItem('gochara_profile');
-    const heroSection = document.getElementById('hero-section');
-    const appSection = document.getElementById('app-section');
-
-    if (savedProfile) {
-        const profile = JSON.parse(savedProfile);
-        if (heroSection) heroSection.style.display = 'none';
-        if (appSection) appSection.style.display = 'block';
-
-        const nameEl = document.getElementById('user-name-display');
-        if (nameEl) nameEl.textContent = profile.pseudo || profile.name;
-
-        // Hook natal — cache localStorage (natal = immuable, 1 seule inférence)
-        const natalCacheKey = `gochara_natal_hook_${profile.year}_${profile.month}_${profile.day}`;
-        const cachedHook = localStorage.getItem(natalCacheKey);
-
-        const engineBadge = (id, engine) => {
-            const el = document.getElementById(id);
-            if (!el) return;
-            if (engine === 'gemma') {
-                el.textContent = '⬡ GEMMA LOCAL';
-                el.style.cssText += ';background:rgba(180,140,60,0.15);color:var(--gold);border:1px solid rgba(180,140,60,0.3);';
-            } else if (engine === 'claude') {
-                el.textContent = '☁ CLAUDE';
-                el.style.cssText += ';background:rgba(100,120,180,0.12);color:#8899cc;border:1px solid rgba(100,120,180,0.25);';
-            } else if (engine === 'warn') {
-                el.textContent = '⚠ MODÈLE NON CHARGÉ';
-                el.style.cssText += ';background:rgba(180,80,60,0.12);color:#c97a6b;border:1px solid rgba(180,80,60,0.25);';
-            }
-        };
-
-        const showNatalHook = (text, engine) => {
-            const box     = document.getElementById('natal-hook-box');
-            const content = document.getElementById('natal-hook-content');
-            if (box && content && text) {
-                content.innerHTML = marked.parse(text);
-                box.style.display = 'block';
-                if (engine) engineBadge('natal-engine-badge', engine);
-            }
-        };
-
-        if (cachedHook) {
-            // Affichage immédiat depuis le cache — on lit l'engine stocké
-            const cachedEngine = localStorage.getItem(natalCacheKey + '_engine') || 'gemma';
-            showNatalHook(cachedHook, cachedEngine);
-        } else {
-            // Première fois : inférence Gemma puis mise en cache
-            Gemma.checkModel().then(async status => {
-                if (!status.loaded) return;
-                if (!AstroCalc.plugin()) return;
-                try {
-                    const now = new Date();
-                    const chartData = await AstroCalc.calculateTransits({
-                        natal: {
-                            year:   parseInt(profile.year),
-                            month:  parseInt(profile.month),
-                            day:    parseInt(profile.day),
-                            hour:   parseInt(profile.hour   || 12),
-                            minute: parseInt(profile.minute || 0),
-                            lat:    parseFloat(profile.lat),
-                            lon:    parseFloat(profile.lon),
-                            tz:     profile.tz || 'Europe/Paris',
-                        },
-                        date:   `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`,
-                        hour:   now.getHours(),
-                        minute: now.getMinutes(),
-                    });
-                    const prompts = buildNatalHookPrompts(chartData, profile);
-                    const gr = await Gemma.generate(prompts.system, prompts.user);
-                    if (gr.synthesis) {
-                        const engine = gr.local ? 'gemma' : 'claude';
-                        localStorage.setItem(natalCacheKey, gr.synthesis);
-                        localStorage.setItem(natalCacheKey + '_engine', engine);
-                        showNatalHook(gr.synthesis, engine);
-                    }
-                } catch(e) { console.warn('Natal hook skipped:', e.message); }
-            });
-        }
-    }
-});
-
-function setLang(code) {
-    fetch('/set_lang', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({lang: code})
-    }).then(() => location.reload());
-}
-
-function toggleRegistration() {
-    const fields = document.getElementById('registration-fields');
-    const mainBtn = document.getElementById('main-action-btn');
-    const toggleBtn = document.getElementById('toggle-reg-btn');
-    const errDiv = document.getElementById('login-error');
-
-    if (fields.style.display === 'none' || fields.style.display === '') {
-        fields.style.display = 'block';
-        mainBtn.innerHTML = "S'INSCRIRE ET SE CONNECTER";
-        mainBtn.onclick = register;
-        toggleBtn.innerHTML = "RETOUR À LA CONNEXION";
-    } else {
-        fields.style.display = 'none';
-        mainBtn.innerHTML = "Connexion";
-        mainBtn.onclick = login;
-        toggleBtn.innerHTML = "Créer un profil";
-    }
-    errDiv.textContent = "";
-}
-
-function login() {
-    const pseudo = document.getElementById('pseudo-input').value.trim();
-    const errDiv = document.getElementById('login-error');
-    if (!pseudo) { errDiv.textContent = "Pseudo requis."; return; }
-
-    errDiv.style.color = "var(--gold)";
-    errDiv.textContent = "Alignement des énergies...";
-
-    // Standalone Mock Login
-    setTimeout(() => {
-        const dummyProfile = {
-            pseudo: pseudo,
-            name: pseudo,
-            year: 1980, month: 1, day: 1, hour: 12, minute: 0,
-            city: "Paris", lat: 48.8566, lon: 2.3522, tz: "Europe/Paris"
-        };
-        localStorage.setItem('gochara_profile', JSON.stringify(dummyProfile));
-        location.reload();
-    }, 800);
-}
-
-function register() {
-    const pseudo = document.getElementById('pseudo-input').value.trim();
-    const birthDate = document.getElementById('birth-date').value;
-    const birthTime = document.getElementById('birth-time').value;
-    const birthCity = document.getElementById('birth-city').value.trim();
-    const errDiv = document.getElementById('login-error');
-    
-    if (!pseudo || !birthDate || !birthTime || !birthCity) {
-        errDiv.style.color = "#c97a6b";
-        errDiv.textContent = "Champs de naissance manquants.";
-        return;
-    }
-
-    // Standalone Mock Register
-    const [year, month, day] = birthDate.split('-').map(Number);
-    const [hour, minute] = birthTime.split(':').map(Number);
-    
-    const profile = {
-        pseudo, name: pseudo,
-        year, month, day, hour, minute,
-        city: birthCity, lat: 48.8566, lon: 2.3522, tz: "Europe/Paris"
-    };
-    
-    localStorage.setItem('gochara_profile', JSON.stringify(profile));
-    location.reload();
-}
-
-function calculate() {
-    const date = document.getElementById('transit-date').value;
-    if (!date) return;
-
-    const btn = document.getElementById('calc-btn');
-    const btnText = document.getElementById('btn-text');
-    const originalText = btnText.innerHTML;
-
-    // Activation de l'état de chargement (Roue + Texte)
-    btn.disabled = true;
-    btnText.innerHTML = '<span class="spinner"></span> LECTURE DES ASTRES...';
-
-    const payload = { date, hour: 12, minute: 0 };
-    if (transitGeo) {
-        payload.transit_lat  = transitGeo.lat;
-        payload.transit_lon  = transitGeo.lon;
-        payload.transit_city = transitGeo.city;
-        payload.transit_tz   = transitGeo.tz;
-    }
-    fetch('/calculate', {
-        method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(payload)
-    })
-    .then(r => r.json())
-    .then(data => {
-        // Retour à l'état normal
-        btn.disabled = false;
-        btnText.innerHTML = originalText;
-
-        if (data.error) {
-            alert(data.error);
-        } else {
-            lastSynthesis = data.synthesis;
-            document.getElementById('synthesis-content').innerHTML = marked.parse(data.synthesis);
-            document.getElementById('synthesis-box').style.display = 'block';
-            document.getElementById('email-status').textContent = '';
-            // Badge moteur : synthesis vient toujours du serveur (Claude)
-            const synthBadge = document.getElementById('synthesis-engine-badge');
-            if (synthBadge) {
-                const isLocal = data.local === true;
-                if (isLocal) {
-                    synthBadge.textContent = '⬡ GEMMA LOCAL';
-                    synthBadge.style.cssText += ';background:rgba(180,140,60,0.15);color:var(--gold);border:1px solid rgba(180,140,60,0.3);';
-                } else {
-                    synthBadge.textContent = '☁ CLAUDE';
-                    synthBadge.style.cssText += ';background:rgba(100,120,180,0.12);color:#8899cc;border:1px solid rgba(100,120,180,0.25);';
-                }
-            }
-            // Scroll automatique vers le résultat
-            document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
-        }
-    })
-    .catch(err => {
-        btn.disabled = false;
-        btnText.innerHTML = originalText;
-        alert("Erreur de connexion.");
-    });
-}
-
-let lastSynthesis = '';
-let transitGeo = null; // { lat, lon, city, tz }
-
-function useGeolocation() {
-    const icon = document.getElementById('geo-icon');
-    const input = document.getElementById('transit-city-input');
-    if (!navigator.geolocation) {
-        input.placeholder = "Géolocalisation non supportée — saisir une ville";
-        return;
-    }
-    icon.textContent = '⏳';
-    input.value = '';
-    input.placeholder = 'Localisation…';
-    input.disabled = true;
-    navigator.geolocation.getCurrentPosition(
-        async (pos) => {
-            const lat = pos.coords.latitude;
-            const lon = pos.coords.longitude;
-            const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-            try {
-                const r = await fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=fr`);
-                const d = await r.json();
-                const city = d.address?.city || d.address?.town || d.address?.village || d.address?.county || 'Position GPS';
-                const country = d.address?.country || '';
-                transitGeo = { lat, lon, city: `${city}, ${country}`.trim().replace(/,$/, ''), tz };
-            } catch {
-                transitGeo = { lat, lon, city: `${lat.toFixed(3)}, ${lon.toFixed(3)}`, tz };
-            }
-            icon.textContent = '✓';
-            input.value = transitGeo.city;
-            input.disabled = false;
-        },
-        (err) => {
-            icon.textContent = '📍';
-            input.disabled = false;
-            input.value = '';
-            input.placeholder = err.code === 1
-                ? 'Permission refusée — saisir une ville'
-                : 'Erreur GPS — saisir une ville';
-        },
-        { timeout: 10000 }
-    );
-}
-
-let _cityTimer = null;
-
-function onCityInput(val) {
-    // Si l'utilisateur efface le champ, on retire la géoloc manuelle
-    if (!val.trim()) { transitGeo = null; hideSuggestions(); return; }
-    clearTimeout(_cityTimer);
-    _cityTimer = setTimeout(() => fetchCitySuggestions(val.trim()), 350);
-}
-
-async function fetchCitySuggestions(q) {
-    if (q.length < 2) return;
-    // Standalone Demo: Only Paris
-    const mockParis = [{display_name: "Paris, France", lat: 48.8566, lon: 2.3522, tz: "Europe/Paris"}];
-    showSuggestions(mockParis);
-}
-
-function showSuggestions(results) {
-    const box = document.getElementById('city-suggestions');
-    if (!results.length) { hideSuggestions(); return; }
-    box.innerHTML = '';
-    results.forEach(item => {
-        // Nominatim renvoie display_name, lat, lon
-        const name = item.display_name || item.name || '';
-        const lat  = parseFloat(item.lat);
-        const lon  = parseFloat(item.lon);
-        const tz   = Intl.DateTimeFormat().resolvedOptions().timeZone;
-        const div  = document.createElement('div');
-        div.textContent = name;
-        div.style.cssText = 'padding:8px 12px; cursor:pointer; font-size:0.82rem; border-bottom:1px solid var(--border); color:var(--text);';
-        div.onmouseenter = () => div.style.background = '#1a1a18';
-        div.onmouseleave = () => div.style.background = '';
-        div.onclick = () => {
-            transitGeo = { lat, lon, city: name, tz };
-            document.getElementById('transit-city-input').value = name;
-            document.getElementById('geo-icon').textContent = '✓';
-            hideSuggestions();
-        };
-        box.appendChild(div);
-    });
-    box.style.display = 'block';
-}
-
-function hideSuggestions() {
-    document.getElementById('city-suggestions').style.display = 'none';
-}
-
-document.addEventListener('click', (e) => {
-    if (!e.target.closest('#transit-city-input') && !e.target.closest('#city-suggestions')) {
-        hideSuggestions();
-    }
-});
-
-async function sendSynthesisEmail() {
-    if (!lastSynthesis) { alert('Lance d\'abord un calcul pour obtenir ta synthèse.'); return; }
-    const btn = document.getElementById('btnEmail');
-    const status = document.getElementById('email-status');
-    btn.disabled = true;
-    status.style.color = 'var(--text-dim)';
-    status.textContent = 'Envoi en cours…';
-    try {
-        const res = await fetch('/send_synthesis', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ synthesis: lastSynthesis }),
-        });
-        const data = await res.json();
-        if (data.ok) {
-            status.textContent = '✓ Synthèse envoyée par email.';
-            status.style.color = '#6a9f6a';
-        } else {
-            status.textContent = '✗ Erreur : ' + (data.error || 'inconnu');
-            status.style.color = '#c06060';
-        }
-    } catch (err) {
-        status.textContent = '✗ Erreur réseau.';
-        status.style.color = '#c06060';
-    } finally {
-        btn.disabled = false;
-    }
-}
-
-function logout() {
-    localStorage.removeItem('gochara_profile');
-    location.reload();
-}
-
-if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('/sw.js');
-}
-
-// ✦ Chrome Built-in AI (window.LanguageModel — Chrome 127+ Android) ✦
-const ChromeAI = {
-    _api() { return window.LanguageModel || window.ai?.languageModel || null; },
-    async isAvailable() {
-        try {
-            const api = this._api();
-            if (!api) return false;
-            const av = await api.availability();
-            return av === 'available';
-        } catch { return false; }
-    },
-    async generate(system, user) {
-        const api = this._api();
-        const session = await api.create({ systemPrompt: system, temperature: 0.7, topK: 40 });
-        try {
-            const raw = await session.prompt(user);
-            return { ok: true, synthesis: raw.trim(), local: true, model: 'chrome-ai' };
-        } finally { try { session.destroy(); } catch {} }
-    },
-};
-
-// ✦ Gemma 3 - Inférence locale (AI Core / MediaPipe) ✦
-// ══════════════════════════════════════════════════
-
-const Gemma = {
-    _available: null,   // null = pas encore vérifié
-    _loaded:    false,
-    _dlId:      null,
-
-    plugin() {
-        return window.Capacitor?.Plugins?.GemmaSynthesis ?? null;
-    },
-
-    async isAvailable() {
-        if (await ChromeAI.isAvailable()) return true;
-        if (this._available !== null) return this._available;
-        const p = this.plugin();
-        if (!p) { this._available = false; return false; }
-        try {
-            const r = await p.checkModel();
-            this._available = r.exists && r.loaded;
-            return this._available;
-        } catch { this._available = false; return false; }
-    },
-
-    async checkModel() {
-        const p = this.plugin();
-        if (!p) return { exists: false, loaded: false };
-        try { return await p.checkModel(); }
-        catch { return { exists: false, loaded: false }; }
-    },
-
-    async loadModel() {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        const r = await p.loadModel();
-        this._loaded = r.ok;
-        return r;
-    },
-
-    async downloadModel() {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        const r = await p.downloadModel();
-        this._dlId = r.downloadId;
-        return r;
-    },
-
-    async pickModelFile() {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        return await p.pickModelFile();
-    },
-
-    async pollDownload(onProgress) {
-        if (!this._dlId) return;
-        const p = this.plugin();
-        const interval = setInterval(async () => {
-            try {
-                const r = await p.checkDownloadProgress({ downloadId: this._dlId });
-                onProgress(r);
-                if (r.status === 'success' || r.status === 'failed') {
-                    clearInterval(interval);
-                }
-            } catch { clearInterval(interval); }
-        }, 2000);
-    },
-
-    async generate(systemPrompt, userPrompt, prefix = '') {
-        if (await ChromeAI.isAvailable()) return ChromeAI.generate(systemPrompt, userPrompt);
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin non disponible');
-        return await p.generate({ system: systemPrompt, user: userPrompt, prefix });
-    },
-};
-
-// ── AstroCalc plugin wrapper ──────────────────────────────────────────────────
-const AstroCalc = {
-    plugin() { return window.Capacitor?.Plugins?.AstroCalc ?? null; },
-    async calculateTransits(params) {
-        const p = this.plugin();
-        if (!p) throw new Error('Plugin AstroCalc non disponible');
-        return await p.calculateTransits(params);
-    },
-};
-
-// ── Calcul avec routage local / serveur ───────────────────────────────────────
-// Remplace la fonction calculate() existante par une version Gemma-aware.
-// Si Gemma est disponible et chargé → prompt côté serveur + inférence locale.
-// Sinon → flux Claude existant.
-
-async function calculateWithRouting() {
-    const date = document.getElementById('transit-date').value;
-    if (!date) return;
-
-    const btn      = document.getElementById('calc-btn');
-    const btnText  = document.getElementById('btn-text');
-    const origText = btnText.innerHTML;
-    btn.disabled   = true;
-
-    const payload = { date, hour: 12, minute: 0 };
-    if (transitGeo) {
-        payload.transit_lat  = transitGeo.lat;
-        payload.transit_lon  = transitGeo.lon;
-        payload.transit_city = transitGeo.city;
-        payload.transit_tz   = transitGeo.tz;
-    }
-
-    const gemmaReady = await Gemma.isAvailable();
-
-    try {
-        if (gemmaReady) {
-            // ── Voie locale : AstroCalc (Java) + Gemma — zéro réseau ───────
-            btnText.innerHTML = '<span class="spinner"></span> CALCUL ASTRAL…';
-
-            const savedProfile = JSON.parse(localStorage.getItem('gochara_profile') || '{}');
-            const chartData = await AstroCalc.calculateTransits({
-                natal: {
-                    year:   parseInt(savedProfile.year),
-                    month:  parseInt(savedProfile.month),
-                    day:    parseInt(savedProfile.day),
-                    hour:   parseInt(savedProfile.hour || 12),
-                    minute: parseInt(savedProfile.minute || 0),
-                    lat:    parseFloat(savedProfile.lat),
-                    lon:    parseFloat(savedProfile.lon),
-                    tz:     savedProfile.tz || 'Europe/Paris'
-                },
-                date:         date,
-                hour:         12,
-                minute:       0,
-                transit_lat:  payload.transit_lat  || null,
-                transit_lon:  payload.transit_lon  || null,
-                transit_city: payload.transit_city || null,
-                transit_tz:   payload.transit_tz   || null,
-            });
-
-            btnText.innerHTML = '<span class="spinner"></span> ORACLE GEMMA…';
-            const prompts = buildPromptsLocally(chartData, savedProfile);
-            const gr = await Gemma.generate(prompts.system, prompts.user);
-            showSynthesis(gr.synthesis, null);
-            showTiming(chartData.dashas, chartData.sadeSati);
-            showLocalBadge(true);
-
-        } else {
-            // ── Voie serveur : Claude (comportement existant) ───────────────
-            btnText.innerHTML = '<span class="spinner"></span> LECTURE DES ASTRES…';
-            const r = await fetch('/calculate', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify(payload),
-            });
-            const data = await r.json();
-            if (data.error) { alert(data.error); return; }
-            showSynthesis(data.synthesis, data.remaining);
-            showTiming(data.dashas, data.sade_sati);
-            showLocalBadge(false);
-        }
-    } catch (err) {
-        alert('Erreur : ' + err.message);
-    } finally {
-        btn.disabled      = false;
-        btnText.innerHTML = origText;
-    }
-}
-
-function showTiming(dashas, sadeSati) {
-    const box = document.getElementById('timing-box');
-    if (!box) return;
-    
-    // Sade Sati
-    const ssDiv = document.getElementById('sade-sati-display');
-    if (sadeSati && sadeSati.active) {
-        ssDiv.style.display = 'block';
-        ssDiv.style.background = 'rgba(180, 80, 60, 0.15)';
-        ssDiv.style.border = '1px solid rgba(180, 80, 60, 0.3)';
-        ssDiv.innerHTML = `<span style="color:#ff6b6b; font-weight:bold;">⚠ SADE SATI ACTIF</span><br>`
-            + `<span style="font-size:0.85rem; color:rgba(245,240,232,0.8);">Phase : ${sadeSati.phase}</span>`;
-    } else {
-        ssDiv.style.display = 'none';
-    }
-    
-    // Dashas
-    const dashaDiv = document.getElementById('dasha-display');
-    if (dashas && dashas.length > 0) {
-        let html = '<div style="margin-bottom:0.5rem; font-family:var(--display); font-size:0.75rem; color:var(--gold);">MAHA DASHAS (Périodes majeures)</div>';
-        const now = new Date();
-        let _found = false;
-        
-        dashas.forEach((d) => {
-            let endDate;
-            if (typeof d.end_date === 'string') {
-                const parts = d.end_date.split('/');
-                endDate = new Date(parts[2], parts[1]-1, parts[0]);
-            } else if (d.endTimestamp) {
-                endDate = new Date(d.endTimestamp);
-            }
+    <!-- ── Modal Paramètres IA ─────────────────────────────────────────────────── -->
+    <div id="settings-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
+        <div style="background:#0f0f22; border:1px solid var(--gold-dim); padding:2rem; max-width:400px; width:90%; text-align:left; max-height:90vh; overflow-y:auto;">
+            <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">Paramètres IA (Optionnel)</h4>
+            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">Utilise ta propre clé API pour des calculs illimités sans restriction de quota.</p>
             
-            let isCurrent = false;
-            if (!_found && endDate > now) {
-                isCurrent = true;
-                _found = true;
-            }
+            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Provider (Fournisseur)</label>
+            <select id="custom-provider" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85);" onchange="updateProviderFields()">
+                <option value="">Défaut serveur</option>
+                <option value="local">Serveur Local (vLLM)</option>
+                <option value="gemini">Google Gemini</option>
+                <option value="claude">Anthropic Claude</option>
+                <option value="groq">Groq</option>
+                <option value="openrouter">OpenRouter</option>
+            </select>
+
+            <div id="provider-fields" style="display:none;">
+                <label id="api-key-label" style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Clé API</label>
+                <div style="position: relative; display: block; margin-bottom: 1rem;">
+                    <input type="password" id="custom-api-key" class="login-input" placeholder="..." style="margin-bottom: 0; padding-right: 40px;">
+                    <span id="toggle-eye" onclick="var input=document.getElementById('custom-api-key'); if(input.type==='password'){input.type='text'; this.textContent='🙈';}else{input.type='password'; this.textContent='👁️';}" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none;">👁️</span>
+                </div>
+                
+                <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Modèle Préféré</label>
+                <select id="custom-model-select" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85); display:none;"></select>
+                <input type="text" id="custom-model-text" class="login-input" style="display:none;" placeholder="Ex: anthropic/claude-3.5-sonnet">
+            </div>
             
-            const dateStr = endDate ? endDate.toLocaleDateString('fr-FR') : '??';
-            html += `<div class="dasha-row ${isCurrent ? 'dasha-current' : ''}">
-                <span>${isCurrent ? '➤ ' : ''}${d.lord}</span>
-                <span>jusqu'au ${dateStr}</span>
-            </div>`;
-        });
-        dashaDiv.innerHTML = html;
-    } else {
-        dashaDiv.innerHTML = 'Données temporelles non disponibles.';
-    }
-    
-    box.style.display = 'block';
-}
+            <div style="display:flex; gap:10px; margin-top:1.5rem;">
+                <button class="btn-secondary" onclick="closeSettings()">Annuler</button>
+                <button class="btn-primary" onclick="saveSettings()"><span>Sauvegarder</span></button>
+            </div>
+        </div>
+    </div>
 
-function showSynthesis(text, remaining) {
-    lastSynthesis = text;
+    <script>
+        const MODELS = {
+            'local': [
+                {val: 'mlx-community/phi-4-4bit', label: 'Phi-4 (14B Local)'}
+            ],
+            'gemini': [
+                {val: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash'},
+                {val: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro'}
+            ],
+            'claude': [
+                {val: 'claude-sonnet-4-6', label: 'Claude Sonnet 4.6'},
+                {val: 'claude-haiku-4-5-20251001', label: 'Claude Haiku 4.5'}
+            ],
+            'groq': [
+                {val: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B'},
+                {val: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B'}
+            ]
+        };
 
-    // Scinde [BLOCAGE] et [ALTERNATIVE] en deux blocs visuels
-    const altRe = /\*?\*?\[ALTERNATIVE\]\*?\*?/i;
-    const altMatch = text.search(altRe);
+        function updateProviderFields() {
+            const provider = document.getElementById('custom-provider').value;
+            const fields = document.getElementById('provider-fields');
+            const keyLabel = document.getElementById('api-key-label');
+            const keyInput = document.getElementById('custom-api-key');
+            const sel = document.getElementById('custom-model-select');
+            const txt = document.getElementById('custom-model-text');
 
-    let html;
-    if (altMatch > 0) {
-        const blocPart = text.slice(0, altMatch)
-            .replace(/\*?\*?\[BLOCAGE\]\*?\*?\s*/gi, '').trim();
-        const altPart  = text.slice(altMatch)
-            .replace(/\*?\*?\[ALTERNATIVE\]\*?\*?\s*/gi, '').trim();
-        html =
-            `<div style="margin-bottom:1.4rem;padding:1rem 1.2rem;border-left:2px solid rgba(180,120,80,0.5);background:rgba(180,120,80,0.06);">`
-          + `<div style="font-size:0.68rem;letter-spacing:0.12em;color:rgba(180,120,80,0.7);margin-bottom:0.5rem;">CE QUI BLOQUE</div>`
-          + marked.parse(blocPart)
-          + `</div>`
-          + `<div style="padding:1rem 1.2rem;border-left:2px solid rgba(100,160,100,0.5);background:rgba(100,160,100,0.06);">`
-          + `<div style="font-size:0.68rem;letter-spacing:0.12em;color:rgba(100,160,100,0.7);margin-bottom:0.5rem;">ALTERNATIVE DE CONSCIENCE</div>`
-          + marked.parse(altPart)
-          + `</div>`;
-    } else {
-        html = marked.parse(text);
-    }
-
-    document.getElementById('synthesis-content').innerHTML = html;
-    document.getElementById('synthesis-box').style.display = 'block';
-    document.getElementById('email-status').textContent = '';
-    document.getElementById('synthesis-box').scrollIntoView({ behavior: 'smooth' });
-
-    // Bandeau contexte transit depuis email
-    if (window._emailCtx) {
-        const { transit, nak, point, regime } = window._emailCtx;
-        const banner = document.getElementById('transit-context-banner');
-        if (banner && transit) {
-            const regimeLabels = {
-                'ROM_oppression':       'Activation ROM — test karmique',
-                'Dharma_amplification': 'Activation Dharma — opportunité',
-                'Blessure_activation':  'Activation Chiron — seuil',
-            };
-            banner.innerHTML = `⚡ <strong style="color:var(--gold)">${transit}</strong>`
-                + (nak ? ` dans <strong>${nak}</strong>` : '')
-                + (point ? ` — nakshatra de ton ${point} natal` : '')
-                + (regime ? ` &nbsp;·&nbsp; <em>${regimeLabels[regime] || regime}</em>` : '');
-            banner.style.display = 'block';
-        }
-        // Auto-ouvrir chatbot avec la question sur le transit
-        setTimeout(async () => {
-            if (transit) {
-                await openChatbot();
-                const input = document.getElementById('chatbot-input');
-                if (input && input.style.display !== 'none' && !input.disabled) {
-                    input.value = `${transit} est en ce moment dans ${nak || 'mon nakshatra natal'}${point ? ' — nakshatra de mon ' + point + ' natal' : ''}. Qu'est-ce que ça active concrètement pour moi ?`;
-                    sendChatMessage();
-                }
-            }
-            window._emailCtx = null;
-        }, 900);
-    }
-}
-
-function showLocalBadge(isLocal) {
-    let badge = document.getElementById('local-badge');
-    if (!badge) {
-        badge = document.createElement('span');
-        badge.id = 'local-badge';
-        badge.style.cssText = 'font-size:0.72rem;padding:2px 8px;border-radius:2px;margin-left:8px;';
-        document.getElementById('synthesis-box').querySelector('div').prepend(badge);
-    }
-    if (isLocal) {
-        badge.textContent = '✦ Gemma local';
-        badge.style.cssText += 'background:#1a2a1a;color:#6ab56a;border:1px solid #2a4a2a;';
-    } else {
-        badge.textContent = '☁ Claude';
-        badge.style.cssText += 'background:#1a1a2a;color:#9090b0;border:1px solid #2a2a4a;';
-    }
-}
-
-// Surcharge le bouton Calculer pour utiliser le routage Gemma
-document.addEventListener('DOMContentLoaded', () => {
-    const calcBtn = document.getElementById('calc-btn');
-    if (calcBtn) calcBtn.onclick = calculateWithRouting;
-
-    // Auto-lancement depuis lien email (?open=synthesis&ctx=...)
-    const params = new URLSearchParams(window.location.search);
-    if (params.get('open') === 'synthesis') {
-        const ctx = params.get('ctx') || '';
-        history.replaceState({}, '', window.location.pathname);
-        if (ctx) {
-            const [transit, nak, point, regime] = ctx.split('|');
-            window._emailCtx = { transit, nak, point, regime };
-        }
-        const btn = document.getElementById('calc-btn');
-        if (btn) setTimeout(() => btn.click(), 600);
-    }
-
-    // Quota chatbot en arrière-plan (badge discret sur le bouton)
-    const savedProfile = localStorage.getItem('gochara_profile');
-    if (savedProfile) {
-        fetch('/chat/status').then(r => r.json()).then(data => {
-            const ind = document.getElementById('chatbot-quota-indicator');
-            if (!ind) return;
-            if (data.plan === 'free') {
-                ind.textContent = '🔒';
-            } else if (data.plan === 'subscription' || data.remaining >= 999) {
-                ind.textContent = '∞';
-                ind.style.color = 'var(--gold)';
-            } else if (data.remaining > 0) {
-                ind.textContent = `${data.remaining}/${data.limit}`;
-            } else {
-                ind.textContent = '0 — épuisé';
-                ind.style.color = '#c97a6b';
-            }
-        }).catch(() => {});
-    }
-});
-
-function updateGemmaIndicator(status) {
-    let ind = document.getElementById('gemma-indicator');
-    if (!ind) return;
-    if (status.loaded) {
-        ind.textContent = '✦ Gemma local actif';
-        ind.style.color = '#6ab56a';
-    } else if (status.exists) {
-        ind.textContent = '◆ Gemma disponible (non chargé)';
-        ind.style.color = '#c9a84c';
-    }
-}
-
-// ── Alertes transit ───────────────────────────────────────────────────────────
-async function toggleAlerts(enabled) {
-    const status = document.getElementById('alerts-status');
-    status.textContent = 'Mise à jour…';
-    try {
-        const res  = await fetch('/toggle_alerts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ enabled }),
-        });
-        const data = await res.json();
-        if (data.ok) {
-            status.textContent = enabled
-                ? '✓ Alertes activées — tu recevras un email à chaque transit important.'
-                : '✓ Alertes désactivées.';
-            status.style.color = '#6a9f6a';
-        } else {
-            status.textContent = '✗ ' + (data.error || 'Erreur');
-            status.style.color = '#c06060';
-            document.getElementById('alerts-toggle').checked = !enabled;
-        }
-    } catch {
-        status.textContent = '✗ Erreur réseau.';
-        status.style.color = '#c06060';
-        document.getElementById('alerts-toggle').checked = !enabled;
-    }
-}
-
-// ── Calendrier mensuel ────────────────────────────────────────────────────────
-let calYear  = new Date().getFullYear();
-let calMonth = new Date().getMonth() + 1;
-let calOpen  = false;
-
-const MONTH_FR = ['', 'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
-                  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'];
-
-function toggleCalendar() {
-    const panel = document.getElementById('calendar-panel');
-    calOpen = !calOpen;
-    panel.style.display = calOpen ? 'block' : 'none';
-    if (calOpen) loadCalendar();
-}
-
-function shiftMonth(delta) {
-    calMonth += delta;
-    if (calMonth > 12) { calMonth = 1;  calYear++; }
-    if (calMonth < 1)  { calMonth = 12; calYear--; }
-    loadCalendar();
-}
-
-async function loadCalendar() {
-    const title   = document.getElementById('calendar-title');
-    const loading = document.getElementById('calendar-loading');
-    const content = document.getElementById('calendar-content');
-
-    title.textContent   = `${MONTH_FR[calMonth]} ${calYear}`;
-    loading.style.display = 'block';
-    content.innerHTML   = '';
-
-    try {
-        const res  = await fetch(`/calendar?year=${calYear}&month=${calMonth}`);
-        const data = await res.json();
-        loading.style.display = 'none';
-
-        if (data.error) { content.innerHTML = `<p style="color:#c06060;">${data.error}</p>`; return; }
-
-        const days = data.days || {};
-        if (!Object.keys(days).length) {
-            content.innerHTML = '<p style="color:var(--text-dim);text-align:center;font-size:0.85rem;">Aucun transit majeur ce mois-ci.</p>';
-            return;
-        }
-
-        let html = '<div style="display:flex;flex-direction:column;gap:10px;">';
-        for (const [dateKey, events] of Object.entries(days).sort()) {
-            const day = dateKey.split('-')[2];
-            html += `<div style="background:#0f0f22;border:1px solid var(--border);border-radius:3px;padding:10px 14px;">`;
-            html += `<div style="color:var(--gold);font-size:0.78rem;font-family:var(--display);margin-bottom:6px;">${day} ${MONTH_FR[calMonth]} ${calYear}</div>`;
-            for (const e of events) {
-                const retro = e.retrograde ? ' <span style="color:#c06060;">℞</span>' : '';
-                html += `<div style="display:flex;gap:8px;align-items:baseline;margin-top:4px;">
-                    <span style="color:${e.transit_color};font-size:0.85rem;font-weight:bold;">${e.transit_label}${retro}</span>
-                    <span style="color:var(--text-dim);font-size:0.75rem;">⊕</span>
-                    <span style="color:${e.natal_color};font-size:0.82rem;">${e.natal_label}</span>
-                    <span style="color:var(--text-dim);font-size:0.72rem;margin-left:auto;">${e.orb}°</span>
-                </div>`;
-            }
-            html += '</div>';
-        }
-        html += '</div>';
-        content.innerHTML = html;
-    } catch {
-        loading.style.display = 'none';
-        content.innerHTML = '<p style="color:#c06060;">Erreur de connexion.</p>';
-    }
-}
-
-// ── Chatbot karmique ─────────────────────────────────────────────────────────
-
-let _chatHistory   = [];   // [{role, content}]
-let _chatRemaining = null; // null = non chargé
-
-async function openChatbot() {
-    const panel  = document.getElementById('chatbot-panel');
-    const isOpen = panel.style.display !== 'none';
-    panel.style.display = isOpen ? 'none' : 'block';
-    if (!isOpen) await _initChatbot();
-}
-
-function closeChatbot() {
-    document.getElementById('chatbot-panel').style.display = 'none';
-}
-
-async function _initChatbot() {
-    // Charge le quota depuis le serveur
-    try {
-        const r    = await fetch('/chat/status');
-        const data = await r.json();
-        _chatRemaining = data.remaining;
-
-        const inputArea  = document.getElementById('chatbot-input-area');
-        const lockedArea = document.getElementById('chatbot-locked');
-        const badge      = document.getElementById('chatbot-remaining-badge');
-        const indicator  = document.getElementById('chatbot-quota-indicator');
-
-        if (data.plan === 'free' || data.remaining <= 0 && data.plan !== 'subscription') {
-            if (data.plan === 'free') {
-                inputArea.style.display  = 'none';
-                lockedArea.style.display = 'block';
+            if (!provider) {
+                fields.style.display = 'none';
                 return;
             }
-        }
+            fields.style.display = 'block';
 
-        inputArea.style.display  = 'flex';
-        lockedArea.style.display = 'none';
-        _updateChatQuotaBadge(data);
+            if (provider === 'local') {
+                keyLabel.textContent = 'Clé API vLLM (Laisser vide)';
+                keyInput.placeholder = 'dummy';
+            } else if (provider === 'gemini') {
+                keyLabel.textContent = 'Clé API Gemini';
+                keyInput.placeholder = 'AIzaSy...';
+            } else if (provider === 'claude') {
+                keyLabel.textContent = 'Clé API Anthropic';
+                keyInput.placeholder = 'sk-ant-...';
+            } else if (provider === 'groq') {
+                keyLabel.textContent = 'Clé API Groq';
+                keyInput.placeholder = 'gsk_...';
+            } else if (provider === 'openrouter') {
+                keyLabel.textContent = 'Clé API OpenRouter';
+                keyInput.placeholder = 'sk-or-v1-...';
+            }
 
-    } catch(e) {
-        console.warn('Chat status error:', e.message);
-    }
-}
-
-function _updateChatQuotaBadge(data) {
-    const badge     = document.getElementById('chatbot-remaining-badge');
-    const indicator = document.getElementById('chatbot-quota-indicator');
-    if (!badge) return;
-
-    if (data.plan === 'subscription' || data.remaining >= 999) {
-        badge.textContent     = '';
-        if (indicator) indicator.textContent = '';
-    } else {
-        const txt = `${data.remaining}/${data.limit} questions restantes`;
-        badge.textContent = txt;
-        if (indicator) indicator.textContent = data.remaining === 0 ? '— épuisé' : txt;
-    }
-}
-
-async function sendChatMessage() {
-    const input = document.getElementById('chatbot-input');
-    const msg   = input.value.trim();
-    if (!msg) return;
-
-    input.value = '';
-    _appendChatBubble('user', msg);
-
-    const sendBtn = document.getElementById('chatbot-send-btn');
-    sendBtn.disabled = true;
-    sendBtn.textContent = '…';
-
-    try {
-        // 1. Demande le prompt au serveur (valide quota, construit system+user)
-        const gemmaLocal = await Gemma.isAvailable();
-        const r = await fetch('/chat/ask', {
-            method:  'POST',
-            headers: {'Content-Type': 'application/json'},
-            body:    JSON.stringify({message: msg, history: _chatHistory, local: gemmaLocal}),
-        });
-        const data = await r.json();
-
-        if (!r.ok || data.error) {
-            if (data.error === 'quota_exceeded') {
-                _appendChatBubble('system-err',
-                    'Tu as utilisé toutes tes questions. Passe à Illimité pour continuer.');
-                document.getElementById('chatbot-input-area').style.display = 'none';
+            if (provider === 'openrouter') {
+                sel.style.display = 'none';
+                txt.style.display = 'block';
             } else {
-                _appendChatBubble('system-err', data.message || 'Erreur serveur.');
+                txt.style.display = 'none';
+                sel.style.display = 'block';
+                sel.innerHTML = '';
+                MODELS[provider].forEach(m => {
+                    const opt = document.createElement('option');
+                    opt.value = m.val; opt.textContent = m.label;
+                    sel.appendChild(opt);
+                });
             }
-            return;
         }
 
-        // Mise à jour du quota
-        _chatRemaining = data.remaining;
-        _updateChatQuotaBadge({
-            plan:      _chatRemaining >= 999 ? 'subscription' : 'test',
-            remaining: _chatRemaining,
-            limit:     3,
-        });
-
-        // 2. Réponse : Haiku serveur (data.answer) ou Gemma local (data.system/user)
-        let reply = '';
-        if (data.answer) {
-            reply = data.answer;
-        } else if (data.system && data.user) {
-            const gr = await Gemma.generate(data.system, data.user);
-            reply = gr.synthesis || '';
-        }
-
-        // 3. Affiche la réponse + met à jour l'historique
-        _appendChatBubble('assistant', reply);
-        _chatHistory.push({role: 'user',      content: msg});
-        _chatHistory.push({role: 'assistant', content: reply});
-        if (_chatHistory.length > 12) _chatHistory = _chatHistory.slice(-12);
-
-    } catch(e) {
-        _appendChatBubble('system-err', 'Erreur : ' + e.message);
-        console.error('Chat error:', e);
-    } finally {
-        sendBtn.disabled    = false;
-        sendBtn.textContent = '→';
-    }
-}
-
-function _appendChatBubble(role, text) {
-    const container = document.getElementById('chatbot-messages');
-    const welcome   = document.getElementById('chatbot-welcome');
-    if (welcome) welcome.style.display = 'none';
-
-    const bubble = document.createElement('div');
-    bubble.style.cssText = 'max-width:85%; word-break:break-word; line-height:1.6; font-size:0.88rem; padding:10px 14px; border-radius:3px;';
-
-    if (role === 'user') {
-        bubble.style.cssText += 'align-self:flex-end; background:rgba(180,140,60,0.12); color:var(--text); border:1px solid rgba(180,140,60,0.2); margin-left:15%;';
-        bubble.textContent = text;
-    } else if (role === 'assistant') {
-        bubble.style.cssText += 'align-self:flex-start; background:#0f0f22; color:rgba(245,240,232,0.85); border:1px solid var(--border); margin-right:15%;';
-        bubble.innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text;
-    } else {
-        bubble.style.cssText += 'align-self:center; color:#c97a6b; font-size:0.78rem; font-style:italic;';
-        bubble.textContent = text;
-    }
-
-    container.appendChild(bubble);
-    container.scrollTop = container.scrollHeight;
-}
-
-// ── Gemma Manager UI ─────────────────────────────────────────────────────────
-async function openGemmaManager() {
-    const panel = document.getElementById('gemma-panel');
-    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
-    if (panel.style.display === 'block') await refreshGemmaStatus();
-}
-
-async function refreshGemmaStatus() {
-    const statusEl  = document.getElementById('gemma-status-text');
-    const btnDl     = document.getElementById('btn-gemma-dl');
-    const btnLoad   = document.getElementById('btn-gemma-load');
-    const indicator = document.getElementById('gemma-indicator');
-
-    const p = Gemma.plugin();
-    if (!p) {
-        statusEl.textContent = '⚠ Plugin non disponible — cette fonctionnalité nécessite l\'app Android.';
-        btnDl.style.display   = 'none';
-        btnLoad.style.display = 'none';
-        return;
-    }
-
-    const status = await Gemma.checkModel();
-    if (status.loaded) {
-        statusEl.textContent  = `✓ Modèle chargé (${status.sizeMb} Mo) — inférence locale active.`;
-        statusEl.style.color  = '#6ab56a';
-        btnDl.style.display   = 'none';
-        btnLoad.style.display = 'none';
-        indicator.textContent = '✦ Gemma local actif';
-        indicator.style.color = '#6ab56a';
-    } else if (status.exists) {
-        statusEl.textContent  = `◆ Modèle présent (${status.sizeMb} Mo) — non chargé en mémoire.`;
-        statusEl.style.color  = '#c9a84c';
-        btnDl.style.display   = 'none';
-        btnLoad.style.display = 'block';
-        indicator.textContent = '◆ Gemma disponible';
-        indicator.style.color = '#c9a84c';
-    } else {
-        statusEl.textContent  = 'Modèle non téléchargé. Connexion Wi-Fi recommandée (~2 Go).';
-        statusEl.style.color  = 'var(--text-dim)';
-        btnDl.style.display   = 'block';
-        btnLoad.style.display = 'none';
-        indicator.textContent = '';
-    }
-}
-
-async function gemmaDownload() {
-    const btnDl   = document.getElementById('btn-gemma-dl');
-    const progress = document.getElementById('gemma-dl-progress');
-    const originalText = btnDl.textContent;
-    btnDl.disabled = true;
-    btnDl.innerHTML = '<span class="spinner"></span> Lancement...';
-    try {
-        const r = await Gemma.downloadModel();
-        if (r.already) {
-            await refreshGemmaStatus();
-            return;
-        }
-        progress.style.display = 'block';
-        Gemma.pollDownload(p => {
-            document.getElementById('gemma-progress-bar').style.width = p.progress + '%';
-            document.getElementById('gemma-progress-text').textContent =
-                `${p.dlMb} Mo / ${p.totalMb > 0 ? p.totalMb + ' Mo' : '?'} — ${p.progress}%`;
-            if (p.status === 'success') {
-                refreshGemmaStatus();
-                progress.style.display = 'none';
+        function openSettings() {
+            const saved = KarmicStore.get();
+            document.getElementById('custom-provider').value = saved.customProvider || '';
+            updateProviderFields();
+            
+            document.getElementById('custom-api-key').value = saved.customApiKey || '';
+            if (saved.customProvider === 'openrouter') {
+                document.getElementById('custom-model-text').value = saved.customModel || '';
+            } else if (saved.customProvider) {
+                document.getElementById('custom-model-select').value = saved.customModel || '';
             }
-            if (p.status === 'failed') {
-                document.getElementById('gemma-status-text').textContent = '✗ Échec du téléchargement.';
-                document.getElementById('gemma-status-text').style.color = '#c06060';
-                btnDl.disabled = false;
-                btnDl.textContent = '⬇ Réessayer';
+            
+            document.getElementById('settings-modal').style.display = 'flex';
+        }
+
+        function closeSettings() {
+            document.getElementById('settings-modal').style.display = 'none';
+        }
+
+        function saveSettings() {
+            const provider = document.getElementById('custom-provider').value;
+            const apiKey = document.getElementById('custom-api-key').value.trim();
+            let model = '';
+            if (provider === 'openrouter') model = document.getElementById('custom-model-text').value.trim();
+            else if (provider) model = document.getElementById('custom-model-select').value;
+            
+            KarmicStore.save({ customProvider: provider, customApiKey: apiKey, customModel: model });
+            closeSettings();
+        }
+
+        // Helper pour ajouter les clés API à tous les payloads
+        function attachApiKeys(payload) {
+            const saved = KarmicStore.get();
+            if (saved.customProvider) payload.user_provider = saved.customProvider;
+            if (saved.customApiKey) payload.user_key = saved.customApiKey;
+            if (saved.customModel) payload.user_model = saved.customModel;
+            return payload;
+        }
+
+        // Modification de toutes les fonctions fetch existantes pour utiliser attachApiKeys
+        const originalFetch = window.fetch;
+        window.fetch = function() {
+            let [resource, config] = arguments;
+            if (config && config.body && config.method === 'POST') {
+                try {
+                    const parsedBody = JSON.parse(config.body);
+                    const updatedBody = attachApiKeys(parsedBody);
+                    config.body = JSON.stringify(updatedBody);
+                } catch(e) {}
+            }
+            return originalFetch.apply(this, arguments);
+        };
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const t = document.getElementById('consent-title');
+            const p = document.getElementById('consent-text');
+            const l = document.getElementById('consent-label-text');
+            const d = document.getElementById('consent-decline-btn');
+            if (t) t.textContent = T.js_modal_title;
+            if (p) p.innerHTML = T.js_modal_text;
+            if (l) l.textContent = T.js_modal_consent;
+            if (d) d.textContent = T.js_modal_decline;
+
+            // Auto-lancement depuis lien email (?open=synthesis&ctx=...)
+            const params = new URLSearchParams(window.location.search);
+            if (params.get('open') === 'synthesis') {
+                const ctx = params.get('ctx') || '';
+                history.replaceState({}, '', window.location.pathname);
+                if (ctx) {
+                    const [transit, nak, point, regime] = ctx.split('|');
+                    window._emailCtx = { transit, nak, point, regime };
+                }
+                const btn = document.getElementById('calc-btn');
+                if (btn) setTimeout(() => btn.click(), 600);
+            }
+            if (params.get('upgrade') === 'subscription') {
+                history.replaceState({}, '', window.location.pathname);
+                setTimeout(() => showPaymentPlans(), 400);
+            }
+            if (params.get('payment') === 'success') {
+                history.replaceState({}, '', window.location.pathname);
+                // Rafraîchir le quota chatbot pour refléter le nouveau plan
+                fetch('/chat/status').then(r => r.json()).then(data => {
+                    const ind = document.getElementById('chatbot-quota-indicator');
+                    if (!ind) return;
+                    if (data.plan === 'subscription' || data.remaining >= 999) {
+                        ind.textContent = '∞';
+                        ind.style.color = 'var(--gold)';
+                    } else if (data.remaining > 0) {
+                        ind.textContent = `${data.remaining}/${data.limit}`;
+                    }
+                    // Masquer le bloc "plan verrouillé" si présent
+                    const locked = document.getElementById('chatbot-locked');
+                    if (locked && data.plan !== 'free') locked.style.display = 'none';
+                }).catch(() => {});
             }
         });
-    } catch (e) {
-        btnDl.disabled = false;
-        btnDl.textContent = '⬇ Télécharger le modèle (~2 Go)';
-        alert('Erreur : ' + e.message);
-    }
-}
+    </script>
 
-async function gemmaLoad() {
-    const btnLoad = document.getElementById('btn-gemma-load');
-    const statusEl = document.getElementById('gemma-status-text');
-    const originalText = btnLoad.textContent;
-    btnLoad.disabled = true;
-    btnLoad.innerHTML = '<span class="spinner"></span> Chargement...';
-    statusEl.innerHTML = '<span class="spinner"></span> Chargement du modèle. (peut prendre 15-30 sec)';
-    try {
-        await Gemma.loadModel();
-        Gemma._available = true;
-        await refreshGemmaStatus();
-    } catch (e) {
-        statusEl.textContent = '❌ Erreur : ' + e.message;
-        statusEl.style.color = '#c06060';
-        btnLoad.disabled = false;
-        btnLoad.textContent = '▶ Charger en mémoire';
-    }
-}
+    <script>
+        // ── Dataset rating ─────────────────────────────────────────────────────────
 
-async function gemmaPickFile() {
-    const btnPick = document.getElementById('btn-gemma-pick');
-    const statusEl = document.getElementById('gemma-status-text');
-    const origText = btnPick.innerHTML;
-    
-    btnPick.disabled = true;
-    btnPick.innerHTML = '<span class="spinner"></span> Séléction...';
-    
-    try {
-        await Gemma.pickModelFile();
-        await refreshGemmaStatus();
-    } catch (e) {
-        statusEl.textContent = '❌ Erreur d\'import : ' + e.message;
-        statusEl.style.color = '#c06060';
-    } finally {
-        btnPick.disabled = false;
-        btnPick.innerHTML = origText;
-    }
-}
-
-// ── Rapport PDF annuel ────────────────────────────────────────────────────────
-async function downloadAnnualReport() {
-    const btn = document.getElementById('btn-annual-report');
-    const orig = btn.textContent;
-    btn.disabled = true;
-    btn.textContent = '⏳ Génération en cours… (1-2 min)';
-    try {
-        const res = await fetch('/report/annual');
-        if (!res.ok) {
-            const data = await res.json().catch(() => ({}));
-            alert('Erreur : ' + (data.error || res.statusText));
-            return;
+        function showRatingBar() {
+            const bar = document.getElementById('rating-bar');
+            if (bar) bar.style.display = 'block';
         }
-        const blob = await res.blob();
-        const url  = URL.createObjectURL(blob);
-        const a    = document.createElement('a');
-        a.href     = url;
-        a.download = `karmic_gochara_${new Date().getFullYear()}.pdf`;
-        a.click();
-        URL.revokeObjectURL(url);
-    } catch {
-        alert('Erreur réseau lors de la génération du PDF.');
-    } finally {
-        btn.disabled = false;
-        btn.textContent = orig;
-    }
-}
-</script>
+
+        function rateUp() { _pendingRating = 1; openConsentModal(); }
+        function rateDown() { _pendingRating = -1; openConsentModal(); }
+
+        function openConsentModal() {
+            // Griser le bouton sélectionné
+            document.querySelectorAll('.btn-rate').forEach(b => b.classList.remove('selected'));
+            const sel = _pendingRating === 1
+                ? document.getElementById('btn-rate-up')
+                : document.getElementById('btn-rate-down');
+            if (sel) sel.classList.add('selected');
+            document.getElementById('consent-modal').classList.add('active');
+        }
+
+        async function submitRating(openConsent) {
+            const consent = openConsent && document.getElementById('consent-check').checked;
+            document.getElementById('consent-modal').classList.remove('active');
+
+            const date = document.getElementById('transit-date')?.value || '';
+            try {
+                await fetch('/rate_synthesis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: _pendingRating,
+                        consent: consent,
+                        synthesis: lastSynthesis,
+                        date: date,
+                    })
+                });
+            } catch (e) { console.warn('Rating échoué (non bloquant):', e); }
+
+            // Feedback visuel
+            const bar = document.getElementById('rating-bar');
+            if (bar) {
+                bar.innerHTML =
+                    '<span class="rating-label" style="color:var(--gold);">' +
+                    (_pendingRating === 1 ? T.js_rating_up : T.js_rating_down) +
+                    '</span>';
+            }
+        }
+
+        // Ferme modal si clic hors du box
+        document.getElementById('consent-modal').addEventListener('click', function (e) {
+            if (e.target === this) this.classList.remove('active');
+        });
+    </script>
 </body>
+
 </html>
