@@ -2,7 +2,7 @@
 
 ## État Actuel
 
-Le projet Karmic Gochara a atteint plusieurs jalons importants récemment. Le déploiement continu a été réussi sur Google Cloud Run, et l'intégration de l'IA locale a été complétée avec succès. Les problèmes de cache ont été résolus, et le mappage du nom de domaine a été effectué. Le projet est maintenant prêt pour une utilisation plus large et des tests supplémentaires.
+Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son modèle économique et la simplicité de son expérience utilisateur. L'application distingue désormais de manière étanche et automatique les profils **PRO** et **Freemium**, avec un routage IA adapté (Edge IA locale pour le Pro, Grok pour le Free) et un système robuste de quotas quotidiens géré par Google Sheets. Le suivi des modèles de l'API Grok est maintenant entièrement autonome pour éviter toute interruption de service lors des dépréciations de x.ai.
 
 ## Hébergement
 
@@ -11,48 +11,41 @@ Le projet Karmic Gochara a atteint plusieurs jalons importants récemment. Le d�
 
 ## Stack Technique
 
-- **Google Cloud Build** : Utilisé pour le déploiement continu.
-- **Docker** : Un Dockerfile propre a été ajouté sur GitHub pour corriger le build.
-- **Cloudflare** : Purge de cache pour résoudre les problèmes bloquant le chargement de `style.css`.
-- **Intégration IA** : vLLM avec `mlx-community/phi-4-4bit` intégré pour l'IA locale.
-- **Interface Web** : Utilisation de `templates/index.html` et `static/app.js` pour gérer les requêtes vers le serveur local.
+- **Google Cloud Build** : Déploiement continu automatisé.
+- **Docker** : Utilisation d'un Dockerfile optimisé pour corriger le build et assurer la légèreté de l'image.
+- **Base de données Google Sheets** : Stockage persistant des profils utilisateurs, maintenant doté d'une colonne de suivi temporel (`last_signal_date`) pour les quotas.
+- **Routage Multi-IA** :
+  - **PRO** : Serveur local / Edge IA via vLLM (`mlx-community/phi-4-4bit`).
+  - **Freemium** : API Grok (propulsée par la clé serveur du créateur de l'application) offrant un ton "X-bot" mystique et percutant.
+- **Interface Web** : Clean-up complet éliminant les sélecteurs techniques complexes pour les utilisateurs gratuits afin de maximiser l'immersion.
 
 ## Ajouts Récents
 
-1. **Déploiement Continu** : Déploiement réussi sur Google Cloud Run via Cloud Build dans la région `europe-west1` (Belgique). Un Dockerfile propre a été ajouté sur GitHub pour corriger le build.
+1. **Étanchéité Économique Freemium vs PRO** :
+   - Suppression de l'affichage et de la sélection manuelle des modèles pour les comptes gratuits. Le routage est 100% automatique en fonction du plan de l'utilisateur défini dans Google Sheets.
+   - Les utilisateurs PRO bénéficient d'un accès illimité à l'IA locale (Edge IA).
+   - Les utilisateurs Freemium sont cantonnés à l'IA Grok (X-bot style) sans avoir à fournir de clé d'API personnelle, celle-ci étant débitée directement sur l'API serveur globale.
 
-2. **Mappage de Nom de Domaine** : Le nom de domaine personnalisé `karmicgochara.app` a été mappé vers le service `gochara-api` en `europe-west1`.
+2. **Limitation du Freemium (1 Signal/jour)** :
+   - Mise en place d'un quota de **1 Daily Signal par jour** pour les comptes gratuits.
+   - Le système stocke désormais la date du dernier signal généré au format `YYYY-MM-DD` dans la colonne `last_signal_date` de Google Sheets.
+   - Toute tentative de génération de signal supplémentaire le même jour renvoie un avertissement clair et bloque la requête.
 
-3. **Problèmes de Cache** : Résolution des problèmes de cache Cloudflare (purge) qui bloquaient le chargement de `style.css`.
-
-4. **Intégration IA Locale** : L'intégration complète et réussie de l'IA locale (vLLM avec `mlx-community/phi-4-4bit`) a été réalisée. L'interface web envoie bien les requêtes au serveur local de l'utilisateur lorsque le fournisseur 'Serveur Local' est sélectionné, avec un indicateur 'œil' 👁️ pour afficher/masquer l'URL. Le modèle génère les réponses (environ 8 tokens/s) sans erreur CORS.
+3. **Suivi des Modèles Grok Auto-géré ("Self-Healing")** :
+   - Implémentation d'une fonction d'auto-découverte dans `ai_interpret.py` : l'application interroge dynamiquement `https://api.x.ai/v1/models`.
+   - Filtrage automatique des modèles indésirables (image-generation, build agents, et modèles de pur raisonnement trop lents/coûteux) pour ne garder que les modèles de texte rapides et qualitatifs.
+   - Tri par versioning mathématique pour élire automatiquement le modèle le plus moderne et récent (ex: bascule automatique sur `grok-4.20-0309-non-reasoning` au lieu de `grok-4.3`).
+   - Cache mémoire de 12 heures pour éliminer tout impact de latence réseau, et fallback automatique ultra-sécurisé sur `grok-4.3` en cas de coupure de l'API x.ai.
 
 ## Erreurs Connues et Résolutions
 
-### Erreur : Consciousness Alternative (aucun contenu)
+### Erreur : Crash API Grok 400 (dépréciation de `grok-beta`)
+* **Description :** L'ancien modèle de génération freemium `grok-beta` a été définitivement supprimé par x.ai, ce qui provoquait une erreur 400 globale empêchant l'accueil de charger pour les utilisateurs gratuits.
+* **Résolution :** Résolu définitivement grâce à la fonction de recherche dynamique auto-gérée (`_get_grok_model()`) et de fallback sécurisé.
 
-**Description de l'Erreur**
-L'erreur "Consciousness Alternative (aucun contenu)" se produit lorsque le projet `karmic.gochara` ne parvient pas à afficher ou à générer le contenu attendu. Cela est généralement dû à un fichier vide, à un chemin de fichier incorrect ou à un problème de configuration entraînant l'affichage de ce message d'erreur.
-
-**Causes Potentielles**
-- Fichier requis vide ou manquant
-- Chemin de fichier incorrect dans la configuration
-- Dépendances manquantes ou incompatibles
-- Problème de génération de contenu
-
-**Solutions**
-1. **Vérification des Fichiers :** Assurez-vous que tous les fichiers requis sont présents et contiennent les données attendues. Vérifiez les chemins de fichier pour vous assurer qu'ils sont corrects.
-2. **Vérification de la Configuration :** Examinez les fichiers de configuration pour vous assurer qu'ils sont correctement définis, y compris les chemins de fichier et les paramètres de liaison de données.
-3. **Vérification des Dépendances :** Assurez-vous que toutes les dépendances requises sont installées et à jour en consultant la documentation du projet pour les versions spécifiques requises.
-4. **Journalisation Détaillée :** Activez la journalisation détaillée pour obtenir plus de détails sur ce qui pourrait causer l'erreur.
-
-### Erreur : Erreur de Routage API Local vers Gemini (404 Not Found)
-
-**Description de l'Erreur**
-Lors de l'utilisation du fournisseur local (phi-4 via ngrok), si l'API locale ne répond pas ou génère une erreur, l'application tentait de faire un "fallback" vers Gemini. Cependant, elle passait l'URL ngrok en tant que `api_key` et le modèle local (`mlx-community/phi-4-4bit`) à Gemini, provoquant une erreur `404 Not Found` sur l'URL `generativelanguage.googleapis.com`.
-
-**Résolution**
-Correction dans `ai_interpret.py` (fonction `generate_ai` et `stream_ai`) : lors du fallback vers Gemini après un échec du provider local, on efface désormais explicitement la variable `model` et `user_key` pour que Gemini utilise ses propres clés d'API serveur et son modèle par défaut. Nous avons également ajouté un `.strip()` pour nettoyer les espaces superflus dans l'URL ngrok saisie par l'utilisateur.
+### Erreur : Écran de chargement infini pour les nouveaux profils (Délai d'API Sheets)
+* **Description :** Lors de la création d'un nouveau profil sur l'application, l'API Google Sheets met parfois quelques secondes à propager l'écriture d'une nouvelle ligne. L'appel immédiat de `/hook/transit` qui suivait ne retrouvait pas encore l'utilisateur dans l'onglet des profils et bloquait la génération sur une roue infinie.
+* **Résolution :** Ajout d'une tolérance intelligente dans `check_and_consume_daily_signal`. Si l'utilisateur est introuvable mais vient manifestement de s'enregistrer, le système l'autorise gracieusement à obtenir son tout premier signal quotidien de bienvenue sans bloquer son parcours.
 
 ## Roadmap (Noël 2026)
 
