@@ -179,25 +179,20 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
 
 def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
     """Route la requête stream vers le provider. 
-    Pour Gemini, on utilise le vrai stream SSE. 
-    Pour les autres, on fait un appel bloquant puis on yield des mots pour simuler le stream."""
+    Pour Gemini (avec clé), on utilise le vrai stream SSE. 
+    Pour les autres (y compris Grok par défaut), on fait un appel bloquant puis on yield des mots pour simuler le stream."""
     provider = user.get("user_provider")
     user_key = user.get("user_key")
     model = user.get("user_model")
 
-    if not provider or provider == "gemini" or (not user_key and provider != "local"):
-        if model and model.startswith("claude") and _SERVER_ANTHROPIC_KEY:
-            full_text = generate_ai(system, prompt, user=user, max_tokens=max_tokens)
-            words = full_text.split(" ")
-            for i, word in enumerate(words):
-                yield word + (" " if i < len(words) - 1 else "")
-            return
-        gemini_model = model if model and not model.startswith("claude") else None
-        for chunk in gemini_api.stream(system, prompt, max_tokens=max_tokens, model=gemini_model, user_key=user_key):
+    # Si l'utilisateur a explicitement configuré Gemini avec sa propre clé
+    if provider == "gemini" and user_key:
+        for chunk in gemini_api.stream(system, prompt, max_tokens=max_tokens, model=model, user_key=user_key):
             yield chunk
         return
 
-    # Simulation de stream pour Claude, Groq et OpenRouter
+    # Pour tous les autres cas (Serveur par défaut Grok/Claude, VLLM local, Groq, OpenRouter), 
+    # on utilise generate_ai() qui gère déjà parfaitement le routage et les fallbacks.
     try:
         full_text = generate_ai(system, prompt, user=user, max_tokens=max_tokens)
         words = full_text.split(" ")
