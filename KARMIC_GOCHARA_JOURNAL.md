@@ -53,6 +53,12 @@ Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son 
    - Tri par versioning mathématique pour élire automatiquement le modèle le plus moderne et récent (ex: bascule automatique sur `grok-4.20-0309-non-reasoning` au lieu de `grok-4.3`).
    - Cache mémoire de 12 heures pour éliminer tout impact de latence réseau, et fallback automatique ultra-sécurisé sur `grok-4.3` en cas de coupure de l'API x.ai.
 
+7. **Benchmark Interactif des IA pour l'Astrologie Karmique (Aide à l'Onboarding)** :
+   - Ajout d'un bouton discret `📊 Comparatif / Aide` à côté du sélecteur de fournisseur d'IA dans le modal des paramètres de `templates/index.html`.
+   - Intégration d'un somptueux panneau `#ai-benchmark-panel` présentant un comparatif poétique et technique des performances astrologiques des meilleurs modèles actuels (Gemini 2.0 Flash, Claude 3.5 Sonnet, Llama 3.3 70B, Phi-4 Local) avec leurs spécificités, tarification, liens directs pour obtenir une clé d'API, et notation (Ton oraculaire, Vitesse, Précision).
+   - Développement d'un intercepteur d'événements JavaScript global sur le sélecteur `#open-benchmark` pour permettre l'ouverture directe et fluide du benchmark depuis n'importe quel lien markdown généré par le backend.
+   - Enrichissement du message d'erreur de connexion à l'IA locale dans `ai_interpret.py` pour y injecter dynamiquement le lien d'aide inter-connecté : `[Consulter le Comparatif des IA 📊](#open-benchmark)`.
+
 ## Erreurs Connues et Résolutions
 
 ### Erreur : Crash API Grok 400 (dépréciation de `grok-beta`)
@@ -62,6 +68,10 @@ Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son 
 ### Erreur : Écran de chargement infini pour les nouveaux profils (Délai d'API Sheets)
 * **Description :** Lors de la création d'un nouveau profil sur l'application, l'API Google Sheets met parfois quelques secondes à propager l'écriture d'une nouvelle ligne. L'appel immédiat de `/hook/transit` qui suivait ne retrouvait pas encore l'utilisateur dans l'onglet des profils et bloquait la génération sur une roue infinie.
 * **Résolution :** Ajout d'une tolérance intelligente dans `check_and_consume_daily_signal`. Si l'utilisateur est introuvable mais vient manifestement de s'enregistrer, le système l'autorise gracieusement à obtenir son tout premier signal quotidien de bienvenue sans bloquer son parcours.
+
+### Erreur : Rejet 401 Unauthorized avec l'IA Locale oMLX ("dummy")
+* **Description :** Lors de l'interconnexion de l'application avec un serveur local oMLX (géré via `oMLX.app` sur le port `8000`), ce dernier exige une clé d'API avec n'importe quelle valeur de remplissage (ex: `"dummy"`). Or, le code de `ai_interpret.py` ignorait l'envoi de l'en-tête d'autorisation Bearer lorsque `user_key` contenait `"dummy"`, ce qui déclenchait une erreur d'authentification 401 Unauthorized systématique.
+* **Résolution :** Nettoyage de la condition d'envoi de clé dans `generate_ai()` pour toujours propager l'en-tête V1 de l'API locale avec le Bearer token configuré, débloquant l'intégration oMLX sans friction.
 
 ## Roadmap (Noël 2026)
 
