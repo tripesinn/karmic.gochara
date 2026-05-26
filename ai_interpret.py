@@ -247,19 +247,42 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
             return r.json()["choices"][0]["message"]["content"]
             
     except Exception as e:
-        # En cas d'erreur de clé ou d'API, log et fallback sur le serveur (Claude par défaut)
         print(f"Erreur provider {provider}: {e}")
+        # Si c'est l'IA locale ou un fournisseur personnalisé de l'utilisateur qui a échoué,
+        # on ne fait PAS de repli sur l'API payante du serveur afin de protéger les quotas de facturation !
+        if provider == "local":
+            return (
+                "✦ Impossible de se connecter à votre IA Locale (vLLM).\n\n"
+                "Pour corriger cela :\n"
+                "1. Assurez-vous que votre serveur local vLLM est bien démarré sur votre machine (port 8000).\n"
+                "2. Si vous êtes sur le Web Cloud (karmicgochara.app), configurez votre URL de tunnel public ngrok dans les Paramètres (rouage en haut à droite).\n"
+                "3. Vous pouvez également sélectionner un autre fournisseur (Gemini, Claude, Groq) dans les Paramètres et renseigner votre propre clé d'API personnelle pour utiliser vos propres jetons (tokens)."
+            )
+        
+        # Si c'est un fournisseur tiers individuel configuré par l'utilisateur
+        if user.get("user_provider"):
+            return f"✦ Erreur avec votre fournisseur d'IA personnel ({provider}) : {str(e)}\n\nVeuillez vérifier vos clés API et quotas de facturation dans les Paramètres (rouage)."
+
+        # Fallback de secours uniquement pour le serveur par défaut (ex: Freemium)
+        if _SERVER_GROK_KEY:
+            try:
+                return _call_grok(system, prompt, _get_grok_model(), _SERVER_GROK_KEY, max_tokens)
+            except Exception as e2:
+                print(f"Fallback Grok échoué : {e2}")
+        if _SERVER_ANTHROPIC_KEY:
+            try:
+                return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
+            except Exception as e2:
+                print(f"Fallback Claude échoué : {e2}")
+        return "Erreur lors de la génération (serveur non configuré)."
+        
+    # Provider inconnu et pas de configuration personnalisée -> serveur par défaut (Freemium)
+    if not user.get("user_provider"):
         if _SERVER_GROK_KEY:
             return _call_grok(system, prompt, _get_grok_model(), _SERVER_GROK_KEY, max_tokens)
         elif _SERVER_ANTHROPIC_KEY:
             return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
-        return "Erreur lors de la génération (serveur non configuré)."
-        
-    # Provider inconnu -> serveur par défaut
-    if _SERVER_GROK_KEY:
-        return _call_grok(system, prompt, _get_grok_model(), _SERVER_GROK_KEY, max_tokens)
-    elif _SERVER_ANTHROPIC_KEY:
-        return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
+    return "Erreur de configuration (fournisseur inconnu)."
     return "Erreur lors de la génération (aucun provider valide)."
 
 

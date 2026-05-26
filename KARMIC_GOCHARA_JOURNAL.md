@@ -67,6 +67,20 @@ Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son 
 
 - **Optimisation des performances et Multi-Profils** : Préparation de l'intégration de profils secondaires illimités pour les utilisateurs PRO et transition éventuelle de Google Sheets vers Supabase ou Firebase pour supporter la charge à grande échelle.
 
+## Sécurisation des Coûts d'Inférence (Routage et Facturation Individuelle)
+
+Pour s'assurer que les utilisateurs PRO qui n'ont pas configuré d'IA locale ou qui rencontrent un problème de connexion ne fassent pas supporter leurs coûts d'inférence (qui sont illimités dans leur formule) sur le serveur de Gochara (ce qui ruinerait le modèle économique), l'architecture a été mise à jour :
+
+1. **Priorité au Routage Individuel** :
+   - La fonction `_enforce_plan_provider` dans `ai_interpret.py` a été corrigée. Elle n'écrase plus les paramètres d'IA saisis par l'utilisateur. Si un utilisateur PRO renseigne son propre fournisseur et sa clé (ou son URL de tunnel ngrok pour son vLLM local), ceux-ci sont préservés à 100% et contactés en priorité.
+
+2. **Restauration de l'Interface Web de Configuration d'IA** :
+   - Les champs permettant de choisir son fournisseur d'IA personnel (Serveur Local, Gemini, Claude, Groq, OpenRouter) et de renseigner sa clé API ou son URL de tunnel ont été rajoutés au modal de paramètres dans `templates/index.html`. Cela résout également une erreur JavaScript lors de la sauvegarde et assure une parité parfaite avec l'application mobile.
+
+3. **Blocage du Repli Payant pour les Requêtes Individuelles** :
+   - Le bloc de gestion d'erreurs `except` dans `generate_ai` a été modifié. Si une requête d'IA locale ou d'un fournisseur personnalisé d'un utilisateur échoue, le système ne bascule plus de manière invisible sur l'API payante du serveur (Grok ou Claude). À la place, il retourne un message d'erreur d'explication clair pour inviter l'utilisateur à lancer son serveur vLLM ou à insérer sa clé d'API personnelle.
+   - Les clés payantes du serveur sont ainsi exclusivement réservées à la génération du Signal quotidien gratuit du Freemium (limité à 1 appel/jour par utilisateur, coût négligeable), protégeant le projet de toute facturation indésirable de jetons (tokens).
+
 ## Objectif
 
 Ce fichier sert de "point de sauvegarde" pour permettre à une IA de reprendre le développement facilement. Le projet vise à fournir une solution d'intégration IA robuste et facilement déployable. L'accent sera mis sur l'amélioration de l'expérience utilisateur, l'optimisation des performances et l'expansion des fonctionnalités pour répondre aux besoins des utilisateurs finaux.
