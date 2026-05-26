@@ -178,7 +178,7 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
             headers = {
                 "Content-Type": "application/json"
             }
-            if user_key and user_key.strip() != "dummy":
+            if user_key:
                 user_key = user_key.strip()
                 if user_key.startswith("http"):
                     url = f"{user_key.rstrip('/')}/chat/completions"
@@ -252,11 +252,12 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
         # on ne fait PAS de repli sur l'API payante du serveur afin de protéger les quotas de facturation !
         if provider == "local":
             return (
-                "✦ Impossible de se connecter à votre IA Locale (vLLM).\n\n"
+                "✦ **Impossible de se connecter à votre IA Locale (vLLM).**\n\n"
                 "Pour corriger cela :\n"
                 "1. Assurez-vous que votre serveur local vLLM est bien démarré sur votre machine (port 8000).\n"
                 "2. Si vous êtes sur le Web Cloud (karmicgochara.app), configurez votre URL de tunnel public ngrok dans les Paramètres (rouage en haut à droite).\n"
-                "3. Vous pouvez également sélectionner un autre fournisseur (Gemini, Claude, Groq) dans les Paramètres et renseigner votre propre clé d'API personnelle pour utiliser vos propres jetons (tokens)."
+                "3. Vous pouvez également sélectionner un autre fournisseur (Gemini, Claude, Groq) dans les Paramètres et renseigner votre propre clé d'API personnelle pour utiliser vos propres jetons (tokens).\n\n"
+                "👉 **Nouveau :** Besoin d'aide pour choisir le meilleur moteur ? [Consulter le Comparatif des IA 📊](#open-benchmark)"
             )
         
         # Si c'est un fournisseur tiers individuel configuré par l'utilisateur

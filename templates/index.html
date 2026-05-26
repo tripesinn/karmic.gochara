@@ -538,7 +538,10 @@
                 <h4 style="font-family:var(--display); font-size:1rem; color:var(--gold); margin:0 0 0.5rem;">Paramètres IA (Optionnel)</h4>
                 <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:1rem; line-height:1.4;">Utilise ta propre clé API pour des calculs illimités sans restriction de quota ou ton URL ngrok pour l'IA locale.</p>
                 
-                <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Provider (Fournisseur)</label>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.5rem;">
+                    <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); margin:0; text-transform:uppercase;">Provider (Fournisseur)</label>
+                    <button type="button" onclick="toggleAIBenchmark()" style="background:none; border:none; color:var(--gold); font-family:var(--mono); font-size:0.65rem; cursor:pointer; text-decoration:underline; padding:0; text-transform:uppercase;">📊 Comparatif / Aide</button>
+                </div>
                 <select id="custom-provider" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85); width:100%; margin-bottom:1rem;" onchange="updateProviderFields()">
                     <option value="">Défaut serveur</option>
                     <option value="local">Serveur Local (vLLM)</option>
@@ -547,6 +550,82 @@
                     <option value="groq">Groq</option>
                     <option value="openrouter">OpenRouter</option>
                 </select>
+
+                <!-- Panneau de Benchmark Astrologique -->
+                <div id="ai-benchmark-panel" style="display: none; background: rgba(8, 7, 16, 0.95); border: 1px solid var(--border); padding: 1.2rem; margin-bottom: 1.5rem; border-radius: 4px; box-shadow: inset 0 0 15px rgba(201,168,76,0.05); animation: fadeIn 0.3s ease;">
+                    <h5 style="font-family: var(--display); font-size: 0.85rem; color: var(--gold); margin: 0 0 0.8rem 0; letter-spacing: 0.1em; display:flex; justify-content:space-between; align-items:center;">
+                        <span>✦ BENCHMARK DE L'ORACLE</span>
+                        <span onclick="toggleAIBenchmark()" style="cursor:pointer; opacity:0.6; font-size: 0.8rem;">[Fermer]</span>
+                    </h5>
+                    
+                    <p style="font-size: 0.75rem; color: var(--text-dim); margin-bottom: 1rem; line-height: 1.45; font-family: 'Georgia', serif; font-style: italic;">
+                        Chaque IA possède son propre tempérament et sa manière de verbaliser la doctrine karmique. Voici notre évaluation :
+                    </p>
+
+                    <!-- Grille des Modèles -->
+                    <div style="display: flex; flex-direction: column; gap: 10px; font-family: var(--mono); font-size: 0.72rem;">
+                        
+                        <!-- Gemini -->
+                        <div style="border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+                                <span style="color:var(--gold); font-weight:bold;">🟢 Google Gemini (2.0 Flash)</span>
+                                <span style="color:#6ab56a; background:rgba(106,181,106,0.1); padding:1px 5px; border-radius:2px; font-size:0.65rem;">GRATUIT</span>
+                            </div>
+                            <div style="color: var(--text-dim); line-height: 1.3; margin-bottom: 4px;">
+                                • Ton : <span style="color:var(--gold);">✦✦✦✦</span> | Vitesse : <span style="color:var(--gold);">✦✦✦✦✦</span> | Précision : <span style="color:var(--gold);">✦✦✦✦</span>
+                            </div>
+                            <div style="font-size: 0.68rem; color: rgba(255,255,255,0.5); display:flex; justify-content:space-between;">
+                                <span>Le choix malin. Rapide, fluide et clé gratuite en 2 clics.</span>
+                                <a href="https://aistudio.google.com/" target="_blank" style="color:var(--gold); text-decoration:underline;">Obtenir clé ↗</a>
+                            </div>
+                        </div>
+
+                        <!-- Claude -->
+                        <div style="border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+                                <span style="color:var(--gold); font-weight:bold;">👑 Anthropic Claude (3.5 Sonnet)</span>
+                                <span style="color:var(--text-dim); font-size:0.65rem;">PAYANT (Consommation)</span>
+                            </div>
+                            <div style="color: var(--text-dim); line-height: 1.3; margin-bottom: 4px;">
+                                • Ton : <span style="color:var(--gold);">✦✦✦✦✦</span> | Vitesse : <span style="color:var(--gold);">✦✦✦</span> | Précision : <span style="color:var(--gold);">✦✦✦✦✦</span>
+                            </div>
+                            <div style="font-size: 0.68rem; color: rgba(255,255,255,0.5); display:flex; justify-content:space-between;">
+                                <span>La Rolls absolue. Interprétations d'une rare poésie.</span>
+                                <a href="https://console.anthropic.com/" target="_blank" style="color:var(--gold); text-decoration:underline;">Obtenir clé ↗</a>
+                            </div>
+                        </div>
+
+                        <!-- Groq -->
+                        <div style="border-bottom: 1px solid rgba(255,255,255,0.04); padding-bottom: 8px;">
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+                                <span style="color:var(--gold); font-weight:bold;">⚡ Groq (Llama 3.3 70B)</span>
+                                <span style="color:#6ab56a; background:rgba(106,181,106,0.1); padding:1px 5px; border-radius:2px; font-size:0.65rem;">GRATUIT</span>
+                            </div>
+                            <div style="color: var(--text-dim); line-height: 1.3; margin-bottom: 4px;">
+                                • Ton : <span style="color:var(--gold);">✦✦✦✦</span> | Vitesse : <span style="color:var(--gold);">✦✦✦✦✦</span> | Précision : <span style="color:var(--gold);">✦✦✦✦</span>
+                            </div>
+                            <div style="font-size: 0.68rem; color: rgba(255,255,255,0.5); display:flex; justify-content:space-between;">
+                                <span>Vitesse foudroyante. Analyse lucide de la carte.</span>
+                                <a href="https://console.groq.com/" target="_blank" style="color:var(--gold); text-decoration:underline;">Obtenir clé ↗</a>
+                            </div>
+                        </div>
+
+                        <!-- Local -->
+                        <div>
+                            <div style="display:flex; justify-content:space-between; margin-bottom: 3px;">
+                                <span style="color:var(--gold); font-weight:bold;">💻 Serveur Local (Phi-4 14B)</span>
+                                <span style="color:#6ab56a; background:rgba(106,181,106,0.1); padding:1px 5px; border-radius:2px; font-size:0.65rem;">SOUVERAIN</span>
+                            </div>
+                            <div style="color: var(--text-dim); line-height: 1.3; margin-bottom: 4px;">
+                                • Ton : <span style="color:var(--gold);">✦✦✦</span> | Vitesse : <span style="color:var(--gold);">✦✦✦</span> | Précision : <span style="color:var(--gold);">✦✦✦✦</span>
+                            </div>
+                            <div style="font-size: 0.68rem; color: rgba(255,255,255,0.5); display:flex; justify-content:space-between;">
+                                <span>Gratuit, privé et hors-ligne. S'exécute sur votre propre Mac.</span>
+                                <span style="color:var(--gold-dim);">vLLM activé</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
                 <div id="provider-fields" style="display:none;">
                     <label id="api-key-label" style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Clé API ou URL Tunnel</label>
@@ -652,6 +731,21 @@
             document.getElementById('settings-modal').style.display = 'none';
         }
 
+        function toggleAIBenchmark() {
+            const panel = document.getElementById('ai-benchmark-panel');
+            if (panel) {
+                panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+            }
+        }
+
+        function openSettingsWithBenchmark() {
+            openSettings();
+            const panel = document.getElementById('ai-benchmark-panel');
+            if (panel) {
+                panel.style.display = 'block';
+            }
+        }
+
         function saveSettings() {
             const provider = document.getElementById('custom-provider').value;
             const apiKey = document.getElementById('custom-api-key').value.trim();
@@ -729,6 +823,15 @@
                     if (locked && data.plan !== 'free') locked.style.display = 'none';
                 }).catch(() => {});
             }
+
+            // Interception des clics sur le comparatif des IA
+            document.addEventListener('click', (e) => {
+                const link = e.target.closest('a');
+                if (link && link.getAttribute('href') === '#open-benchmark') {
+                    e.preventDefault();
+                    openSettingsWithBenchmark();
+                }
+            });
         });
     </script>
 
