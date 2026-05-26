@@ -1210,7 +1210,7 @@ Quand la fenêtre se ferme. Pourquoi cette date.
 
 STYLE: Pas de jargon astro externe. Langage direct, français courant.
 LONGUEUR: 200 mots max, total."""
-        system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts."
+        system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts. Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
     else:
         if lang == "en":
             user_prompt = f"""Karmic transit analysis for {name} — {date}.
@@ -1242,7 +1242,8 @@ Tutoiement. Direct. 200 mots max."""
             "Porte Invisible=Prison inconsciente/refoulement. "
             "LILITH=Point de rupture/épreuve. "
             "ACTION=Dharma/Bascule. "
-            "Tutoie l'utilisateur. Sois direct. 200 mots max."
+            "Tutoie l'utilisateur. Sois direct. 200 mots max. "
+            "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
         )
 
     return {"system": system, "user": user_prompt}
