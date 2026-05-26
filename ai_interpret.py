@@ -26,6 +26,74 @@ from astro_calc import NAKSHATRAS, NAKSHATRA_LORDS
 _SERVER_ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 _SERVER_GROK_KEY = os.environ.get("GROK_API_KEY", "")
 
+import time
+import re
+
+_GROK_MODEL_CACHE = {
+    "model": None,
+    "last_fetched": 0
+}
+
+def _get_grok_model() -> str:
+    """
+    Délivre dynamiquement le meilleur modèle Grok disponible.
+    Priorise GROK_MODEL de l'environnement s'il est spécifié.
+    Sinon, interroge l'API x.ai pour lister les modèles et sélectionne le plus récent (avec cache de 12 heures).
+    En cas de problème, fallback sur 'grok-4.3'.
+    """
+    env_model = os.environ.get("GROK_MODEL", "").strip()
+    if env_model and env_model != "auto":
+        return env_model
+
+    now = time.time()
+    if _GROK_MODEL_CACHE["model"] and (now - _GROK_MODEL_CACHE["last_fetched"] < 43200):
+        return _GROK_MODEL_CACHE["model"]
+
+    default_fallback = "grok-4.3"
+    api_key = _SERVER_GROK_KEY or os.environ.get("GROK_API_KEY", "")
+    if not api_key:
+        return default_fallback
+
+    try:
+        url = "https://api.x.ai/v1/models"
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
+        r = requests.get(url, headers=headers, timeout=3)
+        if r.status_code == 200:
+            models_data = r.json().get("data", [])
+            valid_models = []
+            for m in models_data:
+                model_id = m.get("id", "")
+                is_reasoning = "reasoning" in model_id and "non-reasoning" not in model_id
+                if (model_id.startswith("grok-") and 
+                    "imagine" not in model_id and 
+                    "build" not in model_id and 
+                    "multi-agent" not in model_id and 
+                    not is_reasoning):
+                    valid_models.append(model_id)
+
+            if valid_models:
+                def model_sort_key(name):
+                    numbers = re.findall(r'\d+', name)
+                    return [int(num) for num in numbers] if numbers else [0]
+
+                valid_models.sort(key=model_sort_key)
+                best_model = valid_models[-1]
+                
+                _GROK_MODEL_CACHE["model"] = best_model
+                _GROK_MODEL_CACHE["last_fetched"] = now
+                print(f"[GROK AUTO-ROUTING] Dynamic search selected: {best_model} (Available: {valid_models})", flush=True)
+                return best_model
+    except Exception as e:
+        print(f"[GROK AUTO-ROUTING] Error fetching dynamic model, fallback to {default_fallback}: {e}", flush=True)
+
+    _GROK_MODEL_CACHE["model"] = default_fallback
+    _GROK_MODEL_CACHE["last_fetched"] = now
+    return default_fallback
+
+
 def _call_grok(system: str, prompt: str, model: str, api_key: str, max_tokens: int) -> str:
     url = "https://api.x.ai/v1/chat/completions"
     headers = {
@@ -69,7 +137,7 @@ def _enforce_plan_provider(user: dict):
     if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
         return "local", "dummy", "mlx-community/phi-4-4bit"
     else:
-        return "grok", _SERVER_GROK_KEY, "grok-4.3"
+        return "grok", _SERVER_GROK_KEY, _get_grok_model()
 
 
 def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) -> str:
@@ -92,6 +160,9 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
 
         elif provider == "claude":
             return _call_claude(system, prompt, model or "claude-3-5-sonnet-latest", user_key, max_tokens)
+            
+        elif provider == "grok":
+            return _call_grok(system, prompt, model or "grok-4.3", user_key, max_tokens)
             
         elif provider == "local":
             url = "http://127.0.0.1:8000/v1/chat/completions"
@@ -170,14 +241,14 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
         # En cas d'erreur de clé ou d'API, log et fallback sur le serveur (Claude par défaut)
         print(f"Erreur provider {provider}: {e}")
         if _SERVER_GROK_KEY:
-            return _call_grok(system, prompt, "grok-4.3", _SERVER_GROK_KEY, max_tokens)
+            return _call_grok(system, prompt, _get_grok_model(), _SERVER_GROK_KEY, max_tokens)
         elif _SERVER_ANTHROPIC_KEY:
             return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
         return "Erreur lors de la génération (serveur non configuré)."
         
     # Provider inconnu -> serveur par défaut
     if _SERVER_GROK_KEY:
-        return _call_grok(system, prompt, "grok-4.3", _SERVER_GROK_KEY, max_tokens)
+        return _call_grok(system, prompt, _get_grok_model(), _SERVER_GROK_KEY, max_tokens)
     elif _SERVER_ANTHROPIC_KEY:
         return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
     return "Erreur lors de la génération (aucun provider valide)."
