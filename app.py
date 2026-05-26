@@ -186,6 +186,7 @@ LANGS = {
         "feat_chatbot": "Astro Chat Bot",
         "feat_calendar": "Calendrier interactif",
         "feat_multiprofile": "Multi-profil (Entourage)",
+        "feat_edge_ia": "Local IA / Edge IA (Confidentialité)",
         # App section labels
         "section_natal": "✦ Lecture natale",
         "section_signal": "◆ Daily Reading",
@@ -346,6 +347,7 @@ LANGS = {
         "feat_chatbot": "Astro Chat Bot",
         "feat_calendar": "Interactive Calendar",
         "feat_multiprofile": "Multi-profile (Entourage)",
+        "feat_edge_ia": "Local IA / Edge IA (Privacy)",
         # App section labels
         "section_natal": "✦ Natal Reading",
         "section_signal": "◆ Daily Reading",
