@@ -2,12 +2,12 @@
 
 ## État Actuel
 
-Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son modèle économique et la simplicité de son expérience utilisateur. L'application distingue désormais de manière étanche et automatique les profils **PRO** et **Freemium**, avec un routage IA adapté (Edge IA locale pour le Pro, Grok pour le Free) et un système robuste de quotas quotidiens géré par Google Sheets. Le suivi des modèles de l'API Grok est maintenant entièrement autonome pour éviter toute interruption de service lors des dépréciations de x.ai.
+Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son modèle économique et la simplicité de son expérience utilisateur. L'application distingue désormais de manière étanche et automatique les profils **PRO** et **Freemium**, avec un routage IA adapté (Edge IA locale pour le Pro, Grok pour le Free) et un système robuste de quotas quotidiens géré par Google Sheets. Le suivi des modèles de l'API Grok est maintenant entièrement autonome pour éviter toute interruption de service lors des dépréciations de x.ai. De plus, la page Freemium a été allégée et calquée sur le visuel épuré et mystique de "KarmicAstro X-bot", tandis que la Carte Karmique interactive avec interprétation IA en un clic a été intégrée comme une exclusivité majeure de l'offre PRO.
 
 ## Hébergement
 
 - **Google Cloud Run** : Déploiement réussi dans la région `europe-west1` (Belgique).
-- **Mappage de nom de domaine** : `karmicgochara.app` mappé vers le service `gochara-api` dans la région `europe-west1`.
+- **Mappage de nom de domaine** : `karmicgochara.app` mappé vers le service `gochara-api` in the region `europe-west1`.
 
 ## Stack Technique
 
@@ -31,7 +31,23 @@ Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son 
    - Le système stocke désormais la date du dernier signal généré au format `YYYY-MM-DD` dans la colonne `last_signal_date` de Google Sheets.
    - Toute tentative de génération de signal supplémentaire le même jour renvoie un avertissement clair et bloque la requête.
 
-3. **Suivi des Modèles Grok Auto-géré ("Self-Healing")** :
+3. **Design Épuré Freemium (Style X-bot)** :
+   - Masquage automatique de la barre d'onglets pour les utilisateurs Freemium (l'onglet "Carte Karmique" n'est plus visible ni accessible dans le DOM).
+   - Suppression complète de la section "Outils supplémentaires" et des alertes par email ("🔔 Transit alerts by email") pour les utilisateurs gratuits afin d'alléger l'interface et d'éliminer les messages d'erreur.
+   - Refonte visuelle de l'encart du Signal du Jour (`#hook-transit-box`) en une somptueuse carte noire en suspension (fond glassmorphic sombre, bordure supérieure dorée, typographie serif "Georgia" très premium), rappelant fidèlement l'esthétique mystique du bot original.
+
+4. **Exclusivité PRO : Carte Karmique Interactive (Doctrine)** :
+   - Ajout de la "Carte Karmique (Doctrine)" dans le tableau public "Access & Plans" (Gratuit : `—` / PRO : `✓`).
+   - Pour les membres PRO, la Carte Karmique est désormais cliquable. Un clic sur l'image de la carte déclenche une route API dédiée `/chart/interpret` qui analyse les coordonnées natales de l'utilisateur (Ketu/Rahu, Porte Invisible, Chiron/Porte Visible, Jupiter, Saturne).
+   - L'interprétation, rédigée par l'IA siderealAstro13 avec un ton noble, profond et oraculaire, est instantanément affichée sous la carte avec un formatage Markdown élégant.
+
+5. **Exclusivité PRO : Mémoire Karmique Persistante (RAG - Edge IA local)** :
+   - Intégration complète d'une mémoire vectorielle locale avec `ChromaDB` et `SentenceTransformers` (`all-MiniLM-L6-v2`) via `rag_memory.py`.
+   - L'application sauvegarde de manière asynchrone (threads séparés) toutes les lectures passées de l'utilisateur (natal, transits, synthèses, chat).
+   - Lors de chaque nouvelle génération pour un utilisateur PRO, le contexte est enrichi avec son historique de lectures pour éviter la répétition et garantir un accompagnement spirituel de long terme.
+   - Le module est automatiquement désactivé sur Google Cloud Run (`IS_CLOUD = True`) pour préserver les performances en production et gérer l'absence de persistance disque.
+
+6. **Suivi des Modèles Grok Auto-géré ("Self-Healing")** :
    - Implémentation d'une fonction d'auto-découverte dans `ai_interpret.py` : l'application interroge dynamiquement `https://api.x.ai/v1/models`.
    - Filtrage automatique des modèles indésirables (image-generation, build agents, et modèles de pur raisonnement trop lents/coûteux) pour ne garder que les modèles de texte rapides et qualitatifs.
    - Tri par versioning mathématique pour élire automatiquement le modèle le plus moderne et récent (ex: bascule automatique sur `grok-4.20-0309-non-reasoning` au lieu de `grok-4.3`).
@@ -49,7 +65,7 @@ Le projet Karmic Gochara a franchi un cap majeur concernant l'équilibre de son 
 
 ## Roadmap (Noël 2026)
 
-- **Mémoire Karmique Persistante (RAG)** : Implémenter un système de mémoire à long terme (Retrieval-Augmented Generation) exclusif à Gochara Pro avec l'IA locale. L'application indexera toutes les lectures passées de l'utilisateur (hooks, synthèses, alternatives de conscience, conversations du chatbot). Lors d'une nouvelle génération, l'IA locale lira cet historique pour offrir une analyse évolutive et connectée aux événements passés, agissant comme un véritable accompagnateur spirituel de long terme.
+- **Optimisation des performances et Multi-Profils** : Préparation de l'intégration de profils secondaires illimités pour les utilisateurs PRO et transition éventuelle de Google Sheets vers Supabase ou Firebase pour supporter la charge à grande échelle.
 
 ## Objectif
 

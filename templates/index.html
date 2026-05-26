@@ -176,6 +176,17 @@
                     <tr>
                         <td
                             style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            {{ lang.feat_carte if lang.feat_carte else 'Carte Karmique (Doctrine)' }}</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
                             {{ lang.feat_synthesis }}</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
@@ -241,8 +252,8 @@
         </div>
 
         <!-- Tabs (Gochara / Carte) -->
-        <div
-            style="display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; font-family: var(--display);">
+        <div id="tabs-container"
+            style="{% if session_profile and session_profile.get('plan', 'free') == 'free' %}display: none;{% else %}display: flex;{% endif %} justify-content: center; gap: 1rem; margin-bottom: 2rem; font-family: var(--display);">
             <button id="tab-gochara" onclick="switchTab('gochara')"
                 style="background:none; border:none; color:var(--gold); font-size:1rem; letter-spacing:0.1em; cursor:pointer; border-bottom: 2px solid var(--gold); padding-bottom:4px;">{{
                 lang.tab_gochara }}</button>
@@ -251,16 +262,31 @@
                 lang.tab_carte }}</button>
         </div>
 
+        {% if session_profile and session_profile.get('plan', 'free') != 'free' %}
         <div id="view-carte" style="display: none; max-width: 600px; margin: 0 auto 3rem; text-align: center;">
             <img id="karmic-chart-img" src="/chart/karmic.svg"
-                style="width: 100%; max-width: 500px; height: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5);"
+                style="width: 100%; max-width: 500px; height: auto; border-radius: 8px; border: 1px solid var(--border); box-shadow: 0 4px 20px rgba(0,0,0,0.5); cursor: pointer;"
                 alt="Carte Karmique"
-                onerror="this.style.display='none'; document.getElementById('karmic-chart-err').style.display='block';">
+                onerror="this.style.display='none'; document.getElementById('karmic-chart-err').style.display='block';"
+                title="Clique sur la carte pour l'interpréter">
             <div id="karmic-chart-err"
                 style="display: none; color: var(--text-dim); font-size: 0.85rem; margin-top: 1rem;">
                 {{ lang.map_wait if lang.map_wait else 'Lance un calcul...' }}
             </div>
+            
+            <!-- Dedicated box for interpretation -->
+            <div id="chart-interpretation-box" style="display: none; margin-top: 1.5rem; text-align: left; background: rgba(12, 10, 8, 0.85); border: 1px solid var(--border); border-top: 2px solid var(--gold); padding: 1.5rem; border-radius: 4px; box-shadow: 0 4px 24px rgba(0,0,0,0.4);">
+                <div style="font-family: var(--mono); font-size: 0.65rem; color: var(--gold-dim); letter-spacing: 0.2em; text-transform: uppercase; margin-bottom: 0.8rem; display: flex; align-items: center; justify-content: space-between;">
+                    <span>✦ INTERPRÉTATION DE LA CARTE</span>
+                    <span id="chart-interpret-close" style="cursor: pointer; font-size: 0.95rem; opacity: 0.7;" onclick="document.getElementById('chart-interpretation-box').style.display='none';">[X]</span>
+                </div>
+                <div id="chart-interpretation-text" style="font-size: 0.95rem; line-height: 1.75; color: rgba(245,240,232,0.88); white-space: pre-line;"></div>
+                <div id="chart-interpretation-spinner" style="display: none; text-align: center; padding: 1rem 0;">
+                    <span class="spinner"></span> <span style="color: var(--text-dim); font-size: 0.85rem; margin-left: 8px;">Déchiffrage des influences célestes...</span>
+                </div>
+            </div>
         </div>
+        {% endif %}
 
         <div id="view-gochara">
             {% if session_profile and session_profile.get('plan', 'free') != 'free' %}
@@ -279,18 +305,18 @@
             </div>
             {% endif %}
 
-            <!-- Hook transit -->
+            <!-- Hook transit / Daily Reading Card -->
             <div id="hook-transit-box" style="display:none; max-width:600px; margin:0 auto 2rem; padding:0 20px;">
-                <div style="border-left:2px solid var(--gold); padding:1rem 1.2rem; background:rgba(201,168,76,0.06);">
+                <div style="border-top:2px solid var(--gold); border-left: none; padding:2rem 1.8rem; background:rgba(12, 10, 8, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; border-right: 1px solid rgba(255,255,255,0.03); border-bottom: 1px solid rgba(255,255,255,0.03); border-left: 1px solid rgba(255,255,255,0.03); box-shadow: 0 12px 40px rgba(0,0,0,0.6); text-align: center;">
                     <div
-                        style="font-family:var(--mono); font-size:0.65rem; letter-spacing:0.2em; color:var(--gold-dim); margin-bottom:0.6rem; text-transform:uppercase;">
-                        {{ lang.section_signal }}</div>
+                        style="font-family:var(--display); font-size:0.8rem; letter-spacing:0.25em; color:var(--gold); margin-bottom:1.2rem; text-transform:uppercase;">
+                        ✦ {{ lang.section_signal }} ✦</div>
                     <div id="hook-transit-text"
-                        style="font-style:italic; font-size:1rem; line-height:1.75; color:rgba(245,240,232,0.88);">
+                        style="font-family: 'Georgia', serif; font-size:1.1rem; line-height:1.8; color:rgba(245,240,232,0.92); margin-bottom: 0.5rem;">
                     </div>
                     <div id="hook-transit-spinner"
-                        style="display:none; color:var(--text-dim); font-size:0.82rem; margin-top:0.5rem;">
-                        <span class="spinner"></span> <span id="hook-transit-spinner-text">{{ lang.loading_aspects
+                        style="display:none; color:var(--text-dim); font-size:0.82rem; margin-top:1rem;">
+                        <span class="spinner"></span> <span id="hook-transit-spinner-text" style="font-family: var(--mono); letter-spacing: 0.05em;">{{ lang.loading_aspects
                             }}</span>
                     </div>
                 </div>
@@ -403,6 +429,7 @@
         </div>
 
         <!-- Outils supplémentaires -->
+        {% if session_profile and session_profile.get('plan', 'free') != 'free' %}
         <div style="max-width: 800px; margin: 2.5rem auto 0; padding: 0 20px;">
             <div
                 style="border-top: 1px solid var(--border); padding-top: 1.5rem; display: flex; flex-wrap: wrap; gap: 12px; justify-content: center; align-items: center;">
@@ -446,6 +473,7 @@
             </div>
             {% endif %}
         </div>
+        {% endif %}
     </div> <!-- Fin view-gochara -->
     </div> <!-- Fin app-section -->
 
@@ -496,9 +524,8 @@
         <div style="background:#0f0f22; border:1px solid var(--gold-dim); padding:2rem; max-width:400px; width:90%; text-align:left; max-height:90vh; overflow-y:auto;">
             <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">Paramètres</h4>
 
-            
             {% if session_profile %}
-            <div style="margin-top: 0; padding-top: 0;">
+            <div style="margin-top: 0; padding-top: 0; border-bottom: 1px solid rgba(201,168,76,0.15); padding-bottom: 1.5rem; margin-bottom: 1.5rem;">
                 <h4 style="font-family:var(--display); font-size:1rem; color:var(--gold); margin:0 0 0.5rem;">Mode Hors-Ligne (1 An)</h4>
                 <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:1rem; line-height:1.4;">Télécharge tous les calculs astronomiques de l'année en cours pour utiliser l'app sans connexion internet (100% Local).</p>
                 <button id="btn-download-offline" class="btn-secondary" style="width:100%; justify-content:center;" onclick="downloadOfflineYear()">
@@ -506,6 +533,33 @@
                 </button>
             </div>
             {% endif %}
+
+            <div>
+                <h4 style="font-family:var(--display); font-size:1rem; color:var(--gold); margin:0 0 0.5rem;">Paramètres IA (Optionnel)</h4>
+                <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:1rem; line-height:1.4;">Utilise ta propre clé API pour des calculs illimités sans restriction de quota ou ton URL ngrok pour l'IA locale.</p>
+                
+                <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Provider (Fournisseur)</label>
+                <select id="custom-provider" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85); width:100%; margin-bottom:1rem;" onchange="updateProviderFields()">
+                    <option value="">Défaut serveur</option>
+                    <option value="local">Serveur Local (vLLM)</option>
+                    <option value="gemini">Google Gemini</option>
+                    <option value="claude">Anthropic Claude</option>
+                    <option value="groq">Groq</option>
+                    <option value="openrouter">OpenRouter</option>
+                </select>
+
+                <div id="provider-fields" style="display:none;">
+                    <label id="api-key-label" style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Clé API ou URL Tunnel</label>
+                    <div style="position: relative; display: block; margin-bottom: 1rem;">
+                        <input type="password" id="custom-api-key" class="login-input" placeholder="..." style="margin-bottom: 0; padding-right: 40px; width:100%;">
+                        <span id="toggle-eye" onclick="var input=document.getElementById('custom-api-key'); if(input.type==='password'){input.type='text'; this.textContent='🙈';}else{input.type='password'; this.textContent='👁️';}" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none;">👁️</span>
+                    </div>
+                    
+                    <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">Modèle Préféré</label>
+                    <select id="custom-model-select" class="login-input" style="appearance:auto; background:rgba(12,10,8,0.85); display:none; width:100%; margin-bottom:1rem;"></select>
+                    <input type="text" id="custom-model-text" class="login-input" style="display:none; width:100%; margin-bottom:1rem;" placeholder="Ex: anthropic/claude-3.5-sonnet">
+                </div>
+            </div>
             
             <div style="display:flex; gap:10px; margin-top:1.5rem;">
                 <button class="btn-secondary" onclick="closeSettings()">Annuler</button>

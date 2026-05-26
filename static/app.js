@@ -149,26 +149,37 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
             const viewCarte = document.getElementById('view-carte');
 
             if (tabId === 'carte') {
-                carteBtn.style.color = 'var(--gold)';
-                carteBtn.style.borderBottomColor = 'var(--gold)';
-                gocharaBtn.style.color = 'var(--text-dim)';
-                gocharaBtn.style.borderBottomColor = 'transparent';
-                viewGochara.style.display = 'none';
-                viewCarte.style.display = 'block';
-                // Passer la date de transit sélectionnée pour afficher les planètes du jour
-                const tDate = document.getElementById('transit-date')?.value || '';
-                const tHour = new Date().getHours();
-                const chartParams = tDate
-                    ? `date=${tDate}&hour=${tHour}&t=${Date.now()}`
-                    : `t=${Date.now()}`;
-                document.getElementById('karmic-chart-img').src = '/chart/karmic.svg?' + chartParams;
+                if (carteBtn) {
+                    carteBtn.style.color = 'var(--gold)';
+                    carteBtn.style.borderBottomColor = 'var(--gold)';
+                }
+                if (gocharaBtn) {
+                    gocharaBtn.style.color = 'var(--text-dim)';
+                    gocharaBtn.style.borderBottomColor = 'transparent';
+                }
+                if (viewGochara) viewGochara.style.display = 'none';
+                if (viewCarte) {
+                    viewCarte.style.display = 'block';
+                    // Passer la date de transit sélectionnée pour afficher les planètes du jour
+                    const tDate = document.getElementById('transit-date')?.value || '';
+                    const tHour = new Date().getHours();
+                    const chartParams = tDate
+                        ? `date=${tDate}&hour=${tHour}&t=${Date.now()}`
+                        : `t=${Date.now()}`;
+                    const img = document.getElementById('karmic-chart-img');
+                    if (img) img.src = '/chart/karmic.svg?' + chartParams;
+                }
             } else {
-                gocharaBtn.style.color = 'var(--gold)';
-                gocharaBtn.style.borderBottomColor = 'var(--gold)';
-                carteBtn.style.color = 'var(--text-dim)';
-                carteBtn.style.borderBottomColor = 'transparent';
-                viewCarte.style.display = 'none';
-                viewGochara.style.display = 'block';
+                if (gocharaBtn) {
+                    gocharaBtn.style.color = 'var(--gold)';
+                    gocharaBtn.style.borderBottomColor = 'var(--gold)';
+                }
+                if (carteBtn) {
+                    carteBtn.style.color = 'var(--text-dim)';
+                    carteBtn.style.borderBottomColor = 'transparent';
+                }
+                if (viewCarte) viewCarte.style.display = 'none';
+                if (viewGochara) viewGochara.style.display = 'block';
             }
         }
 
@@ -746,6 +757,11 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
 
             const dateInput = document.getElementById('transit-date');
             if (dateInput) dateInput.addEventListener('change', resetHookTransit);
+
+            const chartImg = document.getElementById('karmic-chart-img');
+            if (chartImg) {
+                chartImg.addEventListener('click', interpretKarmicChart);
+            }
         });
 
 
@@ -1304,5 +1320,42 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
             try { const res = await fetch(API_BASE + '/report/annual'); if (!res.ok) { const data = await res.json().catch(() => ({})); alert('Erreur : ' + (data.error || res.statusText)); return; } const blob = await res.blob(); const url = URL.createObjectURL(blob); const a = document.createElement('a'); a.href = url; a.download = `karmic_gochara_${new Date().getFullYear()}.pdf`; a.click(); URL.revokeObjectURL(url); }
             catch { alert(T.js_report_err); }
             finally { btn.disabled = false; btn.textContent = orig; }
+        }
+
+        async function interpretKarmicChart() {
+            const box = document.getElementById('chart-interpretation-box');
+            const textDiv = document.getElementById('chart-interpretation-text');
+            const spinner = document.getElementById('chart-interpretation-spinner');
+            
+            if (!box || !textDiv || !spinner) return;
+            
+            box.style.display = 'block';
+            textDiv.style.display = 'none';
+            textDiv.innerHTML = '';
+            spinner.style.display = 'block';
+            box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
+            try {
+                const res = await fetch(API_BASE + '/chart/interpret', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+                const data = await res.json();
+                spinner.style.display = 'none';
+                textDiv.style.display = 'block';
+                if (data.ok) {
+                    if (window.marked) {
+                        textDiv.innerHTML = marked.parse(data.interpretation);
+                    } else {
+                        textDiv.innerHTML = data.interpretation.replace(/\n/g, '<br>');
+                    }
+                } else {
+                    textDiv.innerHTML = '<span style="color:#ff6b6b;">✗ ' + (data.error || 'Erreur') + '</span>';
+                }
+            } catch (e) {
+                spinner.style.display = 'none';
+                textDiv.style.display = 'block';
+                textDiv.innerHTML = '<span style="color:#ff6b6b;">✗ Erreur réseau</span>';
+            }
         }
     

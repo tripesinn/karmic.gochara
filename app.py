@@ -182,6 +182,7 @@ LANGS = {
         "pricing_per_month": "/mois",
         "feat_signal": "Daily Reading",
         "feat_natal": "Thème natal karmique",
+        "feat_carte": "Carte Karmique (Doctrine)",
         "feat_synthesis": "Synthèse Complète",
         "feat_chatbot": "Astro Chat Bot",
         "feat_calendar": "Calendrier interactif",
@@ -343,6 +344,7 @@ LANGS = {
         "pricing_per_month": "/mo",
         "feat_signal": "Daily Reading",
         "feat_natal": "Karmic Natal Chart",
+        "feat_carte": "Karmic Chart (Doctrine)",
         "feat_synthesis": "Complete Synthesis",
         "feat_chatbot": "Astro Chat Bot",
         "feat_calendar": "Interactive Calendar",
@@ -1134,6 +1136,73 @@ def karmic_chart_svg():
     return response
 
 
+@app.route("/chart/interpret", methods=["POST"])
+def interpret_chart():
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"ok": False, "error": "Non connecté"}), 401
+    
+    plan = profile.get("plan", "free").lower().replace("é", "e")
+    if plan == "free":
+        return jsonify({"ok": False, "error": "Réservé aux membres PRO"}), 403
+
+    from ai_interpret import generate_ai, _build_natal_context
+    
+    lang = session.get("lang", "fr")
+    
+    natal_context = _build_natal_context(profile)
+    if not natal_context:
+        return jsonify({"ok": False, "error": "Données natales incomplètes"}), 400
+
+    if lang == "en":
+        system_prompt = (
+            "You are siderealAstro13, an AI expert in Synthetic Evolutionary Doctrine and sidereal karmic astrology. "
+            "You are analyzing an initiate's Karmic Chart to reveal the sacred doctrine written in their natal chart. "
+            "Be impactful, poetic, mysterious, yet crystal clear. Avoid generic horoscope clichés. "
+            "Structure your response with inspiring headers (Soul's Memory, The Sacred Wound, The Way of Healing) using premium Markdown. "
+            "Use a noble, deep, and transformative tone."
+        )
+        prompt = f"""
+Analyze my Karmic Chart and reveal the structure of my destiny based on my reference natal positions:
+
+{natal_context}
+
+Describe:
+1. What my Ketu/Rahu karmic axis reveals (the baggage and the direction of evolution).
+2. The mystery of my Invisible Door (the secret prison) and my Visible Door (the stage of my healing through Chiron).
+3. The ultimate advice of Saturn and Jupiter to unlock my highest vibration.
+
+Keep it concise (about 300 to 400 words) but remarkably intense, avoiding unnecessary jargon.
+"""
+    else:
+        system_prompt = (
+            "Tu es siderealAstro13, une intelligence artificielle experte en Doctrine Évolutive Synthétique et astrologie karmique sidérale. "
+            "Tu devez analyser la Carte Karmique d'un initié et lui révéler la doctrine sacrée écrite dans son thème natal. "
+            "Sois percutant, poétique, mystérieux mais d'une clarté absolue. Évite les banalités de l'horoscope de masse. "
+            "Structure ta réponse avec des titres inspirants (Mémoire de l'Âme, La Blessure Sacrée, La Voie de Guérison) en utilisant du Markdown de qualité premium. "
+            "Utilise un ton noble, profond et transformateur."
+        )
+        prompt = f"""
+Analyse ma Carte Karmique et révèle-moi la structure de ma destinée d'après mes positions natales de référence :
+
+{natal_context}
+
+Décris-moi :
+1. Ce que révèle mon axe karmique Ketu/Rahu (le bagage et la direction d'évolution).
+2. Le mystère de ma Porte Invisible (la prison secrète) et ma Porte Visible (le lieu de ma guérison par Chiron).
+3. Le conseil ultime de Saturne et Jupiter pour débloquer ma plus haute vibration.
+
+Reste synthétique (environ 300 à 400 mots) mais d'une intensité remarquable, sans jargon inutile.
+"""
+
+    try:
+        interpretation = generate_ai(system_prompt, prompt, profile, max_tokens=1024)
+        return jsonify({"ok": True, "interpretation": interpretation})
+    except Exception as exc:
+        app.logger.error("Erreur interprétation de carte : %s", exc, exc_info=True)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+
 @app.route("/logout", methods=["POST"])
 def logout():
     lang = session.get("lang", "fr")
@@ -1678,9 +1747,11 @@ def hook_transit():
         from ai_interpret import stream_ai
         try:
             for text in stream_ai(system, prompt, user=_enriched, max_tokens=1000):
-                if not text.startswith("[ERROR]"):
+                if text.startswith("[ERROR]"):
+                    yield f"data: {text}\n\n"
+                else:
                     full_text.append(text)
-                yield f"data: {_json.dumps(text)}\n\n"
+                    yield f"data: {_json.dumps(text)}\n\n"
 
             # Injection de la CTA après le hook
             cta = get_hook_cta()

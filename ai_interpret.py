@@ -132,7 +132,16 @@ def _call_claude(system: str, prompt: str, model: str, api_key: str, max_tokens:
 
 
 def _enforce_plan_provider(user: dict):
-    """Enforce provider routing based on plan: PRO -> Local IA, Free -> Grok."""
+    """Enforce provider routing based on plan or custom user settings."""
+    cust_prov = user.get("user_provider")
+    cust_key = user.get("user_key")
+    cust_model = user.get("user_model")
+    
+    # Si l'utilisateur a configuré son propre fournisseur
+    if cust_prov:
+        if cust_prov == "local" or cust_key:
+            return cust_prov, cust_key or "dummy", cust_model or "mlx-community/phi-4-4bit"
+
     plan = user.get("plan", "free").lower().replace("é", "e")
     if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
         return "local", "dummy", "mlx-community/phi-4-4bit"
