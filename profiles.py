@@ -69,11 +69,12 @@ NATAL_COLS = [
     "chandra_lagna_degree",  # AT 45
 ]
 
-# Bloc 3 — Quotas chatbot et alertes (AU–AW, indices 46–48)
+# Bloc 3 — Quotas chatbot et alertes (AU–AX, indices 46–49)
 QUOTA_COLS = [
     "chat_remaining",        # AU 46
     "chat_reset_month",      # AV 47
     "alert_sent",            # AW 48
+    "last_signal_date",      # AX 49
 ]
 
 # Liste maître — toutes les colonnes dans l'ordre
@@ -195,6 +196,7 @@ def _row_to_profile(row: list) -> dict:
         "porte_invisible_house": _safe(C["porte_invisible_house"]),
         "moon_longitude_sid":    _safe(C["moon_longitude_sid"]),
         "chandra_lagna_degree":  _safe(C["chandra_lagna_degree"]),
+        "last_signal_date":      _safe(C["last_signal_date"]),
     }
 
 
@@ -628,9 +630,37 @@ def consume_plan_synthesis(pseudo: str) -> bool:
         except ValueError:
             count = 0
             
-        if count <= 0:
-            return False
-            
         ws.update(f"{_col(C['plan_syntheses'])}{i}", [[str(count - 1)]])
         return True
+    return False
+
+
+def check_and_consume_daily_signal(pseudo: str) -> bool:
+    """
+    Vérifie et consomme le quota d'un signal quotidien (freemium).
+    Retourne True si autorisé, False si quota dépassé aujourd'hui.
+    """
+    ws = _get_sheet()
+    records = ws.get_all_values()
+    pseudo_lower = pseudo.strip().lower()
+    today_str = date.today().isoformat()
+    
+    for i, row in enumerate(records[1:], start=2):
+        if not row or row[0].strip().lower() != pseudo_lower:
+            continue
+            
+        plan = row[C["plan"]] if len(row) > C["plan"] else "free"
+        plan_normalized = plan.lower().replace("é", "e")
+        if plan_normalized in ("illimite", "subscription", "pro"):
+            return True  # Pro: illimité
+            
+        # Freemium check
+        last_date = row[C["last_signal_date"]] if len(row) > C["last_signal_date"] else ""
+        if last_date == today_str:
+            return False  # Déjà utilisé aujourd'hui
+            
+        # Consommer le quota
+        ws.update(f"{_col(C['last_signal_date'])}{i}", [[today_str]])
+        return True
+        
     return False

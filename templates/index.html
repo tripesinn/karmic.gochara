@@ -33,7 +33,7 @@
                 {% endfor %}
             </select>
             {% if session_profile.get('plan', 'free') not in ('free', 'test') or session_user.lower() in ('jero', 'marie') %}
-            <button onclick="openSettings()" style="background:transparent; border:none; color:var(--text-dim); cursor:pointer; font-size:1.2rem;" title="Paramètres IA">⚙️</button>
+            <button onclick="openSettings()" style="background:transparent; border:none; color:var(--text-dim); cursor:pointer; font-size:1.2rem;" title="Paramètres">⚙️</button>
             {% endif %}
         </div>
     </header>
@@ -157,7 +157,7 @@
                             {{ lang.feat_signal }}</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
-                            ✓</td>
+                            1/jour</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
                             ✓</td>
@@ -491,36 +491,14 @@
         </div>
     </div>
 
-    <!-- ── Modal Paramètres IA ─────────────────────────────────────────────────── -->
+    <!-- ── Modal Paramètres ─────────────────────────────────────────────────── -->
     <div id="settings-modal" style="display:none; position:fixed; inset:0; z-index:9999; background:rgba(0,0,0,0.85); align-items:center; justify-content:center;">
         <div style="background:#0f0f22; border:1px solid var(--gold-dim); padding:2rem; max-width:400px; width:90%; text-align:left; max-height:90vh; overflow-y:auto;">
-            <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">{{ lang.ai_settings_title if lang.ai_settings_title else 'Paramètres IA (Optionnel)' }}</h4>
-            <p style="font-size:0.85rem; color:var(--text-dim); margin-bottom:1.5rem; line-height:1.5;">{{ lang.ai_settings_desc if lang.ai_settings_desc else 'Utilise ta propre clé API pour des calculs illimités sans restriction de quota.' }}</p>
-            
-            <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">{{ lang.ai_provider if lang.ai_provider else 'Provider (Fournisseur)' }}</label>
-            <select id="custom-provider" class="login-input" style="appearance:none; background:rgba(12,10,8,0.85) url('data:image/svg+xml;utf8,<svg fill=%22%23c9a84c%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 10px center; padding-right:30px; color-scheme:dark;" onchange="updateProviderFields()">
-                <option value="">{{ lang.ai_provider_default if lang.ai_provider_default else 'Défaut serveur' }}</option>
-                <option value="local">{{ lang.ai_provider_local if lang.ai_provider_local else 'Serveur Local' }} (vLLM)</option>
-                <option value="gemini">Google Gemini</option>
-                <option value="claude">Anthropic Claude</option>
-                <option value="groq">Groq</option>
-                <option value="openrouter">OpenRouter</option>
-            </select>
+            <h4 style="font-family:var(--display); font-size:1.1rem; color:var(--gold); margin:0 0 1rem;">Paramètres</h4>
 
-            <div id="provider-fields" style="display:none;">
-                <label id="api-key-label" style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">{{ lang.ai_api_key if lang.ai_api_key else 'Clé API' }}</label>
-                <div style="position: relative; display: block; margin-bottom: 1rem;">
-                    <input type="password" id="custom-api-key" class="login-input" placeholder="..." style="margin-bottom: 0; padding-right: 40px;">
-                    <span id="toggle-eye" onclick="var input=document.getElementById('custom-api-key'); if(input.type==='password'){input.type='text'; this.textContent='🙈';}else{input.type='password'; this.textContent='👁️';}" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; font-size: 16px; user-select: none;">👁️</span>
-                </div>
-                
-                <label style="font-size:0.75rem; color:var(--gold-dim); font-family:var(--mono); display:block; margin-bottom:0.5rem; text-transform:uppercase;">{{ lang.ai_model_pref if lang.ai_model_pref else 'Modèle Préféré' }}</label>
-                <select id="custom-model-select" class="login-input" style="appearance:none; background:rgba(12,10,8,0.85) url('data:image/svg+xml;utf8,<svg fill=%22%23c9a84c%22 viewBox=%220 0 24 24%22 width=%2224%22 xmlns=%22http://www.w3.org/2000/svg%22><path d=%22M7 10l5 5 5-5z%22/></svg>') no-repeat right 10px center; padding-right:30px; display:none; color-scheme:dark;"></select>
-                <input type="text" id="custom-model-text" class="login-input" style="display:none;" placeholder="Ex: anthropic/claude-3.5-sonnet">
-            </div>
             
             {% if session_profile %}
-            <div style="margin-top: 2rem; border-top: 1px solid var(--border); padding-top: 1.5rem;">
+            <div style="margin-top: 0; padding-top: 0;">
                 <h4 style="font-family:var(--display); font-size:1rem; color:var(--gold); margin:0 0 0.5rem;">Mode Hors-Ligne (1 An)</h4>
                 <p style="font-size:0.8rem; color:var(--text-dim); margin-bottom:1rem; line-height:1.4;">Télécharge tous les calculs astronomiques de l'année en cours pour utiliser l'app sans connexion internet (100% Local).</p>
                 <button id="btn-download-offline" class="btn-secondary" style="width:100%; justify-content:center;" onclick="downloadOfflineYear()">

@@ -1523,6 +1523,13 @@ def hook_transit():
                         mimetype="text/event-stream",
                         headers={"X-Accel-Buffering": "no", "Cache-Control": "no-cache"})
 
+    # ── Quota Check (Freemium: 1/jour) ─────────────────────────────────────────
+    from profiles import check_and_consume_daily_signal
+    if not check_and_consume_daily_signal(pseudo):
+        def err_stream():
+            yield f"data: [ERROR] Quota Freemium atteint (1/jour).\n\n"
+        return Response(stream_with_context(err_stream()), mimetype="text/event-stream")
+
     # ── Calcul astro (bloquant, avant le stream) ──────────────────────────────
     natal = {
         "name":   profile["name"],

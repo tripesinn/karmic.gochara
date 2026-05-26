@@ -63,11 +63,18 @@ def _call_claude(system: str, prompt: str, model: str, api_key: str, max_tokens:
     return r.json()["content"][0]["text"]
 
 
+def _enforce_plan_provider(user: dict):
+    """Enforce provider routing based on plan: PRO -> Local IA, Free -> Grok."""
+    plan = user.get("plan", "free").lower().replace("é", "e")
+    if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
+        return "local", "dummy", "mlx-community/phi-4-4bit"
+    else:
+        return "grok", _SERVER_GROK_KEY, "grok-beta"
+
+
 def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) -> str:
     """Route la requête vers le provider choisi par l'utilisateur."""
-    provider = user.get("user_provider")
-    user_key = user.get("user_key")
-    model = user.get("user_model")
+    provider, user_key, model = _enforce_plan_provider(user)
 
     # Si pas de provider, ou si on a un provider externe mais pas de clé
     if not provider or (not user_key and provider not in ["local", "claude", "gemini"]):
@@ -181,9 +188,7 @@ def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
     """Route la requête stream vers le provider. 
     Pour Gemini (avec clé), on utilise le vrai stream SSE. 
     Pour les autres (y compris Grok par défaut), on fait un appel bloquant puis on yield des mots pour simuler le stream."""
-    provider = user.get("user_provider")
-    user_key = user.get("user_key")
-    model = user.get("user_model")
+    provider, user_key, model = _enforce_plan_provider(user)
 
     # Si l'utilisateur a explicitement configuré Gemini avec sa propre clé
     if provider == "gemini" and user_key:
