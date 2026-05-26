@@ -1525,7 +1525,7 @@ def hook_transit():
 
     # ── Quota Check (Freemium: 1/jour) ─────────────────────────────────────────
     from profiles import check_and_consume_daily_signal
-    if not check_and_consume_daily_signal(pseudo):
+    if not check_and_consume_daily_signal(pseudo, profile):
         def err_stream():
             yield f"data: [ERROR] Quota Freemium atteint (1/jour).\n\n"
         return Response(stream_with_context(err_stream()), mimetype="text/event-stream")

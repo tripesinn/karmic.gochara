@@ -1,0 +1,56 @@
+{
+  "en": {
+    "ai_settings_title": "AI Settings (Optional)",
+    "ai_settings_desc": "Use your own API key for unlimited calculations without quota restrictions.",
+    "ai_provider": "Provider",
+    "ai_provider_default": "Default Server",
+    "ai_provider_local": "Local Server",
+    "ai_api_key": "API Key",
+    "ai_model_pref": "Preferred Model"
+  },
+  "es": {
+    "ai_settings_title": "Configuraciones de IA (Opcional)",
+    "ai_settings_desc": "Usa tu propia clave de API para cálculos ilimitados sin restricciones de cuota.",
+    "ai_provider": "Proveedor",
+    "ai_provider_default": "Servidor Predeterminado",
+    "ai_provider_local": "Servidor Local",
+    "ai_api_key": "Clave de API",
+    "ai_model_pref": "Modelo Preferido"
+  },
+  "pt": {
+    "ai_settings_title": "Configurações de IA (Opcional)",
+    "ai_settings_desc": "Use sua própria chave de API para cálculos ilimitados sem restrições de cota.",
+    "ai_provider": "Fornecedor",
+    "ai_provider_default": "Servidor Padrão",
+    "ai_provider_local": "Servidor Local",
+    "ai_api_key": "Chave de API",
+    "ai_model_pref": "Modelo Preferido"
+  },
+  "de": {
+    "ai_settings_title": "KI-Einstellungen (Optional)",
+    "ai_settings_desc": "Verwende deine eigene API-Schlüssel für unbegrenzte Berechnungen ohne Quoteneinschränkungen.",
+    "ai_provider": "Anbieter",
+    "ai_provider_default": "Standardserver",
+    "ai_provider_local": "Lokaler Server",
+    "ai_api_key": "API-Schlüssel",
+    "ai_model_pref": "Bevorzugtes Modell"
+  },
+  "nl": {
+    "ai_settings_title": "AI-instellingen (Optioneel)",
+    "ai_settings_desc": "Gebruik je eigen API-sleutel voor onbeperkte berekeningen zonder quotumbeperkingen.",
+    "ai_provider": "Provider",
+    "ai_provider_default": "Standaardserver",
+    "ai_provider_local": "Lokale server",
+    "ai_api_key": "API-sleutel",
+    "ai_model_pref": "Voorkeursmodel"
+  },
+  "it": {
+    "ai_settings_title": "Impostazioni IA (Opzionale)",
+    "ai_settings_desc": "Usa la tua propria chiave API per calcoli illimitati senza restrizioni di quota.",
+    "ai_provider": "Fornitore",
+    "ai_provider_default": "Server predefinito",
+    "ai_provider_local": "Server locale",
+    "ai_api_key": "Chiave API",
+    "ai_model_pref": "Modello preferito"
+  }
+}

@@ -1,0 +1,12 @@
+[2026-05-26 07:38:45 +0200] [33255] [INFO] Starting gunicorn 26.0.0
+[2026-05-26 07:38:45 +0200] [33255] [INFO] Listening at: http://127.0.0.1:5000 (33255)
+[2026-05-26 07:38:45 +0200] [33255] [INFO] Using worker: sync
+[2026-05-26 07:38:45 +0200] [33278] [INFO] Booting worker with pid: 33278
+[2026-05-26 07:38:45 +0200] [33255] [INFO] Control socket listening at /Users/jero87/.gunicorn/gunicorn.ctl
+[2026-05-26 07:38:48,727] WARNING in app: Parse birth_date échoué: invalid literal for int() with base 10: '01T12:00'
+[2026-05-26 07:38:50,824] ERROR in app: Échec de save_natal_to_sheet pour tester_66532
+check_and_consume_daily_signal for tester_66532, today=2026-05-26
+User not found in sheet, allowing first use
+[2026-05-26 07:38:58 +0200] [33255] [INFO] Handling signal: term
+[2026-05-26 07:38:58 +0200] [33278] [INFO] Worker exiting (pid: 33278)
+[2026-05-26 07:38:58 +0200] [33255] [INFO] Shutting down: Master

@@ -271,7 +271,7 @@ def create_profile(data: dict) -> dict:
         "0",                      # syntheses_count
         _current_month_str(),     # syntheses_reset_date
         "0",                      # alerts_enabled
-        "pro",                    # plan
+        "free",                   # plan
         "0",                      # plan_syntheses
         "",                       # stripe_customer_id
     ]
@@ -635,32 +635,47 @@ def consume_plan_synthesis(pseudo: str) -> bool:
     return False
 
 
-def check_and_consume_daily_signal(pseudo: str) -> bool:
+def check_and_consume_daily_signal(pseudo: str, profile_dict: dict = None) -> bool:
     """
     Vérifie et consomme le quota d'un signal quotidien (freemium).
     Retourne True si autorisé, False si quota dépassé aujourd'hui.
     """
+    # Si le profil est fourni et qu'il est PRO, pas besoin d'appeler le sheet !
+    if profile_dict:
+        plan = profile_dict.get("plan", "free").lower().replace("é", "e")
+        if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
+            return True
+
     ws = _get_sheet()
     records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
+    pseudo_clean = _clean_pseudo(pseudo)
     today_str = date.today().isoformat()
     
+    print(f"check_and_consume_daily_signal for {pseudo_clean}, today={today_str}", flush=True)
     for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
+        if not row or _clean_pseudo(row[0]) != pseudo_clean:
             continue
             
         plan = row[C["plan"]] if len(row) > C["plan"] else "free"
         plan_normalized = plan.lower().replace("é", "e")
+        print(f"Found user row {i}, plan={plan_normalized}", flush=True)
         if plan_normalized in ("illimite", "subscription", "pro"):
             return True  # Pro: illimité
             
         # Freemium check
         last_date = row[C["last_signal_date"]] if len(row) > C["last_signal_date"] else ""
+        print(f"Last date={last_date}", flush=True)
         if last_date == today_str:
+            print("Quota reached", flush=True)
             return False  # Déjà utilisé aujourd'hui
             
         # Consommer le quota
-        ws.update(f"{_col(C['last_signal_date'])}{i}", [[today_str]])
+        try:
+            ws.update(f"{_col(C['last_signal_date'])}{i}", [[today_str]])
+            print("Quota updated successfully", flush=True)
+        except Exception as e:
+            print(f"Error updating sheet: {e}", flush=True)
         return True
         
-    return False
+    print("User not found in sheet, allowing first use", flush=True)
+    return True

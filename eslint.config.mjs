@@ -1,0 +1,1 @@
+export default [{languageOptions: {ecmaVersion: 2022, globals: {window: "readonly", document: "readonly", console: "readonly", fetch: "readonly", localStorage: "readonly", alert: "readonly", URLSearchParams: "readonly", history: "readonly", URL: "readonly", navigator: "readonly"}}}, {rules: {"no-undef": "warn", "no-unused-vars": "warn"}}];

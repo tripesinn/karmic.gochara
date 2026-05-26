@@ -69,7 +69,7 @@ def _enforce_plan_provider(user: dict):
     if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
         return "local", "dummy", "mlx-community/phi-4-4bit"
     else:
-        return "grok", _SERVER_GROK_KEY, "grok-beta"
+        return "grok", _SERVER_GROK_KEY, "grok-4.3"
 
 
 def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) -> str:
@@ -170,14 +170,14 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
         # En cas d'erreur de clé ou d'API, log et fallback sur le serveur (Claude par défaut)
         print(f"Erreur provider {provider}: {e}")
         if _SERVER_GROK_KEY:
-            return _call_grok(system, prompt, "grok-beta", _SERVER_GROK_KEY, max_tokens)
+            return _call_grok(system, prompt, "grok-4.3", _SERVER_GROK_KEY, max_tokens)
         elif _SERVER_ANTHROPIC_KEY:
             return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
         return "Erreur lors de la génération (serveur non configuré)."
         
     # Provider inconnu -> serveur par défaut
     if _SERVER_GROK_KEY:
-        return _call_grok(system, prompt, "grok-beta", _SERVER_GROK_KEY, max_tokens)
+        return _call_grok(system, prompt, "grok-4.3", _SERVER_GROK_KEY, max_tokens)
     elif _SERVER_ANTHROPIC_KEY:
         return _call_claude(system, prompt, "claude-3-5-sonnet-latest", _SERVER_ANTHROPIC_KEY, max_tokens)
     return "Erreur lors de la génération (aucun provider valide)."
