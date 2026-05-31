@@ -41,8 +41,9 @@ def render():
     rendered = template.render(
         lang=lang_fr,
         langs=langs,
-        session_user=None, # Not logged in by default
-        session_profile=None,
+        session_user='', # Not logged in by default
+        session_profile={}, # Empty dict to avoid .get() UndefinedError
+        user={}, # Empty dict to avoid UndefinedError
         today_iso='' 
     )
     
@@ -56,10 +57,17 @@ def render():
     if not os.path.exists('www'):
         os.makedirs('www')
         
+    # Copy static folder to www/static to bundle with mobile assets
+    import shutil
+    static_dest = os.path.join('www', 'static')
+    if os.path.exists(static_dest):
+        shutil.rmtree(static_dest)
+    shutil.copytree('static', static_dest)
+        
     with open(OUTPUT_PATH, 'w', encoding='utf-8') as f:
         f.write(rendered)
     
-    print(f"Successfully rendered static index to {OUTPUT_PATH}")
+    print(f"Successfully rendered static index and copied assets to {OUTPUT_PATH}")
 
 if __name__ == "__main__":
     render()
