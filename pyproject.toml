@@ -1,0 +1,89 @@
+[project]
+name = "karmic_gochara"
+version = "1.2.0"
+description = "Karmic Gochara — Vedic Astrology Engine (Edge AI, Swiss Ephemeris, Chandra Lagna)"
+readme = "README.md"
+license = { file = "LICENSE.md" }
+requires-python = ">=3.10"
+authors = [
+    { name = "@siderealAstro13" },
+]
+keywords = ["astrology", "vedic", "jyotish", "swiss-ephemeris", "edge-ai"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Flask",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Religion",
+]
+
+dependencies = [
+    "flask>=3.0.0",
+    "gunicorn>=21.0.0",
+    "pyswisseph>=2.10.3",
+    "python-dotenv>=1.0.0",
+    "pytz>=2024.1",
+    "gspread>=6.0.0",
+    "google-auth>=2.28.0",
+    "requests>=2.31.0",
+    "reportlab>=4.2.0",
+    "timezonefinder>=6.2.0",
+    "stripe>=7.0.0",
+    "chromadb>=0.4.22",
+    "sentence-transformers>=2.3.1",
+]
+
+[project.optional-dependencies]
+bot = ["openai>=1.14.0", "tweepy>=4.14.0", "geopy>=2.4.1"]
+dev = ["ruff>=0.15.0", "mypy>=1.19.0", "pytest"]
+
+[project.urls]
+Homepage = "https://github.com/tripesinn/karmic.gochara"
+Repository = "https://github.com/tripesinn/karmic.gochara.git"
+
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+include = ["*.py", "karmic_vault*", "scripts*"]
+exclude = [".archive*", "scratch*", "ios*", "android*", "www*"]
+
+[tool.ruff]
+target-version = "py312"
+line-length = 120
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle errors
+    "F",     # pyflakes
+    "I",     # isort
+    "UP",    # pyupgrade
+    "B",     # flake8-bugbear
+    "SIM",   # flake8-simplify
+]
+ignore = [
+    "E501",  # line-too-long (handled by formatter)
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "ai_interpret", "astro_calc", "gemini_api", "profiles", "rag_memory"]
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.12"
+implicit_optional = true
+ignore_missing_imports = true
+follow_imports = "normal"
+warn_return_any = false
+warn_unused_ignores = false
+disable_error_code = ["import-untyped"]
+# Only type-check core modules (exclude archive, scratch, scripts)
+exclude = [
+    ".archive/",
+    "scratch/",
+    "scripts/",
+]

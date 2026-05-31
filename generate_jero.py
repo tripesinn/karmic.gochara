@@ -1,7 +1,6 @@
-import sys
-import json
 from datetime import date
-from ai_interpret import get_hook_natal, stream_ai, get_synthesis
+
+from ai_interpret import get_hook_natal, get_synthesis
 from astro_calc import calculate_transits
 
 # Jero's profile
@@ -62,7 +61,7 @@ except Exception as e:
 
 # Writing to markdown file
 with open("synthesis_jero.md", "w") as f:
-    f.write(f"# Résultats Phi-4 pour Jero\n\n")
+    f.write("# Résultats Phi-4 pour Jero\n\n")
     f.write(f"## Hook Natal\n{hook_natal}\n\n")
     f.write(f"## Synthèse Complète\n{synthesis}\n\n")
 

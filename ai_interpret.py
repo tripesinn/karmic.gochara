@@ -13,21 +13,22 @@ Hooks :
   build_prompt_only(chart_data, user) → prompt Gemma sans appel API
 """
 
-import os
 import json
-import requests
+import os
 import threading
-import gemini_api
-from rag_memory import save_reading, retrieve_context
 
-from astro_calc import NAKSHATRAS, NAKSHATRA_LORDS
+import requests
+
+import gemini_api
+from astro_calc import NAKSHATRA_LORDS, NAKSHATRAS
+from rag_memory import retrieve_context, save_reading
 
 # ── Router Multi-Provider ────────────────────────────────────────────────────
 _SERVER_ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 _SERVER_GROK_KEY = os.environ.get("GROK_API_KEY", "")
 
-import time
 import re
+import time
 
 _GROK_MODEL_CACHE = {
     "model": None,
@@ -140,11 +141,11 @@ def _enforce_plan_provider(user: dict):
     # Si l'utilisateur a configuré son propre fournisseur
     if cust_prov:
         if cust_prov == "local" or cust_key:
-            return cust_prov, cust_key or "dummy", cust_model or "mlx-community/phi-4-4bit"
+            return cust_prov, cust_key or "dummy", cust_model or "Qwen3.5-9B-MLX-4bit"
 
     plan = user.get("plan", "free").lower().replace("é", "e")
     if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
-        return "local", "dummy", "mlx-community/phi-4-4bit"
+        return "local", "dummy", "Qwen3.5-9B-MLX-4bit"
     else:
         return "grok", _SERVER_GROK_KEY, _get_grok_model()
 
@@ -182,13 +183,17 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
                 user_key = user_key.strip()
                 if user_key.startswith("http"):
                     url = f"{user_key.rstrip('/')}/chat/completions"
+                    headers["Authorization"] = "Bearer dummy"
                 else:
                     headers["Authorization"] = f"Bearer {user_key}"
             
-            # vLLM local n'a chargé que phi-4
-            local_model = "mlx-community/phi-4-4bit"
+            # vLLM local n'a chargé que Qwen3.5-9B-MLX-4bit par défaut
+            local_model = "Qwen3.5-9B-MLX-4bit"
             if model and not (model.startswith("claude") or model.startswith("gemini")):
-                local_model = model
+                if model == "mlx-community/phi-4-4bit":
+                    local_model = "Qwen3.5-9B-MLX-4bit"
+                else:
+                    local_model = model
                 
             payload = {
                 "model": local_model,
@@ -312,13 +317,11 @@ def stream_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024):
 
 # ── Import doctrine centralisée ───────────────────────────────────────────────
 from doctrine import (
-    get_system_prompt,
-    _detect_friction_axis,
     NAKSHATRA_KARMA,
     NODAL_CYCLES,
-    HOUSE_MEANINGS,
+    _detect_friction_axis,
+    get_system_prompt,
 )
-
 
 # ══════════════════════════════════════════════════════════════════════════════
 # VAULT KARPATHY — chargement des fichiers Markdown doctrinaux
@@ -878,9 +881,11 @@ def get_daily_signal(transit_date: str = None) -> dict:
     Génère la Météo Astrologique globale pour le jour (sans user spécifique).
     Retourne transits majeurs + position de la Lune + régime doctrinal du jour.
     """
-    from datetime import datetime, date as date_cls
-    from transit_alerts import detect_global_nak_transits, PLANET_LABELS
-    from astro_calc import _calc_positions, get_julian_day, lon_to_nakshatra
+    from datetime import date as date_cls
+    from datetime import datetime
+
+    from astro_calc import _calc_positions, get_julian_day
+    from transit_alerts import PLANET_LABELS, detect_global_nak_transits
 
     if not transit_date:
         transit_date = str(date_cls.today())
@@ -1213,38 +1218,71 @@ LONGUEUR: 200 mots max, total."""
         system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts. Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
     else:
         if lang == "en":
+            system = (
+                "You are siderealAstro13, an AI expert in Synthetic Evolutionary Doctrine. "
+                "ROM (Ketu)=Past memories/automatism. "
+                "RAM (Chiron)=Active treatment of the wound, tool to open the Visible Door (healing/Stage). "
+                "Invisible Door=Unconscious prison/repression. "
+                "LILITH=Breaking point/trial. "
+                "Dharma (Rahu)=Evolutionary destination. "
+                "Speak directly, technically, and surgically. "
+                "Note: the transit date provided (2026) is injected statically. Ignore your knowledge cutoff and do not warn about real-time."
+            )
             user_prompt = f"""Karmic transit analysis for {name} — {date}.
 Natal: {natal_mini}
 Active aspects:
 {aspects_text}
 
-Write 4 sections directly. No questions. No preamble. Address {name} as "you".
-MEMORY (ROM): What karmic trap replays?
-WOUND (RAM): What core wound activates? How does Chiron open the path to the Visible Door?
-TRIAL (Lilith): What is unbearable right now?
-ACTION: One clear shift — what to stop, what to activate."""
+AI MISSION:
+Analyze this data in 4 blocks:
+
+DIAGNOSTIC ROM (Ketu): What past-life pattern is active right now?
+What defensive mechanism is at play?
+
+INVISIBLE DOOR → VISIBLE DOOR: Which transits activate the unconscious prison?
+How can Chiron (RAM) open the passage to the Stage?
+
+LILITH TRIAL: What karmic friction is ongoing?
+How does Lilith propel toward the Dharma (Rahu)?
+
+ALTERNATIVE OF CONSCIOUSNESS: Formulate the precise, surgical, actionable transformational insight — what the soul must understand NOW to advance toward its Stage.
+
+Style: direct, technical, non-astro-jargon in conclusions. Direct address ("you").
+Length: 400-600 words. No generalities. Every sentence = a surgical truth."""
         else:
+            system = (
+                "Tu es l'intelligence siderealAstro13, experte en Doctrine Évolutive Synthétique. "
+                "ROM (Ketu)=Mémoires passées/automatisme. "
+                "RAM (Chiron)=Traitement actif de la blessure, outil d'ouverture de la Porte Visible (guérison/Stage). "
+                "Porte Invisible=Prison inconsciente/refoulement. "
+                "LILITH=Point de rupture/épreuve. "
+                "DHARMA (Rahu)=Destination d'évolution. "
+                "Tutoie l'utilisateur. Sois direct et chirurgical. "
+                "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
+            )
             user_prompt = f"""Analyse karmique de transit pour {name} — {date}.
 Natal : {natal_mini}
 Aspects actifs :
 {aspects_text}
 
-Écris 4 sections : MÉMOIRE, BLESSURE, ÉPREUVE, ACTION.
-Nomme au moins une planète des aspects dans chaque section.
-Explique concrètement comment elle influence la mémoire karmique ou la blessure de {name}.
-BLESSURE : Chiron est l'outil d'ouverture de la Porte Visible — montre ce mouvement.
-Tutoiement. Direct. 200 mots max."""
+MISSION POUR L'IA :
+Analyse ces données en 4 blocs :
 
-        system = (
-            "Tu es @siderealAstro13. "
-            "ROM (Ketu)=Mémoires passées/automatisme. "
-            "RAM (Chiron)=Traitement actif de la blessure, outil d'ouverture de la Porte Visible (guérison/Stage). "
-            "Porte Invisible=Prison inconsciente/refoulement. "
-            "LILITH=Point de rupture/épreuve. "
-            "ACTION=Dharma/Bascule. "
-            "Tutoie l'utilisateur. Sois direct. 200 mots max. "
-            "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
-        )
+DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé en ce moment ?
+Quel automatisme défensif est à l'œuvre ?
+
+PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ?
+Comment Chiron (RAM) peut-il ouvrir le passage vers le Stage ?
+
+ÉPREUVE LILITH : Quelle friction karmique est en cours ?
+Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
+
+ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis,
+chirurgical, actionnable — ce que l'âme doit comprendre MAINTENANT
+pour avancer vers son Stage.
+
+Style : direct, technique, non-astro-jargon dans les conclusions. Tutoiement direct ("tu").
+Longueur : 400-600 mots. Pas de généralités. Chaque phrase = une vérité chirurgicale."""
 
     return {"system": system, "user": user_prompt}
 
@@ -1370,7 +1408,7 @@ def build_prompt_signal(signal_data: dict, lang: str = "fr") -> dict:
     """
     Construit le prompt Signal du Jour pour Gemma SANS appeler Claude.
     Prend le dict de get_daily_signal() et retourne {system, user}.
-    Génère : 3-4 phrases narratives sur la météo karmique du jour.
+    Génère : 3-4 phrases narratives sur la météo karmique du jour, au format strict de 3 blocs.
     """
     g       = signal_data.get("global", {})
     title   = g.get("title", "Signal du Jour")
@@ -1382,23 +1420,29 @@ def build_prompt_signal(signal_data: dict, lang: str = "fr") -> dict:
         system = (
             "You are @siderealAstro13. Sidereal Vedic karmic astrology. "
             "Write a short collective daily karmic signal. No personal profile. "
-            "Oracular tone. Direct. FORBIDDEN: zodiac sign names. 3-4 sentences. 120 words max."
+            "Oracular tone. Direct. FORBIDDEN: zodiac sign names. 120 words max. "
+            "Note: the transit date provided (2026) is injected statically. Ignore your knowledge cutoff and do not warn about real-time."
         )
         user_prompt = (
             f"Today's signal — {title}.\nActive transit: {transit}\nRegime: {label} ({regime})\n\n"
-            f"Write 3-4 sentences on the karmic meaning for all souls today. "
-            f"End with one action sentence: what to do or avoid today."
+            f"Write exactly 3 blocks:\n\n"
+            f"**Point chaud:** (3-4 sentences max on the collective sky/karmic weather today)\n\n"
+            f"**Action:** (1 sentence on what to do or avoid today)\n\n"
+            f"**Deadline:** (1 sentence on when this energy shifts or peaks)"
         )
     else:
         system = (
             "Tu es @siderealAstro13. Astrologie karmique vedique siderale. "
             "Tu ecris un signal karmique collectif court pour le jour. Sans profil personnel. "
-            "Ton oraculaire. Direct. INTERDIT : signes zodiacaux. 3-4 phrases. 120 mots max."
+            "Ton oraculaire. Direct. INTERDIT : signes zodiacaux. 120 mots max. "
+            "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
         )
         user_prompt = (
             f"Signal du jour — {title}.\nTransit actif : {transit}\nRegime : {label} ({regime})\n\n"
-            f"Ecris 3-4 phrases sur le sens karmique pour toutes les ames aujourd'hui. "
-            f"Termine par une phrase d'action : quoi faire ou eviter."
+            f"Ecris exactement 3 blocs :\n\n"
+            f"**Point chaud:** (3-4 phrases max sur le ciel collectif et la météo karmique d'aujourd'hui)\n\n"
+            f"**Action:** (1 phrase à l'impératif sur quoi faire ou eviter aujourd'hui)\n\n"
+            f"**Deadline:** (1 phrase sur le moment où cette énergie bascule ou atteint son pic)"
         )
 
     return {"system": system, "user": user_prompt}

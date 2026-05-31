@@ -62,7 +62,6 @@ def chiron_tropical_lon(jd):
     # Passage au plan écliptique J2000
     u    = nu + CHIRON_PERI  # argument de latitude
     cos_i = math.cos(CHIRON_I)
-    sin_i = math.sin(CHIRON_I)
 
     # Longitude écliptique héliocentrique
     x = r * (math.cos(CHIRON_NODE) * math.cos(u) - math.sin(CHIRON_NODE) * math.sin(u) * cos_i)
@@ -102,7 +101,7 @@ print("package com.karmicgochara.app.astro;")
 print()
 print("/**")
 print(f" * ChironTable — positions sidérales de Chiron, résolution {STEP} jours.")
-print(f" * Générée par generate_chiron_table.py · Mécanique képlerienne · Ayanamsa DK")
+print(" * Générée par generate_chiron_table.py · Mécanique képlerienne · Ayanamsa DK")
 print(f" * Éléments orbitaux : JPL Horizons J2000 · {START}→{END}")
 print(f" * {len(entries)} entrées · précision ~0.3-0.5° (orbe 3°)")
 print(" */")

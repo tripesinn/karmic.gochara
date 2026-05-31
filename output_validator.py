@@ -18,7 +18,6 @@ Usage :
 
 import re
 
-
 # ── Constantes de validation ──────────────────────────────────────────────────
 
 ZODIAC_SIGNS_FR = [

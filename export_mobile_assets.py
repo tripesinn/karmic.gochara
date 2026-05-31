@@ -14,7 +14,8 @@ Pré-requis : lancé depuis la racine du repo karmic.gochara.
 
 import json
 import os
-from doctrine import NAKSHATRA_KARMA, SYSTEM_PROMPT_MOBILE_FR, SYSTEM_PROMPT_MOBILE_EN
+
+from doctrine import NAKSHATRA_KARMA, SYSTEM_PROMPT_MOBILE_EN, SYSTEM_PROMPT_MOBILE_FR
 
 ASSETS_DIR = os.path.join("android", "app", "src", "main", "assets")
 

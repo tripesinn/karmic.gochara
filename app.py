@@ -3,15 +3,19 @@ app.py — Gochara Karmique
 Application Flask — Architecture multi-utilisateurs
 """
 
+import json
 import os
 import time
 from datetime import datetime
 
 import pytz
-from flask import Flask, jsonify, make_response, render_template, request, session, send_from_directory
 from dotenv import load_dotenv
+from flask import Flask, Response, jsonify, make_response, render_template, request, send_from_directory, session, stream_with_context
+
+from logging_config import request_middleware, setup_logging
 
 load_dotenv(dotenv_path=".env")
+setup_logging()
 
 # Store des paiements en attente d'activation de session (cas navigateur externe).
 # Clé : pseudo en minuscule, valeur : {"plan": str, "time": float}
@@ -22,6 +26,7 @@ UNLIMITED_PSEUDOS = {"jero", "marie"}
 app = Flask(__name__)
 app.secret_key = os.environ.get("SECRET_KEY", "gochara-secret-2024")
 app.config["JSON_AS_ASCII"] = False
+request_middleware(app)
 
 TRANSIT_LOC_DEFAULT = {
     "city": "Paris, France",
@@ -419,7 +424,6 @@ LANGS = {
         "js_toggle_login": "BACK TO LOGIN",
         "js_signal_btn": "◆ SEE DAILY SIGNAL",
         "js_gemma_loading": "LOCAL AI…",
-        "pillar3_title": "The Stage",
     },
     "es": {
         "ai_settings_title": "Configuraciones de IA (Opcional)",
@@ -911,10 +915,11 @@ def login():
 
     # Toujours recalculer natal_positions en session (non stocké dans le Sheet)
     try:
+        from datetime import date as _date
+
+        from ai_interpret import get_hook_natal
         from astro_calc import calculate_transits
         from profiles import save_natal_to_sheet
-        from ai_interpret import get_hook_natal
-        from datetime import date as _date
 
         natal_input = {
             "name":   profile["name"],
@@ -964,7 +969,7 @@ def login():
 
 @app.route("/register", methods=["POST"])
 def register():
-    from profiles import get_profile_by_email, pseudo_exists, create_profile
+    from profiles import create_profile, get_profile_by_email, pseudo_exists
     data   = request.get_json() or {}
     pseudo = (data.get("pseudo") or "").strip()
     if not pseudo:
@@ -1015,10 +1020,11 @@ def register():
     # 2. Try to calculate natal and enrich
     hook_natal = ""
     try:
+        from datetime import date as _date
+
+        from ai_interpret import get_hook_natal
         from astro_calc import calculate_transits
         from profiles import save_natal_to_sheet
-        from datetime import date as _date
-        from ai_interpret import get_hook_natal
 
         natal_input = {
             "name":   profile["name"],
@@ -1066,7 +1072,7 @@ def register():
 
             # 4. Generate hook only if pro
             if profile.get("plan", "free") != "free":
-                hook_natal = get_hook_natal(profile, lang=user_lang)
+                hook_natal = get_hook_natal(profile, lang=session.get("lang", "fr"))
     except Exception as exc:
         app.logger.error("Calcul natal register échoué pour %s : %s", pseudo, exc, exc_info=True)
 
@@ -1103,7 +1109,6 @@ def karmic_chart_svg():
     date_param   = request.args.get("date", "").strip()
     if date_param:
         try:
-            from datetime import date as _date
             parts = date_param.split("-")
             yr, mo, dy = int(parts[0]), int(parts[1]), int(parts[2])
             hr = int(request.args.get("hour", 12))
@@ -1146,7 +1151,7 @@ def interpret_chart():
     if plan == "free":
         return jsonify({"ok": False, "error": "Réservé aux membres PRO"}), 403
 
-    from ai_interpret import generate_ai, _build_natal_context
+    from ai_interpret import _build_natal_context, generate_ai
     
     lang = session.get("lang", "fr")
     
@@ -1213,7 +1218,7 @@ def logout():
 
 @app.route("/geocode")
 def geocode():
-    import time, requests as req
+    import requests as req
     q = request.args.get("q", "")
     if not q:
         return jsonify([])
@@ -1261,9 +1266,11 @@ def calculate_v2():
     6.  STREAMING: Streame la réponse JSON via SSE.
     """
     total_start_time = time.perf_counter()
+    import requests
+
+    from ai_interpret import stream_synthesis
     from astro_calc import calculate_transits
     from profiles import consume_plan_synthesis
-    import requests
 
     # 1. Gestion d'erreur : Authentification
     profile = session.get("profile")
@@ -1381,9 +1388,8 @@ def calculate_v2():
 
 @app.route("/calculate", methods=["POST"])
 def calculate():
-    from astro_calc import calculate_transits
     from ai_interpret import get_synthesis
-    from profiles import check_and_increment_synthesis
+    from astro_calc import calculate_transits
     from output_validator import SynthesisValidator
 
     profile = session.get("profile")
@@ -1467,13 +1473,11 @@ def calculate():
 
         # Retry 3x sur surcharge Anthropic (529 / overloaded_error)
         synthesis = None
-        last_exc  = None
         for attempt in range(3):
             try:
                 synthesis = get_synthesis(result, enriched_profile, lang=lang)
                 break
             except Exception as exc:
-                last_exc = exc
                 msg = str(exc).lower()
                 if "529" in msg or "overload" in msg:
                     app.logger.warning("Anthropic surchargé (tentative %d/3) : %s", attempt + 1, exc)
@@ -1559,10 +1563,12 @@ def hook_transit():
       data: [DONE]\n\n   — fin du stream
       data: [ERROR] message\n\n — erreur
     """
-    from astro_calc import calculate_transits
-    from ai_interpret import _build_system_prompt, _aspects_to_text, _build_natal_context
-    from flask import Response, stream_with_context
     import json as _json
+
+    from flask import Response, stream_with_context
+
+    from ai_interpret import _aspects_to_text, _build_natal_context
+    from astro_calc import calculate_transits
 
     profile = session.get("profile")
     if not profile:
@@ -1596,7 +1602,7 @@ def hook_transit():
     from profiles import check_and_consume_daily_signal
     if not check_and_consume_daily_signal(pseudo, profile):
         def err_stream():
-            yield f"data: [ERROR] Quota Freemium atteint (1/jour).\n\n"
+            yield "data: [ERROR] Quota Freemium atteint (1/jour).\n\n"
         return Response(stream_with_context(err_stream()), mimetype="text/event-stream")
 
     # ── Calcul astro (bloquant, avant le stream) ──────────────────────────────
@@ -1631,8 +1637,9 @@ def hook_transit():
 
     except Exception as exc:
         app.logger.error("Erreur calcul hook transit : %s", exc, exc_info=True)
+        _exc_for_stream = exc
         def err_stream():
-            yield f"data: [ERROR] {str(exc)}\n\n"
+            yield f"data: [ERROR] {str(_exc_for_stream)}\n\n"
         return Response(stream_with_context(err_stream()), mimetype="text/event-stream")
 
     # ── Sauvegarde transit_date + localisation en session et Sheet ────────────
@@ -1659,7 +1666,8 @@ def hook_transit():
     date_label   = chart_data.get("transit_date", date_str)
 
     # Activations nakshatra : planètes lentes dans le nakshatra natal de Ketu/Rahu/Chiron
-    from transit_alerts import _active_nak_activations, PLANET_LABELS as _PLANET_LABELS
+    from transit_alerts import PLANET_LABELS as _PLANET_LABELS
+    from transit_alerts import _active_nak_activations
 
     natal_naks = {
         "Ketu":   enriched_profile.get("ketu_nakshatra", ""),
@@ -1734,8 +1742,6 @@ def hook_transit():
             f"- The hook does NOT deliver the Alternative of Consciousness — it makes it desirable.\n"
         )
 
-    hook_model = os.environ.get("HOOK_MODEL", "claude-sonnet-4-6")
-
     # ── Stream SSE ────────────────────────────────────────────────────────────
     # On capture le profil enrichi dans une var locale pour le cache post-stream
     _enriched = enriched_profile
@@ -1755,9 +1761,9 @@ def hook_transit():
 
             # Injection de la CTA après le hook
             cta = get_hook_cta()
-            yield f"data: [CTA]\n\n"
+            yield "data: [CTA]\n\n"
             yield f"data: {_json.dumps(cta)}\n\n"
-            yield f"data: [DONE]\n\n"
+            yield "data: [DONE]\n\n"
         except Exception as exc:
             app.logger.error("Erreur stream hook transit : %s", exc)
             yield f"data: [ERROR] {str(exc)}\n\n"
@@ -1882,8 +1888,10 @@ def synthesis_prompt():
         {ok, system, user, context, aspects?, transit_date?}
     """
     from ai_interpret import (
-        build_prompt_only, build_prompt_natal,
-        build_prompt_conscience, build_prompt_signal,
+        build_prompt_conscience,
+        build_prompt_natal,
+        build_prompt_only,
+        build_prompt_signal,
         get_daily_signal,
     )
 
@@ -1927,9 +1935,10 @@ def synthesis_prompt():
 
     # Hook transit — pas de quota (teaser, même logique que /hook/transit mais retourne prompts)
     if context == "hook_transit":
-        from astro_calc import calculate_transits
         from ai_interpret import _aspects_to_text, _build_natal_context
-        from transit_alerts import _active_nak_activations, PLANET_LABELS as _PLANET_LABELS
+        from astro_calc import calculate_transits
+        from transit_alerts import PLANET_LABELS as _PLANET_LABELS
+        from transit_alerts import _active_nak_activations
         date_str = data.get("date", "")
         if not date_str:
             return jsonify({"error": "Date requise"}), 400
@@ -2110,10 +2119,11 @@ def alert_history():
 @app.route("/api/v1/transit-alert", methods=["POST"])
 def trigger_transit_alert():
     """Admin route to trigger a test alert for a user."""
+    from datetime import date
+
+    from email_formatter import format_alert_email
     from profiles import get_profile_by_pseudo
     from transit_alerts import generate_transit_alert
-    from email_formatter import format_alert_email
-    from datetime import date
     
     data = request.get_json() or {}
     pseudo = data.get("pseudo")
@@ -2241,8 +2251,9 @@ def chat_ask():
         
         # Sauvegarde asynchrone dans RAG
         if pseudo:
-            from rag_memory import save_reading
             import threading
+
+            from rag_memory import save_reading
             content_to_save = f"User: {message}\nAssistant: {answer}"
             threading.Thread(target=save_reading, args=(pseudo, content_to_save, "chat")).start()
 
@@ -2283,8 +2294,9 @@ def toggle_alerts():
 # ── Calendrier mensuel des transits ───────────────────────────────────────────
 @app.route("/calendar")
 def calendar_route():
-    from calendar_calc import get_monthly_transits
     from datetime import date as _date
+
+    from calendar_calc import get_monthly_transits
 
     profile = session.get("profile")
     if not profile:
@@ -2305,8 +2317,9 @@ def calendar_route():
 # ── Rapport PDF annuel ────────────────────────────────────────────────────────
 @app.route("/report/annual")
 def annual_report():
-    from annual_report import generate_annual_pdf
     from flask import Response
+
+    from annual_report import generate_annual_pdf
 
     profile = session.get("profile")
     if not profile:
@@ -2468,7 +2481,7 @@ def expand():
     )
 
     try:
-        from ai_interpret import generate_ai, HOOK_MODEL
+        from ai_interpret import HOOK_MODEL, generate_ai
         # Default to HOOK_MODEL if no user_model provided, so it correctly routes to Claude instead of Gemini (which lacks the server key)
         user_params = {
             "user_provider": user_provider, 
@@ -2611,7 +2624,6 @@ def api_complete_payment():
     Appelé par le script sur la page /stripe/success.
     """
     from stripe_payments import verify_checkout_session
-    from profiles import get_profile_by_pseudo
 
     data = request.get_json() or {}
     session_id = data.get("session_id")
@@ -2684,8 +2696,8 @@ def karmic_analysis_orchestrator():
     Endpoint orchestrateur qui intègre les différentes logiques (astro, doctrine, paiement)
     pour fournir une analyse karmique complète.
     """
-    from astro_calc import calculate_transits
     from ai_interpret import get_synthesis
+    from astro_calc import calculate_transits
 
     # 1. Vérification de la session utilisateur
     profile = session.get("profile")
@@ -2769,7 +2781,7 @@ def stripe_webhook():
     Reçoit les événements Stripe et met à jour le plan utilisateur.
     C'est la méthode de garantie si l'utilisateur ferme son navigateur.
     """
-    from stripe_payments import verify_webhook, get_plan_from_price
+    from stripe_payments import verify_webhook
 
     payload    = request.get_data()
     sig_header = request.headers.get("Stripe-Signature", "")
@@ -2803,7 +2815,6 @@ def stripe_webhook():
                     app.logger.error(f"Failed to send next event alert for {pseudo}: {e}")
 
     elif event["type"] == "customer.subscription.deleted":
-        from profiles import get_profile_by_email, downgrade_plan
         obj_raw = event["data"]["object"]
         obj     = obj_raw.to_dict() if hasattr(obj_raw, "to_dict") else dict(obj_raw)
         customer_id = obj.get("id", "")
@@ -2943,6 +2954,7 @@ def content_daily():
       ?lang=fr|en         (optionnel, défaut = fr)
     """
     from datetime import date as date_cls
+
     from ai_interpret import get_daily_signal
 
     transit_date  = request.args.get("date", str(date_cls.today()))
@@ -2964,7 +2976,7 @@ def content_daily():
 def generate_task():
     """Génère et retourne le fichier .task pour l'utilisateur connecté."""
     from astro_calc import calculate_transits
-    from build_task_file import build_task_file, extract_natal_for_task, extract_dominant_transit
+    from build_task_file import build_task_file, extract_dominant_transit, extract_natal_for_task
 
     profile = session.get("profile")
     if not profile:
@@ -3011,8 +3023,9 @@ def generate_task():
 @app.route("/api/prefetch_year", methods=["POST"])
 def prefetch_year():
     """Précalcule et retourne tous les transits pour une année entière."""
-    from astro_calc import calculate_transits
     from datetime import date, timedelta
+
+    from astro_calc import calculate_transits
     
     data = request.get_json() or {}
     year = int(data.get("year", datetime.now().year))
@@ -3064,12 +3077,12 @@ def prefetch_year():
                     enriched_profile = _enrich_profile_with_natal(profile, res.get("natal", {}))
                     prompts = build_prompt_only(res, enriched_profile, lang=session.get("lang", "fr"))
                     res["prompts"] = prompts
-                except Exception as e:
+                except Exception:
                     pass
 
             date_key = current_date.strftime("%Y-%m-%d")
             results[date_key] = res
-        except Exception as e:
+        except Exception:
             pass
         current_date += timedelta(days=1)
         

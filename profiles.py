@@ -3,9 +3,10 @@ profiles.py — Gestion des profils utilisateurs via Google Sheets
 Gochara Karmique — Architecture multi-utilisateurs
 """
 
-import os
 import json
+import os
 from datetime import date
+
 import gspread
 from google.oauth2.service_account import Credentials
 

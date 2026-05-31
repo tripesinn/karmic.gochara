@@ -1,6 +1,6 @@
 import os
-from datetime import datetime
 import uuid
+from datetime import datetime
 
 # Si on est sur Google Cloud Run, le RAG local sur disque éphémère est désactivé
 # (Il est destiné à l'utilisation locale / hors-ligne)

@@ -1,5 +1,4 @@
 import sys
-import os
 
 sys.path.append("/Users/jero87/karmic.gochara")
 from ai_interpret import generate_ai

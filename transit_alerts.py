@@ -15,7 +15,7 @@ from urllib.parse import quote
 
 import requests as req
 
-from astro_calc import get_julian_day, _calc_positions, ORB, NAKSHATRAS, NAKSHATRA_LORDS
+from astro_calc import NAKSHATRA_LORDS, NAKSHATRAS, ORB, _calc_positions, get_julian_day
 
 # Planètes lentes en transit — celles qui déclenchent des alertes
 SLOW_PLANETS = {
@@ -637,7 +637,7 @@ def send_next_event_alert_email(profile: dict, event: dict) -> bool:
                 "from":     "Gochara Karmique <karmic.gochara@astro.jeromemalige.fr>",
                 "reply_to": "astro@jeromemalige.fr",
                 "to":       [email],
-                "subject":  f"✦ Votre prochain événement karmique",
+                "subject":  "✦ Votre prochain événement karmique",
                 "html":     html,
             },
             timeout=10,

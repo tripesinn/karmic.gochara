@@ -8,9 +8,8 @@ entre planètes lentes en transit et points natals clés (3 piliers + Soleil/Lun
 
 import calendar as _calendar
 
-from astro_calc import get_julian_day, _calc_positions, ORB
-from transit_alerts import SLOW_PLANETS, TARGET_NATAL, _add_south_node, PLANET_LABELS, NATAL_LABELS
-
+from astro_calc import ORB, _calc_positions, get_julian_day
+from transit_alerts import NATAL_LABELS, PLANET_LABELS, SLOW_PLANETS, TARGET_NATAL, _add_south_node
 
 # Couleur par planète (pour le frontend)
 PLANET_COLORS = {

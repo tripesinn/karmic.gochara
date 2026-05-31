@@ -16,14 +16,12 @@ Usage :
         return result["synthesis"]
 """
 
-import json
 import os
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
-from aspect_selector import select_dominant_aspects, select_dominant_aspects_ranked
+from aspect_selector import select_dominant_aspects_ranked
 from output_validator import SynthesisValidator
-
 
 # ── Config / Env vars ─────────────────────────────────────────────────────────
 
@@ -173,7 +171,7 @@ class SynthesisPipeline:
             "aspects_used":             aspects_used,
             "human_review_recommended": has_warnings,
             "refinement_needed":        refinement,
-            "timestamp":                datetime.now(timezone.utc).isoformat(),
+            "timestamp":                datetime.now(UTC).isoformat(),
         }
 
     # ── Vault ─────────────────────────────────────────────────────────────────
@@ -266,7 +264,6 @@ class SynthesisPipeline:
         aspects_lines = []
         for a in aspects_dict:
             natal_display   = a.get("natal_display", "")
-            transit_display = a.get("transit_display", "")
             line = (
                 f"- {a.get('transit_planet', '?')} → {a.get('natal_planet', '?')} "
                 f"({natal_display}) · {a.get('aspect', '?')} · orbe {a.get('orb', '?')}°"
@@ -284,10 +281,9 @@ class SynthesisPipeline:
         # Bloc retry feedback
         feedback_block = ""
         if error_feedback:
-            retry_n = len(error_feedback)
             feedback_block = (
-                f"\n[CORRECTION REQUISE]\n"
-                f"Erreurs détectées dans la version précédente :\n"
+                "\n[CORRECTION REQUISE]\n"
+                "Erreurs détectées dans la version précédente :\n"
                 + "\n".join(f"- {e}" for e in error_feedback)
                 + "\nCorrige ces points dans la nouvelle version. Ne répète pas les erreurs."
             )

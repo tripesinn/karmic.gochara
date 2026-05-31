@@ -8,10 +8,9 @@ Usage dans app.py :
     task = build_task_file(user, natal_data, transit_data)
 """
 
-import json
 import hashlib
-from datetime import datetime, timezone
-
+import json
+from datetime import UTC, datetime
 
 # ─────────────────────────────────────────────
 # VAULT CORE — ~150 tokens, toujours injecté
@@ -388,7 +387,7 @@ def build_task_file(user: dict, natal_data: dict, transit_data: dict) -> dict:
     task = {
         "version": "1.0-GEMMA-100",
         "project": "Gochara Karmique",
-        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "generated_at": datetime.now(UTC).isoformat(),
         "user": user.get("name", ""),
         "lang": lang,
         "fingerprint": fingerprint,

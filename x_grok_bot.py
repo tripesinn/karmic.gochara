@@ -5,21 +5,22 @@ Utilise l'API Grok (xAI) et répond aux mentions.
 Format attendu: @BotHandle MM/DD/YYYY HH:MM Ville
 """
 
-import os
-import sys
 import datetime
-import time
+import os
 import re
-from dotenv import load_dotenv
+import sys
+import time
+
 import tweepy
-from openai import OpenAI
+from dotenv import load_dotenv
 from geopy.geocoders import Nominatim
+from openai import OpenAI
 from timezonefinder import TimezoneFinder
 
 # Importer la logique existante
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from karmic_lite import TRANSIT_LOC, generate_prompt
 from astro_calc import calculate_transits
+from karmic_lite import TRANSIT_LOC, generate_prompt
 
 # Charger les variables d'environnement
 load_dotenv()
@@ -53,7 +54,7 @@ def setup_x_client():
 
 def get_last_seen_id():
     if os.path.exists(LAST_SEEN_FILE):
-        with open(LAST_SEEN_FILE, 'r') as f:
+        with open(LAST_SEEN_FILE) as f:
             content = f.read().strip()
             if content.isdigit():
                 return content
@@ -218,7 +219,7 @@ def process_mentions(client, my_user_id):
                 except Exception as e:
                     print(f"  ❌ Erreur lors du traitement : {e}")
                     # Optionnel: Répondre à l'utilisateur qu'il y a eu une erreur (ex: ville non trouvée)
-                    error_msg = f"Désolé, une erreur est survenue lors du calcul de votre carte karmique. Assurez-vous que la ville est bien orthographiée."
+                    error_msg = "Désolé, une erreur est survenue lors du calcul de votre carte karmique. Assurez-vous que la ville est bien orthographiée."
                     client.create_tweet(text=error_msg, in_reply_to_tweet_id=mention.id)
             else:
                 print("  ! Format invalide ignoré.")

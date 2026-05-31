@@ -1,8 +1,9 @@
-import sys
 import os
-import json
-import requests
 import shutil
+import sys
+
+import requests
+
 
 def apply_local_ai(file_path, instruction):
     if not os.path.exists(file_path):
@@ -10,11 +11,14 @@ def apply_local_ai(file_path, instruction):
         sys.exit(1)
         
     # Read the original file content
-    with open(file_path, 'r', encoding='utf-8') as f:
+    with open(file_path, encoding='utf-8') as f:
         original_content = f.read()
         
     url = "http://127.0.0.1:8000/v1/chat/completions"
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer dummy"
+    }
     
     system_prompt = (
         "Tu es un agent d'écriture automatique de code de niveau Sénior.\n"
@@ -28,7 +32,7 @@ def apply_local_ai(file_path, instruction):
     user_prompt = f"Fichier original :\n```\n{original_content}\n```\n\nInstructions de modification :\n{instruction}"
     
     payload = {
-        "model": "mlx-community/phi-4-4bit",
+        "model": "Qwen3.5-9B-MLX-4bit",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}

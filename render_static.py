@@ -1,5 +1,6 @@
-import os
 import ast
+import os
+
 from jinja2 import Environment, FileSystemLoader
 
 # Path to the files
@@ -10,7 +11,7 @@ OUTPUT_PATH = 'www/index.html'
 
 def get_langs_from_app():
     """Extract LANGS dictionary from app.py using AST."""
-    with open(APP_PY_PATH, 'r', encoding='utf-8') as f:
+    with open(APP_PY_PATH, encoding='utf-8') as f:
         tree = ast.parse(f.read())
     
     for node in tree.body:

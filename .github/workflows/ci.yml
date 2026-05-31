@@ -1,0 +1,54 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    name: Lint & Type Check
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          pip install ruff mypy pytest
+          pip install -r requirements.txt
+
+      - name: Ruff — critical checks (F rules)
+        run: ruff check . --select F --exclude '.archive/,scratch/'
+
+      - name: Ruff — style audit (non-blocking)
+        continue-on-error: true
+        run: ruff check . --exclude '.archive/,scratch/' || true
+
+      - name: Mypy — type check (non-blocking)
+        continue-on-error: true
+        run: mypy app.py ai_interpret.py astro_calc.py gemini_api.py profiles.py rag_memory.py --no-error-summary || true
+
+  test:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install test dependencies
+        run: |
+          pip install pytest
+          pip install -r requirements.txt
+
+      - name: Run tests
+        run: python -m pytest test_flows.py -v

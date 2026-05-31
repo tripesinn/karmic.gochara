@@ -1,6 +1,7 @@
 import sys
-import json
+
 import requests
+
 
 def query_local_ai(prompt):
     url = "http://127.0.0.1:8000/v1/chat/completions"
@@ -10,7 +11,7 @@ def query_local_ai(prompt):
     }
     
     payload = {
-        "model": "mlx-community/phi-4-4bit",
+        "model": "Qwen3.5-9B-MLX-4bit",
         "messages": [
             {"role": "user", "content": prompt}
         ],

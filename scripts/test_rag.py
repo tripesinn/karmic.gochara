@@ -1,8 +1,7 @@
 import sys
-import os
 
 sys.path.append("/Users/jero87/karmic.gochara")
-from rag_memory import save_reading, retrieve_context
+from rag_memory import retrieve_context, save_reading
 
 print("Testing RAG memory...")
 

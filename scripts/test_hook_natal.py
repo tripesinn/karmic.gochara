@@ -1,4 +1,5 @@
 import sys
+
 sys.path.append("/Users/jero87/karmic.gochara")
 from ai_interpret import get_hook_natal
 

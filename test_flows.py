@@ -9,7 +9,9 @@ sys.modules['google.oauth2.service_account'] = MagicMock()
 import os
 import unittest
 from unittest.mock import patch
+
 from app import app
+
 
 class TestAppFlows(unittest.TestCase):
 

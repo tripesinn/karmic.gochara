@@ -3,8 +3,9 @@ Génère les assets Google Play Store pour Karmic Gochara :
   - icon_512x512.png    → icône app (512×512)
   - banner_1024x500.png → feature graphic (1024×500)
 """
+import os
+
 from PIL import Image, ImageDraw, ImageFont
-import math, os
 
 SRC = os.path.join("static", "icons", "icon-512.png")
 OUT = "store_assets"
@@ -46,6 +47,7 @@ draw   = ImageDraw.Draw(banner)
 
 # --- Fond étoilé ---
 import random
+
 random.seed(42)
 for _ in range(220):
     x, y = random.randint(0, W), random.randint(0, H)

@@ -1,9 +1,13 @@
+
 import requests
-import json
+
 
 def ask_local_ai_about_ngrok():
     url = "http://127.0.0.1:8000/v1/chat/completions"
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer dummy"
+    }
     
     prompt = """
 L'utilisateur est sur macOS. Il a besoin d'installer et de configurer `ngrok` pour exposer le port 8000 (où tourne son IA locale vLLM) sur internet.
@@ -16,16 +20,16 @@ Sois très concis, donne juste les commandes à taper dans le terminal. Pas de b
 """
     
     payload = {
-        "model": "mlx-community/phi-4-4bit",
+        "model": "Qwen3.5-9B-MLX-4bit",
         "messages": [
             {"role": "system", "content": "Tu es un ingénieur système très direct. Tu donnes uniquement les commandes exactes à exécuter, formatées en Markdown."},
             {"role": "user", "content": prompt}
         ],
         "temperature": 0.2,
-        "max_tokens": 1000
+        "max_tokens": 4000
     }
     
-    print("Demande de tutoriel ngrok à l'IA locale (phi-4)...\n")
+    print("Demande de tutoriel ngrok à l'IA locale (Qwen3.5)...\n")
     try:
         response = requests.post(url, headers=headers, json=payload)
         response.raise_for_status()

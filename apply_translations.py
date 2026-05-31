@@ -1,9 +1,9 @@
 import json
 
-with open("local_ai_translations.json", "r", encoding="utf-8") as f:
+with open("local_ai_translations.json", encoding="utf-8") as f:
     translations = json.load(f)
 
-with open("app.py", "r", encoding="utf-8") as f:
+with open("app.py", encoding="utf-8") as f:
     content = f.read()
 
 # Helper to inject keys

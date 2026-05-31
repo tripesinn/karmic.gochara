@@ -11,17 +11,23 @@ Génère un PDF avec :
 import io
 from datetime import date
 
-from reportlab.lib.pagesizes import A4
-from reportlab.lib.units import cm
 from reportlab.lib.colors import HexColor
-from reportlab.platypus import (
-    BaseDocTemplate, PageTemplate, Frame,
-    Paragraph, Spacer, Table, TableStyle, PageBreak,
-)
+from reportlab.lib.enums import TA_CENTER
+from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle
-from reportlab.lib.enums import TA_CENTER, TA_LEFT
+from reportlab.lib.units import cm
+from reportlab.platypus import (
+    BaseDocTemplate,
+    Frame,
+    PageBreak,
+    PageTemplate,
+    Paragraph,
+    Spacer,
+    Table,
+    TableStyle,
+)
 
-from calendar_calc import get_monthly_transits, PLANET_LABELS, NATAL_LABELS
+from calendar_calc import get_monthly_transits
 
 # ── Palette ───────────────────────────────────────────────────────────────────
 BG       = HexColor("#0c0a08")
@@ -96,7 +102,9 @@ def _add_page_bg(canvas, doc):
 
 def _get_annual_synthesis(profile: dict, all_transits: dict, lang: str = "fr") -> str:
     """Appelle Claude pour une synthèse karmique de l'année."""
-    import anthropic, os
+    import os
+
+    import anthropic
 
     client    = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY", ""))
     name      = profile.get("name") or profile.get("pseudo", "")

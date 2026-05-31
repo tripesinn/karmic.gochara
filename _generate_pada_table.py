@@ -5,7 +5,8 @@ Génère karmic_vault/08_pada_table.md + pada_table.csv
 Navamsa : (nak_idx * 4 + pada_idx) % 12
 """
 
-import csv, os
+import csv
+import os
 
 # ── Séquence Navamsa D9 (index 0-11) ────────────────────────────────────────
 NAVAMSA = [
@@ -316,8 +317,8 @@ for r in rows:
         md_lines += [
             f"### {ni+1}. {r['Nakshatra']} | {r['Vimshotari']} | {r['Regime']} | {r['Divinite']}",
             "",
-            f"| Pada | Signe | Navamsa | Régent | Tension Vécue |",
-            f"|------|-------|---------|--------|---------------|",
+            "| Pada | Signe | Navamsa | Régent | Tension Vécue |",
+            "|------|-------|---------|--------|---------------|",
         ]
     md_lines.append(
         f"| P{r['Pada']} | {r['Signe']} | {r['Nav_Signe']} | {r['Nav_Lord']} | {r['Tension']} |"
@@ -380,8 +381,9 @@ print("\n── Validation séquence Navamsa (10 premiers) ──")
 for r in rows[:10]:
     print(f"  {r['Nakshatra']:22} P{r['Pada']} → {r['Nav_Signe']:12} / {r['Nav_Lord']}")
 
-print(f"\n── Répartition régimes ──")
+print("\n── Répartition régimes ──")
 from collections import Counter
+
 c = Counter(r["Regime"] for r in rows)
 for k, v in sorted(c.items()):
     print(f"  {k:<10}: {v:>3} padas ({v/108*100:.1f}%)")

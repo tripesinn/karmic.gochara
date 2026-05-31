@@ -1,13 +1,16 @@
+
 import requests
-import json
-import os
+
 
 def query_local_ai(prompt, system_prompt="Tu es un assistant IA expert."):
     url = "http://127.0.0.1:8000/v1/chat/completions"
-    headers = {"Content-Type": "application/json"}
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer dummy"
+    }
     
     payload = {
-        "model": "mlx-community/phi-4-4bit",
+        "model": "Qwen3.5-9B-MLX-4bit",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": prompt}
