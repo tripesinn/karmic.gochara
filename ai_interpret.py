@@ -141,11 +141,11 @@ def _enforce_plan_provider(user: dict):
     # Si l'utilisateur a configuré son propre fournisseur
     if cust_prov:
         if cust_prov == "local" or cust_key:
-            return cust_prov, cust_key or "dummy", cust_model or "Qwen3.5-9B-MLX-4bit"
+            return cust_prov, cust_key or "dummy", cust_model or "phi-4-4bit"
 
     plan = user.get("plan", "free").lower().replace("é", "e")
     if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
-        return "local", "dummy", "Qwen3.5-9B-MLX-4bit"
+        return "local", "dummy", "phi-4-4bit"
     else:
         return "grok", _SERVER_GROK_KEY, _get_grok_model()
 
@@ -187,13 +187,10 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
                 else:
                     headers["Authorization"] = f"Bearer {user_key}"
             
-            # vLLM local n'a chargé que Qwen3.5-9B-MLX-4bit par défaut
-            local_model = "Qwen3.5-9B-MLX-4bit"
+            # oMLX multi-model : le nom du modèle dans le répertoire ~/.omlx/models/
+            local_model = "phi-4-4bit"
             if model and not (model.startswith("claude") or model.startswith("gemini")):
-                if model == "mlx-community/phi-4-4bit":
-                    local_model = "Qwen3.5-9B-MLX-4bit"
-                else:
-                    local_model = model
+                local_model = model
                 
             payload = {
                 "model": local_model,
