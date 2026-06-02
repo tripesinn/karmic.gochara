@@ -649,6 +649,38 @@ def send_next_event_alert_email(profile: dict, event: dict) -> bool:
 
 
 
+def run_daily_alerts() -> dict:
+    """Point d'entrée principal — appelé par la route /cron/daily."""
+    from profiles import get_all_profiles, get_and_consume_alert
+
+    profiles = get_all_profiles()
+    results  = {"total": len(profiles), "processed": 0, "alerted": 0, "skipped": 0, "errors": 0}
+
+    for profile in profiles:
+        if not profile.get("alerts_enabled"):
+            continue
+        if not profile.get("email"):
+            continue
+
+        plan = profile.get("plan", "free")
+        quota = get_and_consume_alert(profile.get("pseudo", ""), plan)
+        if not quota["ok"]:
+            results["skipped"] += 1
+            continue
+
+        results["processed"] += 1
+        try:
+            events = detect_transit_events(profile)
+            if events:
+                sent = send_alert_email(profile, events, upgrade_cta=quota["is_last"])
+                if sent:
+                    results["alerted"] += 1
+        except Exception:
+            results["errors"] += 1
+
+    return results
+
+
 def _is_sade_sati_start(profile: dict, today: date) -> bool:
     """Vérifie si Sade Sati commence aujourd'hui."""
     # Cette fonction nécessite un état persistant ou une comparaison plus fine

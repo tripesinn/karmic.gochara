@@ -44,7 +44,7 @@
 ## 4. État des Livraisons (Git Commits & Push)
 
 *   **Statut Local** : Propre.
-*   **Dépôt Distant (Origin)** : Tous les commits locaux (incluant l'intégration `localV1`, les correctifs de modal de paramètres, et l'intégration mobile des assets statiques) ont été poussés sur la branche `main` avec succès.
+*   **Dépôt Distant (Origin)** : Tous les commits locaux poussés sur branche `main`.
 
 
 ## 5. Prochaines Étapes Planifiées
@@ -113,7 +113,40 @@ Objectif : analyse proactive + nettoyage + industrialisation du projet.
     - Script `query_local_llm.py` inclus dans `references/`
 *   **Bug découvert** : `hermes config set` écrase tout le fichier au lieu de merger → règle : ouvrir Xcode pour toute modif de config
 
-### Prochaines étapes
-*   [ ] Refactorer `app.py` en blueprints Flask (3081 lignes → modules)
+### Prochaines étapes (fin mai)
+*   [x] Refactorer `app.py` en blueprints Flask (3081 lignes → modules)
 *   [ ] Commiter et pusher les changements de cette session
+*   [ ] Audit Osteo 4D (projet secondaire)
+
+### 2 Juin 2026 — Deploy API pour Hybrid Local Router
+*   **Pushé sur** `tripesinn/hybrid-local-router` (commits `cb4fff3` + `643fc25`)
+*   **`scripts/deploy_api.sh`** : déploiement multi-backend du serveur LLM local (oMLX, Ollama, vLLM)
+*   **`skills/hybrid-local-router/SKILL.md`** : remplacé par la version Hermes v2.0.2 (124 lignes au lieu de 47)
+    - Routing Hermes natif (terminal+curl), multi-provider, provider babaudus, pitfalls
+*   **`.env.example`** mis à jour, **README.md** modernisé (titre, overview, features)
+*   Push via clé SSH `id_hybrid_router`
+
+### 2 Juin 2026 — Refactoring Blueprints (app.py 3094 → 60 lignes)
+*   **`i18n.py`** créé : LANGS multilingues extrait (fr/en/es/pt/de/nl/it, 674 lignes)
+*   **`app_common.py`** créé : helpers partagés (TRANSIT_LOC_DEFAULT, _SIGNS_FR, UNLIMITED_PSEUDOS, _pending_plan_updates, get_lang, _enrich_profile_with_natal, _fulfill_order, get_hook_cta)
+*   **12 blueprints Flask** créés dans `blueprints/` :
+    - `public.py` (/, /sw.js, /privacy, /assetlinks.json)
+    - `auth.py` (/login, /register, /logout, /set_lang)
+    - `astro.py` (/calculate, /v2/calculate, /chart/*, /hook/transit, /synthesis/prompt)
+    - `chat.py` (/chat/status, /chat/ask, /chat/summarize)
+    - `alerts.py` (/toggle_alerts, /alert/*, /api/v1/alert*)
+    - `calendar.py` (/calendar, /report/annual)
+    - `cron.py` (/cron/daily)
+    - `email.py` (/send_synthesis, /save_email, /expand)
+    - `payments.py` (/stripe/*, /api/complete_payment)
+    - `api.py` (/api/profile, /plan_check, /v1/karmic-analysis, /prefetch_year)
+    - `data.py` (/rate_synthesis, /content/daily, /generate_task)
+    - `geocode.py` (/geocode)
+*   **`app.py`** réécrit : 3094 → 60 lignes (create_app() + 12 register_blueprint)
+*   `app.logger` → `current_app.logger` dans tous les blueprints
+*   `ANALYSE_BLUEPRINTS.md` conservé comme documentation du plan de découpage
+*   **Bug `run_daily_alerts` corrigé** : la fonction avait été supprimée de `transit_alerts.py` par le commit `71ed65a` (mai 2026) mais la route `/cron/daily` y référençait toujours. L'import lazy dans l'ancien `app.py` masquait l'erreur ; le passage en top-level dans le blueprint l'a révélée. Restauré depuis l'historique git + import lazy dans `cron.py`.
+
+### Prochaines étapes
+*   [ ] Commiter et pusher les changements de cette session (refactoring + fix)
 *   [ ] Audit Osteo 4D (projet secondaire)
