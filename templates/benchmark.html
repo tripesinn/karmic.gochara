@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>✦ Benchmark IA — Quelle IA comprend le mieux ton karma ?</title>
+  <meta name="description" content="Comparatif interactif des intelligences artificielles pour l'interprétation de l'astrologie karmique védique. Gemini, Claude, Grok et Phi-4 évalués par les utilisateurs réels.">
+  <meta property="og:title" content="✦ Benchmark des Oracles IA — Karmic Gochara">
+  <meta property="og:description" content="Quelle IA interprète le mieux ton karma ? Participe au benchmark !">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="/static/style.css">
+  <style>
+    body { background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+    .bench-container { max-width: 720px; margin: 0 auto; padding: 3rem 1rem; }
+    h1 { font-family: var(--display); color: var(--gold); font-weight: 400; font-size: 1.5rem; text-align: center; letter-spacing: 0.15em; }
+    h2 { font-family: var(--display); color: var(--gold); font-weight: 400; font-size: 1.1rem; margin-top: 2rem; }
+    .subtitle { text-align: center; color: var(--text-dim); font-style: italic; margin-bottom: 2rem; line-height: 1.6; }
+    .card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+    th { text-align: left; color: var(--gold-dim); font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+    .footer { text-align: center; margin-top: 3rem; font-size: 0.75rem; color: var(--text-dim); line-height: 1.6; }
+    .cta-box { text-align: center; font-family: var(--mono); background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 4px; border: 1px solid var(--border); margin: 1rem 0; }
+    .cta-box strong { color: var(--gold); }
+  </style>
+</head>
+<body>
+  <div class="bench-container">
+    <h1>✦ Benchmark des Oracles IA</h1>
+    <p class="subtitle">
+      3 intelligences artificielles interprètent ton thème karmique.<br>
+      Toi seul sais laquelle te parle vraiment.
+    </p>
+
+    <div class="card">
+      <h2>Classement</h2>
+      {{ stats_html|safe }}
+    </div>
+
+    <div class="card">
+      <h2>Derniers votes</h2>
+      <table>
+        <tr><th>Date</th><th>Thème</th><th>Préférée</th></tr>
+        {{ recent_html|safe }}
+      </table>
+    </div>
+
+    <div style="text-align:center; margin-top:2rem;">
+      <p style="color:var(--text-dim);">Participe au benchmark — reçois une analyse karmique gratuite :</p>
+      <div class="cta-box">
+        Tweet <strong>@karmicgochara 15/03/1990 14:30 Paris</strong><br>
+        <span style="font-size:0.75rem;color:var(--text-dim);">Reçois 3 interprétations et vote pour ta préférée ✨</span>
+      </div>
+    </div>
+
+    <div class="footer">
+      <p>Karmic Gochara — Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa</p>
+      <p><a href="https://x.com/siderealAstro13" style="color:var(--gold);" target="_blank">@siderealAstro13</a></p>
+    </div>
+  </div>
+</body>
+</html>

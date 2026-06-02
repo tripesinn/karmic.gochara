@@ -148,5 +148,39 @@ Objectif : analyse proactive + nettoyage + industrialisation du projet.
 *   **Bug `run_daily_alerts` corrigé** : la fonction avait été supprimée de `transit_alerts.py` par le commit `71ed65a` (mai 2026) mais la route `/cron/daily` y référençait toujours. L'import lazy dans l'ancien `app.py` masquait l'erreur ; le passage en top-level dans le blueprint l'a révélée. Restauré depuis l'historique git + import lazy dans `cron.py`.
 
 ### Prochaines étapes
-*   [ ] Commiter et pusher les changements de cette session (refactoring + fix)
+*   [x] Commiter et pusher les changements de cette session (refactoring + fix)
+*   [ ] Audit Osteo 4D (projet secondaire)
+
+### 2 Juin 2026 — Hotfix Render : gunicorn introuvable
+*   **Bug** : `karmicgochara.app` retournait 500 ("error finding executable 'gunicorn' in PATH")
+*   **Cause** :
+    1. `render.yaml` utilisait `gunicorn app:app` (bare) — Render native Python ne résolvait pas le PATH du venv
+    2. `requirements.txt` et fichiers projet en CRLF (`\r\n`) — pip pouvait échouer silencieusement sur Render Linux
+*   **Correctifs** :
+    - `render.yaml` : `gunicorn` → `python -m gunicorn` (startCommand)
+    - `requirements.txt`, `render.yaml`, `astro_calc.py` : convertis CRLF → LF
+    - Commit 704d574 pushé sur `origin/main`
+*   **Note** : Cloud Run `gochara-api` est down (404). Render est l'hôte actif de karmicgochara.app derrière Cloudflare.
+
+### 2 Juin 2026 — Benchmark IA Astrologique Multi-Provider
+
+*   **Nouveau bot** `x_benchmark_bot.py` :
+    - Parse les mentions X.com au format `@bot MM/DD/YYYY HH:MM Ville` (réutilise le parsing existant)
+    - Calcule le thème karmique via `astro_calc.py`
+    - Appelle **Gemini / Claude / Grok / phi-4 local en parallèle** (threading)
+    - Envoie les 3-4 interprétations en DM avec labels A/B/C/D
+    - Collecte les votes des utilisateurs (réponse A/B/C)
+    - Sauvegarde dans `benchmark_votes.json`
+    - Génère une page HTML statique dans `benchmark_results/index.html`
+    - Mode continu ou `--once` (cron)
+*   **Route Flask** `/benchmark` dans `blueprints/public.py`
+*   **Template** `templates/benchmark.html` (fallback + SEO: meta, OG)
+*   **Cron Hermes** toutes les 5min (`Benchmark IA Bot X`) pour exécuter le bot en continu
+*   **Migration locale** : phi-4-4bit activé dans oMLX (memory guard désactivé), provider `babaudus` mis à jour dans `config.yaml`, modèle par défaut dans `ai_interpret.py` corrigé
+*   **Bug phi-4-4bit corrigé** : `ai_interpret.py` avait un if inversé qui choisissait Qwen même quand phi-4 était sélectionné. Le modèle dans la liste de sélection utilisait `mlx-community/phi-4-4bit` au lieu de `phi-4-4bit` (nom oMLX)
+*   **Skills mis à jour** : `hybrid-local-router`, `cost-aware-orchestration`, `karmic-orchestrator` référencent maintenant `phi-4-4bit`
+
+### Prochaines étapes
+*   [ ] Déployer le benchmark bot sur le serveur (Render/Cloud Run) pour qu'il tourne 24/7
+*   [ ] Promouvoir le bot X avec un tweet de lancement du benchmark
 *   [ ] Audit Osteo 4D (projet secondaire)
