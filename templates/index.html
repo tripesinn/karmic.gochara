@@ -930,6 +930,10 @@
         function rateUp() { _pendingRating = 1; openConsentModal(); }
         function rateDown() { _pendingRating = -1; openConsentModal(); }
 
+        let _pendingRating = 0;
+        let _lastProvider = '';
+        let _lastModel = '';
+
         function openConsentModal() {
             // Griser le bouton sélectionné
             document.querySelectorAll('.btn-rate').forEach(b => b.classList.remove('selected'));
@@ -957,6 +961,22 @@
                     })
                 });
             } catch (e) { console.warn('Rating échoué (non bloquant):', e); }
+
+            // Vote benchmark
+            if (window._lastProvider) {
+                const score = _pendingRating === 1 ? 5 : 1;
+                try {
+                    await fetch('/api/vote', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            rating: score,
+                            provider: _lastProvider,
+                            model: _lastModel || 'unknown',
+                        })
+                    });
+                } catch (e) { console.warn('Vote benchmark échoué (non bloquant):', e); }
+            }
 
             // Feedback visuel
             const bar = document.getElementById('rating-bar');

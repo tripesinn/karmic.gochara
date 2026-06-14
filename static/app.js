@@ -995,7 +995,7 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                     
                     btnText.innerHTML = '<span class="spinner"></span> ' + T.js_gemma_loading;
                     const gr = await NativeAI.generate(pd.system, pd.user);
-                    showSynthesis(gr.synthesis, null);
+                    showSynthesis(gr.synthesis, null, 'local', gr.model ?? 'e2b');
                     showLocalBadge(true, gr.model ?? 'e2b');
                 } else {
                     // 2B. Inférence Serveur
@@ -1007,7 +1007,7 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                         return;
                     }
                     if (data.error) { alert(data.error); return; }
-                    showSynthesis(data.synthesis, data.remaining);
+                    showSynthesis(data.synthesis, data.remaining, data.provider, data.model);
                     showLocalBadge(false);
                 }
             } catch (err) {
@@ -1018,8 +1018,10 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
             }
         }
 
-        function showSynthesis(text, remaining) {
+        function showSynthesis(text, remaining, provider, model) {
             lastSynthesis = text;
+            _lastProvider = provider || 'unknown';
+            _lastModel = model || 'unknown';
             document.getElementById('synthesis-content').innerHTML = marked.parse(text || '');
             document.getElementById('synthesis-box').style.display = 'block';
             document.getElementById('email-status').textContent = '';

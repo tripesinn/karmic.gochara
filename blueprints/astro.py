@@ -2,6 +2,7 @@
 blueprints/astro.py — Routes d'astrologie (calculs, cartes, hooks, prompts)
 """
 import json
+import os
 import time
 from flask import (
     Blueprint,
@@ -144,6 +145,8 @@ def calculate():
             "warnings": validation_result.get("warnings", []),
         }
         result["remaining"] = quota["remaining"]
+        result["provider"]  = enriched_profile.get("user_provider", "openrouter")
+        result["model"]     = enriched_profile.get("user_model", "") or os.environ.get("SYNTHESIS_MODEL", "xai/grok-4.3")
 
         # Sauvegarde la localisation de transit dans la session (toujours)
         if transit_loc.get("city"):
