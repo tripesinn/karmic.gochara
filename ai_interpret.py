@@ -26,6 +26,8 @@ from rag_memory import retrieve_context, save_reading
 # ── Router Multi-Provider ────────────────────────────────────────────────────
 _SERVER_ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 _SERVER_GROK_KEY = os.environ.get("GROK_API_KEY", "")
+_SERVER_OPENROUTER_KEY = os.environ.get("OPENROUTER_API_KEY", "")
+_SERVER_OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "xai/grok-4.3")
 
 import re
 import time
@@ -133,7 +135,8 @@ def _call_claude(system: str, prompt: str, model: str, api_key: str, max_tokens:
 
 
 def _enforce_plan_provider(user: dict):
-    """Enforce provider routing based on plan or custom user settings."""
+    """Enforce provider routing based on plan or custom user settings.
+    Tout le trafic serveur → OpenRouter avec Grok par défaut."""
     cust_prov = user.get("user_provider")
     cust_key = user.get("user_key")
     cust_model = user.get("user_model")
@@ -143,11 +146,11 @@ def _enforce_plan_provider(user: dict):
         if cust_prov == "local" or cust_key:
             return cust_prov, cust_key or "dummy", cust_model or "phi-4-4bit"
 
-    plan = user.get("plan", "free").lower().replace("é", "e")
-    if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
-        return "local", "dummy", "phi-4-4bit"
-    else:
-        return "grok", _SERVER_GROK_KEY, _get_grok_model()
+    # Tout le trafic serveur → OpenRouter avec Grok par défaut
+    model = _SERVER_OPENROUTER_MODEL
+    if cust_model:
+        model = cust_model
+    return "openrouter", _SERVER_OPENROUTER_KEY, model
 
 
 def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) -> str:
