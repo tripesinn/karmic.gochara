@@ -200,3 +200,29 @@ def prefetch_year():
         current_date += timedelta(days=1)
 
     return jsonify(results), 200
+
+
+@api_bp.route("/vote", methods=["POST"])
+def api_vote():
+    """Enregistre un vote (1-5) pour une interprétation."""
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"ok": False, "error": "Non authentifié"}), 401
+    data = request.get_json() or {}
+    rating = data.get("rating")
+    if not isinstance(rating, int) or rating < 1 or rating > 5:
+        return jsonify({"ok": False, "error": "Rating must be 1-5"}), 400
+    provider = data.get("provider", "unknown")
+    model = data.get("model", "unknown")
+    pseudo = profile.get("pseudo", "anonymous")
+    from profiles import save_vote
+    ok = save_vote(pseudo, provider, model, rating)
+    return jsonify({"ok": ok})
+
+
+@api_bp.route("/benchmark")
+def api_benchmark():
+    """Retourne les stats benchmark public."""
+    from profiles import get_benchmark
+    data = get_benchmark()
+    return jsonify({"ok": True, "benchmark": data})

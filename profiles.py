@@ -272,7 +272,7 @@ def create_profile(data: dict) -> dict:
         "0",                      # syntheses_count
         _current_month_str(),     # syntheses_reset_date
         "0",                      # alerts_enabled
-        "free",                   # plan
+        "pro",                    # plan — beta testeurs gratuits jusqu'au 15 juil.
         "0",                      # plan_syntheses
         "",                       # stripe_customer_id
     ]
@@ -645,6 +645,10 @@ def check_and_consume_daily_signal(pseudo: str, profile_dict: dict = None) -> bo
     if profile_dict:
         plan = profile_dict.get("plan", "free").lower().replace("é", "e")
         if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
+            # Beta testeurs: Pro jusqu'au 15 juillet 2026
+            today = date.today()
+            if plan == "pro" and today > date(2026, 7, 15):
+                return False  # Expiré
             return True
 
     ws = _get_sheet()
@@ -661,7 +665,11 @@ def check_and_consume_daily_signal(pseudo: str, profile_dict: dict = None) -> bo
         plan_normalized = plan.lower().replace("é", "e")
         print(f"Found user row {i}, plan={plan_normalized}", flush=True)
         if plan_normalized in ("illimite", "subscription", "pro"):
-            return True  # Pro: illimité
+            if plan_normalized == "pro" and date.today() > date(2026, 7, 15):
+                print("Beta pro expired", flush=True)
+                pass  # Fall through to freemium check
+            else:
+                return True  # Pro: illimité
             
         # Freemium check
         last_date = row[C["last_signal_date"]] if len(row) > C["last_signal_date"] else ""
@@ -680,3 +688,69 @@ def check_and_consume_daily_signal(pseudo: str, profile_dict: dict = None) -> bo
         
     print("User not found in sheet, allowing first use", flush=True)
     return True
+
+
+# ── Voting / Benchmark ─────────────────────────────────────────────────────
+
+
+def _get_vote_sheet():
+    """Ouvre ou crée la feuille 'votes' dans le même spreadsheet."""
+    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+    sheet_id = os.environ.get("SHEET_ID")
+    if not creds_json or not sheet_id:
+        return None
+    creds = Credentials.from_service_account_info(json.loads(creds_json), scopes=SCOPES)
+    gc = gspread.authorize(creds)
+    sp = gc.open_by_key(sheet_id)
+    try:
+        ws = sp.worksheet("votes")
+    except gspread.WorksheetNotFound:
+        ws = sp.add_worksheet(title="votes", rows=1000, cols=5)
+        ws.append_row(["pseudo", "date", "provider", "model", "rating"])
+    return ws
+
+
+def save_vote(pseudo: str, provider: str, model: str, rating: int) -> bool:
+    """Enregistre un vote (1-5 étoiles) pour le benchmark."""
+    ws = _get_vote_sheet()
+    if not ws:
+        return False
+    try:
+        ws.append_row([pseudo, date.today().isoformat(), provider, model, str(rating)])
+        return True
+    except Exception:
+        return False
+
+
+def get_benchmark() -> list:
+    """Retourne les stats benchmark : moyenne par (provider, model)."""
+    ws = _get_vote_sheet()
+    if not ws:
+        return []
+    try:
+        records = ws.get_all_values()
+    except Exception:
+        return []
+    if len(records) < 2:
+        return []
+    from collections import defaultdict
+    totals = defaultdict(lambda: {"count": 0, "sum": 0})
+    for row in records[1:]:
+        if len(row) < 5:
+            continue
+        prov, mod = row[2], row[3]
+        try:
+            rat = int(row[4])
+        except ValueError:
+            continue
+        key = f"{prov}/{mod}"
+        totals[key]["count"] += 1
+        totals[key]["sum"] += rat
+    result = []
+    for key, v in sorted(totals.items(), key=lambda x: -x[1]["count"]):
+        result.append({
+            "provider_model": key,
+            "votes": v["count"],
+            "avg_rating": round(v["sum"] / v["count"], 2),
+        })
+    return result

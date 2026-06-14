@@ -25,6 +25,8 @@ import sys
 import time
 import threading
 import urllib.request
+import base64
+import urllib.parse
 
 import tweepy
 from dotenv import load_dotenv
@@ -95,7 +97,27 @@ def setup_x_client():
     if not all([X_API_KEY, X_API_SECRET, X_ACCESS_TOKEN, X_ACCESS_TOKEN_SECRET]):
         print("❌ Clés X.com manquantes.")
         sys.exit(1)
+    # Générer un Bearer Token à partir des clés OAuth2
+    bearer_token = None
+    try:
+        b64 = base64.b64encode(f"{X_API_KEY}:{X_API_SECRET}".encode()).decode()
+        data = urllib.parse.urlencode({"grant_type": "client_credentials"}).encode()
+        req = urllib.request.Request(
+            "https://api.twitter.com/oauth2/token",
+            data=data,
+            headers={
+                "Authorization": f"Basic {b64}",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            method="POST"
+        )
+        resp = urllib.request.urlopen(req)
+        token_data = json.loads(resp.read())
+        bearer_token = token_data.get("access_token")
+    except Exception as e:
+        print(f"⚠ Impossible de générer le Bearer Token: {e}")
     client = tweepy.Client(
+        bearer_token=bearer_token,
         consumer_key=X_API_KEY,
         consumer_secret=X_API_SECRET,
         access_token=X_ACCESS_TOKEN,

@@ -4,20 +4,28 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>✦ Benchmark IA — Quelle IA comprend le mieux ton karma ?</title>
-  <meta name="description" content="Comparatif interactif des intelligences artificielles pour l'interprétation de l'astrologie karmique védique. Gemini, Claude, Grok et Phi-4 évalués par les utilisateurs réels.">
-  <meta property="og:title" content="✦ Benchmark des Oracles IA — Karmic Gochara">
-  <meta property="og:description" content="Quelle IA interprète le mieux ton karma ? Participe au benchmark !">
+  <meta name="description" content="Comparatif de 9 intelligences artificielles pour l'interprétation de l'astrologie karmique védique. Claude, Gemma 4, Gemini, Grok, minimax, ChatGPT, phi-4, Mistral évalués sur le prompt Karmic Gochara.">
+  <meta property="og:title" content="✦ Benchmark des Oracles IA — 9 modèles testés">
+  <meta property="og:description" content="9 IA interprètent ton thème karmique — laquelle te parle vraiment ? Claude, Gemma 4, Gemini 3.5 Flash, Grok, minimax-m3, ChatGPT, phi-4 local, Mistral Vibe, mistral-nemo comparés.">
   <meta property="og:type" content="website">
+  <meta property="og:image" content="https://karmicgochara.app/static/og-benchmark.png">
   <link rel="stylesheet" href="/static/style.css">
   <style>
     body { background: var(--bg); color: var(--text); margin: 0; padding: 0; }
     .bench-container { max-width: 720px; margin: 0 auto; padding: 3rem 1rem; }
     h1 { font-family: var(--display); color: var(--gold); font-weight: 400; font-size: 1.5rem; text-align: center; letter-spacing: 0.15em; }
     h2 { font-family: var(--display); color: var(--gold); font-weight: 400; font-size: 1.1rem; margin-top: 2rem; }
+    h3 { color: var(--gold); font-weight: 400; font-size: 0.95rem; margin: 1.5rem 0 0.5rem; }
     .subtitle { text-align: center; color: var(--text-dim); font-style: italic; margin-bottom: 2rem; line-height: 1.6; }
     .card { background: rgba(255,255,255,0.02); border: 1px solid var(--border); border-radius: 8px; padding: 1.5rem; margin-bottom: 1.5rem; }
     table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-    th { text-align: left; color: var(--gold-dim); font-family: var(--mono); font-size: 0.75rem; text-transform: uppercase; padding: 4px 8px; border-bottom: 1px solid var(--border); }
+    th { text-align: left; color: var(--gold-dim); font-family: var(--mono); font-size: 0.7rem; text-transform: uppercase; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+    td { padding: 6px 8px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .rank-1 { color: var(--gold); font-weight: bold; }
+    .star { color: var(--gold); }
+    .free { color: #6ab56a; background: rgba(106,181,106,0.1); padding: 1px 5px; border-radius: 2px; font-size: 0.65rem; }
+    .model-name { font-weight: bold; }
+    .detail { font-size: 0.78rem; color: var(--text-dim); line-height: 1.4; }
     .footer { text-align: center; margin-top: 3rem; font-size: 0.75rem; color: var(--text-dim); line-height: 1.6; }
     .cta-box { text-align: center; font-family: var(--mono); background: rgba(255,255,255,0.03); padding: 1rem; border-radius: 4px; border: 1px solid var(--border); margin: 1rem 0; }
     .cta-box strong { color: var(--gold); }
@@ -27,13 +35,65 @@
   <div class="bench-container">
     <h1>✦ Benchmark des Oracles IA</h1>
     <p class="subtitle">
-      3 intelligences artificielles interprètent ton thème karmique.<br>
+      9 intelligences artificielles ont interprété le même thème karmique.<br>
       Toi seul sais laquelle te parle vraiment.
     </p>
 
     <div class="card">
-      <h2>Classement</h2>
-      {{ stats_html|safe }}
+      <h2>Classement général</h2>
+      <table>
+        <tr><th>#</th><th>Modèle</th><th>Note</th><th>Temps</th><th>Point fort</th></tr>
+        <tr><td class="rank-1">1</td><td class="model-name">Claude Haiku 4.5</td><td class="star">★★★★★</td><td>—</td><td class="detail">Seul à inférer la vie réelle du thème</td></tr>
+        <tr><td class="rank-1">2</td><td class="model-name">gemma4:31b</td><td class="star">★★★★★</td><td>26s</td><td class="detail">Doctrinal pur, format parfait, zéro faute</td></tr>
+        <tr><td>3</td><td class="model-name">minimax-m3</td><td class="star">★★★★☆</td><td>26s</td><td class="detail">Meilleure plume, images poétiques uniques</td></tr>
+        <tr><td>4</td><td class="model-name">Gemini 3.5 Flash</td><td class="star">★★★★☆</td><td>—</td><td class="detail">Structuré, actionnable</td></tr>
+        <tr><td>5</td><td class="model-name">Grok</td><td class="star">★★★★☆</td><td>—</td><td class="detail">Solide, sans originalité</td></tr>
+        <tr><td>6</td><td class="model-name">ChatGPT</td><td class="star">★★★★☆</td><td>—</td><td class="detail">Bon mais générique sans historique</td></tr>
+        <tr><td>7</td><td class="model-name">phi-4 local</td><td class="star">★★★★☆</td><td>1'39"</td><td class="detail">80% gemma, local, gratuit</td></tr>
+        <tr><td>8</td><td class="model-name">Mistral Vibe</td><td class="star">★★★★☆</td><td>—</td><td class="detail">Rapide, concis, sans faute</td></tr>
+        <tr><td>9</td><td class="model-name">mistral-nemo</td><td class="star">★★☆☆☆</td><td>—</td><td class="detail">Généralités, invente des planètes</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h2>Détails par modèle</h2>
+
+      <h3>1. Claude Haiku 4.5 <span class="free">GRATUIT (via API tiers)</span></h3>
+      <div class="detail">Le seul modèle capable de lire la biographie réelle entre les lignes du thème. Là où les autres récitent la doctrine, Claude infère des événements de vie, une personnalité, un parcours. Lecture quasi-humaine.</div>
+
+      <h3>2. gemma4:31b (Ollama Cloud) <span class="free">GRATUIT</span></h3>
+      <div class="detail">Le meilleur interprète doctrinal pur. 26 secondes, zéro faute de ton, format parfait. Sur le prompt lite (450 tok), c'est le seul modèle qui tient le format. Sur le prompt cloud (~3000 tok), il délivre une analyse chirurgicale sans dérive. ★★★★★</div>
+
+      <h3>3. minimax-m3</h3>
+      <div class="detail">Refus catégorique sur le prompt lite (guardrails trop stricts). Révélation sur le prompt cloud : meilleure plume des trois. Images poétiques et uniques ("thésaurisation", "pétrification", "main invisible", "propulseur nucléaire"). Alternative la plus originale ("nomme à voix haute la peur"). Le prompt long le déverrouille complètement.</div>
+
+      <h3>4. Gemini 3.5 Flash</h3>
+      <div class="detail">Interprétation structurée, actionnable. Bon équilibre entre profondeur doctrinale et clarté pratique. Solide sans être exceptionnel.</div>
+
+      <h3>5. Grok</h3>
+      <div class="detail">Analyse solide et fiable. Pas d'erreur doctrinale, mais manque d'originalité dans les formulations. Un bon interprète généraliste.</div>
+
+      <h3>6. ChatGPT</h3>
+      <div class="detail">Correct sur la doctrine mais tendance au générique. Sans historique de conversation, les interprétations manquent de personnalisation. Reste un bon point d'entrée.</div>
+
+      <h3>7. phi-4 local (MLX)</h3>
+      <div class="detail">80% du gemma pour un temps local quasi réel (1'39"). Le format long (prompt cloud) le contraint mieux que le lite. Ton encore un peu thérapeutique, manque de tranchant oraculaire. Excellent rapport qualité/coût (zéro API).</div>
+
+      <h3>8. Mistral Vibe</h3>
+      <div class="detail">Rapide, concis, sans fioritures. ROM H2 bien vu, blessure H12 précise ("te montrer était dangereux"), Alternative actionnable ("écris, lance, même imparfait"). Fait le taf en version courte.</div>
+
+      <h3>9. mistral-nemo</h3>
+      <div class="detail">Généralités. Invente des planètes et des aspects qui n'existent pas dans le thème. Ne pas utiliser pour l'interprétation karmique.</div>
+    </div>
+
+    <div class="card">
+      <h2>Découvertes clés</h2>
+      <div class="detail">
+        <p><strong>Prompt lite (450 tok)</strong> → seul gemma4 tient le format. Les autres dérivent.</p>
+        <p><strong>Prompt cloud (~3000 tok)</strong> → déverrouille tous les modèles. Plus contraint, meilleur suivi doctrinal.</p>
+        <p><strong>Règle "Traduction Obligatoire" + exemples</strong> → fait la différence sur l'interdiction des noms de signes.</p>
+        <p><strong>minimax-m3</strong> refuse sur lite, excellent sur cloud. Guardrails contournés par le format long.</p>
+      </div>
     </div>
 
     <div class="card">
@@ -41,6 +101,7 @@
       <table>
         <tr><th>Date</th><th>Thème</th><th>Préférée</th></tr>
         {{ recent_html|safe }}
+        <tr><td colspan="3" style="text-align:center;color:var(--text-dim);padding:1rem;">—— En attente des premiers votes ——</td></tr>
       </table>
     </div>
 
@@ -48,13 +109,13 @@
       <p style="color:var(--text-dim);">Participe au benchmark — reçois une analyse karmique gratuite :</p>
       <div class="cta-box">
         Tweet <strong>@karmicgochara 15/03/1990 14:30 Paris</strong><br>
-        <span style="font-size:0.75rem;color:var(--text-dim);">Reçois 3 interprétations et vote pour ta préférée ✨</span>
+        <span style="font-size:0.75rem;color:var(--text-dim);">Reçois 9 interprétations et vote pour ta préférée ✨</span>
       </div>
     </div>
 
     <div class="footer">
       <p>Karmic Gochara — Astrologie Védique Sidérale · Chandra Lagna · DK Ayanamsa</p>
-      <p><a href="https://x.com/siderealAstro13" style="color:var(--gold);" target="_blank">@siderealAstro13</a></p>
+      <p><a href="https://karmicgochara.app" style="color:var(--gold);">karmicgochara.app</a> · <a href="https://x.com/siderealAstro13" style="color:var(--gold);" target="_blank">@siderealAstro13</a></p>
     </div>
   </div>
 </body>
