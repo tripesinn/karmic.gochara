@@ -337,7 +337,10 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                     body: JSON.stringify({ product_type: plan })
                 });
                 const data = await res.json();
-                if (data.url) {
+                if (data.ok && data.beta) {
+                    // Beta mode : PRO offert gratuitement → recharger
+                    window.location.href = '/?payment=success';
+                } else if (data.url) {
                     // Marquer le paiement comme en cours (survit si Stripe ouvre dans Chrome externe)
                     const savedProfile = localStorage.getItem('gochara_profile');
                     const pseudo = savedProfile ? (JSON.parse(savedProfile).pseudo || '') : '';

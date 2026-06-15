@@ -16,9 +16,8 @@ def stripe_checkout():
     Crée une session Stripe Checkout.
     Body JSON : {"product_type": "test"|"subscription"}
     Retourne  : {"url": "https://checkout.stripe.com/..."}
+    En beta : accorde PRO gratuitement si les vars Stripe manquent.
     """
-    from stripe_payments import create_checkout_session
-
     profile = session.get("profile")
     if not profile:
         return jsonify({"error": "Non connecté"}), 401
@@ -32,6 +31,20 @@ def stripe_checkout():
     pseudo = profile.get("pseudo", "")
     if not email:
         return jsonify({"error": "Email requis pour le paiement"}), 400
+
+    # ── Beta mode : pas de Stripe → PRO gratuit ──────────────────────────
+    if product_type == "subscription" and not os.environ.get("STRIPE_PRICE_GEMMA_UNLIMITED"):
+        current_app.logger.info("Beta mode — grant PRO gratuit à %s", pseudo)
+        _fulfill_order(pseudo, "subscription")
+
+        if "profile" in session:
+            session["profile"]["plan"] = "subscription"
+        session["payment_completed"] = {"pseudo": pseudo, "plan": "subscription"}
+        session.modified = True
+
+        return jsonify({"ok": True, "plan": "subscription", "beta": True})
+
+    from stripe_payments import create_checkout_session
 
     base_url = os.environ.get("DEEP_LINK_BASE_URL") or request.host_url.rstrip("/")
     try:
