@@ -40,7 +40,6 @@ steps:
       - $_SERVICE_NAME
       - --platform=managed
       - --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:latest
-      - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$SHORT_SHA,gcb-build-id=$BUILD_ID
       - --region=$_DEPLOY_REGION
       - --quiet
     waitFor:
@@ -50,9 +49,6 @@ substitutions:
   _SERVICE_NAME: gochara-api
   _DEPLOY_REGION: europe-west1
   _AR_HOSTNAME: europe-west1-docker.pkg.dev
-
-images:
-  - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:latest
 
 timeout: 1200s
 options:
