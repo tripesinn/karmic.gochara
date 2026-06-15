@@ -1,4 +1,12 @@
 steps:
+  # Fetch secrets excluded from git (doctrine.py)
+  - id: fetch-secrets
+    name: gcr.io/cloud-builders/gsutil
+    args:
+      - cp
+      - gs://karmic-gochara-build-assets/doctrine.py
+      - /workspace/doctrine.py
+
   # Build with layer caching via Artifact Registry
   - id: build
     name: gcr.io/cloud-builders/docker
