@@ -343,6 +343,10 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                     const pseudo = savedProfile ? (JSON.parse(savedProfile).pseudo || '') : '';
                     if (pseudo) sessionStorage.setItem('paymentPending', pseudo);
                     window.location.href = data.url;
+                } else if (data.ok && data.beta) {
+                    // Beta mode — PRO accordé gratuitement, recharge direct
+                    if (errEl) errEl.style.display = 'none';
+                    location.reload();
                 } else {
                     if (errEl) { errEl.textContent = data.error || T.js_err_payment; errEl.style.display = 'block'; }
                     else { alert(data.error || T.js_err_payment); }

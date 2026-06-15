@@ -337,15 +337,14 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                     body: JSON.stringify({ product_type: plan })
                 });
                 const data = await res.json();
-                if (data.ok && data.beta) {
-                    // Beta mode : PRO offert gratuitement → recharger
-                    window.location.href = '/?payment=success';
-                } else if (data.url) {
-                    // Marquer le paiement comme en cours (survit si Stripe ouvre dans Chrome externe)
+                if (data.url) {
                     const savedProfile = localStorage.getItem('gochara_profile');
                     const pseudo = savedProfile ? (JSON.parse(savedProfile).pseudo || '') : '';
                     if (pseudo) sessionStorage.setItem('paymentPending', pseudo);
                     window.location.href = data.url;
+                } else if (data.ok && data.beta) {
+                    if (errEl) errEl.style.display = 'none';
+                    location.reload();
                 } else {
                     if (errEl) { errEl.textContent = data.error || T.js_err_payment; errEl.style.display = 'block'; }
                     else { alert(data.error || T.js_err_payment); }
