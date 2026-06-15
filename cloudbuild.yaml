@@ -6,11 +6,11 @@ steps:
     args:
       - -c
       - |
-        docker pull $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:latest || true
+        docker pull $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:latest || true
         docker build \
-          --cache-from $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:latest \
-          -t $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$SHORT_SHA \
-          -t $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:latest \
+          --cache-from $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:latest \
+          -t $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:$SHORT_SHA \
+          -t $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:latest \
           -f Dockerfile .
 
   # Push image
@@ -18,7 +18,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - push
-      - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME
+      - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME
     waitFor:
       - build
 
@@ -32,7 +32,7 @@ steps:
       - update
       - $_SERVICE_NAME
       - --platform=managed
-      - --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:latest
+      - --image=$_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:latest
       - --labels=managed-by=gcp-cloud-build-deploy-cloud-run,commit-sha=$SHORT_SHA,gcb-build-id=$BUILD_ID
       - --region=$_DEPLOY_REGION
       - --quiet
@@ -45,8 +45,8 @@ substitutions:
   _AR_HOSTNAME: europe-west1-docker.pkg.dev
 
 images:
-  - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:$SHORT_SHA
-  - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/$REPO_NAME/$_SERVICE_NAME:latest
+  - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:$SHORT_SHA
+  - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME:latest
 
 timeout: 1200s
 options:
