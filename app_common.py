@@ -109,7 +109,10 @@ def _fulfill_order(pseudo: str, plan: str, stripe_customer_id: str = ""):
     """Mise à jour du plan utilisateur après paiement Stripe réussi."""
     try:
         from profiles import upgrade_plan
-        upgrade_plan(pseudo, plan, stripe_customer_id=stripe_customer_id)
+        ok = upgrade_plan(pseudo, plan, stripe_customer_id=stripe_customer_id)
+        if not ok:
+            import logging
+            logging.getLogger("app").warning("upgrade_plan a retourné False pour %s (utilisateur non trouvé dans le sheet)", pseudo)
     except Exception as e:
         import logging
         logging.getLogger("app").error("Erreur fulfill_order pour %s : %s", pseudo, e)

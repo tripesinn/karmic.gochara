@@ -51,7 +51,9 @@ def calculate():
     else:
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
-        if plan_normalized in ("test", "subscription", "lecture", "essential", "illimite"):
+        if plan_normalized in ("subscription", "illimite"):
+            quota = {"allowed": True, "remaining": 999}
+        elif plan_normalized in ("test", "lecture", "essential"):
             # Utilisateur payant — consomme une synthèse plan
             from profiles import consume_plan_synthesis
             allowed = consume_plan_synthesis(pseudo)
@@ -214,7 +216,9 @@ def calculate_v2():
     if not (pseudo.lower() in UNLIMITED_PSEUDOS or user_key):
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
-        if plan_normalized in ("test", "subscription", "lecture", "essential", "illimite"):
+        if plan_normalized in ("subscription", "illimite"):
+            pass  # illimité, pas de vérification sheet
+        elif plan_normalized in ("test", "lecture", "essential"):
             if not consume_plan_synthesis(pseudo):
                 return jsonify({
                     "error": "quota_exceeded",
@@ -819,7 +823,9 @@ def synthesis_prompt():
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
-        if plan_normalized in ("test", "subscription", "lecture", "essential", "illimite"):
+        if plan_normalized in ("subscription", "illimite"):
+            pass  # illimité, pas de vérification sheet
+        elif plan_normalized in ("test", "lecture", "essential"):
             from profiles import consume_plan_synthesis
             if not consume_plan_synthesis(pseudo):
                 return jsonify({"error": "quota_exceeded",
