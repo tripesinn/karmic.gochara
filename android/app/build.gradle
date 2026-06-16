@@ -45,11 +45,9 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 
-    // ── Gemma 3/4 — MediaPipe LlmInference (inférence locale, remplace ML Kit GenAI) ─
-    implementation 'com.google.mediapipe:tasks-genai:0.10.14'
-
-    // ── Gemma 4 (LLM) Inference Service ─
-    implementation 'com.google.mediapipe:tasks-llm-inference:0.10.14'
+    // ── Gemma 3/4 — MediaPipe LlmInference (inférence locale) ─
+    // Using stable tasks-text (includes LLM inference)
+    implementation 'com.google.mediapipe:tasks-text:0.10.9'
 
     // ── Google Play Billing (achat "Supprimer les pubs") ─────────────────────
     implementation 'com.android.billingclient:billing:7.1.1'
