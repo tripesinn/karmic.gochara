@@ -22,7 +22,13 @@
   },
   "android": {
     "allowMixedContent": false,
-    "backgroundColor": "#0a0a08"
+    "backgroundColor": "#0a0a08",
+    "buildOptions": {
+      "compileOptions": {
+        "sourceCompatibility": "VERSION_17",
+        "targetCompatibility": "VERSION_17"
+      }
+    }
   },
   "ios": {
     "backgroundColor": "#0a0a08"
