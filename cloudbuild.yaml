@@ -7,7 +7,7 @@ steps:
       - gs://karmic-gochara-build-assets/doctrine.py
       - /workspace/doctrine.py
 
-  # Build with layer caching via Artifact Registry
+  # Build with layer caching via Artifact Registry (--no-cache forced 2026-06-16)
   - id: build
     name: gcr.io/cloud-builders/docker
     entrypoint: bash

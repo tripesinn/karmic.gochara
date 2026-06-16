@@ -16,6 +16,8 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 # Copier le reste du code de l'application
+# Cache buster for showRatingBar deploy 2026-06-16
+RUN echo "cache_buster_showRatingBar_20260616" > /dev/null
 COPY . .
 
 # Exposer le port sur lequel l'application s'exécute (Cloud Run utilise 8080 par défaut)

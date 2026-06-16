@@ -803,60 +803,8 @@
         });
     </script>
 
-    <script>
-        // ── Dataset rating ─────────────────────────────────────────────────────────
 
-        function showRatingBar() {
-            const bar = document.getElementById('rating-bar');
-            if (bar) bar.style.display = 'block';
-        }
 
-        function rateUp() { _pendingRating = 1; openConsentModal(); }
-        function rateDown() { _pendingRating = -1; openConsentModal(); }
-
-        function openConsentModal() {
-            // Griser le bouton sélectionné
-            document.querySelectorAll('.btn-rate').forEach(b => b.classList.remove('selected'));
-            const sel = _pendingRating === 1
-                ? document.getElementById('btn-rate-up')
-                : document.getElementById('btn-rate-down');
-            if (sel) sel.classList.add('selected');
-            document.getElementById('consent-modal').classList.add('active');
-        }
-
-        async function submitRating(openConsent) {
-            const consent = openConsent && document.getElementById('consent-check').checked;
-            document.getElementById('consent-modal').classList.remove('active');
-
-            const date = document.getElementById('transit-date')?.value || '';
-            try {
-                await fetch('/rate_synthesis', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        rating: _pendingRating,
-                        consent: consent,
-                        synthesis: lastSynthesis,
-                        date: date,
-                    })
-                });
-            } catch (e) { console.warn('Rating échoué (non bloquant):', e); }
-
-            // Feedback visuel
-            const bar = document.getElementById('rating-bar');
-            if (bar) {
-                bar.innerHTML =
-                    '<span class="rating-label" style="color:var(--gold);">' +
-                    (_pendingRating === 1 ? T.js_rating_up : T.js_rating_down) +
-                    '</span>';
-            }
-        }
-
-        // Ferme modal si clic hors du box
-        document.getElementById('consent-modal').addEventListener('click', function (e) {
-            if (e.target === this) this.classList.remove('active');
-        });
-    </script>
 </body>
 
 </html>

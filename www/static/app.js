@@ -1072,6 +1072,78 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
             });
         }
 
+        // ── Rating & consent ─────────────────────────────────────────────────────────
+
+        function showRatingBar() {
+            const bar = document.getElementById('rating-bar');
+            if (bar) bar.style.display = 'block';
+        }
+
+        function rateUp() { _pendingRating = 1; openConsentModal(); }
+        function rateDown() { _pendingRating = -1; openConsentModal(); }
+
+        function openConsentModal() {
+            document.querySelectorAll('.btn-rate').forEach(b => b.classList.remove('selected'));
+            const sel = _pendingRating === 1
+                ? document.getElementById('btn-rate-up')
+                : document.getElementById('btn-rate-down');
+            if (sel) sel.classList.add('selected');
+            const modal = document.getElementById('consent-modal');
+            if (modal) modal.classList.add('active');
+        }
+
+        async function submitRating(openConsent) {
+            const consent = openConsent && document.getElementById('consent-check')?.checked;
+            const modal = document.getElementById('consent-modal');
+            if (modal) modal.classList.remove('active');
+
+            const date = document.getElementById('transit-date')?.value || '';
+            try {
+                await fetch('/rate_synthesis', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        rating: _pendingRating,
+                        consent: consent,
+                        synthesis: lastSynthesis,
+                        date: date,
+                    })
+                });
+            } catch (e) { console.warn('Rating échoué (non bloquant):', e); }
+
+            const bar = document.getElementById('rating-bar');
+            if (bar) {
+                bar.innerHTML =
+                    '<span class="rating-label" style="color:var(--gold);">' +
+                    (_pendingRating === 1 ? T.js_rating_up : T.js_rating_down) +
+                    '</span>';
+            }
+
+            // Vote benchmark
+            if (window._lastProvider) {
+                const score = _pendingRating === 1 ? 5 : 1;
+                try {
+                    await fetch('/api/vote', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            rating: score,
+                            provider: _lastProvider,
+                            model: _lastModel || 'unknown',
+                        })
+                    });
+                } catch (e) { console.warn('Vote benchmark échoué (non bloquant):', e); }
+            }
+        }
+
+        // Ferme modal si clic hors du box
+        const _consentModal = document.getElementById('consent-modal');
+        if (_consentModal) {
+            _consentModal.addEventListener('click', function (e) {
+                if (e.target === this) this.classList.remove('active');
+            });
+        }
+
         function showLocalBadge(isLocal, modelType) {
             let badge = document.getElementById('local-badge');
             if (!badge) {
