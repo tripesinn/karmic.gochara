@@ -25,6 +25,7 @@ steps:
     name: gcr.io/cloud-builders/docker
     args:
       - push
+      - --all-tags
       - $_AR_HOSTNAME/$PROJECT_ID/cloud-run-source-deploy/karmic.gochara/$_SERVICE_NAME
     waitFor:
       - build
