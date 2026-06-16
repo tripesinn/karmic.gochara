@@ -47,6 +47,7 @@ dependencies {
 
     // ── Gemma 3/4 — MediaPipe Tasks GenAI (inférence locale) ────────────────
     implementation 'com.google.mediapipe:tasks-genai:0.10.14'
+    implementation 'com.google.mlkit:genai-prompt:1.0.0-beta2'
 
     // ── Google Play Billing (achat "Supprimer les pubs") ─────────────────────
     implementation 'com.android.billingclient:billing:7.1.1'

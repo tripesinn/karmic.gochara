@@ -10,13 +10,13 @@ import com.getcapacitor.annotation.CapacitorPlugin;
 
 import org.json.JSONObject;
 
-import com.google.mediapipe.tasks.genai.GenerativeModel;
-import com.google.mediapipe.tasks.genai.GenerativeModelOptions;
-import com.google.mediapipe.tasks.genai.ContentGenerationRequest;
-import com.google.mediapipe.tasks.genai.InferenceFeature;
-import com.google.mediapipe.tasks.genai.LoraWeightsParameters;
-import com.google.mediapipe.tasks.genai.DownloadConfig;
-import com.google.mediapipe.tasks.genai.InferenceAvailability;
+import com.google.mlkit.genai.inference.GenerativeModel;
+import com.google.mlkit.genai.inference.GenerativeModelOptions;
+import com.google.mlkit.genai.inference.ContentGenerationRequest;
+import com.google.mlkit.genai.inference.InferenceFeature;
+import com.google.mlkit.genai.inference.LoraWeightsParameters;
+import com.google.mlkit.genai.inference.DownloadConfig;
+import com.google.mlkit.genai.inference.InferenceAvailability;
 
 import java.io.BufferedReader;
 import java.io.File;
