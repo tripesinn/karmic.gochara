@@ -23,8 +23,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility JavaVersion.VERSION_17
-        targetCompatibility JavaVersion.VERSION_17
+        sourceCompatibility JavaVersion.VERSION_21
+        targetCompatibility JavaVersion.VERSION_21
     }
 }
 
@@ -45,9 +45,8 @@ dependencies {
     androidTestImplementation "androidx.test.espresso:espresso-core:$androidxEspressoCoreVersion"
     implementation project(':capacitor-cordova-android-plugins')
 
-    // ── Gemma 3/4 — MediaPipe Tasks GenAI (inférence locale) ────────────────
+    // ── Gemma 3/4 — MediaPipe LlmInference (inférence locale, remplace ML Kit GenAI) ─
     implementation 'com.google.mediapipe:tasks-genai:0.10.14'
-    implementation 'com.google.mlkit:genai-prompt:1.0.0-beta2'
 
     // ── Google Play Billing (achat "Supprimer les pubs") ─────────────────────
     implementation 'com.android.billingclient:billing:7.1.1'

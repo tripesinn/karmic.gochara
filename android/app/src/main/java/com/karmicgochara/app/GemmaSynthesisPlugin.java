@@ -8,99 +8,94 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-import org.json.JSONObject;
-
-import com.google.mlkit.genai.inference.GenerativeModel;
-import com.google.mlkit.genai.inference.GenerativeModelOptions;
-import com.google.mlkit.genai.inference.ContentGenerationRequest;
-import com.google.mlkit.genai.inference.InferenceFeature;
-import com.google.mlkit.genai.inference.LoraWeightsParameters;
-import com.google.mlkit.genai.inference.DownloadConfig;
-import com.google.mlkit.genai.inference.InferenceAvailability;
+import com.google.mediapipe.tasks.genai.llminference.LlmInference;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * GemmaSynthesisPlugin — Inférence locale Gemma via ML Kit GenAI APIs.
+ * GemmaSynthesisPlugin — Inférence locale Gemma via MediaPipe LlmInference.
  *
  * Architecture :
- *   - Modèle de base : géré par le système (AICore / Play Services), pas bundlé dans l'APK.
- *   - LoRA adapter   : assets/lora/doctrine_adapter.bin — doctrine karmique @siderealAstro13
- *                      baked dans les poids, contexte réduit de ~4000 → ~400 tokens.
+ *   - Modèle .task téléchargé depuis HuggingFace au premier lancement
+ *     (URL configurable via MODEL_URL).
+ *   - LoRA adapter : assets/lora/doctrine_adapter.bin — doctrine karmique @siderealAstro13
+ *   - Fallback vault (assets/karmic_vault/) quand LoRA absent.
  *
- * Capacitor methods exposés au JS :
- *   checkAvailability()  → {available: bool, status: string, downloading: bool}
- *   prepareModel()       → télécharge le modèle si nécessaire, charge le LoRA
- *   generate(system, user, type) → {synthesis: string, local: true, loraUsed: bool}
- *   unloadModel()        → libère la mémoire
+ * Capacitor methods (inchangés pour le JS) :
+ *   checkAvailability()  → {available, status, downloading}
+ *   prepareModel()       → télécharge le modèle + charge l'inférence
+ *   generate(system, user, type) → {synthesis, local: true, loraUsed}
+ *   unloadModel()        → close()
  *   getDeviceMemory()    → {totalRamGb, sufficient, recommended}
  */
 @CapacitorPlugin(name = "GemmaSynthesis")
 public class GemmaSynthesisPlugin extends Plugin {
 
-    // Fichier LoRA bundlé dans l'APK (assets/lora/)
+    // ── LoRA ─────────────────────────────────────────────────────────────────
     private static final String LORA_ASSET_PATH    = "lora/doctrine_adapter.bin";
     private static final String LORA_CACHE_FILENAME = "doctrine_adapter.bin";
 
-    // Paramètres d'inférence
-    private static final int MAX_TOKENS_SYNTHESIS = 2048;
-    private static final int MAX_TOKENS_REPORT    = 4096;
+    // ── Modèle ────────────────────────────────────────────────────────────────
+    // Gemma 3 1B It 4‑bit quantisé (LiteRT format) — change l'URL pour un
+    // modèle personnalisé ou un miroir.
+    private static final String MODEL_URL      =
+        "https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/gemma3-1b-it-int4.task";
+    private static final String MODEL_FILENAME = "gemma3-1b-it-int4.task";
 
-    // État runtime — static pour survivre aux recreations d'Activity
-    private static GenerativeModel  sModel      = null;
-    private static boolean          sLoraLoaded = false;
-    private static boolean          sPreparing  = false;
+    // ── Paramètres inférence constants ────────────────────────────────────────
+    private static final int   MAX_TOKENS_SYNTHESIS = 2048;
+    private static final int   MAX_TOKENS_REPORT    = 4096;
+    private static final float TEMPERATURE          = 0.7f;
+    private static final int   TOP_K                = 40;
+
+    // ── État runtime — static pour survivre aux recreations d'Activity ────────
+    private static LlmInference sModel       = null;
+    private static boolean     sLoraLoaded   = false;
+    private static boolean     sPreparing    = false;
+    private static boolean     sDownloading  = false;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 
-    // ── checkAvailability : modèle disponible sur ce device ? ────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    //  checkAvailability
+    // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void checkAvailability(PluginCall call) {
-        GenerativeModelOptions opts = buildOptions(false, MAX_TOKENS_SYNTHESIS);
-        GenerativeModel.checkFeatureAvailability(getContext(), opts)
-            .addOnSuccessListener(status -> {
-                JSObject result = new JSObject();
-                switch (status) {
-                    case InferenceAvailability.AVAILABLE:
-                        result.put("available",   true);
-                        result.put("status",      "available");
-                        result.put("downloading", false);
-                        break;
-                    case InferenceAvailability.DOWNLOADABLE:
-                        result.put("available",   false);
-                        result.put("status",      "downloadable");
-                        result.put("downloading", false);
-                        break;
-                    case InferenceAvailability.DOWNLOADING:
-                        result.put("available",   false);
-                        result.put("status",      "downloading");
-                        result.put("downloading", true);
-                        break;
-                    default:
-                        result.put("available",   false);
-                        result.put("status",      "unavailable");
-                        result.put("downloading", false);
-                }
-                call.resolve(result);
-            })
-            .addOnFailureListener(e ->
-                call.reject("CHECK_ERROR", e.getMessage(), e)
-            );
+        JSObject result = new JSObject();
+        File modelFile = getModelFile();
+        if (modelFile.exists() && modelFile.length() > 0) {
+            result.put("available",   true);
+            result.put("status",      "available");
+            result.put("downloading", false);
+        } else if (sDownloading) {
+            result.put("available",   false);
+            result.put("status",      "downloading");
+            result.put("downloading", true);
+        } else {
+            result.put("available",   false);
+            result.put("status",      "downloadable");
+            result.put("downloading", false);
+        }
+        call.resolve(result);
     }
 
 
-    // ── prepareModel : télécharge le modèle si besoin + charge le LoRA ───────
+    // ══════════════════════════════════════════════════════════════════════════
+    //  prepareModel
+    // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void prepareModel(PluginCall call) {
         if (sModel != null) {
-            // Déjà chargé (survit aux recreations d'Activity)
             JSObject result = new JSObject();
             result.put("ok",       true);
             result.put("loraUsed", sLoraLoaded);
@@ -122,26 +117,44 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         executor.execute(() -> {
             try {
-                boolean loraAvailable = ensureLoraExtracted();
-                GenerativeModelOptions opts = buildOptions(loraAvailable, maxTokens);
+                // 1. Télécharger le modèle .task si pas encore en cache
+                File modelFile = getModelFile();
+                if (!modelFile.exists() || modelFile.length() == 0) {
+                    if (!downloadModel(modelFile)) {
+                        throw new IOException("Échec du téléchargement du modèle");
+                    }
+                }
 
-                GenerativeModel.createOrDownload(getContext(), opts)
-                    .addOnSuccessListener(m -> {
-                        synchronized (GemmaSynthesisPlugin.class) {
-                            sModel      = m;
-                            sLoraLoaded = loraAvailable;
-                            sPreparing  = false;
-                        }
-                        JSObject result = new JSObject();
-                        result.put("ok",       true);
-                        result.put("loraUsed", sLoraLoaded);
-                        result.put("cached",   false);
-                        call.resolve(result);
-                    })
-                    .addOnFailureListener(e -> {
-                        synchronized (GemmaSynthesisPlugin.class) { sPreparing = false; }
-                        call.reject("PREPARE_ERROR", e.getMessage(), e);
-                    });
+                // 2. Extraire le LoRA depuis assets/ si dispo
+                boolean loraAvailable = ensureLoraExtracted();
+
+                // 3. Construire les options MediaPipe et créer la session
+                LlmInference.LlmInferenceOptions.Builder optsBuilder =
+                    LlmInference.LlmInferenceOptions.builder()
+                        .setModelPath(modelFile.getAbsolutePath())
+                        .setMaxTokens(maxTokens)
+                        .setTemperature(TEMPERATURE)
+                        .setTopK(TOP_K);
+
+                if (loraAvailable) {
+                    optsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
+                }
+
+                LlmInference model = LlmInference.createFromOptions(
+                    getContext(), optsBuilder.build()
+                );
+
+                synchronized (GemmaSynthesisPlugin.class) {
+                    sModel      = model;
+                    sLoraLoaded = loraAvailable;
+                    sPreparing  = false;
+                }
+
+                JSObject result = new JSObject();
+                result.put("ok",       true);
+                result.put("loraUsed", sLoraLoaded);
+                result.put("cached",   false);
+                call.resolve(result);
 
             } catch (Exception e) {
                 synchronized (GemmaSynthesisPlugin.class) { sPreparing = false; }
@@ -151,7 +164,9 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
 
-    // ── generate : lazy-init + inférence ─────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    //  generate
+    // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void generate(PluginCall call) {
         String system = call.getString("system", "");
@@ -165,40 +180,46 @@ public class GemmaSynthesisPlugin extends Plugin {
         }
 
         JSObject profileJs = call.getObject("profile", new JSObject());
-        JSONObject profile;
-        try { profile = new JSONObject(profileJs.toString()); }
-        catch (Exception e) { profile = new JSONObject(); }
-        final JSONObject finalProfile = profile;
+        org.json.JSONObject profile;
+        try { profile = new org.json.JSONObject(profileJs.toString()); }
+        catch (Exception e) { profile = new org.json.JSONObject(); }
+        final org.json.JSONObject finalProfile = profile;
 
         executor.execute(() -> {
-            // Lazy-init : prépare le modèle si pas encore chargé
+            // Lazy-init : charger le modèle au premier appel si pas déjà fait
             if (sModel == null) {
                 try {
-                    boolean loraAvailable = ensureLoraExtracted();
-                    GenerativeModelOptions opts = buildOptions(loraAvailable, MAX_TOKENS_SYNTHESIS);
-                    // createOrDownload bloquant simulé via CountDownLatch
-                    java.util.concurrent.CountDownLatch latch = new java.util.concurrent.CountDownLatch(1);
-                    final Exception[] loadError = {null};
-
-                    GenerativeModel.createOrDownload(getContext(), opts)
-                        .addOnSuccessListener(m -> {
-                            synchronized (GemmaSynthesisPlugin.class) {
-                                sModel      = m;
-                                sLoraLoaded = loraAvailable;
-                            }
-                            latch.countDown();
-                        })
-                        .addOnFailureListener(e -> {
-                            loadError[0] = e;
-                            latch.countDown();
-                        });
-
-                    latch.await(30, java.util.concurrent.TimeUnit.SECONDS);
-
-                    if (loadError[0] != null || sModel == null) {
-                        call.reject("MODEL_NOT_READY", "Modèle non disponible — vérifie la connexion.");
-                        return;
+                    File modelFile = getModelFile();
+                    if (!modelFile.exists() || modelFile.length() == 0) {
+                        if (!downloadModel(modelFile)) {
+                            call.reject("MODEL_NOT_READY",
+                                "Modèle pas encore téléchargé — appelle prepareModel() d'abord.");
+                            return;
+                        }
                     }
+
+                    boolean loraAvailable = ensureLoraExtracted();
+
+                    LlmInference.LlmInferenceOptions.Builder optsBuilder =
+                        LlmInference.LlmInferenceOptions.builder()
+                            .setModelPath(modelFile.getAbsolutePath())
+                            .setMaxTokens(MAX_TOKENS_SYNTHESIS)
+                            .setTemperature(TEMPERATURE)
+                            .setTopK(TOP_K);
+
+                    if (loraAvailable) {
+                        optsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
+                    }
+
+                    LlmInference model = LlmInference.createFromOptions(
+                        getContext(), optsBuilder.build()
+                    );
+
+                    synchronized (GemmaSynthesisPlugin.class) {
+                        sModel      = model;
+                        sLoraLoaded = loraAvailable;
+                    }
+
                 } catch (Exception e) {
                     call.reject("MODEL_NOT_READY", e.getMessage(), e);
                     return;
@@ -206,12 +227,15 @@ public class GemmaSynthesisPlugin extends Plugin {
             }
 
             try {
+                // Construire le prompt system + user
                 String contextualSystem;
                 if (sLoraLoaded) {
+                    // Avec LoRA, on peut utiliser le system fourni ou rien
                     contextualSystem = (system != null && !system.isEmpty()) ? system : "";
                 } else if (system != null && !system.isEmpty()) {
                     contextualSystem = system;
                 } else {
+                    // Fallback vault → DoctrinePromptBuilder
                     contextualSystem = DoctrinePromptBuilder.buildSystemPrompt(
                         getContext(), finalProfile, lang
                     );
@@ -219,23 +243,16 @@ public class GemmaSynthesisPlugin extends Plugin {
 
                 String fullPrompt = buildGemmaPrompt(contextualSystem, user);
 
-                ContentGenerationRequest request = ContentGenerationRequest.builder()
-                    .setContents(fullPrompt)
-                    .build();
+                // Inférence synchrone MediaPipe
+                String response = sModel.generateResponse(fullPrompt);
 
-                sModel.generateContent(request)
-                    .addOnSuccessListener(response -> {
-                        JSObject result = new JSObject();
-                        result.put("ok",        true);
-                        result.put("synthesis", response.getText().trim());
-                        result.put("local",     true);
-                        result.put("loraUsed",  sLoraLoaded);
-                        result.put("type",      type);
-                        call.resolve(result);
-                    })
-                    .addOnFailureListener(e ->
-                        call.reject("INFERENCE_ERROR", e.getMessage(), e)
-                    );
+                JSObject result = new JSObject();
+                result.put("ok",        true);
+                result.put("synthesis", response.trim());
+                result.put("local",     true);
+                result.put("loraUsed",  sLoraLoaded);
+                result.put("type",      type);
+                call.resolve(result);
 
             } catch (Exception e) {
                 call.reject("INFERENCE_ERROR", e.getMessage(), e);
@@ -244,7 +261,9 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
 
-    // ── unloadModel : libère la mémoire ───────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    //  unloadModel
+    // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void unloadModel(PluginCall call) {
         synchronized (GemmaSynthesisPlugin.class) {
@@ -260,7 +279,9 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
 
-    // ── getDeviceMemory : RAM + recommandation ────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    //  getDeviceMemory
+    // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void getDeviceMemory(PluginCall call) {
         android.app.ActivityManager am = (android.app.ActivityManager)
@@ -274,46 +295,68 @@ public class GemmaSynthesisPlugin extends Plugin {
         JSObject result = new JSObject();
         result.put("totalRamGb",  totalRamGb);
         result.put("sufficient",  totalRamGb >= 4);
-        result.put("recommended", totalRamGb >= 6 ? "full" : totalRamGb >= 4 ? "standard" : "unavailable");
+        result.put("recommended", totalRamGb >= 6 ? "full"
+                                 : totalRamGb >= 4 ? "standard"
+                                 : "unavailable");
         call.resolve(result);
     }
 
 
-    // ── checkModel / checkModels : rétrocompat JS ─────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    //  checkModel / checkModels : rétrocompat JS
+    // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void checkModel(PluginCall call)  { checkAvailability(call); }
     @PluginMethod
     public void checkModels(PluginCall call) { checkAvailability(call); }
 
 
-    // ── Helpers privés ────────────────────────────────────────────────────────
+    // ══════════════════════════════════════════════════════════════════════════
+    //  Helpers privés
+    // ══════════════════════════════════════════════════════════════════════════
 
     /**
-     * Construit les options ML Kit GenAI.
-     * Si le LoRA est disponible en cache, l'injecte dans les options.
+     * Télécharge le modèle .task depuis MODEL_URL vers le cache interne.
+     * Bloque jusqu'à la fin du téléchargement.
      */
-    private GenerativeModelOptions buildOptions(boolean withLora, int maxTokens) {
-        GenerativeModelOptions.Builder builder = GenerativeModelOptions.builder()
-            .setInferenceFeature(InferenceFeature.TEXT_GENERATION)
-            .setMaxTokens(maxTokens);
+    private boolean downloadModel(File dest) throws IOException {
+        sDownloading = true;
+        try {
+            dest.getParentFile().mkdirs();
 
-        if (withLora) {
-            File loraFile = getLoraFile();
-            if (loraFile.exists() && loraFile.length() > 0) {
-                builder.setLoraWeightsParameters(
-                    LoraWeightsParameters.builder()
-                        .setWeightsFilePath(loraFile.getAbsolutePath())
-                        .build()
-                );
+            HttpURLConnection conn = (HttpURLConnection) new URL(MODEL_URL).openConnection();
+            conn.setConnectTimeout(15_000);
+            conn.setReadTimeout(30_000);
+            conn.setInstanceFollowRedirects(true);
+            conn.connect();
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw new IOException("HTTP " + responseCode + " pour " + MODEL_URL);
             }
-        }
 
-        return builder.build();
+            long total = conn.getContentLengthLong();
+            long downloaded = 0;
+
+            try (InputStream in  = conn.getInputStream();
+                 FileOutputStream out = new FileOutputStream(dest)) {
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = in.read(buf)) != -1) {
+                    out.write(buf, 0, n);
+                    downloaded += n;
+                }
+            }
+
+            return dest.exists() && dest.length() > 0;
+        } finally {
+            sDownloading = false;
+        }
     }
 
     /**
-     * Copie le LoRA depuis assets/lora/ vers le cache interne au premier lancement.
-     * Retourne true si le fichier est disponible et non vide.
+     * Copie le LoRA depuis assets/lora/ vers le cache interne.
+     * Retourne true si dispo et non-vide.
      */
     private boolean ensureLoraExtracted() {
         File dest = getLoraFile();
@@ -321,26 +364,27 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         try (InputStream is = getContext().getAssets().open(LORA_ASSET_PATH)) {
             dest.getParentFile().mkdirs();
-            java.io.FileOutputStream fos = new java.io.FileOutputStream(dest);
-            byte[] buf = new byte[8192];
-            int n;
-            while ((n = is.read(buf)) != -1) fos.write(buf, 0, n);
-            fos.close();
+            try (FileOutputStream fos = new FileOutputStream(dest)) {
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = is.read(buf)) != -1) fos.write(buf, 0, n);
+            }
             return dest.exists() && dest.length() > 0;
         } catch (IOException e) {
-            // LoRA non bundlé — fallback vault en contexte
             return false;
         }
     }
 
+    private File getModelFile() {
+        return new File(getContext().getFilesDir(), "models/" + MODEL_FILENAME);
+    }
+
     private File getLoraFile() {
-        File cacheDir = new File(getContext().getFilesDir(), "lora");
-        return new File(cacheDir, LORA_CACHE_FILENAME);
+        return new File(getContext().getFilesDir(), "lora/" + LORA_CACHE_FILENAME);
     }
 
     /**
      * Fallback : charge le vault depuis assets/karmic_vault/ si LoRA absent.
-     * Utilisé uniquement si lora_adapter.bin n'est pas encore bundlé.
      */
     private String getVaultContent() {
         StringBuilder sb = new StringBuilder();
@@ -376,8 +420,8 @@ public class GemmaSynthesisPlugin extends Plugin {
     @Override
     protected void handleOnDestroy() {
         executor.shutdown();
-        // Ne pas fermer sModel ici — il est static et doit survivre aux recreations d'Activity.
-        // Appeler unloadModel() explicitement si on veut libérer la mémoire.
+        // Ne PAS fermer sModel ici — static, survit aux recreations d'Activity.
+        // Appeler unloadModel() explicitement si besoin de libérer la mémoire.
         super.handleOnDestroy();
     }
 }
