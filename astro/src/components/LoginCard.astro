@@ -1,0 +1,83 @@
+---
+// src/components/LoginCard.astro — Login card with pseudo input (Flask session auth)
+// client:load required on usage
+---
+
+<section id="login-card" class="w-full max-w-md mx-auto">
+  <div
+    class="p-8 sm:p-10 rounded-2xl border border-cosmic-border bg-cosmic-void/80 backdrop-blur-sm shadow-xl text-center"
+  >
+    <h2 class="text-3xl sm:text-4xl font-display text-cosmic-gold mb-2">✦ ENTRER</h2>
+    <p class="text-cosmic-text-dim text-sm mb-6">Entre ton pseudo pour accéder à ta carte karmique</p>
+
+    <form id="login-form" class="space-y-4">
+      <input
+        id="pseudo-input"
+        type="text"
+        placeholder="Pseudo"
+        required
+        autocomplete="username"
+        class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
+               text-cosmic-text placeholder:text-cosmic-text-dim/50
+               focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
+               transition-all duration-300"
+      />
+
+      <div id="login-error" class="text-sm text-red-400/90 h-5" role="alert"></div>
+
+      <button
+        id="login-btn"
+        type="submit"
+        class="w-full py-3 text-base font-display font-semibold tracking-wider
+               rounded-full border border-cosmic-gold/50 text-cosmic-gold
+               transition-all duration-500 ease-out
+               hover:bg-cosmic-gold hover:text-cosmic-bg
+               hover:shadow-[0_0_30px_rgba(201,168,76,0.3)]
+               disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        ✦ CONNEXION
+      </button>
+
+      <p class="text-cosmic-text-dim text-sm pt-4">
+        Pas encore de compte&thinsp;?
+        <a href="/register" class="text-cosmic-gold hover:underline font-medium">Créer un profil</a>
+      </p>
+    </form>
+  </div>
+</section>
+
+<script>
+  import { api } from '../lib/api';
+
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const input = document.getElementById('pseudo-input') as HTMLInputElement;
+  const errorDiv = document.getElementById('login-error') as HTMLDivElement;
+  const btn = document.getElementById('login-btn') as HTMLButtonElement;
+
+  form?.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const pseudo = input.value.trim();
+    if (!pseudo) {
+      errorDiv.textContent = 'Pseudo requis';
+      return;
+    }
+
+    btn.disabled = true;
+    btn.textContent = 'Connexion…';
+    errorDiv.textContent = '';
+
+    try {
+      const resp = await api.login(pseudo);
+      if (resp.ok) {
+        window.location.href = '/app';
+      } else {
+        errorDiv.textContent = resp.error || 'Pseudo inconnu';
+      }
+    } catch (err: any) {
+      errorDiv.textContent = err.message || 'Erreur réseau';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = '✦ CONNEXION';
+    }
+  });
+</script>

@@ -3,6 +3,7 @@ from flask import current_app
 import time
 from i18n import LANGS, get_lang
 from app_common import UNLIMITED_PSEUDOS, _enrich_profile_with_natal, _pending_plan_updates
+from jwt_auth import create_tokens, refresh_access_token
 
 auth_bp = Blueprint('auth_bp', __name__)
 
@@ -106,8 +107,11 @@ def login():
     except Exception as exc:
         current_app.logger.warning("Hook natal login échoué : %s", exc)
 
-    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
-
+    return jsonify({
+        "ok": True, "pseudo": pseudo, "profile": profile,
+        "hook_natal": hook_natal, "hook_engine": "claude",
+        **create_tokens(pseudo),
+    })
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
@@ -218,7 +222,11 @@ def register():
     except Exception as exc:
         current_app.logger.error("Calcul natal register échoué pour %s : %s", pseudo, exc, exc_info=True)
 
-    return jsonify({"ok": True, "pseudo": pseudo, "profile": profile, "hook_natal": hook_natal, "hook_engine": "claude"})
+    return jsonify({
+        "ok": True, "pseudo": pseudo, "profile": profile,
+        "hook_natal": hook_natal, "hook_engine": "claude",
+        **create_tokens(pseudo),
+    })
 
 
 @auth_bp.route('/logout', methods=['POST'])
@@ -227,3 +235,26 @@ def logout():
     session.clear()
     session["lang"] = lang
     return jsonify({"ok": True})
+
+
+# ── JWT Token lifecycle ──────────────────────────────────────────────────────
+
+@auth_bp.route('/refresh', methods=['POST'])
+def refresh():
+    """Échange un refresh_token contre un nouveau jeu de tokens."""
+    data = request.get_json() or {}
+    token = data.get("refresh_token", "")
+    if not token:
+        # Fallback: Authorization header
+        auth = request.headers.get("Authorization", "")
+        if auth.lower().startswith("bearer "):
+            token = auth[7:].strip()
+
+    if not token:
+        return jsonify({"ok": False, "error": "refresh_token requis"}), 400
+
+    tokens = refresh_access_token(token)
+    if not tokens:
+        return jsonify({"ok": False, "error": "refresh_token invalide ou expiré"}), 401
+
+    return jsonify({"ok": True, **tokens})

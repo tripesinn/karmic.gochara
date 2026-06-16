@@ -1,0 +1,17 @@
+---
+// src/pages/index.astro — Landing page
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HeroSection from '../components/HeroSection.astro';
+import LoginCard from '../components/LoginCard.astro';
+---
+
+<BaseLayout title="Karmic Gochara — Ta carte karmique en transit">
+  <main>
+    <HeroSection />
+
+    <!-- Login section with client-side interactive card -->
+    <section id="login" class="min-h-screen flex items-center justify-center px-4 py-20">
+      <LoginCard />
+    </section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,152 @@
+---
+// src/components/DailyReading.astro — Lecture karmique quotidienne avec streaming SSE
+// Utilise ReadableStream via fetch body.getReader() (PAS EventSource)
+// client:load requis sur l'import pour activer l'interactivité
+
+export interface Props {
+  autoStart?: boolean;
+  title?: string;
+  subtitle?: string;
+  loadingText?: string;
+  errorText?: string;
+}
+
+const {
+  autoStart = true,
+  title = '✦ Lecture du Jour',
+  subtitle = "Reçois ton analyse karmique personnalisée en temps réel.",
+  loadingText = 'Connexion à l\u2019oracle \u2026',
+  errorText = 'Impossible de récupérer ton profil.',
+} = Astro.props;
+---
+
+<section class="daily-reading max-w-3xl mx-auto px-4 py-12 space-y-8">
+  <h1 class="text-3xl sm:text-4xl font-display text-cosmic-gold text-center">
+    {title}
+  </h1>
+  <p class="text-cosmic-text-dim text-center">
+    {subtitle}
+  </p>
+
+  <!-- Reading container -->
+  <div
+    class="border border-cosmic-border rounded-xl bg-cosmic-void/60 p-6 sm:p-10 min-h-[300px]"
+  >
+    <div
+      id="dr-status"
+      class="text-cosmic-text-dim text-center italic py-10"
+    >
+      {autoStart ? 'Prépare-toi \u2026' : 'Appuie sur "Nouvelle Lecture" pour commencer.'}
+    </div>
+    <div
+      id="dr-output"
+      class="text-cosmic-text leading-relaxed space-y-4 whitespace-pre-wrap"
+    ></div>
+  </div>
+
+  <!-- Controls -->
+  <div class="text-center">
+    <button
+      id="dr-refresh-btn"
+      class="px-6 py-3 font-display tracking-wider rounded-full border border-cosmic-gold/50
+             text-cosmic-gold transition-all duration-500
+             hover:bg-cosmic-gold hover:text-cosmic-bg
+             hover:shadow-[0_0_30px_rgba(201,168,76,0.3)]
+             disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      ✦ Nouvelle Lecture
+    </button>
+  </div>
+
+  <!-- Pass server props to client script via hidden data-* element -->
+  <div id="dr-config" data-auto-start={autoStart ? 'true' : 'false'} hidden></div>
+</section>
+
+<style is:global>
+  @keyframes dr-fade-in {
+    from { opacity: 0; transform: translateY(4px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #dr-output > * {
+    animation: dr-fade-in 0.4s ease-out;
+  }
+</style>
+
+<script>
+  import { api } from '../../lib/api';
+
+  function today(): string {
+    const d = new Date();
+    return d.toISOString().slice(0, 10);
+  }
+  function now(): string {
+    const d = new Date();
+    return d.toTimeString().slice(0, 5);
+  }
+
+  let controller: AbortController | null = null;
+
+  async function startReading() {
+    const status = document.getElementById('dr-status')!;
+    const output = document.getElementById('dr-output')!;
+    const btn = document.getElementById('dr-refresh-btn') as HTMLButtonElement;
+
+    // Abort any in-flight request
+    if (controller) controller.abort();
+    controller = new AbortController();
+
+    status.textContent = 'Connexion à l\u2019oracle \u2026';
+    status.style.display = 'block';
+    output.textContent = '';
+    btn.disabled = true;
+
+    // Resolve pseudo from profile
+    let pseudo = '';
+    try {
+      const resp = await api.profile();
+      if (resp.ok && resp.profile?.pseudo) pseudo = resp.profile.pseudo;
+    } catch {
+      // fallback
+    }
+
+    if (!pseudo) {
+      status.textContent = 'Impossible de récupérer ton profil. Connecte-toi d\u2019abord.';
+      btn.disabled = false;
+      return;
+    }
+
+    try {
+      for await (const chunk of api.calculate({
+        pseudo,
+        transit_date: today(),
+        transit_time: now(),
+      })) {
+        status.style.display = 'none';
+        if (chunk.text) {
+          output.textContent += chunk.text;
+        } else if (chunk.html) {
+          output.innerHTML += chunk.html;
+        }
+        // Auto-scroll
+        (status.parentElement as HTMLElement).scrollTop =
+          (status.parentElement as HTMLElement).scrollHeight;
+      }
+      status.textContent = '';
+    } catch (err: any) {
+      if (err.name !== 'AbortError') {
+        status.textContent = 'Erreur de connexion. Réessaie.';
+      }
+    } finally {
+      btn.disabled = false;
+      controller = null;
+    }
+  }
+
+  document.getElementById('dr-refresh-btn')?.addEventListener('click', startReading);
+
+  // Auto-start if configured
+  const configEl = document.getElementById('dr-config');
+  if (configEl?.dataset.autoStart === 'true') {
+    startReading();
+  }
+</script>

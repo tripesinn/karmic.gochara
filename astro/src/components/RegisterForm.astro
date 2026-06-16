@@ -1,0 +1,336 @@
+---
+// src/components/RegisterForm.astro
+// Form with client:load — uses lib/auth for registration, /geocode for city autocomplete.
+// Imported with <RegisterForm client:load /> in any page.
+---
+
+<div id="register-form-root" class="min-h-screen flex items-center justify-center p-4">
+  <div class="w-full max-w-md bg-cosmic-void border border-cosmic-border rounded-xl shadow-2xl p-8 space-y-6">
+
+    <!-- Header -->
+    <h2 class="text-3xl font-bold text-center text-cosmic-gold tracking-wider">
+      ✦ Créer son compte
+    </h2>
+    <p class="text-center text-cosmic-text-dim text-sm font-body">
+      Renseigne tes données natales pour dévoiler ta carte karmique.
+    </p>
+
+    <!-- Error Message -->
+    <div id="reg-error" class="text-sm text-red-400 h-5 text-center" role="alert"></div>
+
+    <!-- Identité -->
+    <div class="border border-cosmic-border rounded-lg p-4 space-y-3">
+      <h3 class="text-xs uppercase tracking-widest text-cosmic-gold-dim font-display mb-2">Identité</h3>
+
+      <div>
+        <label for="reg-pseudo" class="block text-sm font-medium text-cosmic-text mb-1">Pseudo</label>
+        <input type="text" id="reg-pseudo" placeholder="ton_pseudo_unique"
+               class="w-full px-4 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 focus:border-cosmic-gold transition duration-200"
+               required autocomplete="username" />
+      </div>
+
+      <div>
+        <label for="reg-email" class="block text-sm font-medium text-cosmic-text mb-1">Email</label>
+        <input type="email" id="reg-email" placeholder="ton@email.com"
+               class="w-full px-4 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg
+                      focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 focus:border-cosmic-gold transition duration-200"
+               required autocomplete="email" />
+      </div>
+    </div>
+
+    <!-- Données natales -->
+    <div class="border border-cosmic-border rounded-lg p-4 space-y-3">
+      <h3 class="text-xs uppercase tracking-widest text-cosmic-gold-dim font-display mb-2">Données natales</h3>
+
+      <!-- Date -->
+      <div>
+        <label class="block text-sm font-medium text-cosmic-text mb-1">Date de naissance</label>
+        <div class="flex gap-2 items-center">
+          <input type="number" id="reg-day" placeholder="JJ" min="1" max="31"
+                 class="w-16 px-3 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg text-center
+                        focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 transition duration-200" />
+          <span class="text-cosmic-text-dim text-lg">/</span>
+          <input type="number" id="reg-month" placeholder="MM" min="1" max="12"
+                 class="w-16 px-3 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg text-center
+                        focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 transition duration-200" />
+          <span class="text-cosmic-text-dim text-lg">/</span>
+          <input type="number" id="reg-year" placeholder="AAAA" min="1900" max="2030"
+                 class="w-24 px-3 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg text-center
+                        focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 transition duration-200" />
+        </div>
+      </div>
+
+      <!-- Heure -->
+      <div>
+        <label class="block text-sm font-medium text-cosmic-text mb-1">Heure de naissance</label>
+        <div class="flex gap-2 items-center">
+          <input type="number" id="reg-hour" placeholder="HH" min="0" max="23"
+                 class="w-16 px-3 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg text-center
+                        focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 transition duration-200" />
+          <span class="text-cosmic-text-dim text-lg">h</span>
+          <input type="number" id="reg-minute" placeholder="MM" min="0" max="59"
+                 class="w-16 px-3 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg text-center
+                        focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 transition duration-200" />
+          <span class="text-cosmic-text-dim text-sm">min</span>
+        </div>
+      </div>
+
+      <!-- Ville / Géocodage -->
+      <div>
+        <label for="reg-city" class="block text-sm font-medium text-cosmic-text mb-1">Lieu de naissance</label>
+        <div class="relative">
+          <div class="flex gap-2">
+            <input type="text" id="reg-city" placeholder="ex: Paris, France"
+                   class="flex-1 px-4 py-3 bg-cosmic-bg text-cosmic-text border border-cosmic-border rounded-lg
+                          focus:outline-none focus:ring-2 focus:ring-cosmic-gold/50 focus:border-cosmic-gold transition duration-200"
+                   autocomplete="off" />
+            <button id="reg-geocode-btn" type="button"
+                    class="px-4 py-3 text-sm font-semibold rounded-lg border border-cosmic-gold-dim/40
+                           text-cosmic-gold hover:bg-cosmic-gold/10 transition duration-200 whitespace-nowrap disabled:opacity-40">
+              Chercher
+            </button>
+          </div>
+          <!-- Autocomplete dropdown -->
+          <div id="reg-city-suggestions"
+               class="hidden absolute z-20 top-full left-0 right-0 mt-1 bg-cosmic-void border border-cosmic-border rounded-lg
+                      shadow-xl max-h-48 overflow-y-auto"></div>
+          <!-- Coordinate display -->
+          <p id="reg-coords" class="text-xs text-cosmic-text-dim italic mt-1">—</p>
+        </div>
+      </div>
+
+      <!-- Hidden fields for geocode results -->
+      <input type="hidden" id="reg-lat" />
+      <input type="hidden" id="reg-lon" />
+      <input type="hidden" id="reg-tz" />
+      <input type="hidden" id="reg-city-name" />
+    </div>
+
+    <!-- Submit -->
+    <button id="reg-submit-btn" type="button"
+            class="w-full py-3 text-lg font-semibold rounded-lg
+                   bg-gradient-to-r from-cosmic-gold to-amber-600 text-gray-950
+                   hover:from-cosmic-gold/90 hover:to-amber-700 transition duration-300
+                   shadow-md shadow-cosmic-gold/40 disabled:opacity-50 disabled:cursor-not-allowed">
+      Créer mon compte
+    </button>
+
+    <!-- Footer link -->
+    <div class="text-center pt-2">
+      <p class="text-cosmic-text-dim text-sm">
+        Déjà un compte ?
+        <a href="/login" class="text-cosmic-gold font-medium hover:text-cosmic-gold/80 transition duration-200">
+          Se connecter
+        </a>
+      </p>
+    </div>
+  </div>
+</div>
+
+<script>
+  import { register } from '../lib/auth';
+
+  (function () {
+    "use strict";
+
+    // ─── TZ guess map ────────────────────────────────────────
+    const TZ_MAP = {
+      "Europe/Paris":       ["France","Belgium","Luxembourg","Monaco","Andorra","Spain","Germany","Italy","Switzerland","Austria","Netherlands","Poland","Czech","Slovakia","Hungary","Slovenia","Croatia","Serbia","Bosnia","Montenegro","North Macedonia","Albania","Kosovo","Liechtenstein","San Marino","Vatican"],
+      "Europe/London":      ["United Kingdom","UK","England","Ireland"],
+      "Europe/Bucharest":   ["Romania","Bulgaria","Moldova","Greece","Cyprus"],
+      "Europe/Helsinki":    ["Finland","Estonia","Latvia","Lithuania"],
+      "Europe/Moscow":      ["Russia"],
+      "America/New_York":   ["United States","USA","US","Canada"],
+      "America/Chicago":    ["Mexico"],
+      "America/Los_Angeles":[],
+      "America/Sao_Paulo":  ["Brazil"],
+      "Asia/Tokyo":         ["Japan"],
+      "Asia/Shanghai":      ["China"],
+      "Asia/Kolkata":       ["India"],
+      "Australia/Sydney":   ["Australia"],
+    };
+
+    function guessTz(displayName) {
+      for (const [tz, countries] of Object.entries(TZ_MAP)) {
+        if (countries.some(c => displayName.toLowerCase().includes(c.toLowerCase()))) return tz;
+      }
+      return "UTC";
+    }
+
+    // ─── DOM refs ────────────────────────────────────────────
+    const $ = id => document.getElementById(id);
+
+    const pseudo   = $("reg-pseudo");
+    const email    = $("reg-email");
+    const day      = $("reg-day");
+    const month    = $("reg-month");
+    const year     = $("reg-year");
+    const hour     = $("reg-hour");
+    const minute   = $("reg-minute");
+    const cityInput= $("reg-city");
+    const geocodeBtn = $("reg-geocode-btn");
+    const suggestDiv = $("reg-city-suggestions");
+    const coordsEl  = $("reg-coords");
+    const latHid    = $("reg-lat");
+    const lonHid    = $("reg-lon");
+    const tzHid     = $("reg-tz");
+    const cityNameHid= $("reg-city-name");
+    const errorEl   = $("reg-error");
+    const submitBtn = $("reg-submit-btn");
+
+    // ─── Helpers ─────────────────────────────────────────────
+    function showError(msg) {
+      errorEl.textContent = "⚠ " + msg;
+    }
+    function hideError() {
+      errorEl.textContent = "";
+    }
+
+    // ─── Geocode: autocomplete dropdown ──────────────────────
+    let geocodeTimer = null;
+
+    async function fetchSuggestions(query) {
+      if (query.length < 2) { suggestDiv.classList.add("hidden"); return; }
+      try {
+        const res = await fetch("/geocode?q=" + encodeURIComponent(query));
+        if (!res.ok) return;
+        const data = await res.json();
+        renderSuggestions(data);
+      } catch {
+        // ignore network errors silently
+      }
+    }
+
+    function renderSuggestions(results) {
+      suggestDiv.innerHTML = "";
+      if (!results || results.length === 0) {
+        suggestDiv.classList.add("hidden");
+        return;
+      }
+      for (const r of results) {
+        const item = document.createElement("button");
+        item.type = "button";
+        item.className =
+          "w-full text-left px-4 py-2 text-sm text-cosmic-text hover:bg-cosmic-gold/10 border-b border-cosmic-border/50 last:border-b-0 transition duration-100";
+        const label = r.display_name.split(",").slice(0, 3).join(",").trim();
+        item.textContent = label;
+        item.dataset.lat = r.lat;
+        item.dataset.lon = r.lon;
+        item.dataset.displayName = r.display_name;
+        item.addEventListener("click", () => selectCity(item));
+        suggestDiv.appendChild(item);
+      }
+      suggestDiv.classList.remove("hidden");
+    }
+
+    function selectCity(item) {
+      const label = item.textContent;
+      const lat   = parseFloat(item.dataset.lat).toFixed(4);
+      const lon   = parseFloat(item.dataset.lon).toFixed(4);
+      const tz    = guessTz(item.dataset.displayName);
+
+      cityInput.value = label;
+      latHid.value    = lat;
+      lonHid.value    = lon;
+      tzHid.value     = tz;
+      cityNameHid.value = label;
+      coordsEl.textContent = `✓ ${label} — lat ${lat} / lon ${lon} — ${tz}`;
+      coordsEl.className = "text-xs text-green-400 italic mt-1";
+      suggestDiv.classList.add("hidden");
+      hideError();
+    }
+
+    // Input listener with debounce
+    cityInput.addEventListener("input", function () {
+      clearTimeout(geocodeTimer);
+      // If city was selected before and user edits, reset hidden fields
+      if (cityNameHid.value && this.value !== cityNameHid.value) {
+        latHid.value = ""; lonHid.value = ""; tzHid.value = ""; cityNameHid.value = "";
+        coordsEl.textContent = "—";
+        coordsEl.className = "text-xs text-cosmic-text-dim italic mt-1";
+      }
+      geocodeTimer = setTimeout(() => fetchSuggestions(this.value), 300);
+    });
+
+    // Manual "Chercher" button
+    geocodeBtn.addEventListener("click", function () {
+      const q = cityInput.value.trim();
+      if (!q) { showError("Saisis un lieu avant de chercher."); return; }
+      fetchSuggestions(q);
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener("click", function (e) {
+      if (!e.target.closest("#reg-city, #reg-city-suggestions")) {
+        suggestDiv.classList.add("hidden");
+      }
+    });
+
+    // Enter in city field → click first suggestion
+    cityInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const first = suggestDiv.querySelector("button");
+        if (first) { selectCity(first); return; }
+        // If no suggestions, trigger search
+        geocodeBtn.click();
+      }
+    });
+
+    // ─── Form validation & submission ────────────────────────
+    submitBtn.addEventListener("click", async function () {
+      hideError();
+
+      // Gather & validate
+      const p = pseudo.value.trim();
+      const e = email.value.trim();
+      const d = parseInt(day.value);
+      const m = parseInt(month.value);
+      const y = parseInt(year.value);
+      const h = parseInt(hour.value);
+      const min = parseInt(minute.value);
+      const city = cityInput.value.trim();
+      const lat = latHid.value;
+      const lon = lonHid.value;
+      const tz = tzHid.value;
+
+      if (!p)       { showError("Pseudo requis."); pseudo.focus(); return; }
+      if (!e)       { showError("Email requis."); email.focus(); return; }
+      if (!d || !m || !y) { showError("Date de naissance incomplète."); return; }
+      if (isNaN(h) || isNaN(min)) { showError("Heure de naissance incomplète."); return; }
+      if (!city)    { showError("Ville de naissance requise."); cityInput.focus(); return; }
+      if (!lat)     { showError("Lieu non géocodé — clique Chercher et sélectionne une suggestion."); return; }
+
+      // Disable button
+      submitBtn.disabled = true;
+      submitBtn.textContent = "Création…";
+
+      try {
+        const result = await register({
+          pseudo: p,
+          email: e,
+          year: y,
+          month: m,
+          day: d,
+          hour: h,
+          minute: min,
+          city: city,
+          lat: parseFloat(lat),
+          lon: parseFloat(lon),
+          tz: tz,
+        });
+        if (result.ok) {
+          window.location.href = "/";
+        } else {
+          showError(result.error || "Erreur inconnue.");
+        }
+      } catch (err) {
+        showError(err instanceof Error ? err.message : "Erreur réseau.");
+      } finally {
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Créer mon compte";
+      }
+    });
+  })();
+</script>

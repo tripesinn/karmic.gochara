@@ -1,0 +1,39 @@
+{
+  "prompt_4": {
+    "title": "Prompt 4 : Types + Env (3 min)",
+    "status": "success",
+    "timestamp": "2026-06-16 10:52:13",
+    "detail": "24s, 968 chars"
+  },
+  "last_updated": "2026-06-16 10:54:33",
+  "prompt_1": {
+    "title": "Prompt 1 : BaseLayout + global CSS (5 min)",
+    "status": "success",
+    "timestamp": "2026-06-16 10:49:28",
+    "detail": "56s, 3148 chars"
+  },
+  "prompt_2": {
+    "title": "Prompt 2 : Tailwind config + astro.config (5 min)",
+    "status": "success",
+    "timestamp": "2026-06-16 10:50:12",
+    "detail": "29s, 923 chars"
+  },
+  "prompt_3": {
+    "title": "Prompt 3 : Pages statiques (landing + 404) (4 min)",
+    "status": "success",
+    "timestamp": "2026-06-16 10:51:24",
+    "detail": "52s, 2940 chars"
+  },
+  "prompt_5": {
+    "title": "Prompt 5 : Composants statiques (login/register cards layout) (4 min)",
+    "status": "success",
+    "timestamp": "2026-06-16 10:53:39",
+    "detail": "57s, 3608 chars"
+  },
+  "prompt_6": {
+    "title": "Prompt 6 (Optionnel) : Package.json + .env.example (2 min)",
+    "status": "success",
+    "timestamp": "2026-06-16 10:54:33",
+    "detail": "24s, 644 chars"
+  }
+}

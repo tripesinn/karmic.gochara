@@ -1,0 +1,150 @@
+---
+// src/components/ProUpgrade.astro — Upgrade card for Pro plan (Stripe checkout)
+// Static component — no client:load directive needed.
+// The <script> block handles the CTA button click client-side.
+---
+
+<section
+  id="pro-upgrade"
+  class="w-full max-w-2xl mx-auto px-4 sm:px-6 py-16"
+  aria-label="Passer à Pro"
+>
+  <div
+    class="p-8 sm:p-10 rounded-2xl border border-cosmic-border bg-cosmic-void/80 backdrop-blur-sm shadow-xl"
+  >
+    <!-- Header -->
+    <div class="text-center mb-10">
+      <span class="text-4xl sm:text-5xl block text-cosmic-gold/60 mb-2">✦</span>
+      <h2 class="text-3xl sm:text-4xl font-display text-cosmic-gold mb-2">
+        Passer à Pro
+      </h2>
+      <p class="text-cosmic-text-dim text-sm max-w-md mx-auto">
+        Débloque l'intégralité des outils karmiques — analyses profondes, lectures illimitées, et bien plus.
+      </p>
+    </div>
+
+    <!-- Comparison table -->
+    <div
+      class="grid grid-cols-2 gap-px rounded-xl overflow-hidden border border-cosmic-border mb-8"
+    >
+      <!-- Header row: Free -->
+      <div
+        class="bg-cosmic-bg/60 px-4 py-3 text-center text-cosmic-text-dim font-mono text-xs uppercase tracking-wider"
+      >
+        Gratuit
+      </div>
+      <!-- Header row: Pro -->
+      <div
+        class="bg-cosmic-bg/60 px-4 py-3 text-center text-cosmic-gold font-display text-sm font-semibold tracking-wider"
+      >
+        ★ PRO
+      </div>
+
+      <!-- Row 1: Lectures -->
+      <div class="bg-cosmic-bg/40 px-4 py-3 text-cosmic-text-dim text-sm flex items-center justify-center">
+        1 lecture / jour
+      </div>
+      <div class="bg-cosmic-bg/40 px-4 py-3 text-cosmic-text text-sm flex items-center justify-center gap-2">
+        <span class="text-cosmic-gold">✦</span>
+        Lectures illimitées
+      </div>
+
+      <!-- Row 2: Analyses -->
+      <div class="bg-cosmic-bg/20 px-4 py-3 text-cosmic-text-dim text-sm flex items-center justify-center">
+        Résumé succinct
+      </div>
+      <div class="bg-cosmic-bg/20 px-4 py-3 text-cosmic-text text-sm flex items-center justify-center gap-2">
+        <span class="text-cosmic-gold">✦</span>
+        Analyses approfondies
+      </div>
+
+      <!-- Row 3: Chartes -->
+      <div class="bg-cosmic-bg/40 px-4 py-3 text-cosmic-text-dim text-sm flex items-center justify-center">
+        Thème natal uniquement
+      </div>
+      <div class="bg-cosmic-bg/40 px-4 py-3 text-cosmic-text text-sm flex items-center justify-center gap-2">
+        <span class="text-cosmic-gold">✦</span>
+        Chartes karmiques
+      </div>
+
+      <!-- Row 4: Publicité -->
+      <div class="bg-cosmic-bg/20 px-4 py-3 text-cosmic-text-dim text-sm flex items-center justify-center">
+        Avec pub
+      </div>
+      <div class="bg-cosmic-bg/20 px-4 py-3 text-cosmic-text text-sm flex items-center justify-center gap-2">
+        <span class="text-cosmic-gold">✦</span>
+        Pas de pub
+      </div>
+    </div>
+
+    <!-- Price callout -->
+    <div class="text-center mb-8">
+      <p class="text-3xl font-display text-cosmic-gold tracking-wide">
+        9,99&thinsp;€
+        <span class="text-base text-cosmic-text-dim font-body tracking-normal">/ mois</span>
+      </p>
+      <p class="text-xs text-cosmic-text-dim mt-2">
+        Annulable à tout moment · Paiement sécurisé par Stripe
+      </p>
+    </div>
+
+    <!-- CTA Button -->
+    <div class="text-center">
+      <button
+        id="pro-checkout-btn"
+        type="button"
+        class="group inline-flex items-center gap-3 px-10 py-4
+               text-base font-display font-semibold tracking-wider
+               rounded-full border border-cosmic-gold/50 text-cosmic-gold
+               transition-all duration-500 ease-out
+               hover:bg-cosmic-gold hover:text-cosmic-bg hover:border-cosmic-gold
+               hover:shadow-[0_0_30px_rgba(201,168,76,0.3)]
+               focus-visible:outline-none focus-visible:ring-2
+               focus-visible:ring-cosmic-gold/60 focus-visible:ring-offset-2
+               focus-visible:ring-offset-cosmic-void
+               disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        ★ Passer à Pro
+        <svg
+          class="w-4 h-4 sm:w-5 sm:h-5 transition-transform duration-500 ease-out
+                 group-hover:translate-x-1"
+          fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          aria-hidden="true"
+        >
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </button>
+      <div id="pro-checkout-error" class="text-sm text-red-400/90 h-5 mt-3" role="alert"></div>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { api } from '../lib/api';
+
+  const btn = document.getElementById('pro-checkout-btn') as HTMLButtonElement;
+  const errorDiv = document.getElementById('pro-checkout-error') as HTMLDivElement;
+
+  btn?.addEventListener('click', async () => {
+    btn.disabled = true;
+    btn.textContent = 'Redirection…';
+    errorDiv.textContent = '';
+
+    try {
+      const resp = await api.stripeCheckout('pro');
+      if (resp.ok && resp.checkout_url) {
+        window.location.href = resp.checkout_url;
+      } else {
+        errorDiv.textContent = resp.beta
+          ? 'Mode bêta — la facturation n\'est pas encore active.'
+          : 'Erreur lors de la création du paiement.';
+        btn.disabled = false;
+        btn.innerHTML = '★ Passer à Pro';
+      }
+    } catch (err: any) {
+      errorDiv.textContent = err.message || 'Erreur réseau';
+      btn.disabled = false;
+      btn.innerHTML = '★ Passer à Pro';
+    }
+  });
+</script>

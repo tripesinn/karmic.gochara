@@ -1,0 +1,103 @@
+---
+// src/pages/app/lecture.astro — Lecture karmique quotidienne
+// Composant client-side avec streaming SSE pour l'analyse
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Lecture — Karmic Gochara">
+  <div class="max-w-3xl mx-auto px-4 py-12 space-y-8">
+    <h1 class="text-3xl sm:text-4xl font-display text-cosmic-gold text-center">✦ Lecture du Jour</h1>
+    <p class="text-cosmic-text-dim text-center">
+      Reçois ton analyse karmique personnalisée en temps réel.
+    </p>
+
+    <div class="border border-cosmic-border rounded-xl bg-cosmic-void/60 p-6 sm:p-10 min-h-[300px]">
+      <div id="reading-status" class="text-cosmic-text-dim text-center italic py-10">
+        Prépare-toi &hellip;
+      </div>
+      <div id="reading-output" class="text-cosmic-text leading-relaxed space-y-4 whitespace-pre-wrap"></div>
+    </div>
+
+    <div class="text-center">
+      <button
+        id="refresh-btn"
+        class="px-6 py-3 font-display tracking-wider rounded-full border border-cosmic-gold/50
+               text-cosmic-gold transition-all duration-500
+               hover:bg-cosmic-gold hover:text-cosmic-bg
+               hover:shadow-[0_0_30px_rgba(201,168,76,0.3)]"
+      >
+        ✦ Nouvelle Lecture
+      </button>
+    </div>
+  </div>
+
+  <script>
+    import { api } from '../../lib/api';
+
+    function today() {
+      const d = new Date();
+      return d.toISOString().slice(0, 10);
+    }
+    function now() {
+      const d = new Date();
+      return d.toTimeString().slice(0, 5);
+    }
+
+    let controller: AbortController | null = null;
+
+    async function startReading() {
+      const status = document.getElementById('reading-status')!;
+      const output = document.getElementById('reading-output')!;
+      const btn = document.getElementById('refresh-btn') as HTMLButtonElement;
+
+      if (controller) controller.abort();
+      controller = new AbortController();
+
+      status.textContent = 'Connexion à l&rsquo;oracle …';
+      status.style.display = 'block';
+      output.textContent = '';
+      btn.disabled = true;
+
+      // Récupérer le pseudo depuis l'API
+      let pseudo = '';
+      try {
+        const resp = await api.profile();
+        if (resp.ok && resp.profile?.pseudo) pseudo = resp.profile.pseudo;
+      } catch {}
+
+      if (!pseudo) {
+        status.textContent = 'Impossible de récupérer ton profil.';
+        btn.disabled = false;
+        return;
+      }
+
+      try {
+        for await (const chunk of api.calculate({
+          pseudo,
+          transit_date: today(),
+          transit_time: now(),
+        })) {
+          status.style.display = 'none';
+          if (chunk.text) {
+            output.textContent += chunk.text;
+          } else if (chunk.html) {
+            output.innerHTML += chunk.html;
+          }
+        }
+        status.textContent = '';
+      } catch (err: any) {
+        if (err.name !== 'AbortError') {
+          status.textContent = 'Erreur de connexion. Réessaie.';
+        }
+      } finally {
+        btn.disabled = false;
+        controller = null;
+      }
+    }
+
+    document.getElementById('refresh-btn')?.addEventListener('click', startReading);
+
+    // Auto-lancer au chargement
+    startReading();
+  </script>
+</AppLayout>

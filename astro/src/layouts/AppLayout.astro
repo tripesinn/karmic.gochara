@@ -1,0 +1,76 @@
+---
+// src/layouts/AppLayout.astro — Layout protégé pour zone connectée
+// Vérifie l'auth client-side via /api/profile
+import BaseLayout from './BaseLayout.astro';
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description = 'Espace Karmic Gochara' } = Astro.props;
+---
+
+<BaseLayout title={title} description={description}>
+  <div class="min-h-screen flex flex-col">
+    <!-- Top bar -->
+    <header
+      class="sticky top-0 z-40 border-b border-cosmic-border/50 bg-cosmic-bg/90 backdrop-blur-md"
+    >
+      <nav class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
+        <a href="/app" class="font-display text-cosmic-gold text-lg tracking-wider hover:text-cosmic-gold/80 transition">
+          ✦ Karmic Gochara
+        </a>
+
+        <div class="flex items-center gap-4 text-sm">
+          <a href="/app" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+            Tableau
+          </a>
+          <a href="/app/lecture" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+            Lecture
+          </a>
+          <a href="/app/profil" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+            Profil
+          </a>
+          <button
+            id="logout-btn"
+            class="text-cosmic-text-dim/60 hover:text-red-400 transition text-xs ml-2"
+          >
+            Quitter
+          </button>
+        </div>
+      </nav>
+    </header>
+
+    <!-- Main content -->
+    <main class="flex-1">
+      <slot />
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-cosmic-border/30 py-6 text-center text-cosmic-text-dim/40 text-xs">
+      <p>Karmic Gochara &mdash; L&rsquo;alchimie des cycles cosmiques</p>
+    </footer>
+  </div>
+
+  <script>
+    import { api } from '../lib/api';
+
+    // Vérification auth côté client
+    (async () => {
+      try {
+        const resp = await api.profile();
+        if (!resp.ok) {
+          window.location.href = '/';
+        }
+      } catch {
+        window.location.href = '/';
+      }
+    })();
+
+    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+      try { await api.logout(); } catch {}
+      window.location.href = '/';
+    });
+  </script>
+</BaseLayout>

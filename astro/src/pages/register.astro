@@ -1,0 +1,12 @@
+---
+// src/pages/register.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import RegisterForm from '../components/RegisterForm.astro';
+---
+
+<BaseLayout title="Créer son compte — Karmic Gochara" description="Inscris-toi pour dévoiler ta carte karmique en transit.">
+  <main class="min-h-screen flex items-center justify-center">
+    <!-- Le script interne gère l'interactivité (geocode, submit) -->
+    <RegisterForm />
+  </main>
+</BaseLayout>

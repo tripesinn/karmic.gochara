@@ -1,0 +1,195 @@
+---
+// KarmicChart.astro
+// Displays user birth chart info, planet positions, and SVG chart placeholder.
+// Static component — no client interactivity.
+
+export interface Props {
+  birthDate?: string;
+  birthTime?: string;
+  birthLocation?: string;
+  planets?: Array<{
+    name: string;
+    sign: string;
+    degree: number;
+    house: number;
+    retrograde?: boolean;
+  }>;
+}
+
+const {
+  birthDate = '—',
+  birthTime = '—',
+  birthLocation = '—',
+  planets = [],
+} = Astro.props;
+---
+
+<div class="karmic-chart space-y-8">
+  <!-- Birth Info Section -->
+  <section class="birth-info rounded-lg border border-cosmic-border bg-cosmic-void p-6">
+    <h2 class="font-display text-lg tracking-widest uppercase text-cosmic-gold mb-4">
+      Birth Chart
+    </h2>
+    <dl class="grid grid-cols-1 gap-3 sm:grid-cols-3">
+      <div>
+        <dt class="font-body text-xs uppercase tracking-widest text-cosmic-text-dim">
+          Date
+        </dt>
+        <dd class="font-display text-base text-cosmic-text mt-0.5">
+          {birthDate}
+        </dd>
+      </div>
+      <div>
+        <dt class="font-body text-xs uppercase tracking-widest text-cosmic-text-dim">
+          Time
+        </dt>
+        <dd class="font-display text-base text-cosmic-text mt-0.5">
+          {birthTime}
+        </dd>
+      </div>
+      <div>
+        <dt class="font-body text-xs uppercase tracking-widest text-cosmic-text-dim">
+          Location
+        </dt>
+        <dd class="font-display text-base text-cosmic-text mt-0.5">
+          {birthLocation}
+        </dd>
+      </div>
+    </dl>
+  </section>
+
+  <!-- Planet Positions Table -->
+  <section class="planet-positions rounded-lg border border-cosmic-border bg-cosmic-void p-6">
+    <h2 class="font-display text-lg tracking-widest uppercase text-cosmic-gold mb-4">
+      Planetary Positions
+    </h2>
+
+    {
+      planets.length > 0 ? (
+        <table class="w-full text-left font-body">
+          <thead>
+            <tr class="border-b border-cosmic-border text-cosmic-text-dim text-xs uppercase tracking-widest">
+              <th class="pb-2 pr-3 font-medium">Planet</th>
+              <th class="pb-2 pr-3 font-medium">Sign</th>
+              <th class="pb-2 pr-3 font-medium">Degree</th>
+              <th class="pb-2 pr-3 font-medium">House</th>
+              <th class="pb-2 font-medium">Motion</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              planets.map((planet) => (
+                <tr class="border-b border-cosmic-border/50 last:border-b-0">
+                  <td class="py-2 pr-3 text-cosmic-gold font-display text-sm">
+                    {planet.retrograde ? `℞ ` : ''}{planet.name}
+                  </td>
+                  <td class="py-2 pr-3 text-cosmic-text">{planet.sign}</td>
+                  <td class="py-2 pr-3 text-cosmic-text">{planet.degree}°</td>
+                  <td class="py-2 pr-3 text-cosmic-text">{planet.house}</td>
+                  <td class="py-2 text-cosmic-text-dim text-xs italic">
+                    {planet.retrograde ? 'Retrograde' : 'Direct'}
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      ) : (
+        <p class="font-body text-cosmic-text-dim italic text-sm">
+          No planetary data available.
+        </p>
+      )
+    }
+  </section>
+
+  <!-- SVG Chart Placeholder -->
+  <section class="chart-placeholder rounded-lg border border-cosmic-border bg-cosmic-void p-6">
+    <h2 class="font-display text-lg tracking-widest uppercase text-cosmic-gold mb-4">
+      Chart
+    </h2>
+    <div class="flex items-center justify-center">
+      <svg
+        viewBox="0 0 400 400"
+        class="w-full max-w-md h-auto"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-label="Karmic chart placeholder"
+        role="img"
+      >
+        <!-- Outer ring -->
+        <circle
+          cx="200" cy="200" r="180"
+          fill="none"
+          stroke="currentColor"
+          class="text-cosmic-border"
+          stroke-width="1.5"
+        />
+        <!-- Inner ring -->
+        <circle
+          cx="200" cy="200" r="140"
+          fill="none"
+          stroke="currentColor"
+          class="text-cosmic-border"
+          stroke-width="0.75"
+        />
+        <!-- Cross axis lines -->
+        <line
+          x1="200" y1="20" x2="200" y2="380"
+          stroke="currentColor"
+          class="text-cosmic-border"
+          stroke-width="0.5"
+        />
+        <line
+          x1="20" y1="200" x2="380" y2="200"
+          stroke="currentColor"
+          class="text-cosmic-border"
+          stroke-width="0.5"
+        />
+        <!-- Diagonal axes -->
+        <line
+          x1="73" y1="73" x2="327" y2="327"
+          stroke="currentColor"
+          class="text-cosmic-border"
+          stroke-width="0.5"
+        />
+        <line
+          x1="327" y1="73" x2="73" y2="327"
+          stroke="currentColor"
+          class="text-cosmic-border"
+          stroke-width="0.5"
+        />
+        <!-- House arcs (12 wedges) - simplified -->
+        <!-- House lines radiating from center -->
+        <!-- 0° / 30° / 60° / 90° / 120° / 150° -->
+        <line x1="200" y1="200" x2="200" y2="20" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <line x1="200" y1="200" x2="327" y2="73" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <line x1="200" y1="200" x2="380" y2="200" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <line x1="200" y1="200" x2="327" y2="327" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <line x1="200" y1="200" x2="200" y2="380" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <line x1="200" y1="200" x2="73" y2="327" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <line x1="200" y1="200" x2="20" y2="200" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <line x1="200" y1="200" x2="73" y2="73" stroke="currentColor" class="text-cosmic-border/30" stroke-width="0.75" />
+        <!-- Zodiac sign labels around outer ring -->
+        <text x="200" y="18" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♈︎</text>
+        <text x="330" y="72" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♉︎</text>
+        <text x="384" y="204" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♊︎</text>
+        <text x="330" y="334" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♋︎</text>
+        <text x="200" y="396" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♌︎</text>
+        <text x="70" y="334" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♍︎</text>
+        <text x="16" y="204" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♎︎</text>
+        <text x="70" y="72" text-anchor="middle" class="fill-cosmic-gold-dim text-[10px] font-display">♏︎</text>
+        <!-- Center glyph -->
+        <circle cx="200" cy="200" r="4" fill="currentColor" class="text-cosmic-gold" />
+        <text x="200" y="203" text-anchor="middle" class="fill-cosmic-text-dim text-[6px] font-display">☉</text>
+      </svg>
+    </div>
+  </section>
+</div>
+
+<style is:global>
+  .karmic-chart {
+    font-family: 'Cormorant Garamond', Georgia, serif;
+  }
+  .karmic-chart .font-display {
+    font-family: 'Cinzel', Georgia, serif;
+  }
+</style>

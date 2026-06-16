@@ -1,0 +1,245 @@
+---
+// src/components/SettingsModal.astro — Settings modal for user preferences
+// Modal overlay triggered by a button with id "settings-btn" or URL hash #settings
+// Client-side — inline <script> handles open/close and interactions
+
+export interface Props {
+  userId?: string;
+  currentLang?: string;
+  currentPlan?: string;
+}
+
+const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
+---
+
+<div
+  id="settings-modal"
+  class="fixed inset-0 z-50 hidden items-center justify-center bg-black/70 backdrop-blur-sm"
+  role="dialog"
+  aria-modal="true"
+  aria-label="Paramètres"
+>
+  <div
+    class="relative w-full max-w-md mx-4 rounded-2xl border border-cosmic-border
+           bg-cosmic-void/95 backdrop-blur-md shadow-2xl shadow-black/50"
+  >
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-5 border-b border-cosmic-border">
+      <h2 class="font-display text-lg tracking-wider text-cosmic-gold">✦ Paramètres</h2>
+      <button
+        id="settings-close"
+        class="w-8 h-8 flex items-center justify-center rounded-full
+               text-cosmic-text-dim hover:text-cosmic-text hover:bg-cosmic-border/50
+               transition-colors duration-300"
+        aria-label="Fermer"
+      >
+        ✕
+      </button>
+    </div>
+
+    <!-- Body -->
+    <div class="px-6 py-6 space-y-6">
+
+      <!-- Profile info -->
+      <div>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Profil</p>
+        <div class="flex items-center gap-4 p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
+          <div
+            class="w-10 h-10 rounded-full border border-cosmic-gold/30
+                   bg-cosmic-void flex items-center justify-center
+                   font-display text-sm text-cosmic-gold"
+          >
+            ☿
+          </div>
+          <div class="flex-1 min-w-0">
+            <p id="settings-pseudo" class="font-display text-sm text-cosmic-text truncate">—</p>
+            <p id="settings-plan" class="font-body text-xs text-cosmic-text-dim mt-0.5">
+              Plan {currentPlan === 'pro' ? 'Pro' : 'Gratuit'}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Langue -->
+      <div>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Langue</p>
+        <div class="flex gap-3">
+          <button
+            id="lang-fr"
+            class="lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
+                   transition-all duration-300"
+            data-lang="fr"
+          >
+            🇫🇷 Français
+          </button>
+          <button
+            id="lang-en"
+            class="lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
+                   transition-all duration-300"
+            data-lang="en"
+          >
+            🇬🇧 English
+          </button>
+        </div>
+      </div>
+
+      <!-- Plan info -->
+      <div id="settings-plan-section">
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Abonnement</p>
+        <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
+          {currentPlan === 'pro' ? (
+            <div class="flex items-center gap-3">
+              <span class="text-cosmic-gold text-lg">✦</span>
+              <div>
+                <p class="font-display text-sm text-cosmic-gold">Karmic Pro</p>
+                <p class="font-body text-xs text-cosmic-text-dim mt-0.5">Accès illimité</p>
+              </div>
+            </div>
+          ) : (
+            <div class="flex items-center gap-3">
+              <span class="text-cosmic-text-dim text-lg">✦</span>
+              <div>
+                <p class="font-display text-sm text-cosmic-text">Plan Gratuit</p>
+                <p class="font-body text-xs text-cosmic-dim mt-0.5">
+                  <a href="/app?upgrade=true" class="text-cosmic-gold hover:underline">Passer à Pro →</a>
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="px-6 py-4 border-t border-cosmic-border flex items-center justify-between">
+      <a
+        href="/logout"
+        id="settings-logout"
+        class="font-body text-xs text-cosmic-text-dim hover:text-red-400/80 transition-colors duration-300"
+      >
+        Se déconnecter
+      </a>
+      <p class="font-body text-[10px] text-cosmic-text-dim/40">Karmic Gochara v1.0</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  // ── DOM refs ──
+  const modal = document.getElementById('settings-modal')!;
+  const closeBtn = document.getElementById('settings-close')!;
+  const pseudoEl = document.getElementById('settings-pseudo')!;
+  const langBtns = document.querySelectorAll('.lang-btn') as NodeListOf<HTMLButtonElement>;
+
+  // ── Open / Close ──
+  function openModal() {
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.body.style.overflow = 'hidden';
+    loadUserProfile();
+  }
+
+  function closeModal() {
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    document.body.style.overflow = '';
+  }
+
+  async function loadUserProfile() {
+    try {
+      const res = await fetch('/api/profile', { credentials: 'include' });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.ok && data.profile) {
+        pseudoEl.textContent = data.profile.pseudo || '—';
+        // Update plan display if available
+        const planSection = document.getElementById('settings-plan-section');
+        if (planSection && data.profile.plan) {
+          const isPro = data.profile.plan === 'pro';
+          planSection.innerHTML = `
+            <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Abonnement</p>
+            <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
+              <div class="flex items-center gap-3">
+                <span class="${isPro ? 'text-cosmic-gold' : 'text-cosmic-text-dim'} text-lg">✦</span>
+                <div>
+                  <p class="font-display text-sm ${isPro ? 'text-cosmic-gold' : 'text-cosmic-text'}">${isPro ? 'Karmic Pro' : 'Plan Gratuit'}</p>
+                  <p class="font-body text-xs text-cosmic-dim mt-0.5">${isPro ? 'Accès illimité' : '<a href="/app?upgrade=true" class="text-cosmic-gold hover:underline">Passer à Pro →</a>'}</p>
+                </div>
+              </div>
+            </div>
+          `;
+        }
+      }
+    } catch {
+      // Silent fail — keep default text
+    }
+  }
+
+  // ── Langue toggle ──
+  async function setLang(lang: string) {
+    try {
+      await fetch('/set_lang', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ lang }),
+      });
+      // Update visual state
+      langBtns.forEach((btn) => {
+        const isActive = btn.dataset.lang === lang;
+        btn.className = `lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
+          transition-all duration-300 ${
+            isActive
+              ? 'bg-cosmic-gold/15 border-cosmic-gold/50 text-cosmic-gold'
+              : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
+          }`;
+      });
+    } catch {
+      // Silent fail
+    }
+  }
+
+  // ── Event listeners ──
+  closeBtn.addEventListener('click', closeModal);
+
+  // Close on backdrop click
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  // Close on Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+  });
+
+  // Listen for settings button click
+  document.addEventListener('click', (e) => {
+    const target = e.target as HTMLElement;
+    if (target.closest('#settings-btn') || target.closest('[data-action="settings"]')) {
+      openModal();
+    }
+  });
+
+  // Listen for URL hash
+  window.addEventListener('hashchange', () => {
+    if (window.location.hash === '#settings') openModal();
+  });
+  if (window.location.hash === '#settings') openModal();
+
+  // Langue buttons
+  langBtns.forEach((btn) => {
+    btn.addEventListener('click', () => setLang(btn.dataset.lang || 'fr'));
+  });
+
+  // Initial language state
+  const currentLang = '{currentLang}';
+  langBtns.forEach((btn) => {
+    const isActive = btn.dataset.lang === currentLang;
+    btn.className = `lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
+      transition-all duration-300 ${
+        isActive
+          ? 'bg-cosmic-gold/15 border-cosmic-gold/50 text-cosmic-gold'
+          : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
+      }`;
+  });
+</script>

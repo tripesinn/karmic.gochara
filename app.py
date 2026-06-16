@@ -9,7 +9,9 @@ import os
 
 from dotenv import load_dotenv
 from flask import Flask
+from flask_cors import CORS
 
+from jwt_auth import jwt_before_request
 from logging_config import request_middleware, setup_logging
 
 load_dotenv(dotenv_path=".env")
@@ -21,6 +23,22 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = os.environ.get("SECRET_KEY", "gochara-secret-2024")
     app.config["JSON_AS_ASCII"] = False
+
+    # ── CORS ──────────────────────────────────────────────────────────────────
+    CORS(
+        app,
+        origins=[
+            "https://karmicgochara.app",
+            "capacitor://localhost",
+            "http://localhost:4321",   # Astro dev server
+            "http://localhost:3000",   # Astro alt port / Capacitor web
+        ],
+        supports_credentials=True,
+    )
+
+    # ── JWT middleware (transparent compatibilité sessions existantes) ────────
+    app.before_request(jwt_before_request)
+
     request_middleware(app)
 
     # ── Enregistrement des Blueprints ──────────────────────────────────────
