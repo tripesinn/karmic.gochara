@@ -1,4 +1,5 @@
 apply plugin: 'com.android.application'
+apply plugin: 'com.github.triplet.play'
 
 android {
     namespace = "com.karmicgochara.app"
@@ -7,7 +8,7 @@ android {
         applicationId "com.karmicgochara.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 4
+        versionCode 13
         versionName "1.3"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
@@ -16,9 +17,18 @@ android {
             ignoreAssetsPattern = '!.svn:!.git:!.ds_store:!*.scc:.*:!CVS:!thumbs.db:!picasa.ini:!*~'
         }
     }
+    signingConfigs {
+        release {
+            storeFile file("/Users/jero87/Library/CloudStorage/GoogleDrive-jerome@jeromemalige.fr/Mon Drive/karmic-key")
+            storePassword "nRqzZ@x;akZDsfcVWg^Y"
+            keyAlias "key0"
+            keyPassword "nRqzZ@x;akZDsfcVWg^Y"
+        }
+    }
     buildTypes {
         release {
             minifyEnabled false
+            signingConfig signingConfigs.release
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro' // Fix Gradle Proguard
         }
     }
@@ -26,6 +36,11 @@ android {
         sourceCompatibility JavaVersion.VERSION_17
         targetCompatibility JavaVersion.VERSION_17
     }
+}
+
+play {
+    serviceAccountCredentials = file("play-service-account.json")
+    track = "internal"
 }
 
 repositories {
@@ -47,7 +62,7 @@ dependencies {
 
     // ── Gemma 3/4 — MediaPipe LlmInference (inférence locale) ─
     // Using stable tasks-text (includes LLM inference)
-    implementation 'com.google.mediapipe:tasks-text:0.10.9'
+    implementation 'com.google.mediapipe:tasks-genai:0.10.14'
 
     // ── Google Play Billing (achat "Supprimer les pubs") ─────────────────────
     implementation 'com.android.billingclient:billing:7.1.1'

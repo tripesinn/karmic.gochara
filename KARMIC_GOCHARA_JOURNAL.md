@@ -47,5 +47,83 @@ L'insight transformateur est que **l'auto-affirmation n'est pas une opposition a
 - ✅ `global.css` enrichi : overlay gradients (body::before), bruit SVG (body::after), 4 nouvelles animations (fadeIn, spin, goldGlow, shimmer), classes utilitaires stagger, spinner, vars manquantes (--gold-dim, --text-dim, --void, --glyph, --mist)
 - ✅ manifest.json, icons (192+512), sw.js déjà en place dans `public/static/`
 - ✅ Google Fonts link (Cinzel, Cormorant Garamond, DM Mono) déjà dans BaseLayout
-- 🔧 Fix : chemins BaseLayout — apple-touch-icon `/icons/`→`/static/icons/`, SW register `/sw.js`→`/static/sw.js`
-- ✅ Build Astro OK (527ms, 2 pages)
+| 🔧 Fix : chemins BaseLayout — apple-touch-icon `/icons/`→`/static/icons/`, SW register `/sw.js`→`/static/sw.js`
+|- ✅ Build Astro OK (527ms, 2 pages)
+
+## Session 16/06/2026 — 11h-12h30 : Closed Beta Web + Android
+
+### Phases exécutées
+
+**Phase 1.3 — HeroSection.astro** ✅ done
+- 29 lignes, cosmic gold/dark palette (pas purple/pink)
+- Full-viewport hero, 3 glow orbs, animations stagger
+- Teaser + CTA vers /login
+- Build OK
+
+**Phase 0.3 — API client JWT (api.ts, auth.ts)** ✅ done
+- Session cookies (Flask sessions), pas de JWT localStorage
+- Streaming SSE via ReadableStream (fetch body.getReader())
+- Types.ts, capacitor-bridge.ts complets
+- 4 fichiers, build clean
+
+**Phase 4.0-4.1 — Capacitor + Build** ✅ done
+- Astro build (6 pages, 479ms)
+- `npm run sync:capacitor` → www/ + android/ + ios/ assets
+- Pipelock v2.7 relancé (patch `proxy_address`→`listen` 127.0.0.1:8088)
+- Vite proxy bypass GET /login + /register (allow client-side render)
+- `login.astro` créé (page manquante)
+- Removed `client:load` from LoginCard (Astro native, no hydration needed)
+- Android AdMob plugin + SplashScreen + StatusBar synced
+
+**Phase 3.1-3.5 — Composants métier** ✅ done
+- DailyReading.astro (152 lines, SSE streaming)
+- ProUpgrade.astro (150 lines, Stripe CTA)
+- KarmicChart.astro (195 lines, SVG natal chart)
+- ChatBox.astro (306 lines, chat SSE, streaming)
+- **SettingsModal.astro (NEW)** — langue/plan/logout modal overlay
+
+### Web Setup
+
+- ✅ PWA manifest + icons (192/512)
+- ✅ Astro build: 6 pages (/, /login, /register, /app, /app/lecture, /404)
+- ✅ Pipelock proxy 127.0.0.1:8088 (forward proxy active)
+- ✅ Assets ready for deployment
+- 📤 **Deploy path:** git push → Cloud Shell `git pull` → `gcloud builds submit` (Cloud Run)
+
+### Android Closed Beta Setup
+
+- ✅ GemmaSynthesisPlugin.java (427 lines, MediaPipe LlmInference)
+  - Gemma 3 1B 4-bit from HuggingFace (dynamic download on first load)
+  - LoRA doctrine adapter (optional, fallback to vault)
+  - Device memory check (4GB min, 6GB recommended)
+- ✅ DoctrinePromptBuilder.java — profile-aware prompt injection
+- ✅ Assets bundled: system_prompt_mobile.json, nakshatra_karma.json
+- ✅ AndroidManifest.xml + MainActivity configured
+- ✅ build.gradle: v1.3 (build 4), target SDK 34, min SDK 24
+- ✅ Web assets synced to `android/app/src/main/assets/public/`
+
+**Skill created:** `android-closed-beta` (gaming category)
+- Build signed AAB step-by-step
+- Google Play Console closed testing setup
+- Tester invitation workflow
+- Troubleshooting checklist
+
+### Board Status
+
+14/15 phases ✅ done, 1 ⊘ blocked
+
+| Phase | Status | Notes |
+|-------|--------|-------|
+| 0.0–0.75 | ✅ | Backup, init, theme, auth, tests |
+| 1.1–1.3 | ✅ | Layouts, landing, hero |
+| 2.1–2.3 | ✅ | Login, register, app layout |
+| 3.1–3.5 | ✅ | Composants métier (5 components) |
+| 4.0–4.1 | ✅ | Capacitor + build sync |
+| 4.2–4.3 | ⊘ | iOS TestFlight (waiting Apple info) |
+
+### Next Steps (optional)
+
+1. 📱 **Android Studio:** Open `/android/` → Build signed AAB
+2. 📤 **Play Console:** Upload AAB → Create closed testing track → Invite testers
+3. 🌐 **Cloud Run:** Deploy web via console GCP (git → builds submit)
+4. 🧪 **QA:** Test login/register, SSE streaming, local Gemma inference

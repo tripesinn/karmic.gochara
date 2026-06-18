@@ -1,6 +1,5 @@
 ---
-// src/components/LoginCard.astro — Login card with pseudo input (Flask session auth)
-// client:load required on usage
+// src/components/LoginCard.astro — Login card calling the Flask backend directly
 ---
 
 <section id="login-card" class="w-full max-w-md mx-auto">
@@ -8,23 +7,65 @@
     class="p-8 sm:p-10 rounded-2xl border border-cosmic-border bg-cosmic-void/80 backdrop-blur-sm shadow-xl text-center"
   >
     <h2 class="text-3xl sm:text-4xl font-display text-cosmic-gold mb-2">✦ ENTRER</h2>
-    <p class="text-cosmic-text-dim text-sm mb-6">Entre ton pseudo pour accéder à ta carte karmique</p>
+    <p class="text-cosmic-text-dim text-sm mb-6">
+      Renseigne tes informations pour te connecter à ton espace karmique.
+    </p>
 
     <form id="login-form" class="space-y-4">
-      <input
-        id="pseudo-input"
-        type="text"
-        placeholder="Pseudo"
-        required
-        autocomplete="username"
-        class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
-               text-cosmic-text placeholder:text-cosmic-text-dim/50
-               focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
-               transition-all duration-300"
-      />
+      <!-- Pseudo -->
+      <div>
+        <label for="pseudo-input" class="block text-left text-xs font-semibold text-cosmic-gold/80 uppercase tracking-wider mb-1.5">
+          Pseudo
+        </label>
+        <input
+          id="pseudo-input"
+          type="text"
+          placeholder="Ex: jero87"
+          required
+          autocomplete="username"
+          class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
+                 text-cosmic-text placeholder:text-cosmic-text-dim/30
+                 focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
+                 transition-all duration-300"
+        />
+      </div>
 
-      <div id="login-error" class="text-sm text-red-400/90 h-5" role="alert"></div>
+      <!-- Email (Pour la compatibilité de l'interface future) -->
+      <div>
+        <label for="email-input" class="block text-left text-xs font-semibold text-cosmic-gold/80 uppercase tracking-wider mb-1.5">
+          Adresse Email
+        </label>
+        <input
+          id="email-input"
+          type="email"
+          placeholder="Ex: jero@example.com"
+          autocomplete="email"
+          class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
+                 text-cosmic-text placeholder:text-cosmic-text-dim/30
+                 focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
+                 transition-all duration-300"
+        />
+      </div>
 
+      <!-- Date de naissance (Pour la compatibilité de l'interface future) -->
+      <div>
+        <label for="birthdate-input" class="block text-left text-xs font-semibold text-cosmic-gold/80 uppercase tracking-wider mb-1.5">
+          Date de naissance
+        </label>
+        <input
+          id="birthdate-input"
+          type="date"
+          class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
+                 text-cosmic-text
+                 focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
+                 transition-all duration-300"
+        />
+      </div>
+
+      <!-- Messages d'erreur / succès -->
+      <div id="login-message" class="text-sm min-h-5 transition-all duration-300" role="alert"></div>
+
+      <!-- Bouton Soumettre -->
       <button
         id="login-btn"
         type="submit"
@@ -50,34 +91,59 @@
   import { api } from '../lib/api';
 
   const form = document.getElementById('login-form') as HTMLFormElement;
-  const input = document.getElementById('pseudo-input') as HTMLInputElement;
-  const errorDiv = document.getElementById('login-error') as HTMLDivElement;
+  const pseudoInput = document.getElementById('pseudo-input') as HTMLInputElement;
+  const messageDiv = document.getElementById('login-message') as HTMLDivElement;
   const btn = document.getElementById('login-btn') as HTMLButtonElement;
 
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
-    const pseudo = input.value.trim();
+
+    const pseudo = pseudoInput.value.trim();
+
     if (!pseudo) {
-      errorDiv.textContent = 'Pseudo requis';
+      showMessage('Le pseudo est requis.', 'error');
       return;
     }
 
+    // Désactiver le bouton pendant le chargement
     btn.disabled = true;
     btn.textContent = 'Connexion…';
-    errorDiv.textContent = '';
+    clearMessage();
 
     try {
+      // Appel direct au backend Flask via le client API
       const resp = await api.login(pseudo);
+
       if (resp.ok) {
-        window.location.href = '/app';
+        showMessage('Connexion réussie ! Redirection...', 'success');
+        setTimeout(() => {
+          window.location.href = '/app';
+        }, 1200);
       } else {
-        errorDiv.textContent = resp.error || 'Pseudo inconnu';
+        showMessage(resp.error || 'Pseudo inconnu ou invalide.', 'error');
+        btn.disabled = false;
+        btn.textContent = '✦ CONNEXION';
       }
     } catch (err: any) {
-      errorDiv.textContent = err.message || 'Erreur réseau';
-    } finally {
+      showMessage(err.message || 'Erreur réseau. Veuillez réessayer.', 'error');
       btn.disabled = false;
       btn.textContent = '✦ CONNEXION';
     }
   });
+
+  function showMessage(text: string, type: 'error' | 'success') {
+    if (!messageDiv) return;
+    messageDiv.textContent = text;
+    if (type === 'error') {
+      messageDiv.className = 'text-sm min-h-5 text-red-400/90 font-medium';
+    } else {
+      messageDiv.className = 'text-sm min-h-5 text-emerald-400/90 font-medium';
+    }
+  }
+
+  function clearMessage() {
+    if (!messageDiv) return;
+    messageDiv.textContent = '';
+    messageDiv.className = 'text-sm min-h-5';
+  }
 </script>

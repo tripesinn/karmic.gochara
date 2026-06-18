@@ -1,17 +1,64 @@
 ---
-// src/pages/index.astro — Landing page
-import BaseLayout from '../layouts/BaseLayout.astro';
-import HeroSection from '../components/HeroSection.astro';
+// src/pages/index.astro
+/**
+ * Page d'accueil principale de Karmic Gochara.
+ * Intègre le composant de lecture de doctrine (t_daily_reading_comp).
+ *
+ * @param {Astro.Props} props - Props pour les métadonnées SEO
+ */
+import DailyReading from '../components/DailyReading.astro'; 
 import LoginCard from '../components/LoginCard.astro';
+
+// Props pour les métadonnées SEO et le titre principal
+const props = { 
+    title: "Karmic Gochara | Doctrine & Synergie Astrale", 
+    description: "Exploration de la doctrine karmique via l'IA locale et l'astrologie sacrée." 
+};
 ---
 
-<BaseLayout title="Karmic Gochara — Ta carte karmique en transit">
-  <main>
-    <HeroSection />
+<!-- Structure HTML de base -->
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width" />
+    <title>{props.title}</title>
+    <!-- Assurez-vous que votre fichier global.css (ou tailwind) est importé ici -->
+    <link rel="stylesheet" href="/styles/main.css" />
+    <!-- Meta tags Open Graph pour le partage social -->
+    <meta name="description" content={props.description} />
+    <meta property="og:title" content={props.title} />
+    <meta property="og:description" content={props.description} />
+    <meta property="og:type" content="website" />
+    <!-- Ajoutez d'autres tags OG si besoin -->
+  </head>
+  <body class="bg-gray-950 text-gray-100 font-sans">
+    <!-- Navigation globale (à implémenter/récupérer du layout) -->
+    <header class="p-6 bg-gray-900 border-b border-gold">
+        <nav class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-2xl font-serif text-gold">Karmic Gochara</h1>
+            <div>
+                <a href="/about" class="mr-4 text-gray-300 hover:text-gold">À Propos</a>
+                <a href="/dashboard" class="text-gold font-bold">Dashboard</a>
+            </div>
+        </nav>
+    </header>
 
-    <!-- Login section with client-side interactive card -->
-    <section id="login" class="min-h-screen flex items-center justify-center px-4 py-20">
-      <LoginCard />
-    </section>
-  </main>
-</BaseLayout>
+    <main class="min-h-[80vh] pt-10 pb-12">
+      <div class="max-w-4xl mx-auto px-4">
+        
+        <!-- Composant de Connexion (t_auth_flow) -->
+        <LoginCard />
+
+        <!-- Zone pour les autres contenus (e.g., articles, CTA) -->
+        <div class="mt-20 text-center text-gray-400">
+            <p>Contenu futur : Focus sur les nouvelles fonctionnalités et les lectures personnalisées.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Pied de page -->
+    <footer class="p-6 bg-gray-900 border-t border-gold text-center text-sm text-gray-500">
+      &copy; 2026 Karmic Gochara. Biomécanique 4D & Doctrine.
+    </footer>
+  </body>
+</html>

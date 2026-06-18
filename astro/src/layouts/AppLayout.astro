@@ -6,12 +6,33 @@ import BaseLayout from './BaseLayout.astro';
 interface Props {
   title: string;
   description?: string;
+  ogImage?: string;
 }
 
-const { title, description = 'Espace Karmic Gochara' } = Astro.props;
+const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
 ---
 
-<BaseLayout title={title} description={description}>
+<meta name="title" content={title} />
+<meta name="description" content={description} />
+
+<script type="application/ld+json">
+{
+  "@context": "http://schema.org",
+  "@type": "WebSite",
+  "name": "{title}",
+  "url": "https://yourdomain.com",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "https://yourdomain.com/search?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:image" content={ogImage} />
+
+<BaseLayout title={title} description={description} ogImage={ogImage}>
   <div class="min-h-screen flex flex-col">
     <!-- Top bar -->
     <header
