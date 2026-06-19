@@ -33,8 +33,8 @@ def login():
         return jsonify({"ok": False, "error": str(exc)}), 500
     if not profile:
         return jsonify({"ok": False, "error": f"Pseudo '{pseudo}' introuvable. Crée ton profil d'abord."}), 404
-    if not profile.get("email") or not profile.get("birth_date"):
-        return jsonify({"ok": False, "error": "Profil incomplet. Email et date de naissance requis."}), 403
+    if not profile.get("email") and not profile.get("year"):
+        return jsonify({"ok": False, "error": "Profil incomplet. Email requis."}), 403
     # ── Contournement de la latence Sheets après paiement ────────────────────
     # 1. Store en mémoire (cas navigateur externe — session différente)
     pending = _pending_plan_updates.pop(pseudo.strip().lower(), None)
