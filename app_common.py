@@ -2,11 +2,6 @@
 app_common.py — Constantes et helpers partages entre tous les blueprints
 """
 import os
-import time
-
-from flask import request, session
-
-from i18n import LANGS, get_lang
 
 # ── Constantes ──────────────────────────────────────────────────────────────
 TRANSIT_LOC_DEFAULT = {

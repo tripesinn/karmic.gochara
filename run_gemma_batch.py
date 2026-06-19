@@ -14,7 +14,6 @@ Prérequis :
 """
 
 import json
-import os
 import subprocess
 import sys
 import time
@@ -371,7 +370,7 @@ def main():
             if files:
                 saved = save_generated_files(files)
                 if saved:
-                    print(f"   📂 Fichiers créés:")
+                    print("   📂 Fichiers créés:")
                     for s in saved:
                         print(f"      ✓ {s}")
                 else:
@@ -398,7 +397,7 @@ def main():
         print(f"✅ Batch terminé: {successes}/{total} prompts réussis")
         print(f"📂 Fichiers dans {ASTRO_DIR}")
         print(f"📝 Log: {LOG_FILE}")
-        print(f"\nProchaine étape: revue Hermes pour valider les fichiers")
+        print("\nProchaine étape: revue Hermes pour valider les fichiers")
     else:
         print(f"⚠️ Batch partiel: {successes}/{total} prompts réussis")
         print(f"   Consulte le log pour les erreurs: {LOG_FILE}")

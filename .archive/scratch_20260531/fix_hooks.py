@@ -1,4 +1,4 @@
-with open('/Users/jero87/karmic.gochara/ai_interpret.py', 'r') as f:
+with open('/Users/jero87/karmic.gochara/ai_interpret.py') as f:
     content = f.read()
 
 # For get_hook_natal

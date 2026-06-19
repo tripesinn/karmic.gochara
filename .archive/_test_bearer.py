@@ -1,8 +1,14 @@
 #!/usr/bin/env python3
 """Test generating a bearer token for X API"""
-import base64, urllib.request, json, os, sys
+import base64
+import json
+import os
+import sys
+import urllib.request
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from dotenv import load_dotenv
+
 load_dotenv()
 
 key = os.getenv('X_API_KEY')

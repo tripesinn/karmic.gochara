@@ -13,7 +13,7 @@ import time
 from functools import wraps
 
 import jwt
-from flask import current_app, g, jsonify, request, session
+from flask import g, jsonify, request, session
 
 # ── Configuration ─────────────────────────────────────────────────────────────
 

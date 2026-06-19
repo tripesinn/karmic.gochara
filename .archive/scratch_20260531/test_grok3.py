@@ -1,6 +1,6 @@
 import os
+
 import requests
-import json
 
 api_key = os.environ.get("SERVER_GROK_KEY", "")
 url = "https://api.x.ai/v1/models"

@@ -1,5 +1,6 @@
-from profiles import create_profile, check_and_consume_daily_signal
 import random
+
+from profiles import check_and_consume_daily_signal, create_profile
 
 pseudo = f"tester_{random.randint(10000,99999)}"
 data = {

@@ -14,7 +14,7 @@ try:
 except ImportError:
     import swisseph_ctypes as swe  # fallback ctypes (pas de compilation)
 import math
-from datetime import timezone, datetime
+from datetime import UTC, datetime
 
 import pytz
 
@@ -163,7 +163,7 @@ def calc_vimshottari(moon_lon: float, birth_jd: float) -> list[dict]:
     # Conversion JD en datetime (simplifié)
     from datetime import datetime
     # JD 2440587.5 = 1970-01-01 12:00 UTC
-    dt_birth = datetime.fromtimestamp((birth_jd - 2440587.5) * 86400, tz=timezone.utc)
+    dt_birth = datetime.fromtimestamp((birth_jd - 2440587.5) * 86400, tz=UTC)
     
     current_date = dt_birth + timedelta(days=years_remaining * 365.25)
     

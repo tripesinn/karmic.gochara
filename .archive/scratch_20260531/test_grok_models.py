@@ -1,5 +1,5 @@
+
 import requests
-import os
 
 key = ""
 with open(".env") as f:

@@ -1,7 +1,6 @@
-with open('/Users/jero87/karmic.gochara/app.py', 'r') as f:
+with open('/Users/jero87/karmic.gochara/app.py') as f:
     content = f.read()
 
-import re
 
 # Fix index()
 old_index = """    return render_template(

@@ -1,9 +1,8 @@
 """
 blueprints/geocode.py — Geocoding via Nominatim/Photon
 """
-from flask import Blueprint, jsonify, request
-
 import requests as req
+from flask import Blueprint, jsonify, request
 
 geocode_bp = Blueprint("geocode_bp", __name__)
 

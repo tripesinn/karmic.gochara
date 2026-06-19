@@ -1,5 +1,5 @@
 import sys
-import os
+
 sys.path.append('.')
 from ai_interpret import _build_natal_context, generate_ai
 
@@ -21,6 +21,6 @@ try:
     prompt = "Test prompt"
     content = generate_ai(system, prompt, user=user_params, max_tokens=1024)
     print("Content:", content)
-except Exception as e:
+except Exception:
     import traceback
     traceback.print_exc()

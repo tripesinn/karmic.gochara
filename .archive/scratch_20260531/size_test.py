@@ -1,4 +1,5 @@
 import json
+
 import astro_calc
 
 natal = {
@@ -22,7 +23,7 @@ for day in range(1, 366):
     try:
         res = astro_calc.calculate_transits(natal, transit_loc, 2026, month, d, 12, 0)
         results.append(res)
-    except Exception as e:
+    except Exception:
         pass
 
 payload = json.dumps(results)

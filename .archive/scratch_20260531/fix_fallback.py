@@ -1,4 +1,4 @@
-with open('/Users/jero87/karmic.gochara/ai_interpret.py', 'r') as f:
+with open('/Users/jero87/karmic.gochara/ai_interpret.py') as f:
     content = f.read()
 
 old_fallback = """    except Exception as e:

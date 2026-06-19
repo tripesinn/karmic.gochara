@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Check dependencies for x_benchmark_bot.py"""
 import sys
+
 print(f"Python: {sys.version}")
 
 try:

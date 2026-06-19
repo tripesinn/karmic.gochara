@@ -1,6 +1,6 @@
 import os
+
 import requests
-import json
 
 api_key = os.environ.get("SERVER_GROK_KEY", "")
 print("KEY length:", len(api_key))

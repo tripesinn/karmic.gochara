@@ -2,9 +2,9 @@
 blueprints/public.py — Routes publiques (index, service worker, privacy, assetlinks)
 """
 import os
-import pytz
 from datetime import datetime
 
+import pytz
 from flask import (
     Blueprint,
     jsonify,
@@ -70,7 +70,6 @@ def privacy():
 @public_bp.route("/benchmark")
 def benchmark():
     """Page publique du Benchmark IA Astrologique — alimentée par x_benchmark_bot.py"""
-    import json
     bench_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), "benchmark_results", "index.html")
     if os.path.exists(bench_path):
         return make_response(open(bench_path).read())

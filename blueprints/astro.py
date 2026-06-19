@@ -4,6 +4,7 @@ blueprints/astro.py — Routes d'astrologie (calculs, cartes, hooks, prompts)
 import json
 import os
 import time
+
 from flask import (
     Blueprint,
     Response,
@@ -20,7 +21,6 @@ from app_common import (
     UNLIMITED_PSEUDOS,
     _enrich_profile_with_natal,
     get_hook_cta,
-    get_lang,
 )
 
 astro_bp = Blueprint("astro_bp", __name__)

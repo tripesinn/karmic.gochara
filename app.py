@@ -42,18 +42,18 @@ def create_app():
     request_middleware(app)
 
     # ── Enregistrement des Blueprints ──────────────────────────────────────
-    from blueprints.public import public_bp
-    from blueprints.auth import auth_bp
-    from blueprints.astro import astro_bp
-    from blueprints.chat import chat_bp
     from blueprints.alerts import alerts_bp
-    from blueprints.calendar import calendar_bp
-    from blueprints.cron import cron_bp
-    from blueprints.email import email_bp
-    from blueprints.payments import payments_bp
     from blueprints.api import api_bp
+    from blueprints.astro import astro_bp
+    from blueprints.auth import auth_bp
+    from blueprints.calendar import calendar_bp
+    from blueprints.chat import chat_bp
+    from blueprints.cron import cron_bp
     from blueprints.data import data_bp
+    from blueprints.email import email_bp
     from blueprints.geocode import geocode_bp
+    from blueprints.payments import payments_bp
+    from blueprints.public import public_bp
 
     app.register_blueprint(public_bp)
     app.register_blueprint(auth_bp)

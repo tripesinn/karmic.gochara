@@ -17,16 +17,16 @@ Utilisation :
 Dépendances : tweepy, python-dotenv, geopy, timezonefinder
 """
 
+import base64
 import datetime
 import json
 import os
 import re
 import sys
-import time
 import threading
-import urllib.request
-import base64
+import time
 import urllib.parse
+import urllib.request
 
 import tweepy
 from dotenv import load_dotenv
@@ -34,9 +34,9 @@ from geopy.geocoders import Nominatim
 from timezonefinder import TimezoneFinder
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import gemini_api
 from astro_calc import calculate_transits
 from karmic_lite import TRANSIT_LOC, generate_prompt
-import gemini_api
 
 # ── Config ────────────────────────────────────────────────────────────────────
 load_dotenv()
@@ -579,7 +579,7 @@ def process_mentions(client, my_user_id):
                     except Exception as e:
                         print(f"  ⚠ DM impossible (l'utilisateur suit-il le bot ?) : {e}")
                         # Fallback : réponse publique avec un lien
-                        fallback = f"Ton analyse est prête ! Suis-nous et DM ouvert pour la recevoir \u2728 karmicgochara.app"
+                        fallback = "Ton analyse est prête ! Suis-nous et DM ouvert pour la recevoir \u2728 karmicgochara.app"
                         client.create_tweet(text=fallback, in_reply_to_tweet_id=mention.id)
                         continue
 

@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Build the Gemma prompts for jero's profile."""
-import os, sys, json
+import os
+import sys
+
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 os.environ["STRIPE_PRICE_TEST_GEMMA"] = "price_dummy_lecture"
@@ -9,14 +11,16 @@ os.environ["KARMIC_STRIPE_SECRET_KEY"] = "***"
 os.environ["GOOGLE_CREDENTIALS_JSON"] = "{}"
 os.environ["SHEET_ID"] = "dummy_sheet_id"
 
-from unittest.mock import MagicMock
 import sys as _sys
+from unittest.mock import MagicMock
+
 _sys.modules['gspread'] = MagicMock()
 _sys.modules['google'] = MagicMock()
 _sys.modules['google.oauth2'] = MagicMock()
 _sys.modules['google.oauth2.service_account'] = MagicMock()
 
 import profiles
+
 profiles.GoogleSheetsSession = MagicMock()
 profiles.update_profile = MagicMock()
 profiles.consume_plan_synthesis = MagicMock(return_value=True)

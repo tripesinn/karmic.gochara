@@ -1,6 +1,12 @@
 #!/usr/bin/env python3
-import os, base64, urllib.request, json, urllib.parse
+import base64
+import json
+import os
+import urllib.parse
+import urllib.request
+
 from dotenv import load_dotenv
+
 load_dotenv()
 ak = os.getenv('X_API_KEY')
 sk = os.getenv('X_API_SECRET')
