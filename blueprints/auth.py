@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request, session
 from flask import current_app
 import time
+import re
+from datetime import datetime
 from i18n import LANGS, get_lang
 from app_common import UNLIMITED_PSEUDOS, _enrich_profile_with_natal, _pending_plan_updates
 from jwt_auth import create_tokens, refresh_access_token
@@ -20,7 +22,7 @@ def set_lang():
 @auth_bp.route('/login', methods=['POST'])
 def login():
     from profiles import get_profile_by_pseudo
-    data   = request.get_json() or {}
+    data = request.get_json() or {}
     pseudo = (data.get("pseudo") or "").strip()
     if not pseudo:
         return jsonify({"ok": False, "error": "Pseudo requis"}), 400
@@ -33,7 +35,6 @@ def login():
         return jsonify({"ok": False, "error": f"Pseudo '{pseudo}' introuvable. Crée ton profil d'abord."}), 404
     if not profile.get("email") or not profile.get("birth_date"):
         return jsonify({"ok": False, "error": "Profil incomplet. Email et date de naissance requis."}), 403
-    # ── Contournement de la latence Sheets après paiement ────────────────────
     # ── Contournement de la latence Sheets après paiement ────────────────────
     # 1. Store en mémoire (cas navigateur externe — session différente)
     pending = _pending_plan_updates.pop(pseudo.strip().lower(), None)
@@ -51,10 +52,9 @@ def login():
     session["pseudo"] = pseudo
 
     # ── Hook natal : généré au login depuis données Sheets ───────────────────
-    # Le profil contient chandra_lagna_sign si natal déjà calculé à l'inscription
     hook_natal = ""
     user_lang = session.get("lang", "fr")
-    cache_key  = f"hook_natal_{pseudo}_{user_lang}"
+    cache_key = f"hook_natal_{pseudo}_{user_lang}"
     if session.get(cache_key):
         hook_natal = session[cache_key]
 
@@ -67,17 +67,17 @@ def login():
         from profiles import save_natal_to_sheet
 
         natal_input = {
-            "name":   profile["name"],
-            "year":   profile["year"],   "month":  profile["month"],
-            "day":    profile["day"],    "hour":   profile["hour"],
-            "minute": profile["minute"], "lat":    profile["lat"],
-            "lon":    profile["lon"],    "tz":     profile["tz"],
-            "city":   profile["city"],
+            "name": profile["name"],
+            "year": profile["year"], "month": profile["month"],
+            "day": profile["day"], "hour": profile["hour"],
+            "minute": profile["minute"], "lat": profile["lat"],
+            "lon": profile["lon"], "tz": profile["tz"],
+            "city": profile["city"],
         }
         today = _date.today()
         transit_loc = {
             "city": profile["city"], "lat": profile["lat"],
-            "lon":  profile["lon"],  "tz":  profile["tz"],
+            "lon": profile["lon"], "tz": profile["tz"],
         }
         natal_result = calculate_transits(natal_input, transit_loc,
                                           today.year, today.month, today.day, 12, 0)
@@ -115,59 +115,66 @@ def login():
         **create_tokens(pseudo),
     })
 
+
 @auth_bp.route('/register', methods=['POST'])
 def register():
     from profiles import create_profile, get_profile_by_email, pseudo_exists
-    data   = request.get_json() or {}
+    data = request.get_json() or {}
     pseudo = (data.get("pseudo") or "").strip()
     if not pseudo:
         return jsonify({"ok": False, "error": "Pseudo requis"}), 400
 
     current_app.logger.info("REGISTER data reçue: %s", data)
 
+    # 1. Validation des données d'inscription
+    email = (data.get("email") or "").strip().lower()
+    pseudo = (data.get("pseudo") or "").strip()
+
+    if not pseudo:
+        return jsonify({"ok": False, "error": "Pseudo requis"}), 400
+
+    # Validation Email
+    if email:
+        if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+            return jsonify({"ok": False, "error": "Format email invalide."}), 400
+
+    # Validation Date de Naissance
+    birth_date_str = data.get("birth_date")
+    if birth_date_str:
+        try:
+            datetime.strptime(birth_date_str, '%Y-%m-%d')
+        except ValueError:
+            return jsonify({"ok": False, "error": "Format date de naissance invalide. Utilisez YYYY-MM-DD."}), 400
+
     # Normalise : parse birth_date / birth_time si envoyés comme strings
     if "birth_date" in data and "year" not in data:
         try:
             parts = str(data["birth_date"]).split("-")
-            # 1. Validation des données d'inscription
-                    email = (data.get("email") or "").strip().lower()
-                    pseudo = (data.get("pseudo") or "").strip()
+            data["year"] = int(parts[0])
+            data["month"] = int(parts[1])
+            data["day"] = int(parts[2])
+        except Exception as e:
+            current_app.logger.warning("Parse birth_date échoué: %s", e)
 
-                    # Validation Email
-                    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
-                        return jsonify({"ok": False, "error": "Format email invalide."}), 400
+    if "birth_time" in data and "hour" not in data:
+        try:
+            time_parts = str(data["birth_time"]).split(":")
+            data["hour"] = int(time_parts[0])
+            data["minute"] = int(time_parts[1] if len(time_parts) > 1 else 0)
+        except Exception as e:
+            current_app.logger.warning("Parse birth_time échoué: %s", e)
 
-                    # Validation Date de Naissance
-                    birth_date_str = data.get("birth_date")
-                    if birth_date_str:
-                        try:
-                            # Tente de parser le format YYYY-MM-DD
-                            datetime.strptime(birth_date_str, '%Y-%m-%d')
-                        except ValueError:
-                            return jsonify({"ok": False, "error": "Format date de naissance invalide. Utilisez YYYY-MM-DD."}), 400
-
-                    # Valeurs par défaut obligatoires
-                    data.setdefault("name", pseudo)
-                    data.setdefault("city", data.get("birth_city", ""))
-                    data.setdefault("lat", 48.8566)
-                    data.setdefault("lon", 2.3522)
-                    data.setdefault("tz", "Europe/Paris")
-                    # Transit = lieu natal par défaut
-                    data.setdefault("transit_city", data.get("city", ""))
-                    data.setdefault("transit_lat",  data.get("lat", 48.8566))
-                    data.setdefault("transit_lon",  data.get("lon", 2.3522))
-        
-            # Valeurs par défaut obligatoires
-                    data.setdefault("name", pseudo)
+    # Valeurs par défaut obligatoires
+    data.setdefault("name", pseudo)
     data.setdefault("city", data.get("birth_city", ""))
     data.setdefault("lat", 48.8566)
     data.setdefault("lon", 2.3522)
     data.setdefault("tz", "Europe/Paris")
     # Transit = lieu natal par défaut
     data.setdefault("transit_city", data.get("city", ""))
-    data.setdefault("transit_lat",  data.get("lat", 48.8566))
-    data.setdefault("transit_lon",  data.get("lon", 2.3522))
-    data.setdefault("transit_tz",   data.get("tz", "Europe/Paris"))
+    data.setdefault("transit_lat", data.get("lat", 48.8566))
+    data.setdefault("transit_lon", data.get("lon", 2.3522))
+    data.setdefault("transit_tz", data.get("tz", "Europe/Paris"))
 
     try:
         if pseudo_exists(pseudo):
@@ -194,27 +201,27 @@ def register():
         from profiles import save_natal_to_sheet
 
         natal_input = {
-            "name":   profile["name"],
-            "year":   profile["year"],   "month":  profile["month"],
-            "day":    profile["day"],    "hour":   profile["hour"],
-            "minute": profile["minute"], "lat":    profile["lat"],
-            "lon":    profile["lon"],    "tz":     profile["tz"],
-            "city":   profile["city"],
+            "name": profile["name"],
+            "year": profile["year"], "month": profile["month"],
+            "day": profile["day"], "hour": profile["hour"],
+            "minute": profile["minute"], "lat": profile["lat"],
+            "lon": profile["lon"], "tz": profile["tz"],
+            "city": profile["city"],
         }
         today = _date.today()
         transit_loc = {
             "city": profile["city"], "lat": profile["lat"],
-            "lon":  profile["lon"],  "tz":  profile["tz"],
+            "lon": profile["lon"], "tz": profile["tz"],
         }
-        natal_result     = calculate_transits(natal_input, transit_loc,
-                                              today.year, today.month, today.day, 12, 0)
-        
+        natal_result = calculate_transits(natal_input, transit_loc,
+                                          today.year, today.month, today.day, 12, 0)
+
         # Verify result content before enriching
         if not natal_result.get("natal"):
             current_app.logger.error("Calcul natal a retourné un résultat vide pour %s", pseudo)
         else:
             enriched_profile = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
-            
+
             # 3. Save natal info to sheet and update session
             user_key = data.get("user_key")
             user_model = data.get("user_model")
