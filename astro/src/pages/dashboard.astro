@@ -10,10 +10,32 @@ import type { AstroProps } from 'astro/types';
  */
 
 // 1. LOGIQUE DE PROTECTION DE ROUTE (SSR)
-const token = Astro.cookies.get('auth_token');
+try {
+  const profileResponse = await fetch(BASE + '/api/profile', {
+    headers: {
+      // Note: Dans un vrai SSR, on utiliserait les cookies du request (Astro.cookies)
+      // mais pour ce prototype, nous faisons l'appel direct pour la vérification.
+      // Si l'API renvoie 401, c'est non-authentifié.
+    }
+  });
 
-if (!token) {
-  // Si aucun token, rediriger vers la page d'accueil
+  if (!profileResponse.ok) {
+    // Si l'appel échoue (401 Unauthorized ou autre), l'utilisateur n'est pas connecté.
+    return new Response(null, { 
+      status: 302, 
+      headers: { 
+        'Location': '/' 
+      } 
+    });
+  }
+  
+  // Si l'appel est OK (200), nous continuons le rendu.
+  const profile = await profileResponse.json();
+  // Stockage du profil dans l'Astro context (pour les composants enfants)
+  Astro.locals.profile = profile;
+
+} catch (e) {
+  // En cas d'erreur réseau ou d'API, on redirige par défaut.
   return new Response(null, { 
     status: 302, 
     headers: { 

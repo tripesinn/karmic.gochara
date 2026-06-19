@@ -31,7 +31,9 @@ def login():
         return jsonify({"ok": False, "error": str(exc)}), 500
     if not profile:
         return jsonify({"ok": False, "error": f"Pseudo '{pseudo}' introuvable. Crée ton profil d'abord."}), 404
-
+    if not profile.get("email") or not profile.get("birth_date"):
+        return jsonify({"ok": False, "error": "Profil incomplet. Email et date de naissance requis."}), 403
+    # ── Contournement de la latence Sheets après paiement ────────────────────
     # ── Contournement de la latence Sheets après paiement ────────────────────
     # 1. Store en mémoire (cas navigateur externe — session différente)
     pending = _pending_plan_updates.pop(pseudo.strip().lower(), None)
@@ -127,17 +129,36 @@ def register():
     if "birth_date" in data and "year" not in data:
         try:
             parts = str(data["birth_date"]).split("-")
-            data["year"], data["month"], data["day"] = int(parts[0]), int(parts[1]), int(parts[2])
-        except Exception as e:
-            current_app.logger.warning("Parse birth_date échoué: %s", e)
-    if "birth_time" in data and "hour" not in data:
-        try:
-            tp = str(data["birth_time"]).split(":")
-            data["hour"], data["minute"] = int(tp[0]), int(tp[1])
-        except Exception as e:
-            current_app.logger.warning("Parse birth_time échoué: %s", e)
-    # Valeurs par défaut obligatoires
-    data.setdefault("name", pseudo)
+            # 1. Validation des données d'inscription
+                    email = (data.get("email") or "").strip().lower()
+                    pseudo = (data.get("pseudo") or "").strip()
+
+                    # Validation Email
+                    if not re.match(r"[^@]+@[^@]+\.[^@]+", email):
+                        return jsonify({"ok": False, "error": "Format email invalide."}), 400
+
+                    # Validation Date de Naissance
+                    birth_date_str = data.get("birth_date")
+                    if birth_date_str:
+                        try:
+                            # Tente de parser le format YYYY-MM-DD
+                            datetime.strptime(birth_date_str, '%Y-%m-%d')
+                        except ValueError:
+                            return jsonify({"ok": False, "error": "Format date de naissance invalide. Utilisez YYYY-MM-DD."}), 400
+
+                    # Valeurs par défaut obligatoires
+                    data.setdefault("name", pseudo)
+                    data.setdefault("city", data.get("birth_city", ""))
+                    data.setdefault("lat", 48.8566)
+                    data.setdefault("lon", 2.3522)
+                    data.setdefault("tz", "Europe/Paris")
+                    # Transit = lieu natal par défaut
+                    data.setdefault("transit_city", data.get("city", ""))
+                    data.setdefault("transit_lat",  data.get("lat", 48.8566))
+                    data.setdefault("transit_lon",  data.get("lon", 2.3522))
+        
+            # Valeurs par défaut obligatoires
+                    data.setdefault("name", pseudo)
     data.setdefault("city", data.get("birth_city", ""))
     data.setdefault("lat", 48.8566)
     data.setdefault("lon", 2.3522)

@@ -14,7 +14,7 @@ const BASE = (() => {
   const isCapacitor = !!(window as any).Capacitor?.isNative;
   return isCapacitor
     ? 'https://gochara-api-drln4gv4fa-ew.a.run.app'
-    : (import.meta.env.PUBLIC_API_URL || '/api');
+    : (import.meta.env.PUBLIC_API_URL || '');
 })();
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
