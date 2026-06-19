@@ -497,7 +497,6 @@ def process_benchmark_vote(client, mention, results_map):
 
     # Cherche A, B, C ou D dans le texte
     valid_choices = {"A", "B", "C", "D"}
-    words = set(text.split())
     # Enlève le @mention du début
     mention_parts = text.split()
     clean_words = {w for w in mention_parts if not w.startswith("@")}

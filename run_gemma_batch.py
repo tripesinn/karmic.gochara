@@ -148,12 +148,6 @@ def extract_files_from_response(response: str, prompt_num=None):
     in_code = False
     current_lang = ""
     current_lines = []
-    # Patterns de chemin de fichier
-    path_patterns = [
-        r"(?:src|libraries|components|layouts|pages|styles|lib|public)/(?:\S+\.\w+)",
-        r"(?:tailwind|astro|postcss|tsconfig|package)\.\w+",
-        r"\.env\S*",
-    ]
     
     for i, line in enumerate(lines):
         stripped = line.strip()

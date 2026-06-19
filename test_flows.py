@@ -63,7 +63,7 @@ class TestAppFlows(unittest.TestCase):
         print("🔗 URL Checkout générée:", resp_checkout.get_json().get("url"))
 
         # 3. Validation
-        with patch("app._fulfill_order") as mock_fulfill:
+        with patch("blueprints.payments._fulfill_order") as mock_fulfill:
             with patch("stripe_payments.verify_checkout_session") as mock_verify:
                 mock_verify.return_value = True
                 resp_payment = self.client.post("/api/complete_payment", json={
