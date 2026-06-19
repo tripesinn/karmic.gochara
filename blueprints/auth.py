@@ -3,8 +3,8 @@ from flask import current_app
 import time
 import re
 from datetime import datetime
-from i18n import LANGS, get_lang
-from app_common import UNLIMITED_PSEUDOS, _enrich_profile_with_natal, _pending_plan_updates
+from i18n import LANGS
+from app_common import _enrich_profile_with_natal, _pending_plan_updates
 from jwt_auth import create_tokens, refresh_access_token
 
 auth_bp = Blueprint('auth_bp', __name__)

@@ -30,6 +30,7 @@ class TestAppFlows(unittest.TestCase):
         self.mock_user_lecture = {
             "pseudo": "testuser",
             "email": "test@example.com",
+            "birth_date": "2000-01-01",
             "plan": "test",
             "name": "testuser",
             "year": 2000, "month": 1, "day": 1,
