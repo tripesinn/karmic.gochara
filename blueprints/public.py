@@ -67,6 +67,12 @@ def privacy():
     return render_template("privacy-policy.html")
 
 
+@public_bp.route("/terms")
+def terms():
+    """Conditions générales d'utilisation — requis par Google Play Console."""
+    return render_template("terms.html")
+
+
 @public_bp.route("/benchmark")
 def benchmark():
     """Page publique du Benchmark IA Astrologique — alimentée par x_benchmark_bot.py"""

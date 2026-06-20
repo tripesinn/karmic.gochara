@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conditions d'utilisation — Karmic Gochara</title>
+    <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Cinzel:wght@400;500&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a08; --gold: #c9a84c; --text: #e8e4d8; --text-dim: #8a8678;
+            --border: #2a2820; --display: 'Cinzel', serif; --body: 'EB Garamond', serif;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: var(--bg); color: var(--text); font-family: var(--body);
+            font-size: 1.05rem; line-height: 1.8;
+        }
+        header {
+            padding: 1.5rem 2rem; border-bottom: 1px solid var(--border);
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .logo { color: var(--gold); font-family: var(--display); font-size: 0.85rem; letter-spacing: 0.2em; text-decoration: none; }
+        main { max-width: 780px; margin: 0 auto; padding: 3rem 2rem 5rem; }
+        h1 {
+            font-family: var(--display); font-size: clamp(1.4rem, 4vw, 2rem);
+            color: var(--gold); letter-spacing: 0.1em; text-transform: uppercase;
+            margin-bottom: 0.4rem;
+        }
+        .subtitle { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 2.5rem; font-style: italic; }
+        h2 {
+            font-family: var(--display); font-size: 1.15rem; color: var(--gold);
+            letter-spacing: 0.08em; text-transform: uppercase;
+            margin: 2.2rem 0 0.8rem; border-left: 2px solid var(--gold); padding-left: 0.8rem;
+        }
+        h3 { color: var(--text); font-style: italic; margin: 1.2rem 0 0.4rem; }
+        p { margin-bottom: 1rem; }
+        ul, ol { margin: 0 0 1rem 1.5rem; }
+        li { margin-bottom: 0.4rem; }
+        a { color: var(--gold); text-decoration: none; border-bottom: 1px dotted var(--gold); }
+        a:hover { color: var(--text); border-bottom-color: var(--text); }
+        strong { color: var(--gold); font-weight: 500; }
+        em { color: var(--text-dim); }
+        .callout {
+            background: rgba(201,168,76,0.06); border: 1px solid var(--border);
+            border-left: 3px solid var(--gold); padding: 1rem 1.2rem;
+            margin: 1.2rem 0; font-style: italic; color: var(--text-dim);
+        }
+        .lang-switcher { display: flex; gap: 0.4rem; }
+        .lang-switcher button {
+            background: transparent; color: var(--text-dim); border: 1px solid var(--border);
+            padding: 0.3rem 0.8rem; font-family: var(--display); font-size: 0.7rem;
+            letter-spacing: 0.15em; cursor: pointer; transition: all 0.2s;
+        }
+        .lang-switcher button.active { color: var(--gold); border-color: var(--gold); }
+        .lang-switcher button:hover { color: var(--gold); }
+        .section { display: none; }
+        .section.active { display: block; }
+        footer {
+            text-align: center; color: var(--text-dim); font-size: 0.8rem;
+            padding: 2rem; border-top: 1px solid var(--border); font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <a href="/" class="logo">✦ KARMIC GOCHARA</a>
+    <div class="lang-switcher">
+        <button class="active" onclick="showLang('fr', this)">FR</button>
+        <button onclick="showLang('en', this)">EN</button>
+    </div>
+</header>
+
+<main>
+
+<!-- ══════════════════ FRANÇAIS ══════════════════ -->
+<div id="lang-fr" class="section active">
+
+    <h1>Conditions d'utilisation</h1>
+    <p class="subtitle">Dernière mise à jour : juin 2026 &nbsp;·&nbsp; Application : Karmic Gochara (Android &amp; Web)</p>
+
+    <p>
+        Les présentes conditions générales d'utilisation (ci-après «&nbsp;<strong>CGU</strong>&nbsp;»)
+        régissent l'accès et l'utilisation de l'application <strong>Karmic Gochara</strong>
+        (ci-après l'«&nbsp;<strong>Application</strong>&nbsp;»), éditée par Jérôme
+        (ci-après «&nbsp;<strong>l'Éditeur</strong>&nbsp;»), accessibles sur Android
+        (Google Play) et en version web à l'adresse <a href="https://karmicgochara.app">karmicgochara.app</a>.
+    </p>
+    <p>
+        En téléchargeant, installant ou utilisant l'Application, vous acceptez sans réserve
+        les présentes CGU. Si vous n'acceptez pas ces conditions, veuillez ne pas utiliser l'Application.
+    </p>
+
+    <h2>1. Nature du service</h2>
+    <p>
+        Karmic Gochara est une application d'<strong>astrologie védique sidérale</strong> à vocation
+        culturelle, contemplative et introspective. Elle propose des interprétations karmiques
+        personnalisées calculées à partir de votre thème natal (date, heure et lieu de naissance)
+        et des positions planétaires du jour (<em>Gochara</em>).
+    </p>
+    <div class="callout">
+        <strong>Avertissement important :</strong> les contenus générés par l'Application
+        sont purement indicatifs et ne constituent en aucun cas un avis médical, psychologique,
+        juridique, financier ou professionnel. L'astrologie est présentée ici comme un outil
+        de réflexion personnelle, et non comme une science prédictive exacte.
+    </div>
+
+    <h2>2. Inscription et compte</h2>
+    <ul>
+        <li>L'utilisation de base de l'Application peut nécessiter la création d'un compte
+            identifié par un <strong>pseudo</strong> et un <strong>prénom</strong>.</li>
+        <li>Vous êtes responsable de la confidentialité de vos identifiants de connexion.</li>
+        <li>Toute activité réalisée depuis votre compte est réputée effectuée par vous.</li>
+        <li>Vous vous engagez à fournir des informations exactes lors de votre inscription,
+            notamment une date et heure de naissance réelles pour la pertinence des calculs.</li>
+    </ul>
+
+    <h2>3. Accès Premium et paiement</h2>
+    <p>
+        Certaines fonctionnalités avancées (synthèses approfondies, alertes de transit, exports
+        étendus) peuvent faire l'objet d'un <strong>abonnement Premium</strong> géré par
+        Stripe. Les conditions tarifaires sont affichées dans l'Application avant tout paiement.
+    </p>
+    <ul>
+        <li>L'abonnement est <strong>renouvelable tacitement</strong> par période mensuelle
+            ou annuelle selon la formule choisie.</li>
+        <li>Vous pouvez résilier à tout moment depuis votre espace client Stripe ; la résiliation
+            prend effet à la fin de la période en cours.</li>
+        <li>Conformément au droit de la consommation applicable, le téléchargement d'un contenu
+            numérique vaut, sauf exception, renonciation au droit de rétractation.</li>
+        <li>L'Éditeur se réserve le droit de modifier les tarifs avec un préavis de 30 jours
+            communiqué par email ou notification dans l'Application.</li>
+    </ul>
+
+    <h2>4. Règles d'utilisation</h2>
+    <p>Vous vous engagez à ne pas :</p>
+    <ul>
+        <li>Utiliser l'Application à des fins illégales, frauduleuses ou nuisibles.</li>
+        <li>Tenter de porter atteinte au fonctionnement du service
+            (piratage, injection, déni de service, contournement de sécurité).</li>
+        <li>Extraire, copier ou revendre les contenus générés à des fins commerciales sans
+            autorisation écrite préalable.</li>
+        <li>Usurper l'identité d'un tiers ou créer plusieurs comptes dans une intention d'abus.</li>
+    </ul>
+
+    <h2>5. Propriété intellectuelle</h2>
+    <p>
+        L'Application, son code source, son design, ses textes, ses noms de domaines,
+        ses marques (notamment «&nbsp;Karmic Gochara&nbsp;» et «&nbsp;@siderealAstro13&nbsp;»)
+        et l'ensemble de ses contenus sont protégés par le droit d'auteur et le droit des marques,
+        et restent la propriété exclusive de l'Éditeur.
+    </p>
+    <p>
+        Une licence d'utilisation personnelle, non exclusive et non transférable vous est accordée
+        pour l'usage normal de l'Application. Toute reproduction, représentation, modification
+        ou exploitation non autorisée est interdite.
+    </p>
+
+    <h2>6. Limitation de responsabilité</h2>
+    <p>
+        L'Application est fournie «&nbsp;<em>en l'état</em>&nbsp;» et «&nbsp;<em>selon disponibilité</em>&nbsp;».
+        Dans toute la mesure permise par la loi applicable :
+    </p>
+    <ul>
+        <li>L'Éditeur ne garantit pas que le service sera ininterrompu, exempt d'erreurs
+            ou totalement sécurisé.</li>
+        <li>L'Éditeur ne saurait être tenu responsable des décisions prises sur la base
+            des interprétations karmiques générées par l'Application.</li>
+        <li>La responsabilité de l'Éditeur, si elle venait à être engagée, est limitée
+            au montant effectivement payé par l'utilisateur au cours des douze (12) derniers mois.</li>
+    </ul>
+
+    <h2>7. Suspension et résiliation</h2>
+    <p>
+        L'Éditeur se réserve le droit de suspendre ou de résilier votre accès à l'Application
+        en cas de violation des présentes CGU, de comportement abusif, ou de non-paiement
+        d'un abonnement Premium, après mise en demeure restée sans effet pendant quinze (15) jours.
+    </p>
+
+    <h2>8. Données personnelles</h2>
+    <p>
+        Le traitement de vos données personnelles (pseudo, prénom, date et lieu de naissance,
+        email facultatif) est décrit dans la
+        <a href="/privacy">Politique de confidentialité</a> de l'Application, qui fait partie
+        intégrante des présentes CGU.
+    </p>
+
+    <h2>9. Modifications des CGU</h2>
+    <p>
+        L'Éditeur peut modifier les présentes CGU à tout moment. La date de dernière mise à jour
+        est indiquée en haut de cette page. Les modifications significatives seront notifiées
+        dans l'Application ou par email. La poursuite de l'utilisation de l'Application après
+        notification vaut acceptation des nouvelles CGU.
+    </p>
+
+    <h2>10. Droit applicable et juridiction</h2>
+    <p>
+        Les présentes CGU sont régies par le <strong>droit français</strong>. Tout litige relatif
+        à leur interprétation ou à leur exécution relève de la compétence des tribunaux français,
+        sous réserve des règles impératives applicables aux consommateurs (médiation CNMJ,
+        action possible devant le tribunal du lieu de résidence du consommateur).
+    </p>
+    <p>
+        En cas de litige, vous êtes invité à contacter préalablement l'Éditeur à l'adresse
+        <a href="mailto:astro@jeromemalige.fr">astro@jeromemalige.fr</a> pour tenter
+        une résolution amiable.
+    </p>
+
+    <h2>11. Contact</h2>
+    <p>
+        Pour toute question relative à ces CGU :<br>
+        <strong>Jérôme</strong> &nbsp;·&nbsp;
+        <a href="mailto:astro@jeromemalige.fr">astro@jeromemalige.fr</a> &nbsp;·&nbsp;
+        <a href="https://x.com/siderealAstro13" target="_blank" rel="noopener">@siderealAstro13</a>
+    </p>
+
+</div>
+
+<!-- ══════════════════ ENGLISH ══════════════════ -->
+<div id="lang-en" class="section">
+
+    <h1>Terms of Service</h1>
+    <p class="subtitle">Last updated: June 2026 &nbsp;·&nbsp; App: Karmic Gochara (Android &amp; Web)</p>
+
+    <p>
+        These Terms of Service (the "<strong>Terms</strong>") govern access to and use of
+        the <strong>Karmic Gochara</strong> application (the "<strong>Application</strong>"),
+        published by Jérôme (the "<strong>Publisher</strong>"), available on Android
+        (Google Play) and on the web at <a href="https://karmicgochara.app">karmicgochara.app</a>.
+    </p>
+    <p>
+        By downloading, installing or using the Application, you accept these Terms in full.
+        If you do not accept them, please do not use the Application.
+    </p>
+
+    <h2>1. Nature of the service</h2>
+    <p>
+        Karmic Gochara is a <strong>sidereal Vedic astrology</strong> application designed for
+        cultural, contemplative and introspective purposes. It provides personalized karmic
+        interpretations calculated from your natal chart (date, time and place of birth)
+        and current planetary positions (<em>Gochara</em>).
+    </p>
+    <div class="callout">
+        <strong>Important notice:</strong> the content generated by the Application is purely
+        indicative and does not constitute medical, psychological, legal, financial or
+        professional advice. Astrology is presented here as a tool for personal reflection,
+        not as an exact predictive science.
+    </div>
+
+    <h2>2. Registration and account</h2>
+    <ul>
+        <li>Basic use of the Application may require creating an account identified by a
+            <strong>username (pseudo)</strong> and a <strong>first name</strong>.</li>
+        <li>You are responsible for keeping your login credentials confidential.</li>
+        <li>Any activity performed from your account is deemed to be carried out by you.</li>
+        <li>You agree to provide accurate information when registering, in particular a real
+            date and time of birth for calculation accuracy.</li>
+    </ul>
+
+    <h2>3. Premium access and payment</h2>
+    <p>
+        Some advanced features (in-depth syntheses, transit alerts, extended exports) may be
+        subject to a <strong>Premium subscription</strong> managed by Stripe. Pricing is shown
+        in the Application before any payment.
+    </p>
+    <ul>
+        <li>Subscriptions <strong>renew automatically</strong> on a monthly or annual basis
+            depending on the selected plan.</li>
+        <li>You may cancel at any time from your Stripe customer portal; cancellation takes
+            effect at the end of the current billing period.</li>
+        <li>In accordance with applicable consumer law, downloading digital content constitutes
+            a waiver of the withdrawal right, subject to legal exceptions.</li>
+        <li>The Publisher reserves the right to change prices with 30 days' prior notice
+            given by email or in-app notification.</li>
+    </ul>
+
+    <h2>4. Acceptable use</h2>
+    <p>You agree not to:</p>
+    <ul>
+        <li>Use the Application for illegal, fraudulent or harmful purposes.</li>
+        <li>Attempt to impair the operation of the service
+            (hacking, injection, denial of service, security circumvention).</li>
+        <li>Extract, copy or resell generated content for commercial purposes without
+            prior written authorization.</li>
+        <li>Impersonate a third party or create multiple accounts for abusive purposes.</li>
+    </ul>
+
+    <h2>5. Intellectual property</h2>
+    <p>
+        The Application, its source code, design, texts, domain names, trademarks
+        (including "Karmic Gochara" and "@siderealAstro13") and all its content are
+        protected by copyright and trademark law, and remain the exclusive property of
+        the Publisher.
+    </p>
+    <p>
+        A personal, non-exclusive and non-transferable license is granted to you for the
+        normal use of the Application. Any unauthorized reproduction, representation,
+        modification or exploitation is prohibited.
+    </p>
+
+    <h2>6. Limitation of liability</h2>
+    <p>
+        The Application is provided "<em>as is</em>" and "<em>as available</em>". To the
+        fullest extent permitted by applicable law:
+    </p>
+    <ul>
+        <li>The Publisher does not warrant that the service will be uninterrupted, error-free
+            or fully secure.</li>
+        <li>The Publisher cannot be held liable for any decision made on the basis of karmic
+            interpretations generated by the Application.</li>
+        <li>The Publisher's liability, if engaged, is limited to the amount actually paid by
+            the user over the last twelve (12) months.</li>
+    </ul>
+
+    <h2>7. Suspension and termination</h2>
+    <p>
+        The Publisher reserves the right to suspend or terminate your access to the Application
+        in the event of a breach of these Terms, abusive behavior, or non-payment of a Premium
+        subscription, after formal notice remaining without effect for fifteen (15) days.
+    </p>
+
+    <h2>8. Personal data</h2>
+    <p>
+        The processing of your personal data (username, first name, date and place of birth,
+        optional email) is described in the
+        <a href="/privacy">Privacy Policy</a> of the Application, which forms an integral
+        part of these Terms.
+    </p>
+
+    <h2>9. Changes to the Terms</h2>
+    <p>
+        The Publisher may modify these Terms at any time. The last updated date is shown
+        at the top of this page. Significant changes will be notified in the Application
+        or by email. Continued use of the Application after notification constitutes
+        acceptance of the new Terms.
+    </p>
+
+    <h2>10. Governing law and jurisdiction</h2>
+    <p>
+        These Terms are governed by <strong>French law</strong>. Any dispute relating to
+        their interpretation or execution falls within the jurisdiction of French courts,
+        subject to mandatory rules applicable to consumers (mediation, action before the
+        court of the consumer's place of residence).
+    </p>
+    <p>
+        In the event of a dispute, you are invited to first contact the Publisher at
+        <a href="mailto:astro@jeromemalige.fr">astro@jeromemalige.fr</a> to attempt
+        amicable resolution.
+    </p>
+
+    <h2>11. Contact</h2>
+    <p>
+        For any question regarding these Terms:<br>
+        <strong>Jérôme</strong> &nbsp;·&nbsp;
+        <a href="mailto:astro@jeromemalige.fr">astro@jeromemalige.fr</a> &nbsp;·&nbsp;
+        <a href="https://x.com/siderealAstro13" target="_blank" rel="noopener">@siderealAstro13</a>
+    </p>
+
+</div>
+
+</main>
+
+<footer>
+    ✦ Karmic Gochara &nbsp;·&nbsp;
+    <a href="/">karmicgochara.app</a> &nbsp;·&nbsp;
+    <a href="/privacy">Politique de confidentialité / Privacy Policy</a> &nbsp;·&nbsp;
+    <a href="mailto:astro@jeromemalige.fr">astro@jeromemalige.fr</a> &nbsp;·&nbsp;
+    <a href="https://x.com/siderealAstro13" target="_blank" rel="noopener">@siderealAstro13</a>
+</footer>
+
+<script>
+function showLang(lang, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.lang-switcher button').forEach(b => b.classList.remove('active'));
+    document.getElementById('lang-' + lang).classList.add('active');
+    btn.classList.add('active');
+}
+</script>
+
+</body>
+</html>
