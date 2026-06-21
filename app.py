@@ -30,6 +30,7 @@ def create_app():
         origins=[
             "https://karmicgochara.app",
             "capacitor://localhost",
+            "http://localhost",        # Capacitor Android (default)
             "http://localhost:4321",   # Astro dev server
             "http://localhost:3000",   # Astro alt port / Capacitor web
         ],
