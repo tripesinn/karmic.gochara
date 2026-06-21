@@ -1,5 +1,6 @@
 // src/lib/api.ts — Client API avec sessions Flask (cookies)
 // Auth gérée par le cookie de session Flask — pas de JWT localStorage
+import { Capacitor } from '@capacitor/core';
 import type { RegisterData } from './types';
 
 class ApiError extends Error {
@@ -11,7 +12,7 @@ class ApiError extends Error {
 
 function getBaseUrl(): string {
   if (typeof window === 'undefined') return '';
-  const isCapacitor = !!(window as any).Capacitor?.isNative;
+  const isCapacitor = Capacitor.isNativePlatform();
   return isCapacitor
     ? 'https://gochara-api-732214018947.europe-west1.run.app'
     : (import.meta.env.PUBLIC_API_URL || '');
