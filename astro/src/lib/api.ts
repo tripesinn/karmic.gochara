@@ -9,16 +9,16 @@ class ApiError extends Error {
   }
 }
 
-const BASE = (() => {
+function getBaseUrl(): string {
   if (typeof window === 'undefined') return '';
   const isCapacitor = !!(window as any).Capacitor?.isNative;
   return isCapacitor
-    ? 'https://gochara-api-drln4gv4fa-ew.a.run.app'
+    ? 'https://gochara-api-732214018947.europe-west1.run.app'
     : (import.meta.env.PUBLIC_API_URL || '');
-})();
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${getBaseUrl()}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
@@ -37,7 +37,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 // Streaming via fetch + ReadableStream (remplace EventSource)
 async function* streamingRequest(path: string, body: Record<string, unknown>) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${getBaseUrl()}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
