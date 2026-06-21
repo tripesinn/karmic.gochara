@@ -43,7 +43,7 @@
 <script>
   import { signInWithGoogle } from '../lib/firebase-auth';
   import { auth } from '../lib/firebase';
-  import { api } from '../lib/api';
+  import { api, ApiError } from '../lib/api';
 
   // ── DOM References ──
   const googleBtn = document.getElementById('google-signin-btn') as HTMLButtonElement;
@@ -78,7 +78,17 @@
         }
       }
     } catch (err: any) {
-      const msg = err?.message || 'Erreur lors de la connexion Google.';
+      if (err instanceof ApiError && err.data?.needs_register) {
+        const currentUser = auth.currentUser;
+        showMessage('Nouveau profil détecté ! Redirection vers l\'inscription...', 'success');
+        setTimeout(() => {
+          window.location.href = `/register?email=${encodeURIComponent(currentUser?.email || '')}&name=${encodeURIComponent(currentUser?.displayName || '')}`;
+        }, 1200);
+        return;
+      }
+      const msg = err instanceof ApiError && err.data?.error
+        ? err.data.error
+        : (err?.message || 'Erreur lors de la connexion Google.');
       showMessage(msg, 'error');
       googleBtn.disabled = false;
     }

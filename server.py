@@ -13,7 +13,6 @@ import logging
 from datetime import datetime, date
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from typing import Any, Dict, List
-import urllib.parse
 
 # Import astro + doctrine
 from astro_calc import calculate_transits

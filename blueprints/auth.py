@@ -276,21 +276,38 @@ def login_firebase():
 
     if id_token:
         try:
-            # Verify the token with Google OAuth2 API
-            verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
-            resp = requests.get(verify_url, timeout=5)
-            if resp.status_code == 200:
-                token_info = resp.json()
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+            try:
+                # Try Firebase token verification first (for Firebase ID tokens)
+                request_adapter = google_requests.Request()
+                token_info = google_id_token.verify_firebase_token(
+                    id_token,
+                    request_adapter,
+                    audience="karmic-gochara-cloud"
+                )
                 verified_email = token_info.get("email", "").strip().lower()
                 if verified_email:
                     email = verified_email
+                    current_app.logger.info("Firebase ID Token vérifié avec succès pour %s", email)
+            except Exception as firebase_err:
+                current_app.logger.info("Vérification Firebase ID Token échouée ou sautée: %s. Tentative via Google tokeninfo...", firebase_err)
+                # Fallback to Google OAuth2 tokeninfo (for direct Google ID tokens)
+                verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+                resp = requests.get(verify_url, timeout=5)
+                if resp.status_code == 200:
+                    token_info = resp.json()
+                    verified_email = token_info.get("email", "").strip().lower()
+                    if verified_email:
+                        email = verified_email
+                        current_app.logger.info("Google ID Token vérifié avec succès via tokeninfo pour %s", email)
+                    else:
+                        return jsonify({"ok": False, "error": "Token Google valide mais email manquant"}), 400
                 else:
-                    return jsonify({"ok": False, "error": "Token valide mais email manquant"}), 400
-            else:
-                current_app.logger.warning("Vérification ID Token échouée: %s", resp.text)
-                return jsonify({"ok": False, "error": "Token invalide ou expiré"}), 401
+                    current_app.logger.warning("Vérification ID Token échouée (Firebase + Google tokeninfo): %s", resp.text)
+                    return jsonify({"ok": False, "error": "Token invalide ou expiré"}), 401
         except Exception as exc:
-            current_app.logger.error("Erreur de connexion avec l'API Google Tokeninfo: %s", exc)
+            current_app.logger.error("Erreur lors de la validation du jeton: %s", exc)
             if not current_app.debug:
                 return jsonify({"ok": False, "error": "Erreur de validation de jeton"}), 500
 

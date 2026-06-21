@@ -178,9 +178,9 @@ def main():
     
     print("", file=sys.stderr)
     print("✅ All 3 MCP tools validated successfully!", file=sys.stderr)
-    print(f"   - get_natal_chart ✓", file=sys.stderr)
-    print(f"   - get_transits_today ✓", file=sys.stderr)
-    print(f"   - get_doctrine_reading ✓", file=sys.stderr)
+    print("   - get_natal_chart ✓", file=sys.stderr)
+    print("   - get_transits_today ✓", file=sys.stderr)
+    print("   - get_doctrine_reading ✓", file=sys.stderr)
     
     return 0
 

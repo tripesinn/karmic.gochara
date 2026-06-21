@@ -4,9 +4,15 @@ import { Capacitor } from '@capacitor/core';
 import type { RegisterData } from './types';
 
 class ApiError extends Error {
+  public data: any = null;
   constructor(public status: number, message: string) {
     super(message);
     this.name = 'ApiError';
+    try {
+      this.data = JSON.parse(message);
+    } catch {
+      this.data = null;
+    }
   }
 }
 
