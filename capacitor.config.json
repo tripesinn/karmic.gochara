@@ -6,6 +6,9 @@
     "KarmicGoogleAuth": {
       "serverClientId": "732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com"
     },
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "GoogleAuth": {
       "scopes": ["profile", "email"],
       "serverClientId": "732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com",
