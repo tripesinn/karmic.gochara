@@ -1,70 +1,37 @@
 import type { APIRoute } from 'astro';
 
+/**
+ * Mock authentication route for Karmic Gochara.
+ * Accepts only 'pseudo' (min 2 chars).
+ * Sets auth_token and refresh_token cookies as httpOnly.
+ */
 export const POST: APIRoute = async ({ request, cookies }) => {
   try {
-    // 1. Récupération des données du corps de la requête
+    // Only look for the pseudo field
     const body = await request.json();
-    const { pseudo, email, birthDate } = body;
+    const { pseudo } = body;
 
-    // 2. Validation simple des champs requis
-    if (!pseudo || !email || !birthDate) {
-      return new Response(
-        JSON.stringify({ 
-          error: "Tous les champs (Pseudo, Email, Date de naissance) sont requis." 
-        }),
-        { 
-          status: 400, 
-          headers: { "Content-Type": "application/json" } 
-        }
-      );
+    // 1. Validation: Pseudo must exist and be at least 2 characters long
+    if (!pseudo || typeof pseudo !== 'string' || pseudo.length < 2) {
+      return new Response(JSON.stringify({ ok: false, error: "Le pseudo est requis et doit contenir au moins 2 caractères." }), { status: 400, headers: { 'Content-Type': 'application/json' } });
     }
 
-    // 3. Simulation de validation (Mock)
-    // Pour les besoins du mock, on accepte n'importe quelle adresse email valide.
-    // On simule ici la création d'un JWT d'accès et d'un token de rafraîchissement.
-    const mockAccessToken = "mock_access_token_jwt_karmic_gochara";
-    const mockRefreshToken = "mock_refresh_token_jwt_karmic_gochara";
+    // 2. Mock Auth setup
+    const mockAccessToken = 'mock_access_token_jwt_karmic_gochara';
+    const mockRefreshToken = 'mock_refresh_token_jwt_karmic_gochara';
 
-    // 4. Stockage des jetons dans des cookies sécurisés HttpOnly via l'API Astro
-    cookies.set("auth_token", mockAccessToken, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 60 * 15, // 15 minutes
-    });
+    // 3. Set httpOnly cookies
+    // MaxAge 15 minutes (auth_token)
+    cookies.set('auth_token', mockAccessToken, { path: '/', httpOnly: true, secure: true, sameSite: 'strict', maxAge: 60 * 15 });
+    // MaxAge 7 days (refresh_token)
+    cookies.set('refresh_token', mockRefreshToken, { path: '/', httpOnly: true, secure: true, sameSite: 'strict', maxAge: 60 * 60 * 24 * 7 });
 
-    cookies.set("refresh_token", mockRefreshToken, {
-      path: "/",
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      maxAge: 60 * 60 * 24 * 7, // 7 jours
-    });
-
-    // 5. Réponse de succès
-    return new Response(
-      JSON.stringify({
-        success: true,
-        message: "Connexion réussie.",
-        user: { pseudo, email }
-      }),
-      {
-        status: 200,
-        headers: { "Content-Type": "application/json" }
-      }
-    );
+    // 4. Successful response: {ok: true, pseudo, token}
+    return new Response(JSON.stringify({ ok: true, pseudo: pseudo, token: mockAccessToken }), { status: 200, headers: { 'Content-Type': 'application/json' } });
 
   } catch (error) {
     console.error("Erreur d'authentification:", error);
-    return new Response(
-      JSON.stringify({ 
-        error: "Une erreur interne est survenue lors de la connexion." 
-      }),
-      { 
-        status: 500, 
-        headers: { "Content-Type": "application/json" } 
-      }
-    );
+    // 5. Failure response: {ok: false, error}
+    return new Response(JSON.stringify({ ok: false, error: "Une erreur interne est survenue lors de la connexion." }), { status: 500, headers: { 'Content-Type': 'application/json' } });
   }
 };

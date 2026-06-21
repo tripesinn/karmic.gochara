@@ -24,19 +24,21 @@ import java.util.Collections;
 import java.util.List;
 
 /**
- * UnlockPlugin — Achat "Supprimer les pubs" via Google Play Billing
+ * UnlockPlugin — Achat "Karmic PRO" one-shot 9,99€ via Google Play Billing
  *
  * Produit Play Console à créer :
- *   Type    : Achat unique (one-time)
- *   ID      : remove_ads
- *   Prix    : €2,99
+ *   Type    : Achat unique (one-time, non-consumable)
+ *   ID      : karmic_pro_unlock
+ *   Prix    : 9,99 €
  *
  * Une fois acheté, le flag est stocké localement + vérifié via Play Billing.
+ * Déverrouille : lectures illimitées, analyses approfondies, chartes karmiques,
+ *                multi-profil, IA locale (edge).
  */
 @CapacitorPlugin(name = "Unlock")
 public class UnlockPlugin extends Plugin implements PurchasesUpdatedListener {
 
-    private static final String PRODUCT_ID   = "remove_ads";
+    private static final String PRODUCT_ID   = "karmic_pro_unlock";
     private static final String PREFS_NAME   = "karmic_unlock";
     private static final String PREFS_KEY    = "is_unlocked";
 

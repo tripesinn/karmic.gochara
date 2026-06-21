@@ -9,6 +9,7 @@ import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
 import com.google.mediapipe.tasks.genai.llminference.LlmInference;
+import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -22,9 +23,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
- * GemmaSynthesisPlugin — Inférence locale Gemma via MediaPipe LlmInference.
+ * GemmaSynthesisPlugin — Inférence locale Gemma via MediaPipe LlmInference 0.10.35.
  *
- * Architecture :
+ * Architecture 0.10.35 :
+ *   - LlmInferenceOptions : uniquement setModelPath() + setMaxTokens()
+ *   - LlmInferenceSession : porte Temperature / TopK / LoraPath (déplacés depuis LlmInferenceOptions)
+ *   - generateResponse() : via LlmInferenceSession (et non plus directement sur LlmInference)
+ *
  *   - Modèle .task téléchargé depuis HuggingFace au premier lancement
  *     (URL configurable via MODEL_URL).
  *   - LoRA adapter : assets/lora/doctrine_adapter.bin — doctrine karmique @siderealAstro13
@@ -58,10 +63,14 @@ public class GemmaSynthesisPlugin extends Plugin {
     private static final int   TOP_K                = 40;
 
     // ── État runtime — static pour survivre aux recreations d'Activity ────────
-    private static LlmInference sModel       = null;
-    private static boolean     sLoraLoaded   = false;
-    private static boolean     sPreparing    = false;
-    private static boolean     sDownloading  = false;
+    // Modèle (lourd, partagé entre sessions). Créé une fois, fermé via unloadModel().
+    private static LlmInference        sModel      = null;
+    // Session clonée pour chaque appel generate() — permet le contexte conversationnel.
+    private static LlmInferenceSession sBaseSession = null;
+    private static boolean             sLoraLoaded = false;
+    private static boolean             sPreparing  = false;
+    private static boolean             sDownloading = false;
+    private static int                 sMaxTokens  = MAX_TOKENS_SYNTHESIS;
 
     private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -95,7 +104,7 @@ public class GemmaSynthesisPlugin extends Plugin {
     // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void prepareModel(PluginCall call) {
-        if (sModel != null) {
+        if (sModel != null && sBaseSession != null) {
             JSObject result = new JSObject();
             result.put("ok",       true);
             result.put("loraUsed", sLoraLoaded);
@@ -105,7 +114,7 @@ public class GemmaSynthesisPlugin extends Plugin {
         }
 
         boolean useReport = Boolean.TRUE.equals(call.getBoolean("report", false));
-        int maxTokens = useReport ? MAX_TOKENS_REPORT : MAX_TOKENS_SYNTHESIS;
+        sMaxTokens = useReport ? MAX_TOKENS_REPORT : MAX_TOKENS_SYNTHESIS;
 
         synchronized (GemmaSynthesisPlugin.class) {
             if (sPreparing) {
@@ -128,26 +137,33 @@ public class GemmaSynthesisPlugin extends Plugin {
                 // 2. Extraire le LoRA depuis assets/ si dispo
                 boolean loraAvailable = ensureLoraExtracted();
 
-                // 3. Construire les options MediaPipe et créer la session
-                LlmInference.LlmInferenceOptions.Builder optsBuilder =
+                // 3. Construire les options MediaPipe et créer l'inférence + session
+                //    0.10.35 : setTemperature/setTopK/setLoraPath sont sur la Session, pas le Model.
+                LlmInference.LlmInferenceOptions modelOpts =
                     LlmInference.LlmInferenceOptions.builder()
                         .setModelPath(modelFile.getAbsolutePath())
-                        .setMaxTokens(maxTokens)
+                        .setMaxTokens(sMaxTokens)
+                        .build();
+
+                LlmInference model = LlmInference.createFromOptions(getContext(), modelOpts);
+
+                LlmInferenceSession.LlmInferenceSessionOptions.Builder sessionOptsBuilder =
+                    LlmInferenceSession.LlmInferenceSessionOptions.builder()
                         .setTemperature(TEMPERATURE)
                         .setTopK(TOP_K);
 
                 if (loraAvailable) {
-                    optsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
+                    sessionOptsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
                 }
 
-                LlmInference model = LlmInference.createFromOptions(
-                    getContext(), optsBuilder.build()
-                );
+                LlmInferenceSession baseSession =
+                    LlmInferenceSession.createFromOptions(model, sessionOptsBuilder.build());
 
                 synchronized (GemmaSynthesisPlugin.class) {
-                    sModel      = model;
-                    sLoraLoaded = loraAvailable;
-                    sPreparing  = false;
+                    sModel       = model;
+                    sBaseSession = baseSession;
+                    sLoraLoaded  = loraAvailable;
+                    sPreparing   = false;
                 }
 
                 JSObject result = new JSObject();
@@ -187,7 +203,7 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         executor.execute(() -> {
             // Lazy-init : charger le modèle au premier appel si pas déjà fait
-            if (sModel == null) {
+            if (sModel == null || sBaseSession == null) {
                 try {
                     File modelFile = getModelFile();
                     if (!modelFile.exists() || modelFile.length() == 0) {
@@ -200,30 +216,47 @@ public class GemmaSynthesisPlugin extends Plugin {
 
                     boolean loraAvailable = ensureLoraExtracted();
 
-                    LlmInference.LlmInferenceOptions.Builder optsBuilder =
+                    LlmInference.LlmInferenceOptions modelOpts =
                         LlmInference.LlmInferenceOptions.builder()
                             .setModelPath(modelFile.getAbsolutePath())
                             .setMaxTokens(MAX_TOKENS_SYNTHESIS)
+                            .build();
+
+                    LlmInference model = LlmInference.createFromOptions(getContext(), modelOpts);
+
+                    LlmInferenceSession.LlmInferenceSessionOptions.Builder sessionOptsBuilder =
+                        LlmInferenceSession.LlmInferenceSessionOptions.builder()
                             .setTemperature(TEMPERATURE)
                             .setTopK(TOP_K);
 
                     if (loraAvailable) {
-                        optsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
+                        sessionOptsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
                     }
 
-                    LlmInference model = LlmInference.createFromOptions(
-                        getContext(), optsBuilder.build()
-                    );
+                    LlmInferenceSession baseSession =
+                        LlmInferenceSession.createFromOptions(model, sessionOptsBuilder.build());
 
                     synchronized (GemmaSynthesisPlugin.class) {
-                        sModel      = model;
-                        sLoraLoaded = loraAvailable;
+                        sModel       = model;
+                        sBaseSession = baseSession;
+                        sLoraLoaded  = loraAvailable;
                     }
 
                 } catch (Exception e) {
                     call.reject("MODEL_NOT_READY", e.getMessage(), e);
                     return;
                 }
+            }
+
+            // Cloner la session pour chaque appel — la session garde l'historique
+            // conversationnel via les addQueryChunk() successifs, et un clone partage
+            // l'état avec la base.
+            LlmInferenceSession session;
+            try {
+                session = sBaseSession.cloneSession();
+            } catch (Exception e) {
+                call.reject("SESSION_CLONE_ERROR", e.getMessage(), e);
+                return;
             }
 
             try {
@@ -243,8 +276,9 @@ public class GemmaSynthesisPlugin extends Plugin {
 
                 String fullPrompt = buildGemmaPrompt(contextualSystem, user);
 
-                // Inférence synchrone MediaPipe
-                String response = sModel.generateResponse(fullPrompt);
+                // 0.10.35 : la génération passe par la session, pas par LlmInference directement.
+                session.addQueryChunk(fullPrompt);
+                String response = session.generateResponse();
 
                 JSObject result = new JSObject();
                 result.put("ok",        true);
@@ -256,6 +290,8 @@ public class GemmaSynthesisPlugin extends Plugin {
 
             } catch (Exception e) {
                 call.reject("INFERENCE_ERROR", e.getMessage(), e);
+            } finally {
+                try { session.close(); } catch (Exception ignored) {}
             }
         });
     }
@@ -267,6 +303,10 @@ public class GemmaSynthesisPlugin extends Plugin {
     @PluginMethod
     public void unloadModel(PluginCall call) {
         synchronized (GemmaSynthesisPlugin.class) {
+            if (sBaseSession != null) {
+                try { sBaseSession.close(); } catch (Exception ignored) {}
+                sBaseSession = null;
+            }
             if (sModel != null) {
                 try { sModel.close(); } catch (Exception ignored) {}
                 sModel = null;
@@ -420,7 +460,7 @@ public class GemmaSynthesisPlugin extends Plugin {
     @Override
     protected void handleOnDestroy() {
         executor.shutdown();
-        // Ne PAS fermer sModel ici — static, survit aux recreations d'Activity.
+        // Ne PAS fermer sModel / sBaseSession ici — static, survit aux recreations d'Activity.
         // Appeler unloadModel() explicitement si besoin de libérer la mémoire.
         super.handleOnDestroy();
     }

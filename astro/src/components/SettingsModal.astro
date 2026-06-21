@@ -85,7 +85,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
       <!-- Plan info -->
       <div id="settings-plan-section">
-        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Abonnement</p>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Plan</p>
         <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
           {currentPlan === 'pro' ? (
             <div class="flex items-center gap-3">
@@ -157,7 +157,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         if (planSection && data.profile.plan) {
           const isPro = data.profile.plan === 'pro';
           planSection.innerHTML = `
-            <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Abonnement</p>
+            <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Plan</p>
             <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
               <div class="flex items-center gap-3">
                 <span class="${isPro ? 'text-cosmic-gold' : 'text-cosmic-text-dim'} text-lg">✦</span>

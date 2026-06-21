@@ -33,7 +33,7 @@ def login():
         return jsonify({"ok": False, "error": str(exc)}), 500
     if not profile:
         return jsonify({"ok": False, "error": f"Pseudo '{pseudo}' introuvable. Crée ton profil d'abord."}), 404
-    if not profile.get("email") and not profile.get("year"):
+    if not profile.get("email"):
         return jsonify({"ok": False, "error": "Profil incomplet. Email requis."}), 403
     # ── Contournement de la latence Sheets après paiement ────────────────────
     # 1. Store en mémoire (cas navigateur externe — session différente)
@@ -265,7 +265,65 @@ def logout():
     return jsonify({"ok": True})
 
 
+@auth_bp.route('/login_firebase', methods=['POST'])
+def login_firebase():
+    from profiles import get_profile_by_email
+    import requests
+
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    id_token = data.get("idToken")
+
+    if id_token:
+        try:
+            # Verify the token with Google OAuth2 API
+            verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+            resp = requests.get(verify_url, timeout=5)
+            if resp.status_code == 200:
+                token_info = resp.json()
+                verified_email = token_info.get("email", "").strip().lower()
+                if verified_email:
+                    email = verified_email
+                else:
+                    return jsonify({"ok": False, "error": "Token valide mais email manquant"}), 400
+            else:
+                current_app.logger.warning("Vérification ID Token échouée: %s", resp.text)
+                return jsonify({"ok": False, "error": "Token invalide ou expiré"}), 401
+        except Exception as exc:
+            current_app.logger.error("Erreur de connexion avec l'API Google Tokeninfo: %s", exc)
+            if not current_app.debug:
+                return jsonify({"ok": False, "error": "Erreur de validation de jeton"}), 500
+
+    if not email:
+        return jsonify({"ok": False, "error": "Email requis"}), 400
+
+    try:
+        profile = get_profile_by_email(email)
+    except Exception as exc:
+        current_app.logger.error("Erreur Sheets login_firebase : %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    if not profile:
+        return jsonify({
+            "ok": False,
+            "needs_register": True,
+            "error": "Profil inexistant. Veuillez créer un profil."
+        }), 404
+
+    pseudo = profile.get("pseudo")
+    session["profile"] = profile
+    session["pseudo"] = pseudo
+
+    return jsonify({
+        "ok": True,
+        "pseudo": pseudo,
+        "profile": profile,
+        **create_tokens(pseudo)
+    })
+
+
 # ── JWT Token lifecycle ──────────────────────────────────────────────────────
+
 
 @auth_bp.route('/refresh', methods=['POST'])
 def refresh():

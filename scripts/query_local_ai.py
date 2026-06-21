@@ -4,14 +4,14 @@ import requests
 
 
 def query_local_ai(prompt):
-    url = "http://127.0.0.1:11434/v1/chat/completions"
+    url = "http://127.0.0.1:8888/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer dummy"
+        "Authorization": "Bearer omlx_12345678910111213abcDEF"
     }
     
     payload = {
-        "model": "mistral-nemo:latest",
+        "model": "unsloth--gemma-4-E4B-it-UD-MLX-4bit",
         "messages": [
             {"role": "user", "content": prompt}
         ],

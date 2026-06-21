@@ -49,20 +49,17 @@ Thinking Process:
 
     ## 2. Stack Technique
     *   **OS :** macOS (Apple Silicon)
-    *   **Moteur d'inférence :** vllm-mlx
-    *   **Modèle :** mlx-community/phi-4-4bit (Quantisation 4-bit)
+    *   **Moteur d'inférence :** oMLX (omlx-server)
+    *   **Modèle :** unsloth--gemma-4-E4B-it-UD-MLX-4bit
 
     ## 3. Configuration du Service d'Inférence
-    *   **Port d'écoute :** 8000
-    *   **Commande de démarrage :**
-        ```bash
-        ~/.local/bin/vllm-mlx serve mlx-community/phi-4-4bit --prompt-cache-path ~/.cache/vllm-mlx-prompts.json
-        ```
-    *   **Mécanisme de cache :** ~/.cache/vllm-mlx-prompts.json
+    *   **Port d'écoute :** 8888
+    *   **Commande de démarrage / Application :** oMLX.app
+    *   **Clé API (Locale) :** `omlx_12345678910111213abcDEF`
 
     ## 4. Exposition Réseau
     *   **Outil :** ngrok
-    *   **Commande d'exposition :** `ngrok http 8000`
+    *   **Commande d'exposition :** `ngrok http 8888`
     *   **URL Publique :** https://drinking-respect-research.ngrok-free.dev
 
     ## 5. Intégration IDE (Antigravity)
@@ -73,8 +70,8 @@ Thinking Process:
 
     ## 6. Contexte Système pour l'IA
     *   **Instruction d'initialisation :** L'IA doit prioriser l'API locale sur l'URL publique.
-    *   **Endpoint API :** http://localhost:8000/v1/chat/completions (Standard Ollama/vllm format).
-    *   **Authentification :** None (Localhost) / API Key (Remote).
+    *   **Endpoint API :** http://localhost:8888/v1/chat/completions
+    *   **Authentification :** `Bearer omlx_12345678910111213abcDEF`
 
 5.  **Review against Constraints:**
     *   Markdown format? Yes.

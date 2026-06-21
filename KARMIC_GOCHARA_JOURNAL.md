@@ -127,3 +127,63 @@ L'insight transformateur est que **l'auto-affirmation n'est pas une opposition a
 2. 📤 **Play Console:** Upload AAB → Create closed testing track → Invite testers
 3. 🌐 **Cloud Run:** Deploy web via console GCP (git → builds submit)
 4. 🧪 **QA:** Test login/register, SSE streaming, local Gemma inference
+---
+
+## 2026-06-20 — Pages légales / Play Store compliance
+
+**Contexte** : Play Console demande une URL "Règles de confidentialité" ET "Conditions d'utilisation" pour valider la fiche store. Aucune page ToS n'existait, et la privacy avait `karmic-gochara.netlify.app` dans son footer (incohérent — le backend Flask tourne sur GCP Cloud Run).
+
+**Livré** :
+- `templates/terms.html` (nouveau, 381 lignes) — CGU/ToS bilingues FR/EN, 11 sections (nature du service, compte, premium Stripe, usage, IP, responsabilité, suspension, données, modifications, droit français, contact). Style dark/gold aligné sur `/privacy`.
+- `blueprints/public.py` — route `/terms` enregistrée à côté de `/privacy`.
+- `templates/privacy-policy.html` — footer migré vers `karmicgochara.app` + lien retour vers `/terms`.
+- Déployé : commit `590da10`, push GitHub → Cloud Build `ec9c850f` SUCCESS (~4 min) → Cloud Run `gochara-api` revision live.
+- Vérif prod : `https://karmicgochara.app/terms` → HTTP 200 (19.6 KB), `https://karmicgochara.app/privacy` → HTTP 200 (22.6 KB).
+
+**Pour Play Console** :
+- Règles de confidentialité : `https://karmicgochara.app/privacy`
+- Conditions d'utilisation : `https://karmicgochara.app/terms`
+
+**Pas touché** : `blueprints/auth.py` (modifié hors session, hors scope), `astro/`, `android/` (pas lié au store pour cette tâche).
+
+---
+
+## 2026-06-20 — Orchestration karmic-mcp MCP Server
+
+**Objectif** : Déployer un serveur MCP (Model Context Protocol) pour Karmic Gochara exposant 3 tools astrologique.
+
+**Livré** :
+
+1. **server.py** (~290 lignes, stdlib only — pas de dépendances externes)
+   - HTTPServer natif + BaseHTTPRequestHandler (compatible Python 3.9+)
+   - Endpoints : `GET /health`, `GET /mcp/tools` (MCP schema), `POST /mcp/call`
+   - Intégration : `astro_calc.calculate_transits()` + `doctrine.NAKSHATRA_KARMA` + `VAULT_CORE`
+
+2. **3 MCP Tools** (tous testés, JSON parseable, status=ok)
+   - `get_natal_chart(birth_date, birth_time, birth_place)` → birth data structure
+   - `get_transits_today(natal_data)` → Transit aspects + Nakshatra synthesis
+   - `get_doctrine_reading(natal_data, transits_data)` → Full interpretation + synthesis
+
+3. **test_mcp.py** (~180 lignes)
+   - Séquence de validation : natal → transits → doctrine
+   - Test case : Jérôme (1974-10-31 08:25 Athis-Mons)
+   - Résultat : ✅ All 3 tools PASS, JSON parseable
+
+4. **MCP_VALIDATION_REPORT.json**
+   - Certifications : diagnostic ✅, tools validation ✅, Edge Gallery compatibility ✅
+   - Schema MCP conforme
+   - Prêt pour Hermes registration
+
+**Déploiement** :
+- Server tourne : `.venv/bin/python3 ~/karmic.gochara/server.py`
+- Commandes de test : `curl http://localhost:8000/{health,mcp/tools}`
+- Hermes registration : `hermes mcp add karmic-gochara --url http://127.0.0.1:8000/mcp/call`
+- All 3 tools disponibles immédiatement après registration
+
+**Détails techniques** :
+- Architecture : HTTP only (pas FastAPI — Python 3.9 system compatibility)
+- Logging : JSON per-event (timestamp + metadata)
+- Error handling : graceful fallback, 0 external deps in server.py
+- Tools calls : sequential chaining compatible (each tool can use previous output)
+
+**Pas touché** : Hermes config, Capacitor build, GCP infrastructure.

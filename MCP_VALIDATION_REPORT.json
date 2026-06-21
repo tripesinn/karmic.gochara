@@ -1,0 +1,136 @@
+{
+  "server": "Karmic Gochara MCP Server",
+  "version": "1.0.0",
+  "timestamp": "2026-06-20T18:41:00Z",
+  "deployment": {
+    "host": "127.0.0.1",
+    "port": 8000,
+    "endpoints": {
+      "health": "GET /health",
+      "tools_schema": "GET /mcp/tools",
+      "tool_call": "POST /mcp/call"
+    }
+  },
+  "validation_results": {
+    "diagnostic": {
+      "status": "✅ PASS",
+      "test": "Server running on localhost:8000",
+      "result": {
+        "url": "http://localhost:8000/health",
+        "response": {"status": "ok", "service": "karmic-mcp"},
+        "http_code": 200
+      }
+    },
+    "tools_validation": [
+      {
+        "name": "get_natal_chart",
+        "status": "✅ PASS",
+        "test": "Jérôme (1974-10-31 08:25 Athis-Mons)",
+        "result": {
+          "status": "ok",
+          "birth_datetime": "1974-10-31T08:25:00",
+          "birth_place": "Athis-Mons",
+          "natal_data": {
+            "year": 1974,
+            "month": 10,
+            "day": 31,
+            "hour": 8,
+            "minute": 25,
+            "lat": 48.75,
+            "lon": 2.35,
+            "tz": "Europe/Paris",
+            "city": "Athis-Mons"
+          },
+          "json_parseable": true
+        }
+      },
+      {
+        "name": "get_transits_today",
+        "status": "✅ PASS",
+        "test": "Using natal_data from step 1",
+        "result": {
+          "status": "ok",
+          "date": "2026-06-20",
+          "transits_key_count": 5,
+          "aspect_count": 12,
+          "json_parseable": true,
+          "transits_keys": ["aspects", "natal", "transits", "transit_date", "transit_time"]
+        }
+      },
+      {
+        "name": "get_doctrine_reading",
+        "status": "✅ PASS",
+        "test": "Using natal_data and transits_data from steps 1-2",
+        "result": {
+          "status": "ok",
+          "timestamp": "2026-06-20T18:41:00.657691",
+          "birth_info": {
+            "date": "1974-10-31",
+            "time": "08:25",
+            "place": "Athis-Mons"
+          },
+          "interpretation": {
+            "has_nakshatra_karma": true,
+            "has_transit_effects": true,
+            "has_synthesis": true
+          },
+          "json_parseable": true
+        }
+      }
+    ],
+    "edge_gallery_compatibility": {
+      "status": "✅ PASS",
+      "test": "MCP schema format validation",
+      "result": {
+        "endpoint": "GET /mcp/tools",
+        "response_is_array": true,
+        "tools_count": 3,
+        "schema_format": "valid_mcp",
+        "tools_have_required_fields": {
+          "tool_1_get_natal_chart": {
+            "name": true,
+            "description": true,
+            "parameters": {
+              "type": true,
+              "properties": true,
+              "required": true
+            }
+          },
+          "tool_2_get_transits_today": {
+            "name": true,
+            "description": true,
+            "parameters": {
+              "type": true,
+              "properties": true,
+              "required": true
+            }
+          },
+          "tool_3_get_doctrine_reading": {
+            "name": true,
+            "description": true,
+            "parameters": {
+              "type": true,
+              "properties": true,
+              "required": true
+            }
+          }
+        }
+      }
+    }
+  },
+  "summary": {
+    "all_tests_passed": true,
+    "diagnostic_pass": true,
+    "tools_validation_pass": true,
+    "edge_gallery_compatibility_pass": true,
+    "ready_for_deployment": true,
+    "notes": "karmic-mcp MCP server fully operational. All 3 tools tested and validated. Edge Gallery registration ready."
+  },
+  "deployment_instructions": {
+    "1_start_server": ".venv/bin/python3 ~/karmic.gochara/server.py",
+    "2_verify_health": "curl http://localhost:8000/health",
+    "3_check_tools": "curl http://localhost:8000/mcp/tools",
+    "4_register_in_hermes": "hermes mcp add karmic-gochara --url http://localhost:8000/mcp/call",
+    "5_list_available_tools": "hermes tools list"
+  }
+}

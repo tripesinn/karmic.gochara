@@ -80,6 +80,13 @@ export const api = {
     );
   },
 
+  loginFirebase(email: string, idToken: string) {
+    return request<{ ok: boolean; needs_register?: boolean; pseudo?: string; profile?: any; error?: string }>(
+      '/login_firebase',
+      { method: 'POST', body: JSON.stringify({ email, idToken }) }
+    );
+  },
+
   register(data: RegisterData) {
     return request<{ ok: boolean; pseudo?: string; profile?: any; error?: string }>(
       '/register',

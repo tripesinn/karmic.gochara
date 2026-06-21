@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "732214018947",
+    "project_id": "karmic-gochara-cloud",
+    "storage_bucket": "karmic-gochara-cloud.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732214018947:android:64629c73dbe5c05661ecb6",
+        "android_client_info": {
+          "package_name": "com.karmicgochara.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732214018947-1sh6qjv420v50dqsg7ghs84jc2i5ct1h.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.karmicgochara.app",
+            "certificate_hash": "9ef5fb96e369d9f4de6721acf9b22774926628ae"
+          }
+        },
+        {
+          "client_id": "732214018947-ma2fi67soi8d6bt5toevq7rto85474ac.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.karmicgochara.app",
+            "certificate_hash": "7a96c61ee5edb3ec846759264e05d17aea810e85"
+          }
+        },
+        {
+          "client_id": "732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCbJo81VBW9r2HaR6b5xwta3nFYV4txQns"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

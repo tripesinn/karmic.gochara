@@ -5,9 +5,8 @@ import tailwind from "@astrojs/tailwind";
 const isDev = process.env.NODE_ENV === 'development';
 
 export default defineConfig({
-  // Server mode enables API routes on Cloud Run.
-  output: 'server',
-  build: { outDir: 'dist' },
+  output: 'static',
+  outDir: '../www',
   integrations: [tailwind()],
   vite: {
     define: {
