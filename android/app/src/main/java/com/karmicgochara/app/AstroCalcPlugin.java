@@ -34,9 +34,12 @@ public class AstroCalcPlugin extends Plugin {
     public void load() {
         executor.execute(() -> {
             try {
-                engine = new AstroEngine();   // Moshier — pas de fichiers d'éphémérides
+                String path = EphemerisSetup.getEphemerisPath(getContext());
+                engine = new AstroEngine(path);
             } catch (Exception e) {
                 android.util.Log.e("AstroCalcPlugin", "Erreur init AstroEngine : " + e.getMessage(), e);
+                // Fallback Moshier en cas d'erreur d'extraction
+                engine = new AstroEngine(null);
             }
         });
     }

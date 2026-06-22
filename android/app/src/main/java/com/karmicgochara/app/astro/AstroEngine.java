@@ -65,8 +65,8 @@ public class AstroEngine {
 
     private final SwissEph se;
 
-    public AstroEngine() {
-        se = new SwissEph();   // Moshier : pas de fichiers .se1 requis
+    public AstroEngine(String ephePath) {
+        se = new SwissEph(ephePath);
         se.swe_set_sid_mode(SweConst.SE_SIDM_USER, DK_T0_JD, DK_AYAN_T0);
     }
 

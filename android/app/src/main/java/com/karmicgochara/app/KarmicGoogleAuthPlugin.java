@@ -70,7 +70,7 @@ public class KarmicGoogleAuthPlugin extends Plugin {
         GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
             .setFilterByAuthorizedAccounts(false)
             .setServerClientId(webClientId)
-            .setAutoSelectEnabled(true)
+            .setAutoSelectEnabled(false)
             .build();
 
         GetCredentialRequest request = new GetCredentialRequest.Builder()
