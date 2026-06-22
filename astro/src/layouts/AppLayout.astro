@@ -79,13 +79,38 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
 
     // Vérification auth côté client
     (async () => {
+      // Détection de la langue du navigateur
+      const browserLang = navigator.language.split('-')[0];
+      const supportedLangs = ['fr', 'en', 'es', 'pt', 'de', 'nl', 'it'];
+      const finalLang = supportedLangs.includes(browserLang) ? browserLang : 'fr';
+
+      try {
+        await api.setLang(finalLang);
+        console.log(`🌐 [I18N] Langue définie sur : ${finalLang}`);
+      } catch (e) {
+        console.warn('⚠️ [I18N] Échec de la définition de la langue');
+      }
+
+      console.log('📡 [AUTH] Vérification du profil...');
       try {
         const resp = await api.profile();
         if (!resp.ok) {
-          window.location.href = '/';
+          console.warn('❌ [AUTH] Profil invalide ou inexistant:', resp);
+          if ((resp as any).needs_register) {
+            window.location.href = '/register/';
+          } else {
+            window.location.href = '/';
+          }
+        } else {
+          console.log('✅ [AUTH] Profil chargé pour:', resp.profile?.pseudo);
         }
-      } catch {
-        window.location.href = '/';
+      } catch (err) {
+        console.error('❌ [AUTH] Échec de la vérification du profil:', err);
+        // On ne redirige pas immédiatement en cas de timeout pour éviter la boucle
+        // sauf si l'erreur est explicite
+        if (err instanceof Error && err.message.includes('401')) {
+           window.location.href = '/';
+        }
       }
     })();
 

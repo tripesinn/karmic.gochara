@@ -1,30 +1,10 @@
 ---
-// src/components/LoginCard.astro — Login with Google Sign-In (native Capacitor)
+// src/components/LoginCard.astro — Final Navigation Fix with Error Handling
 ---
 
 <section id="login-card" class="w-full max-w-md mx-auto">
-  <div
-    class="p-8 sm:p-10 rounded-2xl border border-cosmic-border bg-cosmic-void/80 backdrop-blur-sm shadow-xl text-center"
-  >
-    <h2 class="text-3xl sm:text-4xl font-display text-cosmic-gold mb-2">✦ ENTRER</h2>
-    <p class="text-cosmic-text-dim text-sm mb-6">
-      Connecte-toi avec Google pour accéder à ton espace karmique.
-    </p>
-
-    <!-- ═══ Google Sign-In ═══ -->
-    <button
-      id="google-signin-btn"
-      type="button"
-      class="w-full flex items-center justify-center gap-3 py-3 px-4
-             text-base font-semibold rounded-full
-             bg-white text-gray-800
-             border border-white/20
-             transition-all duration-500 ease-out
-             hover:shadow-[0_0_25px_rgba(255,255,255,0.15)]
-             hover:scale-[1.02]
-             disabled:opacity-40 disabled:cursor-not-allowed"
-    >
-      <!-- Google 'G' icon -->
+  <div class="text-center">
+    <button id="google-signin-btn" type="button" class="w-full flex items-center justify-center gap-3 py-4 px-6 text-base font-semibold rounded-xl bg-white text-gray-900 border border-white/20 transition-all duration-500 hover:shadow-[0_0_40px_rgba(255,255,255,0.15)] active:scale-[0.98] disabled:opacity-40">
       <svg width="20" height="20" viewBox="0 0 48 48" class="shrink-0">
         <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
         <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
@@ -34,77 +14,109 @@
       Continuer avec Google
     </button>
 
-    <!-- ═══ Messages d'erreur / succès ═══ -->
     <div id="login-message" class="text-sm min-h-5 mt-4 transition-all duration-300" role="alert"></div>
-
   </div>
 </section>
 
 <script>
   import { signInWithGoogle } from '../lib/firebase-auth';
   import { auth } from '../lib/firebase';
+  import { onAuthStateChanged } from '@firebase/auth';
   import { api, ApiError } from '../lib/api';
 
-  // ── DOM References ──
   const googleBtn = document.getElementById('google-signin-btn') as HTMLButtonElement;
   const messageDiv = document.getElementById('login-message') as HTMLDivElement;
+  let isNavigating = false;
 
-  // ── Google Sign-In Button ──
+  console.log('📍 [LOC] Pathname actuel:', window.location.pathname);
+
+  // On vérifie si on vient de tenter une redirection pour éviter la boucle
+  if (sessionStorage.getItem('is_redirecting_to_register')) {
+    console.log('⏳ [AUTH] Redirection déjà en cours, on ignore le check auto');
+    isNavigating = true;
+  }
+
+  onAuthStateChanged(auth, async (user) => {
+    if (user && !isNavigating) {
+       console.log('✅ [AUTH] User détecté, vérification du profil...');
+       handleLoginSuccess(user);
+    }
+  });
+
   googleBtn?.addEventListener('click', async () => {
+    sessionStorage.removeItem('is_redirecting_to_register');
+    isNavigating = false;
     googleBtn.disabled = true;
-    clearMessage();
-
+    if (messageDiv) {
+      messageDiv.textContent = 'Ouverture de Google...';
+      messageDiv.className = 'text-sm mt-4 text-cosmic-gold animate-pulse';
+    }
     try {
+      console.log('🔗 [UI] Appel signInWithGoogle()...');
       const user = await signInWithGoogle();
-      if (user) {
-        // Retrieve the idToken from Firebase Auth
-        const idToken = await auth.currentUser?.getIdToken();
-        if (!idToken) {
-          throw new Error('Jeton de connexion Google introuvable.');
-        }
-
-        // Establish the Flask session on the backend
-        const resp = await api.loginFirebase(user.email || '', idToken);
-        if (resp.ok) {
-          showMessage('Connexion réussie ! Redirection...', 'success');
-          setTimeout(() => { window.location.href = '/app'; }, 800);
-        } else if (resp.needs_register) {
-          showMessage('Nouveau profil détecté ! Redirection vers l\'inscription...', 'success');
-          setTimeout(() => {
-            window.location.href = `/register?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.displayName || '')}`;
-          }, 1200);
-        } else {
-          throw new Error(resp.error || 'Erreur d\'authentification sur le serveur.');
-        }
-      }
+      console.log('🔗 [UI] signInWithGoogle() réussi pour:', user.email);
+      handleLoginSuccess(user);
     } catch (err: any) {
-      if (err instanceof ApiError && err.data?.needs_register) {
-        const currentUser = auth.currentUser;
-        showMessage('Nouveau profil détecté ! Redirection vers l\'inscription...', 'success');
-        setTimeout(() => {
-          window.location.href = `/register?email=${encodeURIComponent(currentUser?.email || '')}&name=${encodeURIComponent(currentUser?.displayName || '')}`;
-        }, 1200);
-        return;
+      console.error('❌ [UI] Erreur Google:', err);
+      if (messageDiv) {
+        messageDiv.textContent = err?.message || 'Erreur Google';
+        messageDiv.className = 'text-sm mt-4 text-red-400';
       }
-      const msg = err instanceof ApiError && err.data?.error
-        ? err.data.error
-        : (err?.message || 'Erreur lors de la connexion Google.');
-      showMessage(msg, 'error');
       googleBtn.disabled = false;
     }
   });
 
-  function showMessage(text: string, type: 'error' | 'success') {
-    if (!messageDiv) return;
-    messageDiv.textContent = text;
-    messageDiv.className = type === 'error'
-      ? 'text-sm min-h-5 mt-4 text-red-400/90 font-medium'
-      : 'text-sm min-h-5 mt-4 text-emerald-400/90 font-medium';
+  async function handleLoginSuccess(user: any) {
+    if (isNavigating) {
+      console.log('⏳ [AUTH] Navigation déjà en cours, on ignore.');
+      return;
+    }
+    console.log('📡 [API] Tentative de connexion via Firebase ID Token pour:', user.email);
+    try {
+      const idToken = await user.getIdToken();
+      const resp = await api.loginFirebase(user.email || '', idToken);
+      console.log('📡 [API] Réponse reçue:', resp);
+
+      const origin = window.location.origin;
+      if (resp.ok) {
+        isNavigating = true;
+        if (messageDiv) {
+          messageDiv.textContent = 'Connexion réussie. Chargement de votre espace...';
+          messageDiv.className = 'text-sm mt-4 text-emerald-400 font-medium';
+        }
+        console.log('🚀 [NAV] Redirection vers /app/ ...');
+        window.location.replace(`${origin}/app/`);
+      } else if (resp.needs_register) {
+        console.log('📝 [NAV] Redirection vers inscription requise.');
+        doRegisterRedirect(user, origin);
+      } else {
+        throw new Error(resp.error || 'Erreur inconnue');
+      }
+    } catch (err: any) {
+      const origin = window.location.origin;
+      // CRITICAL: On intercepte l'erreur 404 de Flask qui contient needs_register
+      if (err instanceof ApiError && err.data?.needs_register) {
+        console.log('📝 [NAV] Profil inexistant détecté via ApiError (404)');
+        doRegisterRedirect(user, origin);
+        return;
+      }
+
+      console.error('❌ [API] Échec handleLoginSuccess:', err);
+      if (messageDiv) {
+        messageDiv.textContent = err.message || 'Erreur serveur. Veuillez réessayer.';
+        messageDiv.className = 'text-sm mt-4 text-red-400';
+      }
+      isNavigating = false;
+      googleBtn.disabled = false;
+    }
   }
 
-  function clearMessage() {
-    if (!messageDiv) return;
-    messageDiv.textContent = '';
-    messageDiv.className = 'text-sm min-h-5 mt-4';
+  function doRegisterRedirect(user: any, origin: string) {
+    isNavigating = true;
+    sessionStorage.setItem('is_redirecting_to_register', 'true');
+    const params = `?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.displayName || '')}`;
+    const url = `${origin}/register/index.html${params}`;
+    console.log('📝 [NAV] Redirection vers inscription (URL explicite):', url);
+    window.location.replace(url);
   }
 </script>

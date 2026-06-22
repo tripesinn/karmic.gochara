@@ -50,16 +50,25 @@ export const capacitorBridge = {
 
   /** GemmaSynthesis plugin helper (AI locale sur mobile) */
   gemma: {
-    async synthesize(prompt: string, options?: {
-      temperature?: number;
-      maxTokens?: number;
-    }): Promise<string | null> {
-      const result = await capacitorBridge.callPlugin<{ text: string }>(
+    async generate(system: string, user: string, type: string = 'synthesis', lang: string = 'fr', profile: any = {}): Promise<string | null> {
+      const result = await capacitorBridge.callPlugin<{ synthesis: string }>(
         'GemmaSynthesis',
-        'synthesize',
-        { prompt, ...options }
+        'generate',
+        { system, user, type, lang, profile }
       );
-      return result?.text ?? null;
+      return result?.synthesis ?? null;
+    },
+
+    async checkAvailability(): Promise<{ available: boolean; status: string; downloading: boolean } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'checkAvailability');
+    },
+
+    async prepareModel(report: boolean = false): Promise<{ ok: boolean; loraUsed: boolean; cached: boolean } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'prepareModel', { report });
+    },
+
+    async unloadModel(): Promise<{ ok: boolean } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'unloadModel');
     },
   },
 };

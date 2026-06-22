@@ -91,12 +91,12 @@
               Chercher
             </button>
           </div>
-          <!-- Autocomplete dropdown -->
+          <!-- Autocomplete dropdown - FORCÉ EN AVANT-PLAN AVEC FOND VISIBLE -->
           <div id="reg-city-suggestions"
-               class="hidden absolute z-20 top-full left-0 right-0 mt-1 bg-cosmic-void border border-cosmic-border rounded-lg
-                      shadow-xl max-h-48 overflow-y-auto"></div>
+               class="hidden absolute z-[100] top-full left-0 right-0 mt-2 bg-gray-900 border border-cosmic-gold/30 rounded-lg
+                      shadow-[0_10px_40px_rgba(0,0,0,0.8)] max-h-60 overflow-y-auto"></div>
           <!-- Coordinate display -->
-          <p id="reg-coords" class="text-xs text-cosmic-text-dim italic mt-1">—</p>
+          <p id="reg-coords" class="text-xs text-cosmic-text-dim italic mt-1"></p>
         </div>
       </div>
 
@@ -109,54 +109,21 @@
 
     <!-- Submit -->
     <button id="reg-submit-btn" type="button"
-            class="w-full py-3 text-lg font-semibold rounded-lg
+            class="w-full py-4 text-lg font-semibold rounded-lg
                    bg-gradient-to-r from-cosmic-gold to-amber-600 text-gray-950
                    hover:from-cosmic-gold/90 hover:to-amber-700 transition duration-300
                    shadow-md shadow-cosmic-gold/40 disabled:opacity-50 disabled:cursor-not-allowed">
       Créer mon compte
     </button>
-
-    <!-- Footer link -->
-    <div class="text-center pt-2">
-      <p class="text-cosmic-text-dim text-sm">
-        Déjà un compte ?
-        <a href="/login" class="text-cosmic-gold font-medium hover:text-cosmic-gold/80 transition duration-200">
-          Se connecter
-        </a>
-      </p>
-    </div>
   </div>
 </div>
 
 <script>
   import { register } from '../lib/auth';
+  import { api } from '../lib/api';
 
   (function () {
     "use strict";
-
-    // ─── TZ guess map ────────────────────────────────────────
-    const TZ_MAP = {
-      "Europe/Paris":       ["France","Belgium","Luxembourg","Monaco","Andorra","Spain","Germany","Italy","Switzerland","Austria","Netherlands","Poland","Czech","Slovakia","Hungary","Slovenia","Croatia","Serbia","Bosnia","Montenegro","North Macedonia","Albania","Kosovo","Liechtenstein","San Marino","Vatican"],
-      "Europe/London":      ["United Kingdom","UK","England","Ireland"],
-      "Europe/Bucharest":   ["Romania","Bulgaria","Moldova","Greece","Cyprus"],
-      "Europe/Helsinki":    ["Finland","Estonia","Latvia","Lithuania"],
-      "Europe/Moscow":      ["Russia"],
-      "America/New_York":   ["United States","USA","US","Canada"],
-      "America/Chicago":    ["Mexico"],
-      "America/Los_Angeles":[],
-      "America/Sao_Paulo":  ["Brazil"],
-      "Asia/Tokyo":         ["Japan"],
-      "Asia/Shanghai":      ["China"],
-      "Asia/Kolkata":       ["India"],
-      "Australia/Sydney":   ["Australia"],
-    };
-
-    function guessTz(displayName) {
-      for (const [tz, countries] of Object.entries(TZ_MAP)) {
-        if (countries.some(c => displayName.toLowerCase().includes(c.toLowerCase()))) return tz;
-      }
-      return "UTC";
-    }
 
     // ─── DOM refs ────────────────────────────────────────────
     const $ = id => document.getElementById(id);
@@ -179,6 +146,19 @@
     const errorEl   = $("reg-error");
     const submitBtn = $("reg-submit-btn");
 
+    // ─── URL Params: Pre-fill ────────────────────────────────
+    (function prefill() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const e = urlParams.get('email');
+      const n = urlParams.get('name');
+      if (e && email) email.value = e;
+      if (n && pseudo) {
+        // Nettoyage basique pour le pseudo
+        const cleanName = n.toLowerCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+        pseudo.value = cleanName;
+      }
+    })();
+
     // ─── Helpers ─────────────────────────────────────────────
     function showError(msg) {
       errorEl.textContent = "⚠ " + msg;
@@ -192,13 +172,17 @@
 
     async function fetchSuggestions(query) {
       if (query.length < 2) { suggestDiv.classList.add("hidden"); return; }
+
+      // Feedback visuel de recherche
+      suggestDiv.innerHTML = '<div class="p-4 text-sm text-cosmic-gold animate-pulse text-center">Recherche céleste...</div>';
+      suggestDiv.classList.remove("hidden");
+
       try {
-        const res = await fetch("/geocode?q=" + encodeURIComponent(query));
-        if (!res.ok) return;
-        const data = await res.json();
+        const data = await api.geocode(query);
         renderSuggestions(data);
-      } catch {
-        // ignore network errors silently
+      } catch (err) {
+        console.error("Geocode error:", err);
+        suggestDiv.innerHTML = '<div class="p-4 text-xs text-red-400 text-center">Erreur de connexion céleste</div>';
       }
     }
 
@@ -218,6 +202,7 @@
         item.dataset.lat = r.lat;
         item.dataset.lon = r.lon;
         item.dataset.displayName = r.display_name;
+        item.dataset.tz = r.tz;
         item.addEventListener("click", () => selectCity(item));
         suggestDiv.appendChild(item);
       }
@@ -228,15 +213,15 @@
       const label = item.textContent;
       const lat   = parseFloat(item.dataset.lat).toFixed(4);
       const lon   = parseFloat(item.dataset.lon).toFixed(4);
-      const tz    = guessTz(item.dataset.displayName);
+      const tz    = item.dataset.tz || "UTC";
 
       cityInput.value = label;
       latHid.value    = lat;
       lonHid.value    = lon;
       tzHid.value     = tz;
       cityNameHid.value = label;
-      coordsEl.textContent = `✓ ${label} — lat ${lat} / lon ${lon} — ${tz}`;
-      coordsEl.className = "text-xs text-green-400 italic mt-1";
+      coordsEl.textContent = `✓ Fuseau : ${tz} (Heure d'été/hiver gérée auto)`;
+      coordsEl.className = "text-xs text-emerald-400 font-medium mt-1";
       suggestDiv.classList.add("hidden");
       hideError();
     }
@@ -321,7 +306,8 @@
           tz: tz,
         });
         if (result.ok) {
-          window.location.href = "/";
+          sessionStorage.removeItem('is_redirecting_to_register');
+          window.location.href = "/app";
         } else {
           showError(result.error || "Erreur inconnue.");
         }

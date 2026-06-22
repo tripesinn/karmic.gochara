@@ -9,4 +9,17 @@ import RegisterForm from '../components/RegisterForm.astro';
     <!-- Le script interne gère l'interactivité (geocode, submit) -->
     <RegisterForm />
   </main>
+
+  <script>
+    console.log('📑 [PAGE] Register chargée (index.html)');
+    console.log('📍 [PAGE] Pathname:', window.location.pathname);
+    // On garde le flag actif pour empêcher le LoginCard (qui peut être en arrière-plan ou rechargé)
+    // de redéclencher une redirection. On ne l'enlèvera qu'au submit réussi.
+    sessionStorage.setItem('is_redirecting_to_register', 'true');
+
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('email')) {
+      console.log('📧 [PAGE] Email détecté dans l\'URL:', urlParams.get('email'));
+    }
+  </script>
 </BaseLayout>
