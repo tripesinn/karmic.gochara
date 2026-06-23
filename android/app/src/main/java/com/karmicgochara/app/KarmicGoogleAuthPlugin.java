@@ -67,8 +67,20 @@ public class KarmicGoogleAuthPlugin extends Plugin {
             return;
         }
 
+        CredentialManager credentialManager = CredentialManager.create(activity);
+        // Phase 1: try already-authorized accounts (faster, skips Activity Controls check)
+        trySignInPhase(activity, credentialManager, webClientId, true, call);
+    }
+
+    private void trySignInPhase(
+        Activity activity,
+        CredentialManager credentialManager,
+        String webClientId,
+        boolean filterByAuthorized,
+        PluginCall call
+    ) {
         GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(false)
+            .setFilterByAuthorizedAccounts(filterByAuthorized)
             .setServerClientId(webClientId)
             .setAutoSelectEnabled(false)
             .build();
@@ -77,9 +89,7 @@ public class KarmicGoogleAuthPlugin extends Plugin {
             .addCredentialOption(googleIdOption)
             .build();
 
-        CredentialManager credentialManager = CredentialManager.create(activity);
-
-        activity.runOnUiThread(() -> {
+        activity.runOnUiThread(() ->
             credentialManager.getCredentialAsync(
                 activity,
                 request,
@@ -93,12 +103,20 @@ public class KarmicGoogleAuthPlugin extends Plugin {
 
                     @Override
                     public void onError(GetCredentialException e) {
-                        Log.e(TAG, "Credential Manager error: " + e.getMessage());
-                        call.reject("Sign-in failed: " + e.getMessage());
+                        if (filterByAuthorized) {
+                            // Phase 1 failed (no cached account) → phase 2: all accounts
+                            Log.i(TAG, "Phase 1 (authorized) failed, retrying with all accounts: "
+                                + e.getMessage());
+                            trySignInPhase(activity, credentialManager,
+                                webClientId, false, call);
+                        } else {
+                            Log.e(TAG, "Credential Manager error (phase 2): " + e.getMessage());
+                            call.reject("Sign-in failed: " + e.getMessage());
+                        }
                     }
                 }
-            );
-        });
+            )
+        );
     }
 
     private void handleCredential(Credential credential, PluginCall call) {
