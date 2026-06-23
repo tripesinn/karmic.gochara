@@ -1,8 +1,7 @@
-// src/lib/capacitor-bridge.ts — Bridge pour plugins natifs Capacitor
+import { Capacitor } from '@capacitor/core';
 
 interface CapacitorWindow {
   Capacitor?: {
-    isNative?: boolean;
     Plugins?: Record<string, any>;
   };
 }
@@ -12,7 +11,8 @@ const capWindow = (typeof window !== 'undefined' ? window : {}) as CapacitorWind
 export const capacitorBridge = {
   /** Détecte si on tourne dans Capacitor (iOS / Android natif) */
   isNative(): boolean {
-    return !!(capWindow.Capacitor?.isNative);
+    if (typeof window === 'undefined') return false;
+    return Capacitor.isNativePlatform();
   },
 
   /** Appelle un plugin Capacitor natif */

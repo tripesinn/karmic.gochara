@@ -1,5 +1,5 @@
 ---
-// src/components/LoginCard.astro — Login card calling the Flask backend directly
+// src/components/LoginCard.astro — Login card with Google Sign-In + legacy pseudo fallback
 ---
 
 <section id="login-card" class="w-full max-w-md mx-auto">
@@ -8,9 +8,40 @@
   >
     <h2 class="text-3xl sm:text-4xl font-display text-cosmic-gold mb-2">✦ ENTRER</h2>
     <p class="text-cosmic-text-dim text-sm mb-6">
-      Renseigne tes informations pour te connecter à ton espace karmique.
+      Connecte-toi pour accéder à ton espace karmique.
     </p>
 
+    <!-- ═══ Google Sign-In ═══ -->
+    <button
+      id="google-signin-btn"
+      type="button"
+      class="w-full flex items-center justify-center gap-3 py-3 px-4
+             text-base font-semibold rounded-full
+             bg-white text-gray-800
+             border border-white/20
+             transition-all duration-500 ease-out
+             hover:shadow-[0_0_25px_rgba(255,255,255,0.15)]
+             hover:scale-[1.02]
+             disabled:opacity-40 disabled:cursor-not-allowed"
+    >
+      <!-- Google 'G' icon -->
+      <svg width="20" height="20" viewBox="0 0 48 48" class="shrink-0">
+        <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+        <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+        <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+        <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+      </svg>
+      Continuer avec Google
+    </button>
+
+    <!-- ═══ Separator ═══ -->
+    <div class="flex items-center gap-4 my-6">
+      <div class="flex-1 h-px bg-cosmic-border"></div>
+      <span class="text-cosmic-text-dim text-xs uppercase tracking-widest">ou</span>
+      <div class="flex-1 h-px bg-cosmic-border"></div>
+    </div>
+
+    <!-- ═══ Legacy Pseudo Login ═══ -->
     <form id="login-form" class="space-y-4">
       <!-- Pseudo -->
       <div>
@@ -25,38 +56,6 @@
           autocomplete="username"
           class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
                  text-cosmic-text placeholder:text-cosmic-text-dim/30
-                 focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
-                 transition-all duration-300"
-        />
-      </div>
-
-      <!-- Email (Pour la compatibilité de l'interface future) -->
-      <div>
-        <label for="email-input" class="block text-left text-xs font-semibold text-cosmic-gold/80 uppercase tracking-wider mb-1.5">
-          Adresse Email
-        </label>
-        <input
-          id="email-input"
-          type="email"
-          placeholder="Ex: jero@example.com"
-          autocomplete="email"
-          class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
-                 text-cosmic-text placeholder:text-cosmic-text-dim/30
-                 focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
-                 transition-all duration-300"
-        />
-      </div>
-
-      <!-- Date de naissance (Pour la compatibilité de l'interface future) -->
-      <div>
-        <label for="birthdate-input" class="block text-left text-xs font-semibold text-cosmic-gold/80 uppercase tracking-wider mb-1.5">
-          Date de naissance
-        </label>
-        <input
-          id="birthdate-input"
-          type="date"
-          class="w-full px-4 py-3 text-base bg-cosmic-bg border border-cosmic-border rounded-xl
-                 text-cosmic-text
                  focus:outline-none focus:border-cosmic-gold focus:ring-1 focus:ring-cosmic-gold/30
                  transition-all duration-300"
         />
@@ -88,13 +87,86 @@
 </section>
 
 <script>
-  import { api } from '../lib/api';
+  import { api, ApiError } from '../lib/api';
+  import { signInWithGoogle, handleRedirectResult } from '../lib/firebase-auth';
+  import { auth } from '../lib/firebase';
 
+  // ── DOM References ──
   const form = document.getElementById('login-form') as HTMLFormElement;
   const pseudoInput = document.getElementById('pseudo-input') as HTMLInputElement;
   const messageDiv = document.getElementById('login-message') as HTMLDivElement;
   const btn = document.getElementById('login-btn') as HTMLButtonElement;
+  const googleBtn = document.getElementById('google-signin-btn') as HTMLButtonElement;
 
+  // ── Google Sign-In (redirect result on page load) ──
+  handleRedirectResult().then(async (user) => {
+    if (user) {
+      try {
+        const idToken = await auth.currentUser?.getIdToken();
+        if (idToken) {
+          await api.loginFirebase(user.email || '', idToken);
+          showMessage('Connexion Google réussie ! Redirection...', 'success');
+          setTimeout(() => { window.location.href = '/app'; }, 800);
+        }
+      } catch (e: any) {
+        if (e instanceof ApiError && e.data?.needs_register) {
+          showMessage('Nouveau profil détecté ! Redirection vers l\'inscription...', 'success');
+          setTimeout(() => {
+            window.location.href = `/register?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.displayName || '')}`;
+          }, 1200);
+          return;
+        }
+        console.error('Redirect result backend auth error:', e);
+      }
+    }
+  });
+
+  // ── Google Sign-In Button ──
+  googleBtn?.addEventListener('click', async () => {
+    googleBtn.disabled = true;
+    clearMessage();
+
+    try {
+      const user = await signInWithGoogle();
+      if (user) {
+        // Retrieve the idToken from Firebase Auth
+        const idToken = await auth.currentUser?.getIdToken();
+        if (!idToken) {
+          throw new Error('Jeton de connexion Google introuvable.');
+        }
+
+        // Establish the Flask session on the backend
+        const resp = await api.loginFirebase(user.email || '', idToken);
+        if (resp.ok) {
+          showMessage('Connexion réussie ! Redirection...', 'success');
+          setTimeout(() => { window.location.href = '/app'; }, 800);
+        } else if (resp.needs_register) {
+          showMessage('Nouveau profil détecté ! Redirection vers l\'inscription...', 'success');
+          setTimeout(() => {
+            window.location.href = `/register?email=${encodeURIComponent(user.email || '')}&name=${encodeURIComponent(user.displayName || '')}`;
+          }, 1200);
+        } else {
+          throw new Error(resp.error || 'Erreur d\'authentification sur le serveur.');
+        }
+      }
+    } catch (err: any) {
+      if (err instanceof ApiError && err.data?.needs_register) {
+        const currentUser = auth.currentUser;
+        showMessage('Nouveau profil détecté ! Redirection vers l\'inscription...', 'success');
+        setTimeout(() => {
+          window.location.href = `/register?email=${encodeURIComponent(currentUser?.email || '')}&name=${encodeURIComponent(currentUser?.displayName || '')}`;
+        }, 1200);
+        return;
+      }
+      const msg = err instanceof ApiError && err.data?.error
+        ? err.data.error
+        : (err?.message || 'Erreur lors de la connexion Google.');
+      showMessage(msg, 'error');
+      googleBtn.disabled = false;
+    }
+  });
+
+  // ── Legacy Pseudo Login ──
   form?.addEventListener('submit', async (e) => {
     e.preventDefault();
 
@@ -105,13 +177,11 @@
       return;
     }
 
-    // Désactiver le bouton pendant le chargement
     btn.disabled = true;
     btn.textContent = 'Connexion…';
     clearMessage();
 
     try {
-      // Appel direct au backend Flask via le client API
       const resp = await api.login(pseudo);
 
       if (resp.ok) {
@@ -125,7 +195,10 @@
         btn.textContent = '✦ CONNEXION';
       }
     } catch (err: any) {
-      showMessage(err.message || 'Erreur réseau. Veuillez réessayer.', 'error');
+      const msg = err instanceof ApiError && err.data?.error
+        ? err.data.error
+        : (err?.message || 'Erreur réseau. Veuillez réessayer.');
+      showMessage(msg, 'error');
       btn.disabled = false;
       btn.textContent = '✦ CONNEXION';
     }

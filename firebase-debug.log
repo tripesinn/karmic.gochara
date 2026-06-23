@@ -1,0 +1,42 @@
+[debug] [2026-06-20T20:54:03.001Z] ----------------------------------------------------------------------
+[debug] [2026-06-20T20:54:03.002Z] Command:       /Users/jero87/.hermes/node/bin/node /Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/.bin/firebase apps:android:sha:create 1:732214018947:android:64629c73dbe5c05661ecb6 9E:F5:FB:96:E3:69:D9:F4:DE:67:21:AC:F9:B2:27:74:92:66:28:AE --project karmic-gochara-cloud
+[debug] [2026-06-20T20:54:03.002Z] CLI Version:   15.22.0
+[debug] [2026-06-20T20:54:03.002Z] Platform:      darwin
+[debug] [2026-06-20T20:54:03.002Z] Node Version:  v22.22.3
+[debug] [2026-06-20T20:54:03.002Z] Detected Agent: antigravity
+[debug] [2026-06-20T20:54:03.002Z] Time:          Sat Jun 20 2026 22:54:03 GMT+0200 (Central European Summer Time)
+[debug] [2026-06-20T20:54:03.002Z] ----------------------------------------------------------------------
+[debug] 
+[debug] [2026-06-20T20:54:03.093Z] > command requires scopes: ["email","openid","https://www.googleapis.com/auth/cloudplatformprojects.readonly","https://www.googleapis.com/auth/firebase","https://www.googleapis.com/auth/cloud-platform"]
+[debug] [2026-06-20T20:54:03.093Z] > authorizing via signed-in user (jerome@jeromemalige.fr)
+[debug] [2026-06-20T20:54:03.095Z] Checked if tokens are valid: false, expires at: 1781966675105
+[debug] [2026-06-20T20:54:03.095Z] Checked if tokens are valid: false, expires at: 1781966675105
+[debug] [2026-06-20T20:54:03.095Z] > refreshing access token with scopes: []
+[debug] [2026-06-20T20:54:03.096Z] >>> [apiv2][query] POST https://www.googleapis.com/oauth2/v3/token [none]
+[debug] [2026-06-20T20:54:03.096Z] >>> [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[debug] [2026-06-20T20:54:03.243Z] <<< [apiv2][status] POST https://www.googleapis.com/oauth2/v3/token 400
+[debug] [2026-06-20T20:54:03.243Z] <<< [apiv2][body] POST https://www.googleapis.com/oauth2/v3/token [omitted]
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[error] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[debug] [2026-06-20T20:54:03.243Z] Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+[debug] [2026-06-20T20:54:03.340Z] FirebaseError: Authentication Error: Your credentials are no longer valid. Please run firebase login --reauth
+
+For CI servers and headless environments, generate a new token with firebase login:ci
+    at invalidCredentialError (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/auth.js:176:12)
+    at refreshTokens (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/auth.js:589:15)
+    at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+    at async getAccessToken (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/apiv2.js:52:18)
+    at async Client.addAuthHeader (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/apiv2.js:182:21)
+    at async Client.request (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/apiv2.js:129:34)
+    at async createAppAndroidSha (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/management/apps.js:475:26)
+    at async /Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/commands/apps-android-sha-create.js:24:78
+    at async promiseWithSpinner (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/utils.js:346:16)
+    at async Command.actionFn (/Users/jero87/.npm/_npx/ba4f1959e38407b5/node_modules/firebase-tools/lib/commands/apps-android-sha-create.js:24:28)
+[error] 
+[error] Error: Failed to create SHA certificate hash for Android app 1:732214018947:android:64629c73dbe5c05661ecb6. See firebase-debug.log for more info.

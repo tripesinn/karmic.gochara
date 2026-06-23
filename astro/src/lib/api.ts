@@ -1,24 +1,31 @@
 // src/lib/api.ts — Client API avec sessions Flask (cookies)
 // Auth gérée par le cookie de session Flask — pas de JWT localStorage
+import { Capacitor } from '@capacitor/core';
 import type { RegisterData } from './types';
 
 class ApiError extends Error {
+  public data: any = null;
   constructor(public status: number, message: string) {
     super(message);
     this.name = 'ApiError';
+    try {
+      this.data = JSON.parse(message);
+    } catch {
+      this.data = null;
+    }
   }
 }
 
-const BASE = (() => {
+function getBaseUrl(): string {
   if (typeof window === 'undefined') return '';
-  const isCapacitor = !!(window as any).Capacitor?.isNative;
+  const isCapacitor = Capacitor.isNativePlatform();
   return isCapacitor
-    ? 'https://gochara-api-drln4gv4fa-ew.a.run.app'
+    ? 'https://gochara-api-732214018947.europe-west1.run.app'
     : (import.meta.env.PUBLIC_API_URL || '');
-})();
+}
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${getBaseUrl()}${path}`, {
     headers: {
       'Content-Type': 'application/json',
       ...options?.headers,
@@ -37,7 +44,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
 // Streaming via fetch + ReadableStream (remplace EventSource)
 async function* streamingRequest(path: string, body: Record<string, unknown>) {
-  const res = await fetch(`${BASE}${path}`, {
+  const res = await fetch(`${getBaseUrl()}${path}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include',
@@ -77,6 +84,13 @@ export const api = {
     return request<{ ok: boolean; pseudo?: string; profile?: any; hook_natal?: string; error?: string }>(
       '/login',
       { method: 'POST', body: JSON.stringify({ pseudo }) }
+    );
+  },
+
+  loginFirebase(email: string, idToken: string) {
+    return request<{ ok: boolean; needs_register?: boolean; pseudo?: string; profile?: any; error?: string }>(
+      '/login_firebase',
+      { method: 'POST', body: JSON.stringify({ email, idToken }) }
     );
   },
 

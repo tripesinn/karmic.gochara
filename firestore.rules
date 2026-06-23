@@ -1,0 +1,126 @@
+rules_version = '2';
+
+// ===============================================================
+// Assumed Data Model — Karmic Gochara (Astrology App)
+// ===============================================================
+//
+// Collection: users
+// Document ID: {userId} (Firebase Auth UID)
+// Fields:
+//   - uid: string (required, immutable) — Firebase Auth UID
+//   - displayName: string (required, max 100) — user display name
+//   - email: string (required, immutable) — from Google Sign-In
+//   - photoURL: string (optional, max 500) — from Google Sign-In
+//   - pseudo: string (optional, max 50) — legacy username
+//   - plan: string (optional, max 50) — e.g. "free", "premium"
+//   - birthData: map (optional) — birth chart info
+//     - year: number
+//     - month: number
+//     - day: number
+//     - hour: number
+//     - minute: number
+//     - city: string (max 200)
+//     - lat: number
+//     - lon: number
+//     - tz: string (max 50)
+//   - createdAt: timestamp (required, immutable)
+//   - updatedAt: timestamp (required)
+//
+// ===============================================================
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // =========================================================
+    // Helper Functions
+    // =========================================================
+
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function hasRequiredFields(fields) {
+      return request.resource.data.keys().hasAll(fields);
+    }
+
+    function hasOnlyAllowedFields(fields) {
+      return request.resource.data.keys().hasOnly(fields);
+    }
+
+    function areImmutableFieldsUnchanged(fields) {
+      return !request.resource.data.diff(resource.data).affectedKeys().hasAny(fields);
+    }
+
+    function isRecent(time) {
+      return time is timestamp &&
+             time > request.time - duration.value(5, 'm') &&
+             time <= request.time;
+    }
+
+    // =========================================================
+    // Domain Validators
+    // =========================================================
+
+    function isValidBirthData(bd) {
+      return bd is map &&
+             bd.keys().hasOnly(['year', 'month', 'day', 'hour', 'minute', 'city', 'lat', 'lon', 'tz']) &&
+             bd.year is number && bd.year >= 1900 && bd.year <= 2100 &&
+             bd.month is number && bd.month >= 1 && bd.month <= 12 &&
+             bd.day is number && bd.day >= 1 && bd.day <= 31 &&
+             bd.hour is number && bd.hour >= 0 && bd.hour <= 23 &&
+             bd.minute is number && bd.minute >= 0 && bd.minute <= 59 &&
+             bd.city is string && bd.city.size() > 0 && bd.city.size() <= 200 &&
+             bd.lat is number && bd.lat >= -90 && bd.lat <= 90 &&
+             bd.lon is number && bd.lon >= -180 && bd.lon <= 180 &&
+             bd.tz is string && bd.tz.size() > 0 && bd.tz.size() <= 50;
+    }
+
+    function isValidUser(data) {
+      let allowedFields = ['uid', 'displayName', 'email', 'photoURL', 'pseudo', 'plan', 'birthData', 'createdAt', 'updatedAt'];
+      let requiredFields = ['uid', 'displayName', 'email', 'createdAt', 'updatedAt'];
+
+      return hasOnlyAllowedFields(allowedFields) &&
+             hasRequiredFields(requiredFields) &&
+             data.uid is string && data.uid == request.auth.uid &&
+             data.displayName is string && data.displayName.size() > 0 && data.displayName.size() <= 100 &&
+             data.email is string && data.email.size() > 0 && data.email.size() <= 320 &&
+             data.createdAt is timestamp &&
+             data.updatedAt is timestamp &&
+             // Optional fields
+             (!('photoURL' in data) || (data.photoURL is string && data.photoURL.size() <= 500)) &&
+             (!('pseudo' in data) || (data.pseudo is string && data.pseudo.size() <= 50)) &&
+             (!('plan' in data) || (data.plan is string && data.plan.size() <= 50)) &&
+             (!('birthData' in data) || isValidBirthData(data.birthData));
+    }
+
+    // =========================================================
+    // Collection: users
+    // Only the authenticated owner can read/write their own doc
+    // =========================================================
+    match /users/{userId} {
+      allow read: if isOwner(userId);
+
+      allow create: if isOwner(userId) &&
+                       isValidUser(request.resource.data) &&
+                       isRecent(request.resource.data.createdAt);
+
+      allow update: if isOwner(userId) &&
+                       isValidUser(request.resource.data) &&
+                       areImmutableFieldsUnchanged(['uid', 'email', 'createdAt']) &&
+                       isRecent(request.resource.data.updatedAt);
+
+      allow delete: if isOwner(userId);
+    }
+
+    // =========================================================
+    // Default: deny all access to undefined collections
+    // =========================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

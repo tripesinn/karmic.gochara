@@ -265,7 +265,82 @@ def logout():
     return jsonify({"ok": True})
 
 
+@auth_bp.route('/login_firebase', methods=['POST'])
+def login_firebase():
+    from profiles import get_profile_by_email
+    import requests
+
+    data = request.get_json() or {}
+    email = (data.get("email") or "").strip().lower()
+    id_token = data.get("idToken")
+
+    if id_token:
+        try:
+            from google.oauth2 import id_token as google_id_token
+            from google.auth.transport import requests as google_requests
+            try:
+                # Try Firebase token verification first (for Firebase ID tokens)
+                request_adapter = google_requests.Request()
+                token_info = google_id_token.verify_firebase_token(
+                    id_token,
+                    request_adapter,
+                    audience="karmic-gochara-cloud"
+                )
+                verified_email = token_info.get("email", "").strip().lower()
+                if verified_email:
+                    email = verified_email
+                    current_app.logger.info("Firebase ID Token vérifié avec succès pour %s", email)
+            except Exception as firebase_err:
+                current_app.logger.info("Vérification Firebase ID Token échouée ou sautée: %s. Tentative via Google tokeninfo...", firebase_err)
+                # Fallback to Google OAuth2 tokeninfo (for direct Google ID tokens)
+                verify_url = f"https://oauth2.googleapis.com/tokeninfo?id_token={id_token}"
+                resp = requests.get(verify_url, timeout=5)
+                if resp.status_code == 200:
+                    token_info = resp.json()
+                    verified_email = token_info.get("email", "").strip().lower()
+                    if verified_email:
+                        email = verified_email
+                        current_app.logger.info("Google ID Token vérifié avec succès via tokeninfo pour %s", email)
+                    else:
+                        return jsonify({"ok": False, "error": "Token Google valide mais email manquant"}), 400
+                else:
+                    current_app.logger.warning("Vérification ID Token échouée (Firebase + Google tokeninfo): %s", resp.text)
+                    return jsonify({"ok": False, "error": "Token invalide ou expiré"}), 401
+        except Exception as exc:
+            current_app.logger.error("Erreur lors de la validation du jeton: %s", exc)
+            if not current_app.debug:
+                return jsonify({"ok": False, "error": "Erreur de validation de jeton"}), 500
+
+    if not email:
+        return jsonify({"ok": False, "error": "Email requis"}), 400
+
+    try:
+        profile = get_profile_by_email(email)
+    except Exception as exc:
+        current_app.logger.error("Erreur Sheets login_firebase : %s", exc)
+        return jsonify({"ok": False, "error": str(exc)}), 500
+
+    if not profile:
+        return jsonify({
+            "ok": False,
+            "needs_register": True,
+            "error": "Profil inexistant. Veuillez créer un profil."
+        }), 404
+
+    pseudo = profile.get("pseudo")
+    session["profile"] = profile
+    session["pseudo"] = pseudo
+
+    return jsonify({
+        "ok": True,
+        "pseudo": pseudo,
+        "profile": profile,
+        **create_tokens(pseudo)
+    })
+
+
 # ── JWT Token lifecycle ──────────────────────────────────────────────────────
+
 
 @auth_bp.route('/refresh', methods=['POST'])
 def refresh():

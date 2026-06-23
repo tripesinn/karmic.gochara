@@ -62,22 +62,25 @@ dependencies {
 
     // ── Gemma 3/4 — MediaPipe LlmInference (inférence locale) ─
     // Using stable tasks-text (includes LLM inference)
-    implementation 'com.google.mediapipe:tasks-genai:0.10.14'
+    implementation 'com.google.mediapipe:tasks-genai:0.10.35'
 
     // ── Google Play Billing (achat "Supprimer les pubs") ─────────────────────
     implementation 'com.android.billingclient:billing:7.1.1'
 
     // ── AdMob (pubs bannière) ─────────────────────────────────────────────────
     implementation 'com.google.android.gms:play-services-ads:23.6.0'
+
+    // ── Firebase (BoM + Auth + Firestore) ─────────────────────────────────────
+    implementation platform('com.google.firebase:firebase-bom:34.15.0')
+    implementation 'com.google.firebase:firebase-auth'
+    implementation 'com.google.firebase:firebase-firestore'
+
+    // ── Google Sign-In via Credential Manager ─────────────────────────────────
+    implementation 'com.google.android.libraries.identity.googleid:googleid:1.1.1'
+    implementation 'androidx.credentials:credentials:1.5.0'
+    implementation 'androidx.credentials:credentials-play-services-auth:1.5.0'
 }
 
 apply from: 'capacitor.build.gradle'
 
-try {
-    def servicesJSON = file('google-services.json')
-    if (servicesJSON.text) {
-        apply plugin: 'com.google.gms.google-services'
-    }
-} catch(Exception e) {
-    logger.info("google-services.json not found, google-services plugin not applied. Push Notifications won't work")
-}
+apply plugin: 'com.google.gms.google-services'
