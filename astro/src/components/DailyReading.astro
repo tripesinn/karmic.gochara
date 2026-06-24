@@ -5,13 +5,14 @@
 // This runs at build time and fetches data from the local API endpoint.
 // We use a relative path to the API endpoint within the Astro project structure.
 import type { AstroProps } from 'astro/types';
+import { GET } from '../pages/api/doctrine';
 
 // Définition des types des props si nécessaire
 interface Props {} 
 const { title = "Doctrine Quotidienne" } = Astro.props;
 
-// Appel à notre API Astro locale. C'est la clé de la migration !
-const response = await fetch('/api/doctrine');
+// Appel direct à la fonction d'API pour éviter l'erreur "Invalid URL" en SSG
+const response = await GET();
 const doctrineData = await response.json();
 ---
 

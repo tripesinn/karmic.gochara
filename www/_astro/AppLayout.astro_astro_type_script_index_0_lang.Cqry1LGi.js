@@ -1,0 +1,1 @@
+import{a as o}from"./api.BCqJRoay.js";import"./index.B8vh4tkU.js";(async()=>{try{(await o.profile()).ok||(window.location.href="/")}catch{window.location.href="/"}})();document.getElementById("logout-btn")?.addEventListener("click",async()=>{try{await o.logout()}catch{}window.location.href="/"});

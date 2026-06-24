@@ -4,4 +4,5 @@
     <string name="title_activity_main">Karmic Gochara</string>
     <string name="package_name">com.karmicgochara.app</string>
     <string name="custom_url_scheme">com.karmicgochara.app</string>
+    <string name="server_client_id">732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com</string>
 </resources>

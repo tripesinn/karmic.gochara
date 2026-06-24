@@ -1,0 +1,1 @@
+import{a as o}from"./api.BCqJRoay.js";import"./index.B8vh4tkU.js";(async()=>{try{const e=await o.profile();e.ok&&e.profile?.pseudo&&(document.getElementById("welcome-pseudo").textContent=`Bienvenue ${e.profile.pseudo}`)}catch{}})();

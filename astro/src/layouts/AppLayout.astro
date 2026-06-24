@@ -2,6 +2,7 @@
 // src/layouts/AppLayout.astro — Layout protégé pour zone connectée
 // Vérifie l'auth client-side via /api/profile
 import BaseLayout from './BaseLayout.astro';
+import SettingsModal from '../components/SettingsModal.astro';
 
 interface Props {
   title: string;
@@ -54,8 +55,14 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
             Profil
           </a>
           <button
+            id="settings-btn"
+            class="text-cosmic-text-dim hover:text-cosmic-gold transition ml-2"
+          >
+            Paramètres
+          </button>
+          <button
             id="logout-btn"
-            class="text-cosmic-text-dim/60 hover:text-red-400 transition text-xs ml-2"
+            class="text-cosmic-text-dim/60 hover:text-red-400 transition text-xs ml-4"
           >
             Quitter
           </button>
@@ -72,6 +79,8 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
     <footer class="border-t border-cosmic-border/30 py-6 text-center text-cosmic-text-dim/40 text-xs">
       <p>Karmic Gochara &mdash; L&rsquo;alchimie des cycles cosmiques</p>
     </footer>
+
+    <SettingsModal />
   </div>
 
   <script>

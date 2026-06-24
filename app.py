@@ -23,6 +23,8 @@ def create_app():
     app = Flask(__name__)
     app.secret_key = os.environ.get("SECRET_KEY", "gochara-secret-2024")
     app.config["JSON_AS_ASCII"] = False
+    app.config["SESSION_COOKIE_SAMESITE"] = "None"
+    app.config["SESSION_COOKIE_SECURE"] = True
 
     # ── CORS ──────────────────────────────────────────────────────────────────
     CORS(

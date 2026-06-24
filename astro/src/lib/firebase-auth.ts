@@ -6,6 +6,7 @@ import {
   getRedirectResult,
   signOut as firebaseSignOut,
   onAuthStateChanged,
+  signInWithCredential,
   type User,
 } from 'firebase/auth';
 import {
@@ -16,26 +17,40 @@ import {
   serverTimestamp,
 } from 'firebase/firestore';
 import { auth, db } from './firebase';
+import { GoogleAuth } from '@codetrix-studio/capacitor-google-auth';
 
 const googleProvider = new GoogleAuthProvider();
+
+// Initialize GoogleAuth for native environments
+if (typeof window !== 'undefined' && !!(window as any).Capacitor?.isNative) {
+  GoogleAuth.initialize({
+    clientId: '732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com',
+    scopes: ['profile', 'email'],
+    grantOfflineAccess: true,
+  });
+}
 
 // ── Google Sign-In ─────────────────────────────────
 
 /**
  * Sign in with Google. Uses popup on desktop,
- * redirect on Capacitor native (WebView popup issues).
+ * Capacitor GoogleAuth plugin on native.
  */
 export async function signInWithGoogle(): Promise<User> {
   const isNative = !!(window as any).Capacitor?.isNative;
 
   if (isNative) {
-    // Redirect flow for Capacitor WebView
-    await signInWithRedirect(auth, googleProvider);
-    // After redirect, getRedirectResult picks up the result
-    const result = await getRedirectResult(auth);
-    if (!result) throw new Error('Connexion Google annulée');
-    await ensureUserProfile(result.user);
-    return result.user;
+    try {
+      const googleUser = await GoogleAuth.signIn();
+      const idToken = googleUser.authentication.idToken;
+      const credential = GoogleAuthProvider.credential(idToken);
+      const result = await signInWithCredential(auth, credential);
+      await ensureUserProfile(result.user);
+      return result.user;
+    } catch (error) {
+      console.error('Erreur Google Auth natif:', error);
+      throw new Error('Connexion Google native annulée ou échouée.');
+    }
   } else {
     // Popup flow for web
     const result = await signInWithPopup(auth, googleProvider);
@@ -49,6 +64,12 @@ export async function signInWithGoogle(): Promise<User> {
  * (needed for Capacitor redirect flow).
  */
 export async function handleRedirectResult(): Promise<User | null> {
+  const isNative = !!(window as any).Capacitor?.isNative;
+  if (isNative) {
+    // Native now uses direct async/await via GoogleAuth plugin, no redirect needed
+    return null;
+  }
+
   try {
     const result = await getRedirectResult(auth);
     if (result?.user) {
@@ -64,6 +85,14 @@ export async function handleRedirectResult(): Promise<User | null> {
 // ── Sign Out ───────────────────────────────────────
 
 export async function signOutUser(): Promise<void> {
+  const isNative = !!(window as any).Capacitor?.isNative;
+  if (isNative) {
+    try {
+      await GoogleAuth.signOut();
+    } catch (e) {
+      console.error(e);
+    }
+  }
   await firebaseSignOut(auth);
 }
 

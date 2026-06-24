@@ -1,0 +1,26 @@
+.git
+.gitignore
+.venv
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.env
+.env.*
+Dockerfile
+.dockerignore
+render.yaml
+*.log
+ios/
+android/
+astro/
+node_modules/
+package-lock.json
+capacitor.config.json
+
+# Explicitly INCLUDE these (override any default ignores)
+!doctrine.py
+!karmic_vault/

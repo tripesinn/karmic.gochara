@@ -7,6 +7,9 @@
     "hostname": "app.karmicgochara.app"
   },
   "plugins": {
+    "CapacitorHttp": {
+      "enabled": true
+    },
     "SplashScreen": {
       "launchShowDuration": 2000,
       "backgroundColor": "#0c0a08",

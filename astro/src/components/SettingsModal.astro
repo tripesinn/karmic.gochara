@@ -60,26 +60,34 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         </div>
       </div>
 
-      <!-- Langue -->
-      <div>
-        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Langue</p>
-        <div class="flex gap-3">
-          <button
-            id="lang-fr"
-            class="lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-                   transition-all duration-300"
-            data-lang="fr"
-          >
-            🇫🇷 Français
-          </button>
-          <button
-            id="lang-en"
-            class="lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-                   transition-all duration-300"
-            data-lang="en"
-          >
-            🇬🇧 English
-          </button>
+      <!-- Mode Hors-Ligne (AI) -->
+      <div id="settings-ai-section" class="hidden">
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Offline AI Model</p>
+        <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border space-y-4">
+          
+          <div>
+            <label for="ai-model-select" class="block font-display text-sm text-cosmic-text mb-2">Preferred Model</label>
+            <select id="ai-model-select" class="w-full bg-cosmic-void border border-cosmic-border rounded-lg px-3 py-2 text-sm text-cosmic-text focus:border-cosmic-gold outline-none">
+              <option value="gemma-2b" data-url="https://huggingface.co/litert-community/gemma-2b-it-int4.task" data-filename="gemma-2b-it-int4.task">Gemma 2B INT4 (1.1 GB — Fast & Efficient)</option>
+              <option value="gemma-4b" data-url="https://huggingface.co/litert-community/gemma-2-9b-it-int4.task" data-filename="gemma-4b-it-int4.task">Gemma 4B INT4 (2.5 GB — More Accurate)</option>
+            </select>
+          </div>
+
+          <div id="ai-download-container">
+            <button id="ai-download-btn" class="w-full py-2.5 rounded-lg border border-cosmic-gold text-cosmic-gold font-body text-sm hover:bg-cosmic-gold/10 transition-colors">
+              Download Model
+            </button>
+            <div id="ai-progress-container" class="hidden mt-3">
+              <div class="flex justify-between text-xs text-cosmic-text-dim mb-1">
+                <span id="ai-progress-text">Downloading...</span>
+                <span id="ai-progress-percent">0%</span>
+              </div>
+              <div class="w-full bg-cosmic-void rounded-full h-1.5 overflow-hidden">
+                <div id="ai-progress-bar" class="bg-cosmic-gold h-1.5 rounded-full transition-all duration-300" style="width: 0%"></div>
+              </div>
+            </div>
+          </div>
+          
         </div>
       </div>
 
@@ -125,11 +133,12 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 </div>
 
 <script>
+  import capacitorBridge from '../lib/capacitor-bridge';
+
   // ── DOM refs ──
   const modal = document.getElementById('settings-modal')!;
   const closeBtn = document.getElementById('settings-close')!;
   const pseudoEl = document.getElementById('settings-pseudo')!;
-  const langBtns = document.querySelectorAll('.lang-btn') as NodeListOf<HTMLButtonElement>;
 
   // ── Open / Close ──
   function openModal() {
@@ -175,71 +184,89 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
     }
   }
 
-  // ── Langue toggle ──
-  async function setLang(lang: string) {
-    try {
-      await fetch('/set_lang', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ lang }),
+  // ── AI Settings Logic ──
+  const aiSection = document.getElementById('settings-ai-section');
+  const aiModelSelect = document.getElementById('ai-model-select') as HTMLSelectElement;
+  const aiDownloadBtn = document.getElementById('ai-download-btn');
+  const aiProgressContainer = document.getElementById('ai-progress-container');
+  const aiProgressBar = document.getElementById('ai-progress-bar');
+  const aiProgressPercent = document.getElementById('ai-progress-percent');
+  const aiProgressText = document.getElementById('ai-progress-text');
+
+  async function initAI() {
+    if (!capacitorBridge.isNative() || !aiSection) return;
+    aiSection.classList.remove('hidden');
+
+    const savedModel = localStorage.getItem('kg_ai_model_id');
+    if (savedModel && aiModelSelect) {
+      aiModelSelect.value = savedModel;
+      const option = aiModelSelect.options[aiModelSelect.selectedIndex];
+      if (option) {
+         capacitorBridge.gemma.setModel(option.value, option.dataset.url!, option.dataset.filename!);
+      }
+    }
+    
+    await updateModelStatus();
+    
+    aiModelSelect?.addEventListener('change', async () => {
+      const option = aiModelSelect.options[aiModelSelect.selectedIndex];
+      localStorage.setItem('kg_ai_model_id', option.value);
+      await capacitorBridge.gemma.setModel(option.value, option.dataset.url!, option.dataset.filename!);
+      await updateModelStatus();
+    });
+
+    aiDownloadBtn?.addEventListener('click', async () => {
+      aiDownloadBtn.classList.add('hidden');
+      aiProgressContainer?.classList.remove('hidden');
+      aiProgressText!.textContent = 'Starting download...';
+      
+      capacitorBridge.gemma.addListener('modelDownloadProgress', (event: any) => {
+        const pct = event.progress || 0;
+        aiProgressBar!.style.width = `${pct}%`;
+        aiProgressPercent!.textContent = `${pct}%`;
+        
+        if (event.bytes && event.total) {
+          const mb = (event.bytes / 1024 / 1024).toFixed(1);
+          const totalMb = (event.total / 1024 / 1024).toFixed(1);
+          aiProgressText!.textContent = `Downloading (${mb} / ${totalMb} MB)`;
+        }
+        
+        if (pct >= 100) {
+          aiProgressText!.textContent = 'Ready';
+          setTimeout(updateModelStatus, 1000);
+        }
       });
-      // Update visual state
-      langBtns.forEach((btn) => {
-        const isActive = btn.dataset.lang === lang;
-        btn.className = `lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-          transition-all duration-300 ${
-            isActive
-              ? 'bg-cosmic-gold/15 border-cosmic-gold/50 text-cosmic-gold'
-              : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
-          }`;
-      });
-    } catch {
-      // Silent fail
+      
+      try {
+        await capacitorBridge.gemma.downloadModel();
+      } catch (err) {
+        aiProgressText!.textContent = 'Download failed';
+        aiDownloadBtn.classList.remove('hidden');
+      }
+    });
+  }
+
+  async function updateModelStatus() {
+    const status = await capacitorBridge.gemma.getModelStatus();
+    if (!status) return;
+    
+    if (status.downloaded) {
+      aiDownloadBtn?.classList.add('hidden');
+      aiProgressContainer?.classList.remove('hidden');
+      aiProgressText!.textContent = 'Model is ready (Offline Mode Active)';
+      aiProgressBar!.style.width = '100%';
+      aiProgressPercent!.textContent = '100%';
+    } else if (status.downloading) {
+      aiDownloadBtn?.classList.add('hidden');
+      aiProgressContainer?.classList.remove('hidden');
+      aiProgressText!.textContent = 'Download in progress...';
+    } else {
+      aiDownloadBtn?.classList.remove('hidden');
+      aiProgressContainer?.classList.add('hidden');
+      aiDownloadBtn!.textContent = 'Download Model';
     }
   }
 
-  // ── Event listeners ──
-  closeBtn.addEventListener('click', closeModal);
-
-  // Close on backdrop click
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
-  });
-
-  // Close on Escape
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
-  });
-
-  // Listen for settings button click
-  document.addEventListener('click', (e) => {
-    const target = e.target as HTMLElement;
-    if (target.closest('#settings-btn') || target.closest('[data-action="settings"]')) {
-      openModal();
-    }
-  });
-
-  // Listen for URL hash
-  window.addEventListener('hashchange', () => {
-    if (window.location.hash === '#settings') openModal();
-  });
-  if (window.location.hash === '#settings') openModal();
-
-  // Langue buttons
-  langBtns.forEach((btn) => {
-    btn.addEventListener('click', () => setLang(btn.dataset.lang || 'fr'));
-  });
-
-  // Initial language state
-  const currentLang = '{currentLang}';
-  langBtns.forEach((btn) => {
-    const isActive = btn.dataset.lang === currentLang;
-    btn.className = `lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-      transition-all duration-300 ${
-        isActive
-          ? 'bg-cosmic-gold/15 border-cosmic-gold/50 text-cosmic-gold'
-          : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
-      }`;
-  });
+  // Initialize AI on load
+  initAI();
 </script>

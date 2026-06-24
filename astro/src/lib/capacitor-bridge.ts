@@ -50,17 +50,32 @@ export const capacitorBridge = {
 
   /** GemmaSynthesis plugin helper (AI locale sur mobile) */
   gemma: {
-    async synthesize(prompt: string, options?: {
-      temperature?: number;
-      maxTokens?: number;
-    }): Promise<string | null> {
-      const result = await capacitorBridge.callPlugin<{ text: string }>(
-        'GemmaSynthesis',
-        'synthesize',
-        { prompt, ...options }
-      );
-      return result?.text ?? null;
+    async setModel(modelId: string, modelUrl: string, filename: string): Promise<{ ok: boolean, modelId: string } | null> {
+      return capacitorBridge.callPlugin('GemmaSynthesis', 'setModel', { modelId, modelUrl, filename });
     },
+    async getModelStatus(): Promise<{ downloaded: boolean, sizeBytes: number, filename: string, downloading: boolean } | null> {
+      return capacitorBridge.callPlugin('GemmaSynthesis', 'getModelStatus');
+    },
+    async downloadModel(): Promise<{ ok: boolean, cached: boolean } | null> {
+      return capacitorBridge.callPlugin('GemmaSynthesis', 'downloadModel');
+    },
+    async checkAvailability(): Promise<{ available: boolean, status: string, downloading: boolean } | null> {
+      return capacitorBridge.callPlugin('GemmaSynthesis', 'checkAvailability');
+    },
+    async prepareModel(report: boolean = false): Promise<{ ok: boolean, loraUsed: boolean, cached: boolean } | null> {
+      return capacitorBridge.callPlugin('GemmaSynthesis', 'prepareModel', { report });
+    },
+    async generate(system: string, user: string, type: string = 'synthesis', lang: string = 'en', profile: any = {}): Promise<{ ok: boolean, synthesis: string, local: boolean, type: string } | null> {
+      return capacitorBridge.callPlugin('GemmaSynthesis', 'generate', { system, user, type, lang, profile });
+    },
+    addListener(eventName: string, listenerFunc: (event: any) => void) {
+      if (!capacitorBridge.isNative()) return null;
+      const plugin = capWindow.Capacitor?.Plugins?.['GemmaSynthesis'];
+      if (plugin && plugin.addListener) {
+        return plugin.addListener(eventName, listenerFunc);
+      }
+      return null;
+    }
   },
 };
 
