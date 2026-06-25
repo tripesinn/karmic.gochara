@@ -52,7 +52,7 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
         return str(house_num) if house_num else ""
 
     enriched = dict(profile)
-    asc = natal.get("Ascendant") or {}
+    asc = natal.get("Ascendant") or natal.get("ASC ↑") or {}
     asc_sign = _sign(asc.get("display", ""))
     enriched["chandra_lagna_sign"] = asc_sign
     enriched["chandra_lagna_deg"]  = _deg(asc.get("display", ""))
