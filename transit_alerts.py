@@ -266,7 +266,7 @@ def _active_conjunctions(natal_pos: dict, transit_pos: dict) -> set[tuple]:
             diff = abs(t_lon - n_lon) % 360
             if diff > 180:
                 diff = 360 - diff
-            if diff <= ORB:
+            if diff <= 1.0:
                 active.add((t_name, n_name))
     return active
 
@@ -376,7 +376,7 @@ def detect_lunation_events(profile: dict, natal_pos: dict, transit_pos: dict) ->
     if diff_conj > 180:
         diff_conj = 360 - diff_conj
     
-    if diff_conj <= ORB:
+    if diff_conj <= 1.0:
         lunation_nak = lon_to_nakshatra(moon_lon)["nakshatra"]
         if lunation_nak == natal_moon_nak:
             events.append({
@@ -391,7 +391,7 @@ def detect_lunation_events(profile: dict, natal_pos: dict, transit_pos: dict) ->
     if diff_opp > 180:
         diff_opp = 360 - diff_opp
 
-    if diff_opp <= ORB:
+    if diff_opp <= 1.0:
         lunation_nak = lon_to_nakshatra(moon_lon)["nakshatra"]
         if lunation_nak == natal_moon_nak:
             events.append({
