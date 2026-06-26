@@ -752,8 +752,8 @@ def synthesis_prompt():
         minute_t = int(data.get("minute", 0))
         transit_loc_t = {
             "city": data.get("transit_city") or profile.get("transit_city", TRANSIT_LOC_DEFAULT["city"]),
-            "lat":  float(data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"])),
-            "lon":  float(data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"])),
+            "lat":  data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"]),
+            "lon":  data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"]),
             "tz":   data.get("transit_tz")  or profile.get("transit_tz",  TRANSIT_LOC_DEFAULT["tz"]),
         }
         natal_t = {
@@ -762,6 +762,15 @@ def synthesis_prompt():
             "lat":  profile["lat"],  "lon":  profile["lon"],  "tz":     profile["tz"],
             "city": profile["city"],
         }
+        
+        # Nettoyage de "undefined" au cas où l'UI l'aurait envoyé sous forme de chaîne de caractères
+        for d in (natal_t, transit_loc_t):
+            if str(d.get("tz")) == "undefined": d["tz"] = "UTC"
+            for k in ("lat", "lon"):
+                if str(d.get(k)) == "undefined": d[k] = 0.0
+                else:
+                    try: d[k] = float(d[k])
+                    except (ValueError, TypeError): d[k] = 0.0
         try:
             year_t, month_t, day_t = map(int, date_str.split("-"))
             chart_t    = calculate_transits(natal_t, transit_loc_t, year_t, month_t, day_t, hour_t, minute_t)
@@ -852,10 +861,19 @@ def synthesis_prompt():
     minute   = int(data.get("minute", 0))
     transit_loc = {
         "city": data.get("transit_city") or profile.get("transit_city", TRANSIT_LOC_DEFAULT["city"]),
-        "lat":  float(data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"])),
-        "lon":  float(data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"])),
+        "lat":  data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"]),
+        "lon":  data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"]),
         "tz":   data.get("transit_tz")  or profile.get("transit_tz",  TRANSIT_LOC_DEFAULT["tz"]),
     }
+
+    # Nettoyage de "undefined" au cas où l'UI l'aurait envoyé sous forme de chaîne de caractères
+    for d in (natal_data, transit_loc):
+        if str(d.get("tz")) == "undefined": d["tz"] = "UTC"
+        for k in ("lat", "lon"):
+            if str(d.get(k)) == "undefined": d[k] = 0.0
+            else:
+                try: d[k] = float(d[k])
+                except (ValueError, TypeError): d[k] = 0.0
 
     try:
         from astro_calc import calculate_transits

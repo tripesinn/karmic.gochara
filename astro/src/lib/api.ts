@@ -21,7 +21,7 @@ function getBaseUrl(): string {
   const isCapacitor = Capacitor.isNativePlatform();
   return isCapacitor
     ? 'https://gochara-api-drln4gv4fa-ew.a.run.app'
-    : (import.meta.env.PUBLIC_API_URL || '');
+    : ((import.meta as any).env.PUBLIC_API_URL || '');
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -30,13 +30,22 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   console.log(`📡 [API] Fetch: ${url} (isCapacitor: ${isCapacitor})`);
 
+  // Récupérer le token si présent
+  const token = typeof window !== 'undefined' ? localStorage.getItem('karmic_token') : null;
+  const headers = {
+    'Content-Type': 'application/json',
+    'Referer': 'https://karmic-gochara.app',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
+    ...options?.headers
+  } as any;
+
   // Utiliser CapacitorHttp pour tout (incluant REST Firestore)
   if (isCapacitor) {
     try {
       const response = await CapacitorHttp.request({
         method: (options?.method as any) || 'GET',
         url: url,
-        headers: { 'Content-Type': 'application/json', 'Referer': 'https://karmic-gochara.app', ...options?.headers } as any,
+        headers: headers,
         data: options?.body ? JSON.parse(options.body as string) : undefined,
         connectTimeout: 15000,
         readTimeout: 15000,
@@ -47,6 +56,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
         const errorData = typeof response.data === 'string' ? response.data : JSON.stringify(response.data);
         throw new ApiError(response.status, errorData || 'Erreur serveur');
       }
+
+      // Si la réponse contient un nouveau token, on le stocke
+      if (response.data && (response.data as any).access_token) {
+        localStorage.setItem('karmic_token', (response.data as any).access_token);
+      }
+
       console.log(`📡 [API] HTTP ${response.status} sur ${path} OK`);
       return response.data as T;
     } catch (err) {
@@ -54,12 +69,9 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       throw err;
     }
   } else {
-    // Fallback standard pour le web ou pour Firebase/Firestore (googleapis.com)
+    // Fallback standard pour le web
     const res = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options?.headers,
-      },
+      headers: headers,
       credentials: 'include',
       ...options,
     });
@@ -68,7 +80,12 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       const msg = await res.text().catch(() => '');
       throw new ApiError(res.status, msg || 'Erreur serveur');
     }
-    return res.json() as Promise<T>;
+
+    const data = await res.json();
+    if (data && data.access_token) {
+      localStorage.setItem('karmic_token', data.access_token);
+    }
+    return data as T;
   }
 }
 
@@ -151,6 +168,13 @@ export const api = {
     return streamingRequest('/calculate', body);
   },
 
+  synthesisPrompt(body: { context: string; date?: string; hour?: number; minute?: number }) {
+    return request<{ ok: boolean; system: string; user: string; error?: string }>('/synthesis/prompt', {
+      method: 'POST',
+      body: JSON.stringify(body),
+    });
+  },
+
   stripeCheckout(product_type: string) {
     return request<{ ok: boolean; beta: boolean; checkout_url?: string }>('/stripe/checkout', {
       method: 'POST',
@@ -160,6 +184,10 @@ export const api = {
 
   geocode(query: string) {
     return request<Array<{ display_name: string; lat: string; lon: string; tz: string }>>(`/geocode?q=${encodeURIComponent(query)}`);
+  },
+
+  getCalendarUrl(pseudo: string): string {
+    return `${getBaseUrl()}/api/calendar/${encodeURIComponent(pseudo)}.ics`;
   },
 };
 
