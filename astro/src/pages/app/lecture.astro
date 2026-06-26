@@ -2,6 +2,7 @@
 // src/pages/app/lecture.astro — Lecture karmique quotidienne
 // Composant client-side avec streaming SSE pour l'analyse
 import AppLayout from '../../layouts/AppLayout.astro';
+import { capacitorBridge } from '../../lib/capacitor-bridge';
 ---
 
 <AppLayout title="Lecture — Karmic Gochara">
@@ -11,13 +12,114 @@ import AppLayout from '../../layouts/AppLayout.astro';
       Reçois ton analyse karmique personnalisée en temps réel.
     </p>
 
-    <div class="border border-cosmic-border rounded-xl bg-cosmic-void/60 p-6 sm:p-10 min-h-[300px]">
-      <div id="reading-status" class="text-cosmic-text-dim text-center italic py-10">
-        Prépare-toi &hellip;
+    <!-- Écran principal de lecture -->
+    <div id="main-reading-card" class="border border-cosmic-border rounded-xl bg-cosmic-void/60 p-6 sm:p-10 min-h-[300px] flex flex-col justify-between">
+      <div>
+        <div id="reading-status" class="text-cosmic-text-dim text-center italic py-10">
+          Prépare-toi &hellip;
+        </div>
+        <div id="reading-output" class="text-cosmic-text leading-relaxed space-y-4 whitespace-pre-wrap"></div>
       </div>
-      <div id="reading-output" class="text-cosmic-text leading-relaxed space-y-4 whitespace-pre-wrap"></div>
+      
+      <div id="copy-container" class="hidden mt-6 flex justify-end">
+        <button 
+          id="copy-reading-btn" 
+          class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cosmic-gold/30 bg-cosmic-void/80 text-xs text-cosmic-gold/70 transition-all hover:text-cosmic-gold hover:border-cosmic-gold active:scale-95"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+          </svg>
+          <span>Copier la lecture</span>
+        </button>
+      </div>
     </div>
 
+    <!-- Écran de téléchargement de modèle (uniquement natif si modèle manquant) -->
+    <div id="model-download-card" class="hidden border border-cosmic-border rounded-xl bg-cosmic-void/80 p-6 sm:p-10 space-y-6">
+      <h2 class="text-xl font-display text-cosmic-gold flex items-center gap-2">
+        <span>✦</span> Modèle Local requis (Gemma 4)
+      </h2>
+      <p class="text-sm text-cosmic-text-dim leading-relaxed">
+        Pour garantir une confidentialité absolue, l'IA Gemma 4 E2B-IT s'exécute directement sur votre processeur (100% hors-ligne).
+        Veuillez choisir un dossier de stockage (ex: Téléchargements) où le modèle (2.58 Go) sera sauvegardé ou lu s'il y est déjà présent.
+      </p>
+
+      <!-- Section Bouton / Barre de progression -->
+      <div class="space-y-4 p-4 rounded-lg bg-cosmic-void/40 border border-cosmic-border/50">
+        <div id="download-progress-container" class="hidden space-y-2">
+          <div class="flex justify-between text-xs text-cosmic-text-dim">
+            <span>Téléchargement du modèle...</span>
+            <span id="download-percentage">0%</span>
+          </div>
+          <div class="w-full bg-cosmic-bg/60 rounded-full h-3 overflow-hidden border border-cosmic-border/30">
+            <div id="download-progress-bar" class="bg-cosmic-gold h-full w-0 transition-all duration-300 shadow-[0_0_10px_rgba(201,168,76,0.5)]"></div>
+          </div>
+          <div id="download-bytes-info" class="text-[10px] text-cosmic-text-dim text-right">
+            0 Mo / 0 Mo
+          </div>
+        </div>
+
+        <button
+          id="request-permission-btn"
+          class="hidden w-full py-3 mb-2 font-display tracking-wider rounded-lg border border-cosmic-gold/50
+                 text-cosmic-gold bg-cosmic-gold/10 transition-all duration-500
+                 hover:bg-cosmic-gold hover:text-cosmic-bg
+                 hover:shadow-[0_0_20px_rgba(201,168,76,0.25)]"
+        >
+          ✦ Choisir le dossier de stockage du modèle
+        </button>
+
+        <button
+          id="start-download-btn"
+          class="w-full py-3 font-display tracking-wider rounded-lg border border-cosmic-gold/50
+                 text-cosmic-gold bg-cosmic-gold/10 transition-all duration-500
+                 hover:bg-cosmic-gold hover:text-cosmic-bg
+                 hover:shadow-[0_0_20px_rgba(201,168,76,0.25)]"
+        >
+          ✦ Démarrer le téléchargement (2.58 Go)
+        </button>
+
+        <div class="text-center text-xs text-cosmic-text-dim py-1">ou</div>
+
+        <button
+          id="select-local-model-btn"
+          class="w-full py-2.5 font-display text-xs tracking-wider rounded-lg border border-cosmic-border
+                 text-cosmic-text-dim bg-cosmic-void/20 transition-all duration-500
+                 hover:border-cosmic-gold hover:text-cosmic-gold hover:bg-cosmic-gold/5"
+        >
+          📁 Importer un fichier local (.litertlm)
+        </button>
+      </div>
+
+      <!-- Instructions détaillées -->
+      <details class="group border border-cosmic-border/30 rounded-lg p-3 text-xs bg-cosmic-void/20">
+        <summary class="cursor-pointer font-display text-cosmic-text hover:text-cosmic-gold select-none flex justify-between items-center">
+          <span>Besoin d'aide ? Instructions et options de téléchargement</span>
+          <span class="transition-transform duration-300 group-open:rotate-180">▼</span>
+        </summary>
+        <div class="mt-3 space-y-4 text-cosmic-text-dim leading-relaxed border-t border-cosmic-border/20 pt-3">
+          <div>
+            <h4 class="font-bold text-cosmic-gold mb-1">Option A : Téléchargement direct depuis l'application</h4>
+            <p>
+              Le téléchargement commencera directement en arrière-plan. Il est conseillé de rester connecté à un réseau Wi-Fi et de brancher votre téléphone sur secteur.
+            </p>
+          </div>
+          <div>
+            <h4 class="font-bold text-cosmic-gold mb-1">Option B : Installation manuelle via ordinateur (Plus rapide)</h4>
+            <p>
+              Si vous préférez économiser la batterie de votre téléphone ou utiliser une connexion plus rapide, vous pouvez le télécharger depuis un ordinateur :
+            </p>
+            <ol class="list-decimal list-inside mt-2 space-y-1">
+              <li>Cliquez sur <a href="https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm" target="_blank" class="text-cosmic-gold underline hover:text-white">ce lien direct de téléchargement</a> (2.58 Go).</li>
+              <li>Transférez le fichier <code>gemma-4-E2B-it.litertlm</code> sur votre téléphone (par câble USB, Google Drive, etc.).</li>
+              <li>Sur l'application, choisissez le dossier où vous avez placé ce fichier, il sera automatiquement détecté !</li>
+            </ol>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <!-- Action principale -->
     <div class="text-center">
       <button
         id="refresh-btn"
@@ -33,6 +135,8 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
   <script>
     import { api } from '../../lib/api';
+    import { capacitorBridge } from '../../lib/capacitor-bridge';
+    import { Capacitor } from '@capacitor/core';
 
     function today() {
       const d = new Date();
@@ -44,11 +148,75 @@ import AppLayout from '../../layouts/AppLayout.astro';
     }
 
     let controller: AbortController | null = null;
+    let isDownloading = false;
+
+    // Configurer le listener de progression natif si sous Capacitor
+    if (Capacitor.isNativePlatform()) {
+      const { GemmaSynthesis } = Capacitor.Plugins as any;
+      if (GemmaSynthesis) {
+        GemmaSynthesis.addListener('modelDownloadProgress', (data: { progress: number; bytes: number; total: number }) => {
+          const progressContainer = document.getElementById('download-progress-container')!;
+          const progressBar = document.getElementById('download-progress-bar')!;
+          const percentageText = document.getElementById('download-percentage')!;
+          const bytesText = document.getElementById('download-bytes-info')!;
+          
+          progressContainer.classList.remove('hidden');
+          
+          const progress = data.progress || 0;
+          progressBar.style.width = `${progress}%`;
+          percentageText.textContent = `${progress}%`;
+          
+          const downloadedMb = (data.bytes / (1024 * 1024)).toFixed(1);
+          const totalMb = (data.total / (1024 * 1024)).toFixed(1);
+          bytesText.textContent = `${downloadedMb} Mo / ${totalMb} Mo`;
+        });
+      }
+    }
+
+    async function checkModelAvailability() {
+      if (!capacitorBridge.isNative()) return true;
+
+      try {
+        const avail = await capacitorBridge.gemma.checkAvailability();
+        // Cacher par défaut
+        document.getElementById('request-permission-btn')?.classList.add('hidden');
+        document.getElementById('start-download-btn')?.classList.remove('hidden');
+
+        if (avail && avail.available) {
+          document.getElementById('model-download-card')?.classList.add('hidden');
+          document.getElementById('main-reading-card')?.classList.remove('hidden');
+          return true;
+        } else {
+          document.getElementById('main-reading-card')?.classList.add('hidden');
+          document.getElementById('model-download-card')?.classList.remove('hidden');
+          
+          if (avail && avail.status === 'permission_required') {
+             document.getElementById('request-permission-btn')?.classList.remove('hidden');
+             document.getElementById('start-download-btn')?.classList.add('hidden');
+             document.getElementById('select-local-model-btn')?.classList.add('hidden');
+          } else if (avail && avail.downloading) {
+            isDownloading = true;
+            document.getElementById('download-progress-container')?.classList.remove('hidden');
+            document.getElementById('start-download-btn')?.classList.add('hidden');
+          } else {
+             document.getElementById('select-local-model-btn')?.classList.remove('hidden');
+          }
+          return false;
+        }
+      } catch (err) {
+        console.error("Erreur checkAvailability :", err);
+        return true; // En cas de doute, on tente
+      }
+    }
 
     async function startReading() {
       const status = document.getElementById('reading-status')!;
       const output = document.getElementById('reading-output')!;
       const btn = document.getElementById('refresh-btn') as HTMLButtonElement;
+
+      // 1. Vérifier si le modèle est dispo (uniquement mobile natif)
+      const hasModel = await checkModelAvailability();
+      if (!hasModel) return;
 
       if (controller) controller.abort();
       controller = new AbortController();
@@ -57,9 +225,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
       status.style.display = 'block';
       output.textContent = '';
       btn.disabled = true;
+      document.getElementById('copy-container')?.classList.add('hidden');
 
-      // Récupérer le pseudo depuis l'API
-      let pseudo = '';
+      let pseudo = 'TestUser';
       try {
         const resp = await api.profile();
         if (resp.ok && resp.profile?.pseudo) pseudo = resp.profile.pseudo;
@@ -72,22 +240,61 @@ import AppLayout from '../../layouts/AppLayout.astro';
       }
 
       try {
-        for await (const chunk of api.calculate({
-          pseudo,
-          transit_date: today(),
-          transit_time: now(),
-        })) {
-          status.style.display = 'none';
-          if (chunk.text) {
-            output.textContent += chunk.text;
-          } else if (chunk.html) {
-            output.innerHTML += chunk.html;
+        if (capacitorBridge.isNative()) {
+          status.textContent = 'Calcul des transits...';
+          const nowTime = new Date();
+          const hour = nowTime.getHours();
+          const minute = nowTime.getMinutes();
+          const promptData = await api.synthesisPrompt({
+            context: 'synthesis',
+            date: today(),
+            hour,
+            minute
+          });
+
+          if (!promptData || !promptData.ok) {
+            throw new Error("Impossible de calculer les transits.");
           }
+
+          status.textContent = 'Initialisation de l&rsquo;Oracle local…';
+          await capacitorBridge.gemma.prepareModel(false);
+
+          status.textContent = 'Génération de ta lecture…';
+          const response = await capacitorBridge.gemma.generate(
+            promptData.system,
+            promptData.user,
+            "synthesis",
+            "fr"
+          );
+
+          if (response) {
+            status.style.display = 'none';
+            output.textContent = response;
+            document.getElementById('copy-container')?.classList.remove('hidden');
+          } else {
+            throw new Error("Gemma n'a pas répondu.");
+          }
+        } else {
+          // Mode Web/Réseau (SSE)
+          for await (const chunk of api.calculate({
+            pseudo,
+            transit_date: today(),
+            transit_time: now(),
+          })) {
+            status.style.display = 'none';
+            if (chunk.text) {
+              output.textContent += chunk.text;
+            } else if (chunk.html) {
+              output.innerHTML += chunk.html;
+            }
+          }
+          status.textContent = '';
+          document.getElementById('copy-container')?.classList.remove('hidden');
         }
-        status.textContent = '';
       } catch (err: any) {
         if (err.name !== 'AbortError') {
-          status.textContent = 'Erreur de connexion. Réessaie.';
+          console.error(err);
+          status.textContent = 'Erreur de lecture. Réessaie.';
         }
       } finally {
         btn.disabled = false;
@@ -95,9 +302,105 @@ import AppLayout from '../../layouts/AppLayout.astro';
       }
     }
 
+    // Gérer l'action de téléchargement
+    document.getElementById('request-permission-btn')?.addEventListener('click', async () => {
+      await capacitorBridge.gemma.requestStoragePermission();
+      checkModelAvailability();
+    });
+
+    document.getElementById('start-download-btn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('start-download-btn') as HTMLButtonElement;
+      const progressContainer = document.getElementById('download-progress-container')!;
+      
+      btn.disabled = true;
+      btn.textContent = "Téléchargement initié...";
+      progressContainer.classList.remove('hidden');
+
+      try {
+        isDownloading = true;
+        const res = await capacitorBridge.gemma.prepareModel(false);
+        if (res && res.ok) {
+          // Téléchargement et chargement réussis !
+          document.getElementById('model-download-card')?.classList.add('hidden');
+          document.getElementById('main-reading-card')?.classList.remove('hidden');
+          startReading();
+        } else {
+          alert("Échec du téléchargement du modèle local.");
+          btn.disabled = false;
+          btn.textContent = "✦ Démarrer le téléchargement (2.58 Go)";
+        }
+      } catch (err: any) {
+        console.error(err);
+        alert(`Erreur : ${err.message || err}`);
+        btn.disabled = false;
+        btn.textContent = "✦ Démarrer le téléchargement (2.58 Go)";
+      } finally {
+        isDownloading = false;
+      }
+    });
+
+    document.getElementById('select-local-model-btn')?.addEventListener('click', async () => {
+      const btn = document.getElementById('select-local-model-btn') as HTMLButtonElement;
+      const progressContainer = document.getElementById('download-progress-container')!;
+      const statusText = document.getElementById('reading-status')!;
+      
+      btn.disabled = true;
+      progressContainer.classList.remove('hidden');
+
+      try {
+        isDownloading = true;
+        const res = await capacitorBridge.gemma.selectLocalModel();
+        if (res && res.ok) {
+          statusText.textContent = 'Initialisation de l\'Oracle local…';
+          const prep = await capacitorBridge.gemma.prepareModel(false);
+          if (prep && prep.ok) {
+            document.getElementById('model-download-card')?.classList.add('hidden');
+            document.getElementById('main-reading-card')?.classList.remove('hidden');
+            startReading();
+          } else {
+            alert("Erreur lors de l'initialisation du modèle importé.");
+          }
+        } else {
+          alert("Importation du modèle annulée ou échouée.");
+        }
+      } catch (err: any) {
+        console.error(err);
+        alert(`Erreur d'importation : ${err.message || err}`);
+      } finally {
+        isDownloading = false;
+        btn.disabled = false;
+      }
+    });
+
     document.getElementById('refresh-btn')?.addEventListener('click', startReading);
 
-    // Auto-lancer au chargement
-    startReading();
+    document.getElementById('copy-reading-btn')?.addEventListener('click', async () => {
+      const text = document.getElementById('reading-output')?.textContent || '';
+      if (!text) return;
+      
+      try {
+        await navigator.clipboard.writeText(text);
+        const btn = document.getElementById('copy-reading-btn')!;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = `
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+          </svg>
+          <span class="text-green-400">Copié !</span>
+        `;
+        setTimeout(() => {
+          btn.innerHTML = originalText;
+        }, 2000);
+      } catch (err) {
+        console.error("Échec de la copie :", err);
+      }
+    });
+
+    // Lancement au chargement
+    checkModelAvailability().then((available) => {
+      if (available) {
+        startReading();
+      }
+    });
   </script>
 </AppLayout>

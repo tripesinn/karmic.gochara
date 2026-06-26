@@ -1,6 +1,11 @@
 package com.karmicgochara.app;
 
 import android.content.Context;
+import androidx.documentfile.provider.DocumentFile;
+import android.os.ParcelFileDescriptor;
+import android.content.SharedPreferences;
+import java.io.OutputStream;
+
 
 import com.getcapacitor.JSObject;
 import com.getcapacitor.Plugin;
@@ -8,8 +13,19 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
-import com.google.mediapipe.tasks.genai.llminference.LlmInference;
-import com.google.mediapipe.tasks.genai.llminference.LlmInferenceSession;
+import com.google.ai.edge.litertlm.Engine;
+import com.google.ai.edge.litertlm.EngineConfig;
+import com.google.ai.edge.litertlm.Conversation;
+import com.google.ai.edge.litertlm.ConversationConfig;
+import com.google.ai.edge.litertlm.Backend;
+import com.google.ai.edge.litertlm.SamplerConfig;
+import com.google.ai.edge.litertlm.Contents;
+
+import android.app.Activity;
+import android.content.Intent;
+import android.net.Uri;
+import androidx.activity.result.ActivityResult;
+import com.getcapacitor.annotation.ActivityCallback;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -21,6 +37,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicReference;
+
 
 /**
  * GemmaSynthesisPlugin — Inférence locale Gemma via MediaPipe LlmInference 0.10.35.
@@ -50,11 +68,9 @@ public class GemmaSynthesisPlugin extends Plugin {
     private static final String LORA_CACHE_FILENAME = "doctrine_adapter.bin";
 
     // ── Modèle ────────────────────────────────────────────────────────────────
-    // Gemma 3 1B It 4‑bit quantisé (LiteRT format) — change l'URL pour un
-    // modèle personnalisé ou un miroir.
-    private static final String MODEL_URL      =
-        "https://huggingface.co/litert-community/Gemma3-1B-IT/resolve/main/gemma3-1b-it-int4.task";
-    private static final String MODEL_FILENAME = "gemma3-1b-it-int4.task";
+    // Gemma 4 E2B It 4‑bit quantisé (LiteRT format) — dynamique via setModel()
+    private static String sModelUrl = "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm";
+    private static String sModelFilename = "gemma-4-E2B-it.litertlm";
 
     // ── Paramètres inférence constants ────────────────────────────────────────
     private static final int   MAX_TOKENS_SYNTHESIS = 2048;
@@ -64,25 +80,105 @@ public class GemmaSynthesisPlugin extends Plugin {
 
     // ── État runtime — static pour survivre aux recreations d'Activity ────────
     // Modèle (lourd, partagé entre sessions). Créé une fois, fermé via unloadModel().
-    private static LlmInference        sModel      = null;
-    // Session clonée pour chaque appel generate() — permet le contexte conversationnel.
-    private static LlmInferenceSession sBaseSession = null;
+    private static final AtomicReference<Engine> sEngineRef = new AtomicReference<>(null);
+    // Session de base créée pour LiteRT-LM
+    private static final AtomicReference<Conversation> sBaseConversationRef = new AtomicReference<>(null);
+    private static ParcelFileDescriptor sModelPfd = null;
     private static boolean             sLoraLoaded = false;
     private static boolean             sPreparing  = false;
     private static boolean             sDownloading = false;
     private static int                 sMaxTokens  = MAX_TOKENS_SYNTHESIS;
 
-    private final ExecutorService executor = Executors.newSingleThreadExecutor();
+    // Utilisation de CachedThreadPool pour éviter le blocage du thread unique en cas d'erreur réseau
+    private final ExecutorService executor = Executors.newCachedThreadPool();
+
+    // ── Méthode pour init forcée depuis MainActivity ─────────────────────────
+    public static void forceInit(Context context) {
+        android.util.Log.i("GemmaSynthesis", "Init forcée au démarrage...");
+    }
 
 
     // ══════════════════════════════════════════════════════════════════════════
     //  checkAvailability
     // ══════════════════════════════════════════════════════════════════════════
+    private boolean hasStoredDocumentTree() {
+        SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+        return prefs.getString("model_tree_uri", null) != null;
+    }
+
+    private DocumentFile getTreeDocumentFile() {
+        SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+        String uriStr = prefs.getString("model_tree_uri", null);
+        if (uriStr == null) return null;
+        Uri treeUri = Uri.parse(uriStr);
+        DocumentFile dir = DocumentFile.fromTreeUri(getContext(), treeUri);
+        if (dir == null || !dir.exists() || !dir.canRead()) return null;
+        return dir;
+    }
+
+    private DocumentFile getModelDocumentFile() {
+        DocumentFile dir = getTreeDocumentFile();
+        if (dir == null) return null;
+        return dir.findFile(sModelFilename);
+    }
+
+    private DocumentFile getOrCreateModelDocumentFile() {
+        DocumentFile dir = getTreeDocumentFile();
+        if (dir == null) return null;
+        DocumentFile file = dir.findFile(sModelFilename);
+        if (file == null) {
+            file = dir.createFile("application/octet-stream", sModelFilename);
+        }
+        return file;
+    }
+
+    @PluginMethod
+    public void requestStoragePermission(PluginCall call) {
+        saveCall(call);
+        if (hasStoredDocumentTree()) {
+            JSObject res = new JSObject();
+            res.put("ok", true);
+            call.resolve(res);
+            return;
+        }
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT_TREE);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
+        startActivityForResult(call, intent, "storagePermResult");
+    }
+
+    @ActivityCallback
+    private void storagePermResult(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        boolean ok = false;
+        if (result.getResultCode() == Activity.RESULT_OK) {
+            Intent data = result.getData();
+            if (data != null && data.getData() != null) {
+                Uri treeUri = data.getData();
+                getContext().getContentResolver().takePersistableUriPermission(treeUri,
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
+                SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+                prefs.edit().putString("model_tree_uri", treeUri.toString()).apply();
+                ok = true;
+            }
+        }
+        JSObject res = new JSObject();
+        res.put("ok", ok);
+        call.resolve(res);
+    }
+
     @PluginMethod
     public void checkAvailability(PluginCall call) {
         JSObject result = new JSObject();
-        File modelFile = getModelFile();
-        if (modelFile.exists() && modelFile.length() > 0) {
+        if (!hasStoredDocumentTree()) {
+            result.put("available",   false);
+            result.put("status",      "permission_required");
+            result.put("downloading", false);
+            call.resolve(result);
+            return;
+        }
+
+        DocumentFile modelFile = getModelDocumentFile();
+        if (modelFile != null && modelFile.exists() && modelFile.length() > 0) {
             result.put("available",   true);
             result.put("status",      "available");
             result.put("downloading", false);
@@ -100,14 +196,234 @@ public class GemmaSynthesisPlugin extends Plugin {
 
 
     // ══════════════════════════════════════════════════════════════════════════
+    //  Dynamic Model Configuration
+    // ══════════════════════════════════════════════════════════════════════════
+
+    @PluginMethod
+    public void setModel(PluginCall call) {
+        String url = call.getString("modelUrl");
+        String filename = call.getString("filename");
+
+        if (url == null || filename == null) {
+            call.reject("INVALID_PARAMS", "modelUrl and filename are required.");
+            return;
+        }
+
+        synchronized (GemmaSynthesisPlugin.class) {
+            sModelUrl = url;
+            sModelFilename = filename;
+            
+            // Si on change de modèle, on décharge l'ancien
+            unloadModelInternal();
+        }
+
+        JSObject result = new JSObject();
+        result.put("ok", true);
+        result.put("modelId", filename);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void getModelStatus(PluginCall call) {
+        DocumentFile modelFile = getModelDocumentFile();
+        JSObject result = new JSObject();
+        result.put("downloaded", modelFile != null && modelFile.exists() && modelFile.length() > 0);
+        result.put("modelId", sModelFilename);
+        result.put("sizeBytes", modelFile != null && modelFile.exists() ? modelFile.length() : 0);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void isModelDownloaded(PluginCall call) {
+        DocumentFile modelFile = getModelDocumentFile();
+        JSObject result = new JSObject();
+        result.put("downloaded", modelFile != null && modelFile.exists() && modelFile.length() > 0);
+        call.resolve(result);
+    }
+
+    @PluginMethod
+    public void downloadModel(PluginCall call) {
+        if (sDownloading) {
+            call.reject("ALREADY_DOWNLOADING", "Un téléchargement est déjà en cours.");
+            return;
+        }
+
+        boolean force = Boolean.TRUE.equals(call.getBoolean("force", false));
+
+        executor.execute(() -> {
+            try {
+                DocumentFile modelFile = getModelDocumentFile();
+                if (!force && modelFile != null && modelFile.exists() && modelFile.length() > 0) {
+                    JSObject result = new JSObject();
+                    result.put("ok", true);
+                    result.put("alreadyDownloaded", true);
+                    call.resolve(result);
+                    return;
+                }
+
+                DocumentFile destFile = getOrCreateModelDocumentFile();
+                if (destFile == null) {
+                    call.reject("DOWNLOAD_ERROR", "Dossier de stockage non configuré ou invalide.");
+                    return;
+                }
+
+                if (downloadModelWithProgress(destFile)) {
+                    JSObject result = new JSObject();
+                    result.put("ok", true);
+                    call.resolve(result);
+                } else {
+                    call.reject("DOWNLOAD_FAILED", "Échec du téléchargement.");
+                }
+            } catch (IOException e) {
+                call.reject("DOWNLOAD_ERROR", e.getMessage());
+            }
+        });
+    }
+
+    @PluginMethod
+    public void selectLocalModel(PluginCall call) {
+        if (sDownloading) {
+            call.reject("ALREADY_DOWNLOADING", "Un téléchargement ou une copie est déjà en cours.");
+            return;
+        }
+        saveCall(call);
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+        intent.setType("*/*");
+        startActivityForResult(call, intent, "pickModelResult");
+    }
+
+    @ActivityCallback
+    private void pickModelResult(PluginCall call, ActivityResult result) {
+        if (call == null) return;
+        if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
+            Uri uri = result.getData().getData();
+            if (uri != null) {
+                sDownloading = true;
+                executor.execute(() -> {
+                    try {
+                        long totalSize = -1;
+                        try (android.database.Cursor cursor = getContext().getContentResolver().query(uri, null, null, null, null)) {
+                            if (cursor != null && cursor.moveToFirst()) {
+                                int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
+                                if (sizeIndex != -1) {
+                                    totalSize = cursor.getLong(sizeIndex);
+                                }
+                            }
+                        }
+
+                        DocumentFile destFile = getOrCreateModelDocumentFile();
+                        if (destFile == null) {
+                            throw new IOException("Dossier de stockage non configuré ou invalide.");
+                        }
+                        try (java.io.InputStream in = getContext().getContentResolver().openInputStream(uri);
+                             java.io.OutputStream out = getContext().getContentResolver().openOutputStream(destFile.getUri())) {
+                            if (in == null) {
+                                throw new IOException("Impossible d'ouvrir le fichier sélectionné.");
+                            }
+                            byte[] buf = new byte[65536];
+                            int n;
+                            long copied = 0;
+                            while ((n = in.read(buf)) != -1) {
+                                out.write(buf, 0, n);
+                                copied += n;
+                                if (totalSize > 0) {
+                                    int progress = (int) (copied * 100 / totalSize);
+                                    JSObject data = new JSObject();
+                                    data.put("progress", progress);
+                                    data.put("bytes", copied);
+                                    data.put("total", totalSize);
+                                    notifyListeners("modelDownloadProgress", data);
+                                }
+                            }
+                        }
+
+                        sDownloading = false;
+                        JSObject res = new JSObject();
+                        res.put("ok", true);
+                        call.resolve(res);
+
+                    } catch (Exception e) {
+                        sDownloading = false;
+                        android.util.Log.e("GemmaSynthesis", "Erreur copie : " + e.getMessage());
+                        call.reject("COPY_FAILED", e.getMessage());
+                    }
+                });
+            } else {
+                call.reject("NO_URI", "Fichier non sélectionné.");
+            }
+        } else {
+            call.reject("CANCELLED", "Sélection annulée.");
+        }
+    }
+
+    private boolean downloadModelWithProgress(DocumentFile dest) throws IOException {
+        sDownloading = true;
+        try {
+            
+            HttpURLConnection conn = (HttpURLConnection) new URL(sModelUrl).openConnection();
+            conn.setConnectTimeout(15_000);
+            conn.setReadTimeout(30_000);
+            conn.setInstanceFollowRedirects(true);
+            conn.connect();
+
+            int responseCode = conn.getResponseCode();
+            if (responseCode != HttpURLConnection.HTTP_OK) {
+                throw new IOException("HTTP " + responseCode + " pour " + sModelUrl);
+            }
+
+            long total = conn.getContentLengthLong();
+            long downloaded = 0;
+
+            try (InputStream in  = conn.getInputStream();
+                 java.io.OutputStream out = getContext().getContentResolver().openOutputStream(dest.getUri())) {
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = in.read(buf)) != -1) {
+                    out.write(buf, 0, n);
+                    downloaded += n;
+                    
+                    if (total > 0) {
+                        int progress = (int) (downloaded * 100 / total);
+                        JSObject data = new JSObject();
+                        data.put("progress", progress);
+                        data.put("bytes", downloaded);
+                        data.put("total", total);
+                        notifyListeners("modelDownloadProgress", data);
+                    }
+                }
+            }
+            return dest.exists() && dest.length() > 0;
+        } finally {
+            sDownloading = false;
+        }
+    }
+
+    private void unloadModelInternal() {
+        Engine engine = sEngineRef.getAndSet(null);
+        if (engine != null) {
+            try { engine.close(); } catch (Exception ignored) {}
+        }
+        Conversation conversation = sBaseConversationRef.getAndSet(null);
+        if (conversation != null) {
+            try { conversation.close(); } catch (Exception ignored) {}
+        }
+        if (sModelPfd != null) {
+            try { sModelPfd.close(); } catch (Exception ignored) {}
+            sModelPfd = null;
+        }
+        sLoraLoaded = false;
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
     //  prepareModel
     // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void prepareModel(PluginCall call) {
-        if (sModel != null && sBaseSession != null) {
+        if (sEngineRef.get() != null && sBaseConversationRef.get() != null) {
             JSObject result = new JSObject();
             result.put("ok",       true);
-            result.put("loraUsed", sLoraLoaded);
+            result.put("loraUsed", false);
             result.put("cached",   true);
             call.resolve(result);
             return;
@@ -126,55 +442,74 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         executor.execute(() -> {
             try {
-                // 1. Télécharger le modèle .task si pas encore en cache
-                File modelFile = getModelFile();
-                if (!modelFile.exists() || modelFile.length() == 0) {
-                    if (!downloadModel(modelFile)) {
-                        throw new IOException("Échec du téléchargement du modèle");
+                DocumentFile modelFile = getModelDocumentFile();
+                if (modelFile == null || !modelFile.exists() || modelFile.length() == 0) {
+                    // Si absent, tenter de le copier à la volée depuis Edge Gallery
+                    try {
+                        new GemmaInitializationService(getContext()).ensureModelAvailable();
+                    } catch (Exception e) {
+                        modelFile = getOrCreateModelDocumentFile();
+                        if (modelFile == null) {
+                            throw new IOException("Dossier de stockage invalide ou manquant.");
+                        }
+                        if (!downloadModelWithProgress(modelFile)) {
+                            throw new IOException("Modèle absent et impossible d'initialiser : " + e.getMessage());
+                        }
                     }
                 }
-
-                // 2. Extraire le LoRA depuis assets/ si dispo
-                boolean loraAvailable = ensureLoraExtracted();
-
-                // 3. Construire les options MediaPipe et créer l'inférence + session
-                //    0.10.35 : setTemperature/setTopK/setLoraPath sont sur la Session, pas le Model.
-                LlmInference.LlmInferenceOptions modelOpts =
-                    LlmInference.LlmInferenceOptions.builder()
-                        .setModelPath(modelFile.getAbsolutePath())
-                        .setMaxTokens(sMaxTokens)
-                        .build();
-
-                LlmInference model = LlmInference.createFromOptions(getContext(), modelOpts);
-
-                LlmInferenceSession.LlmInferenceSessionOptions.Builder sessionOptsBuilder =
-                    LlmInferenceSession.LlmInferenceSessionOptions.builder()
-                        .setTemperature(TEMPERATURE)
-                        .setTopK(TOP_K);
-
-                if (loraAvailable) {
-                    sessionOptsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
+                
+                // Get the updated model file (in case it was just created)
+                if (modelFile == null) {
+                    modelFile = getModelDocumentFile();
                 }
 
-                LlmInferenceSession baseSession =
-                    LlmInferenceSession.createFromOptions(model, sessionOptsBuilder.build());
+                // Open ParcelFileDescriptor for the model in SAF
+                if (sModelPfd != null) {
+                    try { sModelPfd.close(); } catch (Exception ignored) {}
+                }
+                sModelPfd = getContext().getContentResolver().openFileDescriptor(modelFile.getUri(), "r");
+                if (sModelPfd == null) {
+                    throw new IOException("Impossible d'ouvrir le descripteur de fichier pour le modèle.");
+                }
+                
+                int fd = sModelPfd.getFd();
+                String fdPath = "/proc/self/fd/" + fd;
+
+                // 2. Construire l'Engine LiteRT-LM
+                EngineConfig modelOpts = new EngineConfig(
+                    fdPath,
+                    new Backend.CPU(),
+                    null, null, sMaxTokens, null, null
+                );
+
+                Engine engine = new Engine(modelOpts);
+                engine.initialize();
+
+                SamplerConfig samplerOpts = new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0);
+                ConversationConfig conversationOpts = new ConversationConfig(
+                    null, new java.util.ArrayList<>(), new java.util.ArrayList<>(),
+                    samplerOpts, true, null, new java.util.HashMap<>(), null
+                );
+
+                Conversation conversation = engine.createConversation(conversationOpts);
 
                 synchronized (GemmaSynthesisPlugin.class) {
-                    sModel       = model;
-                    sBaseSession = baseSession;
-                    sLoraLoaded  = loraAvailable;
+                    sEngineRef.set(engine);
+                    sBaseConversationRef.set(conversation);
+                    sLoraLoaded  = false;
                     sPreparing   = false;
                 }
 
                 JSObject result = new JSObject();
                 result.put("ok",       true);
-                result.put("loraUsed", sLoraLoaded);
+                result.put("loraUsed", false);
                 result.put("cached",   false);
                 call.resolve(result);
 
             } catch (Exception e) {
                 synchronized (GemmaSynthesisPlugin.class) { sPreparing = false; }
-                call.reject("PREPARE_ERROR", e.getMessage(), e);
+                android.util.Log.w("GemmaSynthesis", "Erreur lors de la préparation : " + e.getMessage());
+                call.reject("PREPARE_ERROR", e.getMessage());
             }
         });
     }
@@ -185,12 +520,16 @@ public class GemmaSynthesisPlugin extends Plugin {
     // ══════════════════════════════════════════════════════════════════════════
     @PluginMethod
     public void generate(PluginCall call) {
+        String lightPrompt = call.getString("lightPrompt");
         String system = call.getString("system", "");
         String user   = call.getString("user",   "");
         String type   = call.getString("type",   "synthesis");
         String lang   = call.getString("lang",   "fr");
 
-        if (user == null || user.isEmpty()) {
+        // Priorité au lightPrompt (RAG) s'il est fourni
+        final String effectiveUser = (lightPrompt != null && !lightPrompt.isEmpty()) ? lightPrompt : user;
+
+        if (effectiveUser == null || effectiveUser.isEmpty()) {
             call.reject("INVALID_PROMPT", "Prompt vide.");
             return;
         }
@@ -203,95 +542,94 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         executor.execute(() -> {
             // Lazy-init : charger le modèle au premier appel si pas déjà fait
-            if (sModel == null || sBaseSession == null) {
+            if (sEngineRef.get() == null) {
                 try {
-                    File modelFile = getModelFile();
-                    if (!modelFile.exists() || modelFile.length() == 0) {
-                        if (!downloadModel(modelFile)) {
-                            call.reject("MODEL_NOT_READY",
-                                "Modèle pas encore téléchargé — appelle prepareModel() d'abord.");
-                            return;
+                    DocumentFile modelFile = getModelDocumentFile();
+                    if (modelFile == null || !modelFile.exists() || modelFile.length() == 0) {
+                        try {
+                            new GemmaInitializationService(getContext()).ensureModelAvailable();
+                        } catch (Exception e) {
+                            modelFile = getOrCreateModelDocumentFile();
+                            if (modelFile != null) downloadModelWithProgress(modelFile);
                         }
                     }
 
-                    boolean loraAvailable = ensureLoraExtracted();
+                    if (modelFile != null && modelFile.exists() && modelFile.length() > 0) {
+                        if (sModelPfd != null) {
+                            try { sModelPfd.close(); } catch (Exception ignored) {}
+                        }
+                        sModelPfd = getContext().getContentResolver().openFileDescriptor(modelFile.getUri(), "r");
+                        if (sModelPfd != null) {
+                            int fd = sModelPfd.getFd();
+                            String fdPath = "/proc/self/fd/" + fd;
 
-                    LlmInference.LlmInferenceOptions modelOpts =
-                        LlmInference.LlmInferenceOptions.builder()
-                            .setModelPath(modelFile.getAbsolutePath())
-                            .setMaxTokens(MAX_TOKENS_SYNTHESIS)
-                            .build();
+                            EngineConfig modelOpts = new EngineConfig(
+                                fdPath,
+                                new Backend.CPU(),
+                                null, null, sMaxTokens, null, null
+                            );
+                            Engine engine = new Engine(modelOpts);
+                            engine.initialize();
 
-                    LlmInference model = LlmInference.createFromOptions(getContext(), modelOpts);
+                            SamplerConfig samplerOpts = new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0);
+                            ConversationConfig conversationOpts = new ConversationConfig(
+                                null, new java.util.ArrayList<>(), new java.util.ArrayList<>(),
+                                samplerOpts, true, null, new java.util.HashMap<>(), null
+                            );
+                            Conversation conversation = engine.createConversation(conversationOpts);
 
-                    LlmInferenceSession.LlmInferenceSessionOptions.Builder sessionOptsBuilder =
-                        LlmInferenceSession.LlmInferenceSessionOptions.builder()
-                            .setTemperature(TEMPERATURE)
-                            .setTopK(TOP_K);
-
-                    if (loraAvailable) {
-                        sessionOptsBuilder.setLoraPath(getLoraFile().getAbsolutePath());
+                            synchronized (GemmaSynthesisPlugin.class) {
+                                sEngineRef.set(engine);
+                                sBaseConversationRef.set(conversation);
+                            }
+                        }
                     }
-
-                    LlmInferenceSession baseSession =
-                        LlmInferenceSession.createFromOptions(model, sessionOptsBuilder.build());
-
-                    synchronized (GemmaSynthesisPlugin.class) {
-                        sModel       = model;
-                        sBaseSession = baseSession;
-                        sLoraLoaded  = loraAvailable;
-                    }
-
                 } catch (Exception e) {
-                    call.reject("MODEL_NOT_READY", e.getMessage(), e);
-                    return;
+                    android.util.Log.w("GemmaSynthesis", "Erreur init différée : " + e.getMessage());
                 }
             }
 
-            // Cloner la session pour chaque appel — la session garde l'historique
-            // conversationnel via les addQueryChunk() successifs, et un clone partage
-            // l'état avec la base.
-            LlmInferenceSession session;
-            try {
-                session = sBaseSession.cloneSession();
-            } catch (Exception e) {
-                call.reject("SESSION_CLONE_ERROR", e.getMessage(), e);
+            Engine engine = sEngineRef.get();
+            if (engine == null) {
+                call.reject("MODEL_NOT_READY", "Moteur non disponible. Vérifiez l'installation.");
                 return;
             }
 
-            try {
-                // Construire le prompt system + user
-                String contextualSystem;
-                if (sLoraLoaded) {
-                    // Avec LoRA, on peut utiliser le system fourni ou rien
-                    contextualSystem = (system != null && !system.isEmpty()) ? system : "";
-                } else if (system != null && !system.isEmpty()) {
-                    contextualSystem = system;
-                } else {
-                    // Fallback vault → DoctrinePromptBuilder
-                    contextualSystem = DoctrinePromptBuilder.buildSystemPrompt(
-                        getContext(), finalProfile, lang
-                    );
-                }
+            String contextualSystem;
+            if (system != null && !system.isEmpty()) {
+                contextualSystem = system;
+            } else {
+                contextualSystem = DoctrinePromptBuilder.buildSystemPrompt(
+                    getContext(), finalProfile, lang
+                );
+            }
 
-                String fullPrompt = buildGemmaPrompt(contextualSystem, user);
+            SamplerConfig samplerOpts = new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0);
+            ConversationConfig conversationOpts = new ConversationConfig(
+                Contents.Companion.of(contextualSystem),
+                new java.util.ArrayList<>(),
+                new java.util.ArrayList<>(),
+                samplerOpts,
+                true,
+                null,
+                new java.util.HashMap<>(),
+                null
+            );
 
-                // 0.10.35 : la génération passe par la session, pas par LlmInference directement.
-                session.addQueryChunk(fullPrompt);
-                String response = session.generateResponse();
+            try (Conversation conversation = engine.createConversation(conversationOpts)) {
+                // Inférence synchrone bloquante via le helper Kotlin
+                String response = GemmaHelper.generateSync(conversation, effectiveUser);
 
                 JSObject result = new JSObject();
                 result.put("ok",        true);
                 result.put("synthesis", response.trim());
                 result.put("local",     true);
-                result.put("loraUsed",  sLoraLoaded);
+                result.put("loraUsed",  false);
                 result.put("type",      type);
                 call.resolve(result);
 
             } catch (Exception e) {
                 call.reject("INFERENCE_ERROR", e.getMessage(), e);
-            } finally {
-                try { session.close(); } catch (Exception ignored) {}
             }
         });
     }
@@ -303,15 +641,7 @@ public class GemmaSynthesisPlugin extends Plugin {
     @PluginMethod
     public void unloadModel(PluginCall call) {
         synchronized (GemmaSynthesisPlugin.class) {
-            if (sBaseSession != null) {
-                try { sBaseSession.close(); } catch (Exception ignored) {}
-                sBaseSession = null;
-            }
-            if (sModel != null) {
-                try { sModel.close(); } catch (Exception ignored) {}
-                sModel = null;
-            }
-            sLoraLoaded = false;
+            unloadModelInternal();
         }
         JSObject result = new JSObject();
         result.put("ok", true);
@@ -356,45 +686,6 @@ public class GemmaSynthesisPlugin extends Plugin {
     // ══════════════════════════════════════════════════════════════════════════
 
     /**
-     * Télécharge le modèle .task depuis MODEL_URL vers le cache interne.
-     * Bloque jusqu'à la fin du téléchargement.
-     */
-    private boolean downloadModel(File dest) throws IOException {
-        sDownloading = true;
-        try {
-            dest.getParentFile().mkdirs();
-
-            HttpURLConnection conn = (HttpURLConnection) new URL(MODEL_URL).openConnection();
-            conn.setConnectTimeout(15_000);
-            conn.setReadTimeout(30_000);
-            conn.setInstanceFollowRedirects(true);
-            conn.connect();
-
-            int responseCode = conn.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP " + responseCode + " pour " + MODEL_URL);
-            }
-
-            long total = conn.getContentLengthLong();
-            long downloaded = 0;
-
-            try (InputStream in  = conn.getInputStream();
-                 FileOutputStream out = new FileOutputStream(dest)) {
-                byte[] buf = new byte[8192];
-                int n;
-                while ((n = in.read(buf)) != -1) {
-                    out.write(buf, 0, n);
-                    downloaded += n;
-                }
-            }
-
-            return dest.exists() && dest.length() > 0;
-        } finally {
-            sDownloading = false;
-        }
-    }
-
-    /**
      * Copie le LoRA depuis assets/lora/ vers le cache interne.
      * Retourne true si dispo et non-vide.
      */
@@ -403,8 +694,8 @@ public class GemmaSynthesisPlugin extends Plugin {
         if (dest.exists() && dest.length() > 0) return true;
 
         try (InputStream is = getContext().getAssets().open(LORA_ASSET_PATH)) {
-            dest.getParentFile().mkdirs();
-            try (FileOutputStream fos = new FileOutputStream(dest)) {
+            
+            try (java.io.FileOutputStream fos = new java.io.FileOutputStream(dest)) {
                 byte[] buf = new byte[8192];
                 int n;
                 while ((n = is.read(buf)) != -1) fos.write(buf, 0, n);
@@ -415,9 +706,7 @@ public class GemmaSynthesisPlugin extends Plugin {
         }
     }
 
-    private File getModelFile() {
-        return new File(getContext().getFilesDir(), "models/" + MODEL_FILENAME);
-    }
+    
 
     private File getLoraFile() {
         return new File(getContext().getFilesDir(), "lora/" + LORA_CACHE_FILENAME);

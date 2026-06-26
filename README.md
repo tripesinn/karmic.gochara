@@ -1,15 +1,15 @@
 # ☸️ Gochara Karmique — Edge AI Astrology
 
-![Edge AI](https://img.shields.io/badge/AI-Gemma_3_1B_Local-orange)
+![Edge AI](https://img.shields.io/badge/AI-Gemma_4_E2B_Local-orange)
 ![License](https://img.shields.io/badge/License-Dual_MIT_CC-blue)
 ![Platform](https://img.shields.io/badge/Platform-Android_Capacitor-green)
-![Version](https://img.shields.io/badge/Version-1.2.0-purple)
+![Version](https://img.shields.io/badge/Version-1.3.0-purple)
 
 **Gochara Karmique** est un moteur expert d'astrologie védique fonctionnant en "Edge AI" (intelligence artificielle locale). Il combine les calculs de précision du Jyotish sidéral avec une synthèse doctrinale originale pour transformer des transits astronomiques en conseils oraculaires profonds.
 
 ---
 
-## 🟢 Current Project Status (May 2026)
+## 🟢 Current Project Status (June 2026)
 This project is currently deployed on Google Cloud Run (`gochara-api`) as a web application and is entering a **Closed Beta Testing** phase. 
 - **User Recruitment**: Beta testers are being recruited on Reddit and X.com. 
 - **Beta Access**: To simplify testing, all new users created during this phase automatically default to the `pro` plan (in `profiles.py`), bypassing Stripe/Apple Pay integrations for now.
@@ -30,10 +30,11 @@ Ce projet suit un modèle de développement hybride :
 ## 🛠 Architecture Technique : "Astro AI Edge"
 
 L'innovation majeure de ce chatbot réside dans sa capacité à fonctionner **100% hors-ligne** sur mobile :
-- **Inférence Locale** : Utilise **Gemma 3 1B** (int4) via le plugin Capacitor Gemma.
+- **Inférence Locale** : Utilise le SDK **LiteRT-LM** (`com.google.ai.edge.litertlm`) pour exécuter **Gemma 4 E2B-IT** localement.
+- **Zéro-Copie via SAF (Storage Access Framework)** : L'application n'exige pas la permission `MANAGE_EXTERNAL_STORAGE`. L'utilisateur sélectionne un dossier de stockage (ex: Téléchargements) via le sélecteur natif Android. Le modèle de 2.58 Go est ensuite lu directement en mémoire (zéro-copie) via son *File Descriptor* (`/proc/self/fd/`), ce qui préserve le stockage interne du téléphone.
 - **Injection Dynamique** : Des fichiers `.task` JSON sont générés par le backend Flask pour injecter précisément les fragments de doctrine pertinents au transit de l'utilisateur.
 - **Précision Astronomique** : Intégration de la **Swiss Ephemeris** (sidéral DK) pour des calculs dignes des meilleurs logiciels professionnels.
-- **Performance Optimisée** : Temps de réponse < 3 secondes sur appareils Android récents.
+- **Performance Optimisée** : Inférence locale ultra-rapide sur processeurs mobiles récents.
 
 ---
 
@@ -118,7 +119,7 @@ Le projet utilise Java 17 pour la compilation. Si vous rencontrez des problèmes
 - **Synthèse Personnalisée** : Adaptation du conseil selon le thème natal
 - **Mode Hors-ligne** : Fonctionnement complet sans connexion internet
 - **Multi-langues** : Français et Anglais supportés
-- **Performance Optimisée** : Utilisation de MediaPipe tasks-genai v0.10.14 pour stabilité
+- **Performance Optimisée** : Utilisation du SDK LiteRT-LM (`com.google.ai.edge.litertlm`) pour la stabilité et l'exécution locale de Gemma 4 E2B-IT
 
 ---
 
