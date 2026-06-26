@@ -119,7 +119,7 @@ NAKSHATRA_REGIME = {
 }
 
 
-def detect_global_nak_transits(target_date: date = None) -> list[dict]:
+def detect_global_nak_transits(target_date: date | None = None) -> list[dict]:
     """
     Détecte les planètes lentes qui entrent dans un nouveau nakshatra aujourd'hui.
     Sans profil natal — météo astrologique globale.
@@ -699,7 +699,7 @@ def _is_nodal_opposition(profile: dict, today: date) -> bool:
     # Placeholder
     return False
 
-def generate_transit_alert(user_id: str, birth_data: dict, current_date: date, subscription_status: str) -> dict:
+def generate_transit_alert(user_id: str, birth_data: dict, current_date: date, subscription_status: str) -> dict | None:
     """
     Core logic for the Transit Alert Agent.
     """

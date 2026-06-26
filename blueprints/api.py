@@ -301,3 +301,115 @@ def login_firebase():
         "profile": profile,
         **create_tokens(pseudo)
     })
+
+
+@api_bp.route("/calendar/<pseudo>.ics", methods=["GET"])
+def get_calendar_ics(pseudo):
+    from profiles import get_profile_by_pseudo
+    from transit_alerts import (
+        _positions_for_day,
+        _active_conjunctions,
+        detect_lunation_events,
+        _active_nak_activations,
+        PLANET_LABELS,
+        NATAL_LABELS,
+    )
+    from flask import Response
+    import hashlib
+
+    profile = get_profile_by_pseudo(pseudo)
+    if not profile:
+        return "Profil non trouvé", 404
+
+    year = date.today().year
+    start_date = date(year, 1, 1)
+    end_date = date(year, 12, 31)
+
+    ics_lines = [
+        "BEGIN:VCALENDAR",
+        "VERSION:2.0",
+        "PRODID:-//Karmic Gochara//NONSGML Calendar Feed//FR",
+        "CALSCALE:GREGORIAN",
+        "METHOD:PUBLISH",
+        f"X-WR-CALNAME:Gochara Karmique - {profile.get('name', pseudo)}",
+        "X-WR-TIMEZONE:Europe/Paris",
+    ]
+
+    current_date = start_date
+    while current_date <= end_date:
+        try:
+            natal_pos, transit_pos = _positions_for_day(profile, current_date)
+            
+            # 1. Conjunctions
+            conjs = _active_conjunctions(natal_pos, transit_pos)
+            for pair in conjs:
+                t_label = PLANET_LABELS.get(pair[0], pair[0])
+                n_label = NATAL_LABELS.get(pair[1], pair[1])
+                date_str = current_date.strftime("%Y%m%d")
+                uid_seed = f"{pseudo}_{date_str}_{pair[0]}_{pair[1]}"
+                uid = hashlib.md5(uid_seed.encode()).hexdigest() + "@karmicgochara.app"
+                
+                ics_lines.extend([
+                    "BEGIN:VEVENT",
+                    f"UID:{uid}",
+                    f"DTSTAMP:{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}",
+                    f"DTSTART;VALUE=DATE:{date_str}",
+                    f"SUMMARY:✦ {t_label} conj. {n_label}",
+                    f"DESCRIPTION:Alignement karmique de {t_label} sur {n_label}. Pic exact.",
+                    "END:VEVENT"
+                ])
+                
+            # 2. Lunations
+            lunes = detect_lunation_events(profile, natal_pos, transit_pos)
+            for e in lunes:
+                t_label = e["transit"]
+                n_label = e.get("interpretation", "Cycle lunaire")
+                date_str = current_date.strftime("%Y%m%d")
+                uid_seed = f"{pseudo}_{date_str}_lune_{t_label}"
+                uid = hashlib.md5(uid_seed.encode()).hexdigest() + "@karmicgochara.app"
+                
+                ics_lines.extend([
+                    "BEGIN:VEVENT",
+                    f"UID:{uid}",
+                    f"DTSTAMP:{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}",
+                    f"DTSTART;VALUE=DATE:{date_str}",
+                    f"SUMMARY:✦ {t_label}",
+                    f"DESCRIPTION:{n_label} dans le nakshatra {e.get('nakshatra','')}.",
+                    "END:VEVENT"
+                ])
+                
+            # 3. Nakshatra activations
+            natal_naks = {
+                "Ketu":   profile.get("ketu_nakshatra", ""),
+                "Rahu":   profile.get("rahu_nakshatra", ""),
+                "Chiron": profile.get("chiron_nakshatra", ""),
+            }
+            naks = _active_nak_activations(natal_naks, transit_pos)
+            for key, info in naks.items():
+                t_name, point_key = key
+                t_label = PLANET_LABELS.get(t_name, t_name)
+                date_str = current_date.strftime("%Y%m%d")
+                uid_seed = f"{pseudo}_{date_str}_nak_{t_name}_{point_key}"
+                uid = hashlib.md5(uid_seed.encode()).hexdigest() + "@karmicgochara.app"
+                
+                ics_lines.extend([
+                    "BEGIN:VEVENT",
+                    f"UID:{uid}",
+                    f"DTSTAMP:{datetime.utcnow().strftime('%Y%m%dT%H%M%SZ')}",
+                    f"DTSTART;VALUE=DATE:{date_str}",
+                    f"SUMMARY:✦ Ingress {t_label} en {info['nakshatra']}",
+                    f"DESCRIPTION:{t_label} traverse {info['nakshatra']} ({info['lord']}) - active {point_key} natal.",
+                    "END:VEVENT"
+                ])
+        except Exception as e:
+            current_app.logger.warning("Erreur calendar date %s : %s", current_date, e)
+            
+        current_date += timedelta(days=1)
+
+    ics_lines.append("END:VCALENDAR")
+    
+    return Response(
+        "\r\n".join(ics_lines),
+        mimetype="text/calendar",
+        headers={"Content-Disposition": f"attachment; filename={pseudo}_gochara.ics"}
+    )

@@ -1,19 +1,12 @@
 """
-profiles.py — Gestion des profils utilisateurs via Google Sheets
+profiles.py — Gestion des profils utilisateurs via Cloud Firestore
 Gochara Karmique — Architecture multi-utilisateurs
 """
 
 import json
 import os
 from datetime import date
-
-import gspread
-from google.oauth2.service_account import Credentials
-
-SCOPES = [
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/drive",
-]
+from google.cloud import firestore
 
 # ── Définition complète et ordonnée de toutes les colonnes ───────────────────
 # Bloc 1 — Profil de base (A–V, indices 0–21)
@@ -86,137 +79,20 @@ C = {name: i for i, name in enumerate(ALL_COLS)}
 
 SYNTHESIS_QUOTA = 3  # max synthèses par mois (plan free)
 
-_sheet = None
+_db = None
 
-
-def _col(idx: int) -> str:
-    """Convertit un index 0-based en lettre(s) de colonne Sheets (A, B, …, AA, …)."""
-    idx += 1
-    result = ""
-    while idx:
-        idx, rem = divmod(idx - 1, 26)
-        result = chr(65 + rem) + result
-    return result
-
+def _get_db():
+    global _db
+    if _db is not None:
+        return _db
+    project_id = os.environ.get("PROJECT_ID", "karmic-gochara-cloud")
+    _db = firestore.Client(project=project_id)
+    return _db
 
 def _current_month_str() -> str:
     """Retourne le 1er du mois courant au format YYYY-MM-01."""
     today = date.today()
     return f"{today.year}-{today.month:02d}-01"
-
-
-def _get_sheet():
-    global _sheet
-    if _sheet is not None:
-        return _sheet
-
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-    sheet_id   = os.environ.get("SHEET_ID")
-
-    if not creds_json or not sheet_id:
-        raise RuntimeError("GOOGLE_CREDENTIALS_JSON ou SHEET_ID manquant dans les variables d'environnement.")
-
-    creds_data = json.loads(creds_json)
-    creds = Credentials.from_service_account_info(creds_data, scopes=SCOPES)
-    gc = gspread.authorize(creds)
-    spreadsheet = gc.open_by_key(sheet_id)
-
-    ws = None
-    try:
-        ws = spreadsheet.worksheet("gochara-profiles")
-    except gspread.WorksheetNotFound:
-        try:
-            ws = spreadsheet.worksheet("profiles")
-        except gspread.WorksheetNotFound:
-            try:
-                ws = spreadsheet.sheet1
-            except Exception: # Can be WorksheetNotFound if no sheets
-                ws = spreadsheet.add_worksheet(title="gochara-profiles", rows=1000, cols=len(ALL_COLS) + 5)
-
-    # Créer l'en-tête si la feuille est vide
-    if ws and not ws.row_values(1):
-        ws.append_row(ALL_COLS)
-
-    _sheet = ws
-    return _sheet
-
-
-def _row_to_profile(row: list) -> dict:
-    """Convertit une ligne Sheets en dict profil."""
-    def _safe(i, cast=str, default=""):
-        try:
-            v = row[i].strip() if isinstance(row[i], str) else str(row[i])
-            return cast(v) if v else default
-        except (IndexError, ValueError):
-            return default
-
-    return {
-        "pseudo":                _safe(C["pseudo"]),
-        "email":                 _safe(C["email"]),
-        "name":                  _safe(C["name"]),
-        "year":                  _safe(C["year"], int, 1990),
-        "month":                 _safe(C["month"], int, 1),
-        "day":                   _safe(C["day"], int, 1),
-        "hour":                  _safe(C["hour"], int, 12),
-        "minute":                _safe(C["minute"], int, 0),
-        "lat":                   _safe(C["lat"], float, 48.8566),
-        "lon":                   _safe(C["lon"], float, 2.3522),
-        "tz":                    _safe(C["tz"]) or "Europe/Paris",
-        "city":                  _safe(C["city"]) or "Paris, France",
-        "transit_city":          _safe(C["transit_city"]) or "Paris, France",
-        "transit_lat":           _safe(C["transit_lat"], float, 48.8566),
-        "transit_lon":           _safe(C["transit_lon"], float, 2.3522),
-        "transit_tz":            _safe(C["transit_tz"]) or "Europe/Paris",
-        "transit_date":          _safe(C["transit_date"]) or "",
-        "syntheses_count":       _safe(C["syntheses_count"], int, 0),
-        "syntheses_reset_date":  _safe(C["syntheses_reset_date"]) or _current_month_str(),
-        "alerts_enabled":        _safe(C["alerts_enabled"], int, 0),
-        "plan":                  _safe(C["plan"]) or "free",
-        "plan_syntheses":        _safe(C["plan_syntheses"], int, 0),
-        "stripe_customer_id":    _safe(C["stripe_customer_id"]) or "",
-        "chandra_lagna_sign":    _safe(C["chandra_lagna_sign"]),
-        "ketu_sign":             _safe(C["ketu_sign"]),
-        "ketu_house":            _safe(C["ketu_house"]),
-        "ketu_nakshatra":        _safe(C["ketu_nakshatra"]),
-        "rahu_sign":             _safe(C["rahu_sign"]),
-        "rahu_house":            _safe(C["rahu_house"]),
-        "rahu_nakshatra":        _safe(C["rahu_nakshatra"]),
-        "chiron_sign":           _safe(C["chiron_sign"]),
-        "chiron_house":          _safe(C["chiron_house"]),
-        "chiron_nakshatra":      _safe(C["chiron_nakshatra"]),
-        "lilith_sign":           _safe(C["lilith_sign"]),
-        "lilith_house":          _safe(C["lilith_house"]),
-        "saturn_sign":           _safe(C["saturn_sign"]),
-        "saturn_house":          _safe(C["saturn_house"]),
-        "jupiter_sign":          _safe(C["jupiter_sign"]),
-        "jupiter_house":         _safe(C["jupiter_house"]),
-        "porte_visible_sign":    _safe(C["porte_visible_sign"]),
-        "porte_visible_house":   _safe(C["porte_visible_house"]),
-        "porte_visible_deg":     _safe(C["porte_visible_deg"]),
-        "porte_invisible_sign":  _safe(C["porte_invisible_sign"]),
-        "porte_invisible_house": _safe(C["porte_invisible_house"]),
-        "moon_longitude_sid":    _safe(C["moon_longitude_sid"]),
-        "chandra_lagna_degree":  _safe(C["chandra_lagna_degree"]),
-        "last_signal_date":      _safe(C["last_signal_date"]),
-    }
-
-
-def get_all_profiles() -> list[dict]:
-    """Retourne tous les profils de la feuille."""
-    ws = _get_sheet()
-    rows = ws.get_all_values()
-    return [_row_to_profile(row) for row in rows[1:] if row and row[0]]
-
-
-def get_profile_by_email(email: str) -> dict | None:
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    email_lower = email.strip().lower()
-    for row in records[1:]:
-        if len(row) > 1 and row[1].strip().lower() == email_lower:
-            return _row_to_profile(row)
-    return None
-
 
 def _clean_pseudo(s: str) -> str:
     """Supprime espaces insécables, caractères invisibles, BOM — pour comparaison robuste."""
@@ -224,528 +100,511 @@ def _clean_pseudo(s: str) -> str:
     s = "".join(c for c in s if not unicodedata.category(c).startswith("C"))
     return s.strip().replace("\u00a0", "").replace("\u200b", "").replace("\ufeff", "").lower()
 
+def _doc_to_profile(doc) -> dict | None:
+    """Convertit un document snapshot Firestore en dictionnaire profil."""
+    if not doc.exists:
+        return None
+    data = doc.to_dict()
+    
+    def _safe(key, cast=str, default=""):
+        try:
+            val = data.get(key)
+            if val is None or val == "":
+                return default
+            return cast(val)
+        except (ValueError, TypeError):
+            return default
+
+    return {
+        "pseudo":                _safe("pseudo"),
+        "email":                 _safe("email"),
+        "name":                  _safe("name"),
+        "year":                  _safe("year", int, 1990),
+        "month":                 _safe("month", int, 1),
+        "day":                   _safe("day", int, 1),
+        "hour":                  _safe("hour", int, 12),
+        "minute":                _safe("minute", int, 0),
+        "lat":                   _safe("lat", float, 48.8566),
+        "lon":                   _safe("lon", float, 2.3522),
+        "tz":                    _safe("tz") or "Europe/Paris",
+        "city":                  _safe("city") or "Paris, France",
+        "transit_city":          _safe("transit_city") or "Paris, France",
+        "transit_lat":           _safe("transit_lat", float, 48.8566),
+        "transit_lon":           _safe("transit_lon", float, 2.3522),
+        "transit_tz":            _safe("transit_tz") or "Europe/Paris",
+        "transit_date":          _safe("transit_date") or "",
+        "syntheses_count":       _safe("syntheses_count", int, 0),
+        "syntheses_reset_date":  _safe("syntheses_reset_date") or _current_month_str(),
+        "alerts_enabled":        _safe("alerts_enabled", int, 0),
+        "plan":                  _safe("plan") or "free",
+        "plan_syntheses":        _safe("plan_syntheses", int, 0),
+        "stripe_customer_id":    _safe("stripe_customer_id") or "",
+        "chandra_lagna_sign":    _safe("chandra_lagna_sign"),
+        "ketu_sign":             _safe("ketu_sign"),
+        "ketu_house":            _safe("ketu_house"),
+        "ketu_nakshatra":        _safe("ketu_nakshatra"),
+        "rahu_sign":             _safe("rahu_sign"),
+        "rahu_house":            _safe("rahu_house"),
+        "rahu_nakshatra":        _safe("rahu_nakshatra"),
+        "chiron_sign":           _safe("chiron_sign"),
+        "chiron_house":          _safe("chiron_house"),
+        "chiron_nakshatra":      _safe("chiron_nakshatra"),
+        "lilith_sign":           _safe("lilith_sign"),
+        "lilith_house":          _safe("lilith_house"),
+        "saturn_sign":           _safe("saturn_sign"),
+        "saturn_house":          _safe("saturn_house"),
+        "jupiter_sign":          _safe("jupiter_sign"),
+        "jupiter_house":         _safe("jupiter_house"),
+        "porte_visible_sign":    _safe("porte_visible_sign"),
+        "porte_visible_house":   _safe("porte_visible_house"),
+        "porte_visible_deg":     _safe("porte_visible_deg"),
+        "porte_invisible_sign":  _safe("porte_invisible_sign"),
+        "porte_invisible_house": _safe("porte_invisible_house"),
+        "moon_longitude_sid":    _safe("moon_longitude_sid"),
+        "chandra_lagna_degree":  _safe("chandra_lagna_degree"),
+        "last_signal_date":      _safe("last_signal_date"),
+        "chat_remaining":        _safe("chat_remaining", int, 0),
+        "chat_reset_month":      _safe("chat_reset_month"),
+        "alert_sent":            _safe("alert_sent", int, 0),
+    }
+
+def get_all_profiles() -> list[dict]:
+    """Retourne tous les profils de la base."""
+    db = _get_db()
+    docs = db.collection("users").stream()
+    profiles = []
+    for doc in docs:
+        p = _doc_to_profile(doc)
+        if p:
+            profiles.append(p)
+    return profiles
+
+def get_profile_by_email(email: str) -> dict | None:
+    """Récupère un profil par son email."""
+    db = _get_db()
+    email_clean = email.strip().lower()
+    doc = db.collection("users").document(email_clean).get()
+    if doc.exists:
+        return _doc_to_profile(doc)
+    
+    # Query fallback en cas d'indexation différente
+    query = db.collection("users").where("email", "==", email_clean).limit(1).get()
+    if query:
+        return _doc_to_profile(query[0])
+    return None
 
 def get_profile_by_pseudo(pseudo: str) -> dict | None:
-    ws = _get_sheet()
-    records = ws.get_all_values()
+    """Récupère un profil par son pseudo (insensible à la casse)."""
+    db = _get_db()
     pseudo_clean = _clean_pseudo(pseudo)
-
-    for row in records[1:]:
-        if row and _clean_pseudo(row[0]) == pseudo_clean:
-            return _row_to_profile(row)
+    
+    # Query directe par le champ pseudo
+    query = db.collection("users").where("pseudo", "==", pseudo_clean).limit(1).get()
+    if query:
+        return _doc_to_profile(query[0])
+    
+    query = db.collection("users").where("pseudo", "==", pseudo.strip()).limit(1).get()
+    if query:
+        return _doc_to_profile(query[0])
+        
+    # Parcours fallback pour robustesse sur pseudos mal formatés
+    docs = db.collection("users").stream()
+    for doc in docs:
+        p = _doc_to_profile(doc)
+        if p and _clean_pseudo(p.get("pseudo", "")) == pseudo_clean:
+            return p
     return None
-
 
 def save_email_by_pseudo(pseudo: str, email: str) -> bool:
-    """Met à jour uniquement la colonne email (B) pour un pseudo donné."""
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_clean = _clean_pseudo(pseudo)
-    for i, row in enumerate(records[1:], start=2):
-        if row and _clean_pseudo(row[0]) == pseudo_clean:
-            ws.update(f"B{i}", [[email.strip().lower()]])
-            return True
+    """Met à jour l'email pour un pseudo donné."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if p:
+        old_email = p.get("email").strip().lower()
+        new_email = email.strip().lower()
+        p["email"] = new_email
+        
+        if old_email == new_email:
+            db.collection("users").document(new_email).update({"email": new_email})
+        else:
+            db.collection("users").document(new_email).set(p)
+            db.collection("users").document(old_email).delete()
+        return True
     return False
-
 
 def create_profile(data: dict) -> dict:
-    """Crée un nouveau profil et retourne le profil créé."""
-    ws = _get_sheet()
-    row = [
-        data.get("pseudo", ""),
-        data.get("email", ""),
-        data.get("name", ""),
-        str(data.get("year", "")),
-        str(data.get("month", "")),
-        str(data.get("day", "")),
-        str(data.get("hour", "")),
-        str(data.get("minute", "")),
-        str(data.get("lat", "")),
-        str(data.get("lon", "")),
-        data.get("tz", "Europe/Paris"),
-        data.get("city", ""),
-        data.get("transit_city", ""),
-        str(data.get("transit_lat", "")),
-        str(data.get("transit_lon", "")),
-        data.get("transit_tz", "Europe/Paris"),
-        data.get("transit_date", ""),  # transit_date
-        "0",                      # syntheses_count
-        _current_month_str(),     # syntheses_reset_date
-        "0",                      # alerts_enabled
-        "pro",                    # plan — beta testeurs gratuits jusqu'au 15 juil.
-        "0",                      # plan_syntheses
-        "",                       # stripe_customer_id
-    ]
-    ws.append_row(row)
-    return _row_to_profile(row)
-
+    """Crée un nouveau profil dans Firestore."""
+    db = _get_db()
+    pseudo = data.get("pseudo", "")
+    email = data.get("email", "").strip().lower()
+    
+    profile_data = {
+        "pseudo":                pseudo,
+        "email":                 email,
+        "name":                  data.get("name", pseudo),
+        "year":                  int(data.get("year", 1990)),
+        "month":                 int(data.get("month", 1)),
+        "day":                   int(data.get("day", 1)),
+        "hour":                  int(data.get("hour", 12)),
+        "minute":                int(data.get("minute", 0)),
+        "lat":                   float(data.get("lat", 48.8566)),
+        "lon":                   float(data.get("lon", 2.3522)),
+        "tz":                    data.get("tz", "Europe/Paris"),
+        "city":                  data.get("city", ""),
+        "transit_city":          data.get("transit_city", data.get("city", "")),
+        "transit_lat":           float(data.get("transit_lat", data.get("lat", 48.8566))),
+        "transit_lon":           float(data.get("transit_lon", data.get("lon", 2.3522))),
+        "transit_tz":            data.get("transit_tz", data.get("tz", "Europe/Paris")),
+        "transit_date":          data.get("transit_date", ""),
+        "syntheses_count":       0,
+        "syntheses_reset_date":  _current_month_str(),
+        "alerts_enabled":        0,
+        "plan":                  "pro",
+        "plan_syntheses":        0,
+        "stripe_customer_id":    "",
+        "chat_remaining":        0,
+        "chat_reset_month":      "",
+        "alert_sent":            0
+    }
+    
+    doc_ref = db.collection("users").document(email)
+    doc_ref.set(profile_data)
+    return _doc_to_profile(doc_ref.get())
 
 def update_profile(email: str, data: dict) -> dict | None:
-    """Met à jour le profil d'un utilisateur existant."""
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    email_lower = email.strip().lower()
-
-    for i, row in enumerate(records[1:], start=2):
-        if len(row) > 1 and row[1].strip().lower() == email_lower:
-            def _pick(key, idx, default=""):
-                return data.get(key) if key in data and data.get(key) is not None else (row[idx] if len(row) > idx else default)
-
-            # Préserve les colonnes quota existantes
-            sc  = C["syntheses_count"]
-            srd = C["syntheses_reset_date"]
-            ae  = C["alerts_enabled"]
-            existing_count      = row[sc]  if len(row) > sc  else "0"
-            existing_reset_date = row[srd] if len(row) > srd else _current_month_str()
-            existing_alerts     = row[ae]  if len(row) > ae  else "0"
-
-            new_row = [
-                _pick("pseudo",       0),
-                row[1],  # email immuable
-                _pick("name",         2),
-                str(_pick("year",     3)),
-                str(_pick("month",    4)),
-                str(_pick("day",      5)),
-                str(_pick("hour",     6)),
-                str(_pick("minute",   7)),
-                str(_pick("lat",      8)),
-                str(_pick("lon",      9)),
-                _pick("tz",           10, "Europe/Paris"),
-                _pick("city",         11),
-                _pick("transit_city", 12),
-                str(_pick("transit_lat", 13)),
-                str(_pick("transit_lon", 14)),
-                _pick("transit_tz",   15, "Europe/Paris"),
-                _pick("transit_date", 16),
-                existing_count,
-                existing_reset_date,
-                existing_alerts,
-            ]
-            # Inclure les données natales existantes pour le retour
-            if len(row) > len(new_row):
-                new_row.extend(row[len(new_row):])
-
-            end_col = _col(C["alerts_enabled"])
-            ws.update(f"A{i}:{end_col}{i}", [new_row[:C["alerts_enabled"] + 1]])
-            return _row_to_profile(new_row)
-    return None
-
+    """Met à jour un profil existant dans Firestore."""
+    db = _get_db()
+    email_clean = email.strip().lower()
+    doc_ref = db.collection("users").document(email_clean)
+    doc = doc_ref.get()
+    if not doc.exists:
+        return None
+        
+    updates = {}
+    for k, v in data.items():
+        if v is not None:
+            if k in ("year", "month", "day", "hour", "minute", "syntheses_count", "plan_syntheses", "alerts_enabled", "chat_remaining", "alert_sent"):
+                try: updates[k] = int(v)
+                except: pass
+            elif k in ("lat", "lon", "transit_lat", "transit_lon"):
+                try: updates[k] = float(v)
+                except: pass
+            else:
+                updates[k] = v
+                
+    if updates:
+        doc_ref.update(updates)
+        
+    return _doc_to_profile(doc_ref.get())
 
 def save_natal_to_sheet(pseudo: str, profile: dict) -> bool:
-    """
-    Sauvegarde les données natales calculées dans les colonnes W→AS.
-    Appelée après calcul natal à l'inscription ou au premier login.
-    """
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-        natal_row = [str(profile.get(col, "")) for col in NATAL_COLS]
-        c1 = _col(C[NATAL_COLS[0]])
-        c2 = _col(C[NATAL_COLS[-1]])
-        ws.update(f"{c1}{i}:{c2}{i}", [natal_row])
+    """Sauvegarde les données natales calculées dans Firestore (conserve le nom historique)."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if p:
+        email = p.get("email").strip().lower()
+        doc_ref = db.collection("users").document(email)
+        
+        updates = {}
+        for col in NATAL_COLS:
+            if col in profile:
+                updates[col] = profile[col]
+        if updates:
+            doc_ref.update(updates)
         return True
     return False
-
 
 def check_and_increment_synthesis(pseudo: str) -> dict:
-    """
-    Vérifie le quota mensuel de synthèses pour un utilisateur.
-    - Si quota dépassé  → retourne {"allowed": False, "remaining": 0}
-    - Sinon             → incrémente le compteur et retourne {"allowed": True, "remaining": N}
-    Gère le reset automatique en début de mois.
-    """
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
+    """Vérifie le quota mensuel de synthèses."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if not p:
+        return {"allowed": False, "remaining": 0}
+        
+    email = p.get("email").strip().lower()
+    doc_ref = db.collection("users").document(email)
+    
     current_month = _current_month_str()
-
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-
-        sc = C["syntheses_count"]; srd = C["syntheses_reset_date"]
-        try:
-            count = int(row[sc]) if len(row) > sc and row[sc] else 0
-        except ValueError:
-            count = 0
-
-        reset_date = row[srd] if len(row) > srd and row[srd] else ""
-
-        if reset_date != current_month:
-            count = 0
-            reset_date = current_month
-
-        if count >= SYNTHESIS_QUOTA:
-            return {"allowed": False, "remaining": 0}
-
-        new_count = count + 1
-        ws.update(f"{_col(sc)}{i}:{_col(srd)}{i}", [[str(new_count), current_month]])
-
-        return {"allowed": True, "remaining": SYNTHESIS_QUOTA - new_count}
-
-    return {"allowed": False, "remaining": 0}
-
+    count = p.get("syntheses_count", 0)
+    reset_date = p.get("syntheses_reset_date", "")
+    
+    if reset_date != current_month:
+        count = 0
+        reset_date = current_month
+        
+    if count >= SYNTHESIS_QUOTA:
+        return {"allowed": False, "remaining": 0}
+        
+    new_count = count + 1
+    doc_ref.update({
+        "syntheses_count": new_count,
+        "syntheses_reset_date": reset_date
+    })
+    return {"allowed": True, "remaining": SYNTHESIS_QUOTA - new_count}
 
 def delete_profile(pseudo: str) -> bool:
-    """Supprime définitivement le profil. Retourne True si supprimé."""
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-    for i, row in enumerate(records[1:], start=2):
-        if row and row[0].strip().lower() == pseudo_lower:
-            ws.delete_rows(i)
-            return True
-    return False
-
-
-def pseudo_exists(pseudo: str) -> bool:
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-    for row in records[1:]:
-        if row and row[0].strip().lower() == pseudo_lower:
-            return True
-    return False
-
-
-def set_alerts(pseudo: str, enabled: bool) -> bool:
-    """Active ou désactive les alertes transit pour un utilisateur."""
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-        ws.update(f"{_col(C['alerts_enabled'])}{i}", [[str(int(enabled))]])
+    """Supprime définitivement un profil dans Firestore."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if p:
+        email = p.get("email").strip().lower()
+        db.collection("users").document(email).delete()
         return True
     return False
 
+def pseudo_exists(pseudo: str) -> bool:
+    """Vérifie si un pseudo existe."""
+    p = get_profile_by_pseudo(pseudo)
+    return p is not None
+
+def set_alerts(pseudo: str, enabled: bool) -> bool:
+    """Active ou désactive les alertes de transit."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if p:
+        email = p.get("email").strip().lower()
+        db.collection("users").document(email).update({
+            "alerts_enabled": int(enabled)
+        })
+        return True
+    return False
 
 # ── Gestion plans Stripe ───────────────────────────────────────────────────────
 
 PLAN_SYNTHESES = {
-    "test":     1,    # one-shot
-    "lecture":  1,    # one-shot → 1 synthèse + 3 questions chatbot
-    "essential": 1,   # legacy name for lecture
-    "subscription": -1, # illimité
-    "illimite": -1,   # illimité
-    "illimité": -1,   # legacy/manual name with accent
+    "test":     1,
+    "lecture":  1,
+    "essential": 1,
+    "subscription": -1,
+    "illimite": -1,
+    "illimité": -1,
     "free":     0,
 }
 
 PLAN_CHAT_LIMITS = {
-    "test":     3,    # 3 questions chatbot one-shot
-    "lecture":  3,    # 3 questions chatbot one-shot
+    "test":     3,
+    "lecture":  3,
     "essential": 3,
-    "subscription": 10, # illimité
-    "illimite": 10,   # 10/mois via serveur (Gemini) — illimité si IA local
+    "subscription": 10,
+    "illimite": 10,
     "illimité": 10,
     "free":     0,
 }
 
-def _parse_unlimited_int(value_str: str, default: int) -> int:
-    """Convertit une chaîne en int, gérant 'UNLIMITED' comme un grand nombre."""
-    if isinstance(value_str, str) and value_str.strip().upper() == "UNLIMITED":
-        return 999999999 # Représente l'illimité
-    try:
-        return int(value_str) if value_str else default
-    except ValueError:
-        return default
-
 def upgrade_plan(pseudo: str, plan: str, stripe_customer_id: str = "") -> bool:
-    """
-    Met à jour le plan d'un utilisateur après paiement Stripe confirmé.
-    Crédite le nombre de synthèses correspondant au plan.
-    Sauvegarde le stripe_customer_id si fourni.
-    """
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
+    """Met à jour le plan d'un utilisateur après paiement Stripe."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if not p:
+        return False
+        
+    email = p.get("email").strip().lower()
+    doc_ref = db.collection("users").document(email)
+    
     syntheses = PLAN_SYNTHESES.get(plan, 0)
-
     chat_limit = PLAN_CHAT_LIMITS.get(plan, 0)
-
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-        ws.update(f"{_col(C['plan'])}{i}:{_col(C['plan_syntheses'])}{i}", [[plan, str(syntheses)]])
-        if stripe_customer_id:
-            ws.update(f"{_col(C['stripe_customer_id'])}{i}", [[stripe_customer_id]])
-        current_month = _current_month_str()[:7]
-        cr = _col(C["chat_remaining"])
-        cm = _col(C["chat_reset_month"])
-        ws.update(f"{cr}{i}:{cm}{i}", [[str(chat_limit), current_month]])
-        return True
-    return False
-
+    current_month = _current_month_str()[:7]
+    
+    updates = {
+        "plan": plan,
+        "plan_syntheses": syntheses,
+        "chat_remaining": chat_limit,
+        "chat_reset_month": current_month
+    }
+    if stripe_customer_id:
+        updates["stripe_customer_id"] = stripe_customer_id
+        
+    doc_ref.update(updates)
+    return True
 
 def downgrade_plan(pseudo: str) -> bool:
-    """Remet le plan à "free" après annulation abonnement Stripe."""
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-        ws.update(f"{_col(C['plan'])}{i}:{_col(C['plan_syntheses'])}{i}", [["free", "0"]])
+    """Rétrograde le plan à free."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if p:
+        email = p.get("email").strip().lower()
+        db.collection("users").document(email).update({
+            "plan": "free",
+            "plan_syntheses": 0
+        })
         return True
     return False
 
-
 def get_chat_quota(pseudo: str) -> dict:
-    """Retourne {plan, remaining, limit, local_unlimited}."""
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
+    """Retourne l'état des quotas de chat pour un utilisateur."""
+    p = get_profile_by_pseudo(pseudo)
+    if not p:
+        return {"plan": "free", "remaining": 0, "limit": 0, "local_unlimited": False}
+        
+    plan = p.get("plan", "free")
+    plan_normalized = plan.lower().replace("é", "e")
+    remaining = p.get("chat_remaining", 0)
     current_month = _current_month_str()[:7]
-    for row in records[1:]:
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-        plan = row[C["plan"]] if len(row) > C["plan"] else "free"
-        plan_normalized = plan.lower().replace("é", "e")
-        try:
-            remaining = int(row[C["chat_remaining"]]) if len(row) > C["chat_remaining"] and row[C["chat_remaining"]] else 0
-        except ValueError:
-            remaining = 0
-        if plan_normalized in ("illimite", "subscription"):
-            reset_month = row[C["chat_reset_month"]] if len(row) > C["chat_reset_month"] else ""
-            if reset_month != current_month:
-                remaining = PLAN_CHAT_LIMITS.get(plan, 10)
-        return {
-            "plan": plan, "remaining": remaining,
-            "limit": PLAN_CHAT_LIMITS.get(plan, 0),
-            "local_unlimited": plan_normalized in ("illimite", "subscription"),
-        }
-    return {"plan": "free", "remaining": 0, "limit": 0, "local_unlimited": False}
-
+    
+    if plan_normalized in ("illimite", "subscription"):
+        reset_month = p.get("chat_reset_month", "")
+        if reset_month != current_month:
+            remaining = PLAN_CHAT_LIMITS.get(plan, 10)
+            
+    return {
+        "plan": plan,
+        "remaining": remaining,
+        "limit": PLAN_CHAT_LIMITS.get(plan, 0),
+        "local_unlimited": plan_normalized in ("illimite", "subscription")
+    }
 
 def consume_chat_question(pseudo: str, local: bool = False) -> dict:
-    """
-    Consomme 1 question chatbot.
-    subscription + local=True  → illimité, pas de décrément
-    subscription + local=False → 10/mois Haiku, reset mensuel col AU
-    test                       → 3 one-shot col AT
-    free                       → refusé
-    """
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
+    """Consomme 1 question de chat."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if not p:
+        return {"ok": False, "remaining": 0, "local": False}
+        
+    email = p.get("email").strip().lower()
+    doc_ref = db.collection("users").document(email)
+    
+    plan = p.get("plan", "free")
+    plan_normalized = plan.lower().replace("é", "e")
     current_month = _current_month_str()[:7]
-
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-        plan = row[C["plan"]] if len(row) > C["plan"] else "free"
-        plan_normalized = plan.lower().replace("é", "e")
-        cr_col = _col(C["chat_remaining"])
-        cm_col = _col(C["chat_reset_month"])
-
-        if plan_normalized in ("illimite", "subscription"):
-            if local:
-                return {"ok": True, "remaining": -1, "local": True}
-            try:
-                remaining = int(row[C["chat_remaining"]]) if len(row) > C["chat_remaining"] and row[C["chat_remaining"]] else 0
-            except ValueError:
-                remaining = 0
-            reset_month = row[C["chat_reset_month"]] if len(row) > C["chat_reset_month"] else ""
-            if reset_month != current_month:
-                remaining = PLAN_CHAT_LIMITS.get(plan, 10)
-                ws.update(f"{cm_col}{i}", [[current_month]])
-            if remaining <= 0:
-                return {"ok": False, "remaining": 0, "local": False}
-            ws.update(f"{cr_col}{i}", [[str(remaining - 1)]])
-            return {"ok": True, "remaining": remaining - 1, "local": False}
-
-        if plan_normalized not in ("test", "lecture", "essential"):
-            return {"ok": False, "remaining": 0, "local": False}
-        try:
-            remaining = int(row[C["chat_remaining"]]) if len(row) > C["chat_remaining"] and row[C["chat_remaining"]] else 0
-        except ValueError:
-            remaining = 0
+    
+    if plan_normalized in ("illimite", "subscription"):
+        if local:
+            return {"ok": True, "remaining": -1, "local": True}
+        remaining = p.get("chat_remaining", 0)
+        reset_month = p.get("chat_reset_month", "")
+        if reset_month != current_month:
+            remaining = PLAN_CHAT_LIMITS.get(plan, 10)
+            doc_ref.update({"chat_reset_month": current_month})
         if remaining <= 0:
             return {"ok": False, "remaining": 0, "local": False}
-        ws.update(f"{cr_col}{i}", [[str(remaining - 1)]])
+        doc_ref.update({"chat_remaining": remaining - 1})
         return {"ok": True, "remaining": remaining - 1, "local": False}
-    return {"ok": False, "remaining": 0, "local": False}
-
+        
+    if plan_normalized not in ("test", "lecture", "essential"):
+        return {"ok": False, "remaining": 0, "local": False}
+        
+    remaining = p.get("chat_remaining", 0)
+    if remaining <= 0:
+        return {"ok": False, "remaining": 0, "local": False}
+    doc_ref.update({"chat_remaining": remaining - 1})
+    return {"ok": True, "remaining": remaining - 1, "local": False}
 
 def get_and_consume_alert(pseudo: str, plan: str) -> dict:
-    """
-    Gère le quota d'alertes selon le plan.
-    - free        → refusé
-    - test/lecture→ 1 alerte one-shot (col AV, index 47)
-    - illimite    → illimité
-
-    Retourne {"ok": bool, "is_last": bool}
-    is_last=True si c'est la dernière alerte disponible (test plan).
-    """
+    """Consomme une alerte de transit."""
     plan_normalized = plan.lower().replace("é", "e")
     if plan_normalized == "free":
         return {"ok": False, "is_last": False}
     if plan_normalized in ("illimite", "subscription"):
         return {"ok": True, "is_last": False}
-
-    # plan == "test" ou "lecture" → 1 alerte max
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
-        try:
-            sent = int(row[C["alert_sent"]]) if len(row) > C["alert_sent"] and row[C["alert_sent"]] else 0
-        except ValueError:
-            sent = 0
-        if sent >= 1:
-            return {"ok": False, "is_last": False}
-        ws.update(f"{_col(C['alert_sent'])}{i}", [["1"]])
-        return {"ok": True, "is_last": True}
-    return {"ok": False, "is_last": False}
-
+        
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if not p:
+        return {"ok": False, "is_last": False}
+        
+    email = p.get("email").strip().lower()
+    doc_ref = db.collection("users").document(email)
+    
+    sent = p.get("alert_sent", 0)
+    if sent >= 1:
+        return {"ok": False, "is_last": False}
+        
+    doc_ref.update({"alert_sent": 1})
+    return {"ok": True, "is_last": True}
 
 def consume_plan_synthesis(pseudo: str) -> bool:
-    """
-    Décrémente le compteur plan_syntheses d'un utilisateur si applicable.
-    Retourne True si autorisé (illimité ou compteur > 0), False sinon.
-    """
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_lower = pseudo.strip().lower()
-
-    for i, row in enumerate(records[1:], start=2):
-        if not row or row[0].strip().lower() != pseudo_lower:
-            continue
+    """Décrémente le compteur de synthèse du plan."""
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if not p:
+        return False
         
-        plan = row[C["plan"]] if len(row) > C["plan"] else "free"
-        plan_normalized = plan.lower().replace("é", "e")
-        if plan_normalized in ("illimite", "subscription"):
-            return True  # Illimité pour les abonnés
-
-        try:
-            count = int(row[C["plan_syntheses"]]) if len(row) > C["plan_syntheses"] and row[C["plan_syntheses"]] else 0
-        except ValueError:
-            count = 0
-            
-        ws.update(f"{_col(C['plan_syntheses'])}{i}", [[str(count - 1)]])
+    plan = p.get("plan", "free")
+    plan_normalized = plan.lower().replace("é", "e")
+    if plan_normalized in ("illimite", "subscription"):
         return True
-    return False
-
+        
+    email = p.get("email").strip().lower()
+    doc_ref = db.collection("users").document(email)
+    
+    count = p.get("plan_syntheses", 0)
+    doc_ref.update({"plan_syntheses": count - 1})
+    return True
 
 def check_and_consume_daily_signal(pseudo: str, profile_dict: dict = None) -> bool:
-    """
-    Vérifie et consomme le quota d'un signal quotidien (freemium).
-    Retourne True si autorisé, False si quota dépassé aujourd'hui.
-    """
-    # Si le profil est fourni et qu'il est PRO, pas besoin d'appeler le sheet !
+    """Quota quotidien freemium."""
     if profile_dict:
         plan = profile_dict.get("plan", "free").lower().replace("é", "e")
         if plan in ("illimite", "subscription", "pro", "test", "lecture", "essential"):
-            # Beta testeurs: Pro jusqu'au 15 juillet 2026
             today = date.today()
             if plan == "pro" and today > date(2026, 7, 15):
-                return False  # Expiré
+                return False
             return True
-
-    ws = _get_sheet()
-    records = ws.get_all_values()
-    pseudo_clean = _clean_pseudo(pseudo)
-    today_str = date.today().isoformat()
-    
-    print(f"check_and_consume_daily_signal for {pseudo_clean}, today={today_str}", flush=True)
-    for i, row in enumerate(records[1:], start=2):
-        if not row or _clean_pseudo(row[0]) != pseudo_clean:
-            continue
             
-        plan = row[C["plan"]] if len(row) > C["plan"] else "free"
-        plan_normalized = plan.lower().replace("é", "e")
-        print(f"Found user row {i}, plan={plan_normalized}", flush=True)
-        if plan_normalized in ("illimite", "subscription", "pro"):
-            if plan_normalized == "pro" and date.today() > date(2026, 7, 15):
-                print("Beta pro expired", flush=True)
-                pass  # Fall through to freemium check
-            else:
-                return True  # Pro: illimité
-            
-        # Freemium check
-        last_date = row[C["last_signal_date"]] if len(row) > C["last_signal_date"] else ""
-        print(f"Last date={last_date}", flush=True)
-        if last_date == today_str:
-            print("Quota reached", flush=True)
-            return False  # Déjà utilisé aujourd'hui
-            
-        # Consommer le quota
-        try:
-            ws.update(f"{_col(C['last_signal_date'])}{i}", [[today_str]])
-            print("Quota updated successfully", flush=True)
-        except Exception as e:
-            print(f"Error updating sheet: {e}", flush=True)
+    db = _get_db()
+    p = get_profile_by_pseudo(pseudo)
+    if not p:
+        print("User not found in db, allowing first use", flush=True)
         return True
         
-    print("User not found in sheet, allowing first use", flush=True)
+    plan = p.get("plan", "free")
+    plan_normalized = plan.lower().replace("é", "e")
+    if plan_normalized in ("illimite", "subscription", "pro"):
+        if plan_normalized == "pro" and date.today() > date(2026, 7, 15):
+            pass
+        else:
+            return True
+            
+    today_str = date.today().isoformat()
+    last_date = p.get("last_signal_date", "")
+    if last_date == today_str:
+        return False
+        
+    email = p.get("email").strip().lower()
+    db.collection("users").document(email).update({
+        "last_signal_date": today_str
+    })
     return True
-
 
 # ── Voting / Benchmark ─────────────────────────────────────────────────────
 
-
-def _get_vote_sheet():
-    """Ouvre ou crée la feuille 'votes' dans le même spreadsheet."""
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
-    sheet_id = os.environ.get("SHEET_ID")
-    if not creds_json or not sheet_id:
-        return None
-    creds = Credentials.from_service_account_info(json.loads(creds_json), scopes=SCOPES)
-    gc = gspread.authorize(creds)
-    sp = gc.open_by_key(sheet_id)
-    try:
-        ws = sp.worksheet("votes")
-    except gspread.WorksheetNotFound:
-        ws = sp.add_worksheet(title="votes", rows=1000, cols=5)
-        ws.append_row(["pseudo", "date", "provider", "model", "rating"])
-    return ws
-
-
 def save_vote(pseudo: str, provider: str, model: str, rating: int) -> bool:
-    """Enregistre un vote (1-5 étoiles) pour le benchmark."""
-    ws = _get_vote_sheet()
-    if not ws:
-        return False
+    """Enregistre un vote pour le benchmark dans Firestore."""
+    db = _get_db()
     try:
-        ws.append_row([pseudo, date.today().isoformat(), provider, model, str(rating)])
+        db.collection("votes").add({
+            "pseudo": pseudo,
+            "date": date.today().isoformat(),
+            "provider": provider,
+            "model": model,
+            "rating": int(rating)
+        })
         return True
     except Exception:
         return False
 
-
 def get_benchmark() -> list:
-    """Retourne les stats benchmark : moyenne par (provider, model)."""
-    ws = _get_vote_sheet()
-    if not ws:
-        return []
+    """Calcule le benchmark des modèles à partir de Firestore."""
+    db = _get_db()
     try:
-        records = ws.get_all_values()
+        docs = db.collection("votes").stream()
     except Exception:
         return []
-    if len(records) < 2:
-        return []
+        
     from collections import defaultdict
     totals = defaultdict(lambda: {"count": 0, "sum": 0})
-    for row in records[1:]:
-        if len(row) < 5:
-            continue
-        prov, mod = row[2], row[3]
+    for doc in docs:
+        row = doc.to_dict()
+        prov = row.get("provider", "")
+        mod = row.get("model", "")
         try:
-            rat = int(row[4])
+            rat = int(row.get("rating", 0))
         except ValueError:
             continue
         key = f"{prov}/{mod}"
         totals[key]["count"] += 1
         totals[key]["sum"] += rat
+        
     result = []
     for key, v in sorted(totals.items(), key=lambda x: -x[1]["count"]):
         result.append({
