@@ -360,16 +360,31 @@ public class GemmaSynthesisPlugin extends Plugin {
     private boolean downloadModelWithProgress(DocumentFile dest) throws IOException {
         sDownloading = true;
         try {
-            
-            HttpURLConnection conn = (HttpURLConnection) new URL(sModelUrl).openConnection();
-            conn.setConnectTimeout(15_000);
-            conn.setReadTimeout(30_000);
-            conn.setInstanceFollowRedirects(true);
-            conn.connect();
+            URL url = new URL(sModelUrl);
+            HttpURLConnection conn = null;
+            int redirects = 0;
+            while (redirects < 5) {
+                conn = (HttpURLConnection) url.openConnection();
+                conn.setConnectTimeout(15_000);
+                conn.setReadTimeout(30_000);
+                conn.setInstanceFollowRedirects(false); // Manual redirect
+                conn.connect();
 
-            int responseCode = conn.getResponseCode();
-            if (responseCode != HttpURLConnection.HTTP_OK) {
-                throw new IOException("HTTP " + responseCode + " pour " + sModelUrl);
+                int responseCode = conn.getResponseCode();
+                if (responseCode == HttpURLConnection.HTTP_MOVED_PERM ||
+                    responseCode == HttpURLConnection.HTTP_MOVED_TEMP ||
+                    responseCode == HttpURLConnection.HTTP_SEE_OTHER ||
+                    responseCode == 307 || responseCode == 308) {
+                    String newUrl = conn.getHeaderField("Location");
+                    url = new URL(newUrl);
+                    redirects++;
+                    continue;
+                }
+                
+                if (responseCode != HttpURLConnection.HTTP_OK) {
+                    throw new IOException("HTTP " + responseCode + " pour " + sModelUrl);
+                }
+                break;
             }
 
             long total = conn.getContentLengthLong();
@@ -393,7 +408,19 @@ public class GemmaSynthesisPlugin extends Plugin {
                     }
                 }
             }
+            if (total > 0 && downloaded != total) {
+                dest.delete();
+                throw new IOException("Téléchargement incomplet: " + downloaded + " / " + total);
+            }
+            // Sanity check: Gemma 4 E2B is ~2.5GB. If it's less than 50MB, it's definitely an error page.
+            if (downloaded < 50_000_000L) {
+                dest.delete();
+                throw new IOException("Fichier téléchargé trop petit (erreur ou redirection non suivie) : " + downloaded + " octets");
+            }
             return dest.exists() && dest.length() > 0;
+        } catch (Exception e) {
+            if (dest.exists()) dest.delete();
+            throw new IOException(e);
         } finally {
             sDownloading = false;
         }
@@ -444,17 +471,13 @@ public class GemmaSynthesisPlugin extends Plugin {
             try {
                 DocumentFile modelFile = getModelDocumentFile();
                 if (modelFile == null || !modelFile.exists() || modelFile.length() == 0) {
-                    // Si absent, tenter de le copier à la volée depuis Edge Gallery
-                    try {
-                        new GemmaInitializationService(getContext()).ensureModelAvailable();
-                    } catch (Exception e) {
-                        modelFile = getOrCreateModelDocumentFile();
-                        if (modelFile == null) {
-                            throw new IOException("Dossier de stockage invalide ou manquant.");
-                        }
-                        if (!downloadModelWithProgress(modelFile)) {
-                            throw new IOException("Modèle absent et impossible d'initialiser : " + e.getMessage());
-                        }
+                    // Si absent, lancer le téléchargement
+                    modelFile = getOrCreateModelDocumentFile();
+                    if (modelFile == null) {
+                        throw new IOException("Dossier de stockage invalide ou manquant.");
+                    }
+                    if (!downloadModelWithProgress(modelFile)) {
+                        throw new IOException("Modèle absent et impossible d'initialiser le téléchargement.");
                     }
                 }
                 
@@ -509,6 +532,13 @@ public class GemmaSynthesisPlugin extends Plugin {
             } catch (Exception e) {
                 synchronized (GemmaSynthesisPlugin.class) { sPreparing = false; }
                 android.util.Log.w("GemmaSynthesis", "Erreur lors de la préparation : " + e.getMessage());
+                String msg = e.getMessage() != null ? e.getMessage() : "";
+                if (msg.contains("Unsupported or unknown file format") || msg.contains("INVALID_ARGUMENT") || msg.contains("No such file or directory")) {
+                    DocumentFile modelFile = getModelDocumentFile();
+                    if (modelFile != null && modelFile.exists()) {
+                        modelFile.delete();
+                    }
+                }
                 call.reject("PREPARE_ERROR", e.getMessage());
             }
         });
@@ -546,12 +576,8 @@ public class GemmaSynthesisPlugin extends Plugin {
                 try {
                     DocumentFile modelFile = getModelDocumentFile();
                     if (modelFile == null || !modelFile.exists() || modelFile.length() == 0) {
-                        try {
-                            new GemmaInitializationService(getContext()).ensureModelAvailable();
-                        } catch (Exception e) {
-                            modelFile = getOrCreateModelDocumentFile();
-                            if (modelFile != null) downloadModelWithProgress(modelFile);
-                        }
+                        modelFile = getOrCreateModelDocumentFile();
+                        if (modelFile != null) downloadModelWithProgress(modelFile);
                     }
 
                     if (modelFile != null && modelFile.exists() && modelFile.length() > 0) {

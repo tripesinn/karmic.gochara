@@ -1,6 +1,7 @@
 package com.karmicgochara.app;
 
 import com.getcapacitor.BridgeActivity;
+import java.io.File;
 
 public class MainActivity extends BridgeActivity {
 
@@ -14,6 +15,7 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(NativeAIPlugin.class);
         // Plugin GemmaSynthesis — inférence locale Gemma via MediaPipe
         registerPlugin(GemmaSynthesisPlugin.class);
+
         // Plugin Unlock — achat "Supprimer les pubs" via Play Billing
         registerPlugin(UnlockPlugin.class);
         // Plugin AstroCalc — moteur Swiss Ephemeris local
