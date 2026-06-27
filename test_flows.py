@@ -5,12 +5,14 @@ sys.modules['gspread'] = MagicMock()
 sys.modules['google'] = MagicMock()
 sys.modules['google.oauth2'] = MagicMock()
 sys.modules['google.oauth2.service_account'] = MagicMock()
+sys.modules['google.cloud'] = MagicMock()
+sys.modules['google.cloud.firestore'] = MagicMock()
 
-import os
-import unittest
-from unittest.mock import patch
+import os  # noqa: E402
+import unittest  # noqa: E402
+from unittest.mock import patch  # noqa: E402
 
-from app import app
+from app import app  # noqa: E402
 
 
 class TestAppFlows(unittest.TestCase):
@@ -63,17 +65,47 @@ class TestAppFlows(unittest.TestCase):
         print("🔗 URL Checkout générée:", resp_checkout.get_json().get("url"))
 
         # 3. Validation
-        with patch("blueprints.payments._fulfill_order") as mock_fulfill:
-            with patch("stripe_payments.verify_checkout_session") as mock_verify:
-                mock_verify.return_value = True
-                resp_payment = self.client.post("/api/complete_payment", json={
-                    "session_id": "cs_test_upgrade",
-                    "plan": "subscription",
-                    "pseudo": "testuser"
-                })
-                print("✅ Vérification post-paiement statut:", resp_payment.status_code)
-                mock_fulfill.assert_called_with("testuser", "subscription")
-                print("⭐ Plan mis à jour vers 'subscription' (Illimité) avec succès!\n")
+        with patch("blueprints.payments._fulfill_order") as mock_fulfill, patch("stripe_payments.verify_checkout_session") as mock_verify:
+            mock_verify.return_value = True
+            resp_payment = self.client.post("/api/complete_payment", json={
+                "session_id": "cs_test_upgrade",
+                "plan": "subscription",
+                "pseudo": "testuser"
+            })
+            print("✅ Vérification post-paiement statut:", resp_payment.status_code)
+            mock_fulfill.assert_called_with("testuser", "subscription")
+            print("⭐ Plan mis à jour vers 'subscription' (Illimité) avec succès!\n")
+
+    @patch("profiles.get_profile_by_pseudo")
+    def test_calendar_feed(self, mock_get_profile):
+        print("\n=== FLUX 4: Récupération du calendrier iCal ===")
+        # On donne un profil complet avec nakshatras pour passer le calcul
+        profile = self.mock_user_lecture.copy()
+        profile.update({
+            "ketu_nakshatra": "Aswini",
+            "rahu_nakshatra": "Chitra",
+            "chiron_nakshatra": "Revati",
+            "Ascendant": 10.0,
+            "Sun": 20.0,
+            "Moon": 30.0,
+            "Mars": 40.0,
+            "Mercury": 50.0,
+            "Jupiter": 60.0,
+            "Venus": 70.0,
+            "Saturn": 80.0,
+            "Rahu": 90.0,
+            "Ketu": 100.0,
+            "Chiron": 110.0
+        })
+        mock_get_profile.return_value = profile
+        
+        resp = self.client.get("/api/calendar/testuser.ics")
+        print("✅ Récupération du calendrier statut:", resp.status_code)
+        self.assertEqual(resp.status_code, 200)
+        self.assertEqual(resp.mimetype, "text/calendar")
+        self.assertIn(b"BEGIN:VCALENDAR", resp.data)
+        self.assertIn(b"END:VCALENDAR", resp.data)
+        print("⭐ Calendrier iCal valide généré avec succès!\n")
 
 if __name__ == "__main__":
     unittest.main()

@@ -270,6 +270,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
           if (response) {
             status.style.display = 'none';
             output.textContent = response;
+            sessionStorage.setItem('last_lecture_output', response);
             document.getElementById('copy-container')?.classList.remove('hidden');
           } else {
             throw new Error("Gemma n'a pas répondu.");
@@ -289,6 +290,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             }
           }
           status.textContent = '';
+          sessionStorage.setItem('last_lecture_output', output.textContent || output.innerHTML);
           document.getElementById('copy-container')?.classList.remove('hidden');
         }
       } catch (err: any) {
@@ -372,7 +374,10 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       }
     });
 
-    document.getElementById('refresh-btn')?.addEventListener('click', startReading);
+    document.getElementById('refresh-btn')?.addEventListener('click', () => {
+      sessionStorage.removeItem('last_lecture_output');
+      startReading();
+    });
 
     document.getElementById('copy-reading-btn')?.addEventListener('click', async () => {
       const text = document.getElementById('reading-output')?.textContent || '';
@@ -399,7 +404,16 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
     // Lancement au chargement
     checkModelAvailability().then((available) => {
       if (available) {
-        startReading();
+        const savedOutput = sessionStorage.getItem('last_lecture_output');
+        if (savedOutput) {
+          const status = document.getElementById('reading-status');
+          const output = document.getElementById('reading-output');
+          if (status) status.style.display = 'none';
+          if (output) output.textContent = savedOutput;
+          document.getElementById('copy-container')?.classList.remove('hidden');
+        } else {
+          startReading();
+        }
       }
     });
   </script>

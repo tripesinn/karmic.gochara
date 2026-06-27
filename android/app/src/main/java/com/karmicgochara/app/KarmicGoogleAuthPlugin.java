@@ -19,6 +19,7 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
+import com.google.android.libraries.identity.googleid.GetSignInWithGoogleOption;
 import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential;
 
 import java.util.concurrent.Executor;
@@ -40,7 +41,7 @@ public class KarmicGoogleAuthPlugin extends Plugin {
                     )
                 );
             } catch (Exception e) {
-                Log.e(TAG, "Failed to read server_client_id resource", e);
+                Log.w(TAG, "Failed to read server_client_id resource, falling back to null");
             }
         }
         return id;
@@ -68,24 +69,26 @@ public class KarmicGoogleAuthPlugin extends Plugin {
         }
 
         CredentialManager credentialManager = CredentialManager.create(activity);
-        // Phase 1: try already-authorized accounts (faster, skips Activity Controls check)
-        trySignInPhase(activity, credentialManager, webClientId, true, call);
+        trySignIn(activity, credentialManager, webClientId, call);
     }
 
-    private void trySignInPhase(
+    private void trySignIn(
         Activity activity,
         CredentialManager credentialManager,
         String webClientId,
-        boolean filterByAuthorized,
         PluginCall call
     ) {
+        GetSignInWithGoogleOption signInWithGoogleOption = new GetSignInWithGoogleOption.Builder(webClientId)
+            .build();
+
         GetGoogleIdOption googleIdOption = new GetGoogleIdOption.Builder()
-            .setFilterByAuthorizedAccounts(filterByAuthorized)
+            .setFilterByAuthorizedAccounts(false) // Direct presentation of all accounts to avoid Android 14 race conditions
             .setServerClientId(webClientId)
             .setAutoSelectEnabled(false)
             .build();
 
         GetCredentialRequest request = new GetCredentialRequest.Builder()
+            .addCredentialOption(signInWithGoogleOption)
             .addCredentialOption(googleIdOption)
             .build();
 
@@ -103,16 +106,8 @@ public class KarmicGoogleAuthPlugin extends Plugin {
 
                     @Override
                     public void onError(GetCredentialException e) {
-                        if (filterByAuthorized) {
-                            // Phase 1 failed (no cached account) → phase 2: all accounts
-                            Log.i(TAG, "Phase 1 (authorized) failed, retrying with all accounts: "
-                                + e.getMessage());
-                            trySignInPhase(activity, credentialManager,
-                                webClientId, false, call);
-                        } else {
-                            Log.e(TAG, "Credential Manager error (phase 2): " + e.getMessage());
-                            call.reject("Sign-in failed: " + e.getMessage());
-                        }
+                        Log.w(TAG, "Credential Manager error: " + e.getMessage());
+                        call.reject("Sign-in failed: " + e.getMessage());
                     }
                 }
             )

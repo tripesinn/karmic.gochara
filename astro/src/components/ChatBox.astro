@@ -1,306 +1,150 @@
 ---
-// ChatBox.astro — Karmic Q&A Chat Interface
-// Client-side chat component with SSE streaming via /calculate endpoint
-// Uses the same streaming pattern as the lecture page
-
-export interface Props {
-  placeholder?: string;
-  greeting?: string;
-  maxHeight?: string;
-}
-
-const {
-  placeholder = 'Ta question karmique…',
-  greeting = '✦ Je suis l\'oracle karmique. Quelle question brûle en toi ?',
-  maxHeight = '500px',
-} = Astro.props;
+// astro/src/components/ChatBox.astro
+// This file is now purely a structural component for Astro, with all client-side logic moved to a script block.
 ---
 
-<div class="chatbox flex flex-col h-full rounded-xl border border-cosmic-border bg-cosmic-bg overflow-hidden">
-  <!-- Header -->
-  <div class="px-5 py-4 border-b border-cosmic-border bg-cosmic-void">
-    <h3 class="font-display text-sm tracking-widest uppercase text-cosmic-gold">✦ Karmic Chat</h3>
-    <p class="font-body text-xs text-cosmic-text-dim mt-0.5">Pose ta question karmique</p>
-  </div>
-
-  <!-- Messages Area -->
-  <div
-    id="chat-messages"
-    class="flex-1 overflow-y-auto px-5 py-4 space-y-4"
-    style="min-height: 280px; max-height: {maxHeight};"
-  >
-    <div class="chat-msg chat-msg--bot flex items-start gap-3">
-      <div
-        class="chat-msg__avatar flex-shrink-0 w-7 h-7 rounded-full border border-cosmic-gold/30
-               bg-cosmic-void flex items-center justify-center
-               font-display text-xs text-cosmic-gold"
-      >
-        ✦
+<div class="chat-container">
+      <h2 class="chat-title">Karmic Gochara RAG Chat</h2>
+      <div class="chat-history" id="chat-history">
+        <!-- Messages will be injected here by JavaScript -->
       </div>
-      <div
-        class="chat-msg__bubble bg-cosmic-void border border-cosmic-border rounded-lg rounded-tl-none
-               px-4 py-3 font-body text-sm text-cosmic-text-dim leading-relaxed"
-      >
-        {greeting}
+      <div class="chat-input-area">
+        <input type="text" id="user-input" placeholder="Ask a question..." class="chat-input" disabled>
+        <button id="send-button" class="send-button" disabled>Send</button>
       </div>
     </div>
-  </div>
 
-  <!-- Typing Indicator (hidden by default) -->
-  <div id="chat-typing" class="hidden px-5 pb-2">
-    <div class="flex items-center gap-2 text-cosmic-text-dim/60 font-body text-xs italic">
-      <span class="inline-block w-1.5 h-1.5 rounded-full bg-cosmic-gold/50 animate-pulse" />
-      <span>L&rsquo;oracle réfléchit&hellip;</span>
-    </div>
-  </div>
+    <script>
+      import { capacitorBridge } from '../lib/capacitor-bridge';
 
-  <!-- Input Area -->
-  <div class="px-5 py-4 border-t border-cosmic-border bg-cosmic-void">
-    <div class="flex gap-3">
-      <input
-        id="chat-input"
-        type="text"
-        placeholder={placeholder}
-        autocomplete="off"
-        class="flex-1 bg-cosmic-bg border border-cosmic-border rounded-lg px-4 py-2.5
-               font-body text-sm text-cosmic-text placeholder:text-cosmic-text-dim/50
-               focus:outline-none focus:border-cosmic-gold/50 focus:ring-1 focus:ring-cosmic-gold/20
-               transition-all duration-300"
-      />
-      <button
-        id="chat-send"
-        class="px-5 py-2.5 font-display text-xs tracking-widest uppercase rounded-lg
-               border border-cosmic-gold/50 text-cosmic-gold
-               hover:bg-cosmic-gold hover:text-cosmic-bg
-               hover:shadow-[0_0_20px_rgba(201,168,76,0.25)]
-               transition-all duration-500 disabled:opacity-40 disabled:cursor-not-allowed"
-      >
-        Envoyer
-      </button>
-    </div>
-  </div>
-</div>
 
-<style is:global>
-  /* Scrollbar styling for the messages area */
-  #chat-messages::-webkit-scrollbar {
-    width: 4px;
-  }
-  #chat-messages::-webkit-scrollbar-track {
-    background: transparent;
-  }
-  #chat-messages::-webkit-scrollbar-thumb {
-    background: #2a2820;
-    border-radius: 999px;
-  }
-  #chat-messages::-webkit-scrollbar-thumb:hover {
-    background: #8a6f30;
-  }
+      // --- Client-Side State Management ---
+      interface Message {
+        role: 'user' | 'assistant';
+        content: string;
+      }
 
-  /* User message bubble */
-  .chat-msg--user .chat-msg__bubble {
-    border-color: #c9a84c / 20;
-    background: rgba(26, 20, 16, 0.8);
-  }
+      const chatState = {
+        messages: [{ role: 'assistant', content: 'Welcome! Ask me a question about Karmic Gochara analysis.' }] as Message[],
+        currentAnalysisId: null as string | null,
+        isLoading: false,
+      };
 
-  /* Pulsing dot */
-  @keyframes chat-pulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 1; }
-  }
-  .chat-msg__dot {
-    animation: chat-pulse 1.2s ease-in-out infinite;
-  }
-  .chat-msg__dot:nth-child(2) {
-    animation-delay: 0.2s;
-  }
-  .chat-msg__dot:nth-child(3) {
-    animation-delay: 0.4s;
-  }
-</style>
+      // --- DOM Elements ---
+      const chatHistoryElement = document.getElementById('chat-history') as HTMLDivElement;
+      const userInputElement = document.getElementById('user-input') as HTMLInputElement;
+      const sendButtonElement = document.getElementById('send-button') as HTMLButtonElement;
 
-<script>
-  import { api } from '../../lib/api';
-  import type { ApiError } from '../../lib/api';
+      // Enable inputs at start
+      if (userInputElement && sendButtonElement) {
+        userInputElement.disabled = false;
+        sendButtonElement.disabled = false;
+      }
 
-  // Yield SSE chunks from /calculate with { pseudo, query }
-  async function* chatRequest(pseudo: string, query: string) {
-    const res = await fetch('/api/calculate', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      credentials: 'include',
-      body: JSON.stringify({ pseudo, query }),
-    });
+      // --- Mock/Web Fallback Functions ---
+      const GemmaWebFallback = {
+        generate: async (lightPrompt: string): Promise<string> => {
+          console.log(`[Web Fallback] Sending light prompt to Gemma: ${lightPrompt.substring(0, 50)}...`);
+          await new Promise(resolve => setTimeout(resolve, 1500));
+          return `[Gemma Web Fallback] Based on context: ${lightPrompt.substring(0, 40)}... (Use native Android app for true local Gemma inference).`;
+        }
+      };
 
-    if (!res.ok) {
-      const msg = await res.text().catch(() => '');
-      throw new Error(msg || 'Erreur serveur');
-    }
+      // --- State Update Functions ---
+      const updateUI = () => {
+        if (!chatHistoryElement) return;
+        chatHistoryElement.innerHTML = '';
+        chatState.messages.forEach((msg) => {
+          const messageDiv = document.createElement('div');
+          messageDiv.className = `message ${msg.role}`;
+          messageDiv.innerHTML = `
+            <strong class="role-tag">${msg.role === 'user' ? 'You' : 'Assistant'}</strong>
+            <p>${msg.content}</p>
+          `;
+          chatHistoryElement.appendChild(messageDiv);
+        });
+        chatHistoryElement.scrollTop = chatHistoryElement.scrollHeight;
+      };
 
-    const reader = res.body?.getReader();
-    if (!reader) throw new Error('No response body');
+      const handleSendMessage = async () => {
+        if (!userInputElement || !sendButtonElement) return;
+        const userMessage = userInputElement.value.trim();
+        if (!userMessage || chatState.isLoading) return;
 
-    const decoder = new TextDecoder();
-    let buffer = '';
+        // 1. Update UI for user message
+        chatState.messages.push({ role: 'user', content: userMessage });
+        userInputElement.value = '';
+        updateUI();
 
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
+        chatState.isLoading = true;
+        userInputElement.disabled = true;
+        sendButtonElement.disabled = true;
 
-      buffer += decoder.decode(value, { stream: true });
-      const lines = buffer.split('\n');
-      buffer = lines.pop() || '';
-
-      for (const line of lines) {
-        if (line.startsWith('data: ')) {
-          try {
-            yield JSON.parse(line.slice(6));
-          } catch {
-            yield { text: line.slice(6) };
+        try {
+          // 2. Check if we are in the follow-up phase (i.e. we have an analysis ID)
+          if (!chatState.currentAnalysisId) {
+            console.log('[Flow] Initiating initial analysis...');
+            const newAnalysisId = 'rom'; // Using 'rom' mock key from database.ts / rag.ts
+            chatState.currentAnalysisId = newAnalysisId;
           }
+
+          // 3. Retrieve context from sessionStorage
+          const lectureContext = sessionStorage.getItem('last_lecture_output') || "Aucune lecture disponible.";
+          
+          const lightPrompt = `
+    Tu es un oracle karmique.
+    Utilise UNIQUEMENT le contexte suivant pour répondre à la question de l'utilisateur.
+    
+    --- CONTEXT ---
+    ${lectureContext}
+    --- END CONTEXT ---
+    
+    Question de l'utilisateur: ${userMessage}
+  `;
+
+          // 4. Call native Gemma plugin or fallback
+          let response = '';
+          if (capacitorBridge.isNative()) {
+            console.log('[Chat] Using Native Gemma Synthesis...');
+            await capacitorBridge.gemma.prepareModel(false);
+            const nativeRes = await capacitorBridge.gemma.generate(
+              "Tu es un oracle karmique.",
+              lightPrompt,
+              "synthesis",
+              "fr"
+            );
+            response = nativeRes || "Oracle local indisponible.";
+          } else {
+            response = await GemmaWebFallback.generate(lightPrompt);
+          }
+
+          // 5. Update UI with assistant response
+          chatState.messages.push({ role: 'assistant', content: response });
+
+        } catch (error) {
+          console.error('Error during message handling:', error);
+          chatState.messages.push({ role: 'assistant', content: 'Error: Could not process request. Please try again.' });
+        } finally {
+          chatState.isLoading = false;
+          userInputElement.disabled = false;
+          sendButtonElement.disabled = false;
+          updateUI();
+          userInputElement.focus();
         }
+      };
+
+      // --- Event Listeners ---
+      if (sendButtonElement) {
+        sendButtonElement.addEventListener('click', handleSendMessage);
       }
-    }
-  }
-
-  // ── DOM refs ──
-  const messagesEl = document.getElementById('chat-messages')!;
-  const inputEl = document.getElementById('chat-input') as HTMLInputElement;
-  const sendBtn = document.getElementById('chat-send') as HTMLButtonElement;
-  const typingEl = document.getElementById('chat-typing')!;
-
-  // ── Helpers ──
-  function scrollToBottom() {
-    messagesEl.scrollTop = messagesEl.scrollHeight;
-  }
-
-  function addMessage(role: 'user' | 'bot', content: string) {
-    const div = document.createElement('div');
-    div.className = `chat-msg chat-msg--${role} flex items-start gap-3 ${
-      role === 'user' ? 'flex-row-reverse' : ''
-    }`;
-
-    const avatar = document.createElement('div');
-    avatar.className =
-      'chat-msg__avatar flex-shrink-0 w-7 h-7 rounded-full border border-cosmic-gold/30 ' +
-      'bg-cosmic-void flex items-center justify-center ' +
-      'font-display text-xs text-cosmic-gold';
-    avatar.textContent = role === 'user' ? '☿' : '✦';
-
-    const bubble = document.createElement('div');
-    bubble.className =
-      'chat-msg__bubble border rounded-lg px-4 py-3 font-body text-sm leading-relaxed ' +
-      (role === 'user'
-        ? 'bg-cosmic-gold/10 border-cosmic-gold/20 text-cosmic-text rounded-tr-none ml-10'
-        : 'bg-cosmic-void border-cosmic-border text-cosmic-text-dim rounded-tl-none mr-10');
-
-    // Use innerHTML for rich text (markdown-like), textContent for plain
-    bubble.innerHTML = content;
-
-    if (role === 'user') {
-      div.appendChild(bubble);
-      div.appendChild(avatar);
-    } else {
-      div.appendChild(avatar);
-      div.appendChild(bubble);
-    }
-
-    messagesEl.appendChild(div);
-    scrollToBottom();
-    return bubble;
-  }
-
-  function showTyping() {
-    typingEl.classList.remove('hidden');
-    scrollToBottom();
-  }
-
-  function hideTyping() {
-    typingEl.classList.add('hidden');
-  }
-
-  function setLoading(loading: boolean) {
-    sendBtn.disabled = loading;
-    inputEl.disabled = loading;
-    if (loading) {
-      inputEl.blur();
-    } else {
-      inputEl.focus();
-    }
-  }
-
-  // ── Core send logic ──
-  async function sendMessage() {
-    const query = inputEl.value.trim();
-    if (!query) return;
-
-    // Show user message
-    addMessage('user', escapeHtml(query));
-    inputEl.value = '';
-
-    setLoading(true);
-    showTyping();
-
-    // Resolve pseudo from profile
-    let pseudo = '';
-    try {
-      const resp = await api.profile();
-      if (resp.ok && resp.profile?.pseudo) pseudo = resp.profile.pseudo;
-    } catch {
-      // fallback below
-    }
-
-    if (!pseudo) {
-      hideTyping();
-      addMessage('bot', 'Impossible de récupérer ton profil. Connecte-toi d\'abord.');
-      setLoading(false);
-      return;
-    }
-
-    // Create bot message bubble we'll stream into
-    const botBubble = addMessage('bot', '');
-
-    try {
-      for await (const chunk of chatRequest(pseudo, query)) {
-        hideTyping();
-        if (chunk.text) {
-          botBubble.innerHTML += escapeHtml(chunk.text);
-        } else if (chunk.html) {
-          botBubble.innerHTML += chunk.html;
-        } else if (chunk.done) {
-          // stream complete
-        }
-        scrollToBottom();
+      if (userInputElement) {
+        userInputElement.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') {
+            handleSendMessage();
+          }
+        });
       }
-    } catch (err: any) {
-      hideTyping();
-      if (err.name !== 'AbortError') {
-        botBubble.innerHTML = '<span class="text-cosmic-gold-dim">— Connexion interrompue. Réessaie.</span>';
-      }
-    } finally {
-      setLoading(false);
-      hideTyping();
-    }
-  }
 
-  // ── Escape HTML for user messages ──
-  function escapeHtml(str: string): string {
-    const map: Record<string, string> = {
-      '&': '&amp;',
-      '<': '&lt;',
-      '>': '&gt;',
-      '"': '&quot;',
-      "'": '&#039;',
-    };
-    return str.replace(/[&<>"']/g, (c) => map[c]);
-  }
-
-  // ── Event listeners ──
-  sendBtn.addEventListener('click', sendMessage);
-  inputEl.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  });
-</script>
+      // --- Initial Render ---
+      updateUI();
+    </script>

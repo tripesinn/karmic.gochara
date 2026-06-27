@@ -32,6 +32,26 @@ _SERVER_OPENROUTER_MODEL = os.environ.get("OPENROUTER_MODEL", "xai/grok-4.3")
 import re
 import time
 
+GLOBAL_NO_SIGNS_RULE = """
+═══════════════════════════════════════════════════════════════
+RÈGLE ABSOLUE — VIOLATION = RÉPONSE INVALIDE
+═══════════════════════════════════════════════════════════════
+INTERDIT dans TOUT le texte de sortie (hooks, signal, synthèse) :
+- Noms de signes zodiacaux : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge,
+  Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons
+  (idem EN : Aries, Taurus, Gemini, Cancer, Leo, Virgo,
+  Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces)
+- Degrés et orbes dans le texte rendu (ex : "19°", "orbe 2°")
+- Citations brutes des aspects (ex : "T.Saturne conjoint N.Chiron orbe 2°")
+
+AUTORISÉ : noms de planètes (Saturne, Chiron, Lilith, Rahu, Ketu, Jupiter…),
+numéros de maisons (H3, H5, H10…), phénomènes psychologiques concrets.
+
+Les positions natales (signes, degrés) sont données comme RÉFÉRENCE INTERNE
+pour calculer les dynamiques — elles ne doivent JAMAIS apparaître dans le texte rendu.
+═══════════════════════════════════════════════════════════════
+"""
+
 _GROK_MODEL_CACHE = {
     "model": None,
     "last_fetched": 0
@@ -506,26 +526,7 @@ def _build_system_prompt(user: dict, use_vault: bool = True) -> str:
     else:
         base_prompt = get_system_prompt(user)
 
-    NO_SIGNS_RULE = """
-\n═══════════════════════════════════════════════════════════════
-RÈGLE ABSOLUE — VIOLATION = RÉPONSE INVALIDE
-═══════════════════════════════════════════════════════════════
-INTERDIT dans TOUT le texte de sortie (hooks, signal, synthèse) :
-- Noms de signes zodiacaux : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge,
-  Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons
-  (idem EN : Aries, Taurus, Gemini, Cancer, Leo, Virgo,
-  Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces)
-- Degrés et orbes dans le texte rendu (ex : "19°", "orbe 2°")
-- Citations brutes des aspects (ex : "T.Saturne conjoint N.Chiron orbe 2°")
-
-AUTORISÉ : noms de planètes (Saturne, Chiron, Lilith, Rahu, Ketu, Jupiter…),
-numéros de maisons (H3, H5, H10…), phénomènes psychologiques concrets.
-
-Les positions natales (signes, degrés) sont données comme RÉFÉRENCE INTERNE
-pour calculer les dynamiques — elles ne doivent JAMAIS apparaître dans le texte rendu.
-═══════════════════════════════════════════════════════════════\n"""
-
-    return base_prompt + natal_bloc + friction_bloc + NO_SIGNS_RULE
+    return base_prompt + natal_bloc + friction_bloc + "\n" + GLOBAL_NO_SIGNS_RULE
 
 
 # ══════════════════════════════════════════════════════════════════════════════
@@ -1196,26 +1197,40 @@ def build_prompt_only(chart_data: dict, user: dict = None, lang: str = "fr", is_
     natal_mini = f"Chandra Lagna {cl}, Ketu {ketu}, Rahu {rahu}, Chiron {chi}, Lilith {lil}." if cl else ""
 
     if is_free:
+        try:
+            from transit_alerts import _active_nak_activations, PLANET_LABELS
+            natal_naks = {
+                "Ketu": user.get("ketu_nakshatra", ""),
+                "Rahu": user.get("rahu_nakshatra", ""),
+                "Chiron": user.get("chiron_nakshatra", "")
+            }
+            transit_for_nak = {k: {"lon": float(v.get("lon_raw", 0))} for k, v in chart_data.get("transits", {}).items() if v}
+            nak_active = _active_nak_activations(natal_naks, transit_for_nak)
+            interp_map = {"ROM_oppression": "régime ROM — test karmique", "Dharma_amplification": "régime Dharma — expansion", "Blessure_activation": "régime Chiron — transformation"}
+            nak_lines = [f"{PLANET_LABELS.get(t,t)} traverse {info['nakshatra']} ({info['lord']}) — {p} natal — {interp_map.get(info['interpretation'],'')}" for (t,p), info in nak_active.items()]
+            nak_ctx = ("Alertes actives :\n" + "\n".join(nak_lines) + "\n") if nak_lines else ""
+        except Exception:
+            nak_ctx = ""
+
         user_prompt = f"""Transit pour {name} — {date}.
 Natal : {natal_mini}
 Aspects : {aspects_text}
-
+{nak_ctx}
 RÉPONSE - 3 BLOCS SEULEMENT:
 
 **Point chaud:** (3-4 phrases max)
-Décris EXACTEMENT ce qui explose en ce moment. Sois spécifique aux positions.
-Pas de généralités. Chaque phrase = une vérité chirurgicale.
+Décris la friction karmique actuelle et les alertes actives.
+Utilise UNIQUEMENT le nom des planètes et des maisons (H1-H12). Ne cite AUCUN nom de signe zodiacal.
 
 **Action:** (1-2 phrases, impératif)
-UNE SEULE chose à faire. Précise (lieu, timing, objet). 
-Pas de "travaille sur toi-même" vague.
+Une action psychologique ou spirituelle ciblée (Chiron/Rahu). Pas d'objets physiques inventés.
 
 **Deadline:** (date ou période précise)
-Quand la fenêtre se ferme. Pourquoi cette date.
+La bascule de cette énergie.
 
-STYLE: Pas de jargon astro externe. Langage direct, français courant.
+STYLE: Percutant, chirurgical. Langage direct, français courant.
 LONGUEUR: 200 mots max, total."""
-        system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts. Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
+        system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts. Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
     else:
         if lang == "en":
             system = (
@@ -1226,7 +1241,7 @@ LONGUEUR: 200 mots max, total."""
                 "LILITH=Breaking point/trial. "
                 "Dharma (Rahu)=Evolutionary destination. "
                 "Speak directly, technically, and surgically. "
-                "Note: the transit date provided (2026) is injected statically. Ignore your knowledge cutoff and do not warn about real-time."
+                "Note: the transit date provided (2026) is injected statically. Ignore your knowledge cutoff and do not warn about real-time.\n" + GLOBAL_NO_SIGNS_RULE
             )
             user_prompt = f"""Karmic transit analysis for {name} — {date}.
 Natal: {natal_mini}
@@ -1258,7 +1273,7 @@ Length: 400-600 words. No generalities. Every sentence = a surgical truth."""
                 "LILITH=Point de rupture/épreuve. "
                 "DHARMA (Rahu)=Destination d'évolution. "
                 "Tutoie l'utilisateur. Sois direct et chirurgical. "
-                "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
+                "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
             )
             user_prompt = f"""Analyse karmique de transit pour {name} — {date}.
 Natal : {natal_mini}
@@ -1325,7 +1340,7 @@ def build_prompt_natal(user: dict, lang: str = "fr") -> dict:
             "You are @siderealAstro13. Sidereal Vedic karmic soul reader. "
             "Oracular, direct, no hedging. No degrees, no orbs, no technical labels. "
             "Plain text only — no markdown, no headers, no numbered lists, no dashes. "
-            "Address user as 'you'. FORBIDDEN: any zodiac sign name. H1-H12 only."
+            "Address user as 'you'. FORBIDDEN: any zodiac sign name. H1-H12 only.\n" + GLOBAL_NO_SIGNS_RULE
         )
         user_prompt = (
             f"Natal chart of {name}:\n{natal_mini}\n\n"
@@ -1340,7 +1355,7 @@ def build_prompt_natal(user: dict, lang: str = "fr") -> dict:
             "Tu es @siderealAstro13. Lecteur d'ame karmique vedique siderale. "
             "Oraculaire, direct, sans hedging. Zero degres, zero orbes. Tutoiement. "
             "Texte brut uniquement — jamais de markdown, jamais de headers, jamais de listes, jamais de tirets. "
-            "INTERDIT : noms de signes zodiacaux. Maisons H1-H12 uniquement."
+            "INTERDIT : noms de signes zodiacaux. Maisons H1-H12 uniquement.\n" + GLOBAL_NO_SIGNS_RULE
         )
         user_prompt = (
             f"Theme natal de {name} :\n{natal_mini}\n\n"
@@ -1377,7 +1392,7 @@ def build_prompt_conscience(chart_data: dict, user: dict = None, lang: str = "fr
             "You are @siderealAstro13. Sidereal Vedic karmic astrology. "
             "Write a precise, actionable inner shift the soul can choose RIGHT NOW. "
             "Plain text only — no markdown, no headers, no numbered lists. "
-            "No intro. Direct address. FORBIDDEN: zodiac signs. H1-H12 only. 150 words max."
+            "No intro. Direct address. FORBIDDEN: zodiac signs. H1-H12 only. 150 words max.\n" + GLOBAL_NO_SIGNS_RULE
         )
         user_prompt = (
             f"Transit for {name} — {date}.\nNatal:\n{natal_mini}\nAspects:\n{aspects_text}\n\n"
@@ -1389,7 +1404,7 @@ def build_prompt_conscience(chart_data: dict, user: dict = None, lang: str = "fr
             "Tu es @siderealAstro13. Astrologie karmique vedique siderale. "
             "Tu ecris le shift interieur actionnable que l'ame peut choisir MAINTENANT. "
             "Texte brut uniquement — jamais de markdown, jamais de headers, jamais de listes. "
-            "Pas d'intro. Tutoiement. INTERDIT : signes zodiacaux. H1-H12 uniquement. 150 mots max."
+            "Pas d'intro. Tutoiement. INTERDIT : signes zodiacaux. H1-H12 uniquement. 150 mots max.\n" + GLOBAL_NO_SIGNS_RULE
         )
         user_prompt = (
             f"Transit de {name} — {date}.\nNatal :\n{natal_mini}\nAspects :\n{aspects_text}\n\n"
@@ -1421,7 +1436,7 @@ def build_prompt_signal(signal_data: dict, lang: str = "fr") -> dict:
             "You are @siderealAstro13. Sidereal Vedic karmic astrology. "
             "Write a short collective daily karmic signal. No personal profile. "
             "Oracular tone. Direct. FORBIDDEN: zodiac sign names. 120 words max. "
-            "Note: the transit date provided (2026) is injected statically. Ignore your knowledge cutoff and do not warn about real-time."
+            "Note: the transit date provided (2026) is injected statically. Ignore your knowledge cutoff and do not warn about real-time.\n" + GLOBAL_NO_SIGNS_RULE
         )
         user_prompt = (
             f"Today's signal — {title}.\nActive transit: {transit}\nRegime: {label} ({regime})\n\n"
@@ -1435,7 +1450,7 @@ def build_prompt_signal(signal_data: dict, lang: str = "fr") -> dict:
             "Tu es @siderealAstro13. Astrologie karmique vedique siderale. "
             "Tu ecris un signal karmique collectif court pour le jour. Sans profil personnel. "
             "Ton oraculaire. Direct. INTERDIT : signes zodiacaux. 120 mots max. "
-            "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel."
+            "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
         )
         user_prompt = (
             f"Signal du jour — {title}.\nTransit actif : {transit}\nRegime : {label} ({regime})\n\n"
@@ -1476,7 +1491,7 @@ def build_prompt_chat(message: str, history: list, profile: dict, lang: str = "f
         system = (
             f"You are @siderealAstro13, Vedic sidereal karmic astrologer. "
             f"In dialogue with {name}. Direct oracular tone. "
-            f"Forbidden: zodiac sign names. Max 100 words per answer."
+            f"Forbidden: zodiac sign names. Max 100 words per answer.\n" + GLOBAL_NO_SIGNS_RULE
         )
         if natal_ctx:
             system += f"\n{natal_ctx}"
@@ -1495,7 +1510,7 @@ def build_prompt_chat(message: str, history: list, profile: dict, lang: str = "f
         system = (
             f"Tu es @siderealAstro13, astrologue karmique vedique sideral. "
             f"En dialogue avec {name}. Ton direct, oraculaire. "
-            f"Interdit : signes zodiacaux. Max 100 mots par reponse."
+            f"Interdit : signes zodiacaux. Max 100 mots par reponse.\n" + GLOBAL_NO_SIGNS_RULE
         )
         if natal_ctx:
             system += f"\n{natal_ctx}"

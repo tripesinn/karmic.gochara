@@ -1,0 +1,12 @@
+.git
+.gitignore
+node_modules/
+android/
+ios/
+venv/
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+.env
+!doctrine.py

@@ -63,8 +63,28 @@ export const capacitorBridge = {
       return await capacitorBridge.callPlugin('GemmaSynthesis', 'checkAvailability');
     },
 
+    async requestStoragePermission(): Promise<{ ok: boolean } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'requestStoragePermission');
+    },
+
     async prepareModel(report: boolean = false): Promise<{ ok: boolean; loraUsed: boolean; cached: boolean } | null> {
       return await capacitorBridge.callPlugin('GemmaSynthesis', 'prepareModel', { report });
+    },
+
+    async setModel(modelId: string, modelUrl: string, filename: string): Promise<{ ok: boolean; modelId: string } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'setModel', { modelId, modelUrl, filename });
+    },
+
+    async downloadModel(): Promise<{ ok: boolean } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'downloadModel');
+    },
+
+    async selectLocalModel(): Promise<{ ok: boolean } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'selectLocalModel');
+    },
+
+    async getModelStatus(): Promise<{ downloaded: boolean; modelId: string; sizeBytes: number } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'getModelStatus');
     },
 
     async unloadModel(): Promise<{ ok: boolean } | null> {

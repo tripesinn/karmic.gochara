@@ -36,7 +36,7 @@ DOCTRINE_PLANETS = [
     "Lilith ⚸",        # Épreuve karmique
     "Saturne ♄",       # Structure / karma
     "Uranus ♅",        # Éveil / libération
-    "Porte Visible ⊙", # Stage / guérison
+    "Porte Visible ⊙", # Scène / guérison
     "Porte Invisible ⊗", # Prison inconsciente
     "Jupiter ♃",       # Cadeaux karmiques
 ]
@@ -134,21 +134,22 @@ def generate_prompt(data, natal_info=None, rich=False):
 Tu es l'intelligence siderealAstro13, experte en Doctrine Évolutive Synthétique.
 Analyse ces données en 4 blocs :
 
-DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé en ce moment ?
-Quel automatisme défensif est à l'œuvre ?
+1. DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé en ce moment ?
+   Quel automatisme défensif est à l'œuvre ?
 
-PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ?
-Comment Chiron (RAM) peut-il ouvrir le passage vers le Stage ?
+2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ?
+   Comment Chiron (RAM) peut-il ouvrir le passage vers la Scène ?
 
-ÉPREUVE LILITH : Quelle friction karmique est en cours ?
-Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
+3. ÉPREUVE LILITH : Quelle friction karmique est en cours ?
+   Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
 
-ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis,
-chirurgical, actionnable — ce que l'âme doit comprendre MAINTENANT
-pour avancer vers son Stage.
+4. ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis,
+   chirurgical, actionnable — ce que l'âme doit comprendre MAINTENANT
+   pour avancer vers sa Scène.
 
 Style : direct, technique, non-astro-jargon dans les conclusions. Tutoiement direct ("tu").
-Longueur : 400-600 mots. Pas de généralités. Chaque phrase = une vérité chirurgicale."""
+Longueur : 400-600 mots MINIMUM. Pas de généralités. Chaque phrase = une vérité chirurgicale. Chaque bloc doit être développé : pas de liste à puces, 
+prose continue avec enchaînement logique interne."""
     else:
         mission_content = """MISSION POUR L'IA :
 
@@ -185,7 +186,7 @@ DHARMA — Nœud Nord / Rahu : {format_planet(rahu, 'Rahu ☊')}
 Nœud Nord transit : {nœud_t.get('display','?')} — {nœud_t.get('nakshatra','?')} pada {nœud_t.get('pada','?')}
 
 ━━━ PILIER 3 — AXE SATURNE-URANUS (Portes) ━━━
-Porte Visible natale (Stage) : {format_planet(pv_n, 'PV ⊙')}
+Porte Visible natale (Scène) : {format_planet(pv_n, 'PV ⊙')}
 Porte Invisible natale (Prison) : {format_planet(pi_n, 'PI ⊗')}
 Saturne natal : {format_planet(sat_n, 'Saturne ♄')}
 Uranus natal : {format_planet(ura_n, 'Uranus ♅')}

@@ -72,7 +72,8 @@ def chat_ask():
     if user_provider:
         enriched["user_provider"] = user_provider
 
-    prompts  = build_prompt_chat(message, history, enriched, lang=lang)
+    # We don't use frontend history anymore, chat_manager handles it
+    prompts  = build_prompt_chat(message, [], enriched, lang=lang)
 
     if local:
         return jsonify({
@@ -82,18 +83,19 @@ def chat_ask():
             "remaining": remaining,
         })
 
-    # Génération AI côté serveur
-    from ai_interpret import generate_ai
+    # Génération AI côté serveur avec le nouveau ChatManager
+    chat_id = data.get("chat_id", "main_chat")
+    from chat_manager.conversation_loop import ConversationLoop
+    
     try:
-        answer = generate_ai(prompts["system"], prompts["user"], user=enriched, max_tokens=1024).strip()
-
-        # Sauvegarde asynchrone dans RAG
-        if pseudo:
-            import threading
-
-            from rag_memory import save_reading
-            content_to_save = f"User: {message}\nAssistant: {answer}"
-            threading.Thread(target=save_reading, args=(pseudo, content_to_save, "chat")).start()
+        loop = ConversationLoop()
+        answer, _ = loop.handle_turn(
+            uid=pseudo,
+            chat_id=chat_id,
+            message=message,
+            user_context=enriched,
+            system_prompt=prompts["system"]
+        )
 
     except Exception as e:
         current_app.logger.error("Chat AI error: %s", e)

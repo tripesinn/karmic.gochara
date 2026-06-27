@@ -1,7 +1,7 @@
 ---
 // src/components/ProUpgrade.astro — Upgrade card for Pro plan (Stripe checkout)
 // Static component — no client:load directive needed.
-// The <script> block handles the CTA button click client-side.
+// The script block handles the CTA button click client-side.
 ---
 
 <section
@@ -16,8 +16,11 @@
     <div class="text-center mb-10">
       <span class="text-4xl sm:text-5xl block text-cosmic-gold/60 mb-2">✦</span>
       <h2 class="text-3xl sm:text-4xl font-display text-cosmic-gold mb-2">
-        Passer à Pro
+        Karmicgochara
       </h2>
+      <p class="text-cosmic-gold/80 text-lg max-w-md mx-auto mb-3 font-semibold">
+        Ton agent d'astrologie karmique.
+      </p>
       <p class="text-cosmic-text-dim text-sm max-w-md mx-auto">
         Débloque l'intégralité des outils karmiques — analyses profondes, lectures illimitées, et bien plus.
       </p>
@@ -80,10 +83,9 @@
     <!-- Price callout -->
     <div class="text-center mb-8">
       <p class="text-3xl font-display text-cosmic-gold tracking-wide">
-        9,99&thinsp;€
-        <span class="text-base text-cosmic-text-dim font-body tracking-normal">· accès à vie</span>
+        Accès illimité 9,99&thinsp;€
       </p>
-      <p class="text-xs text-cosmic-text-dim mt-2">
+      <p id="payment-provider-text" class="text-xs text-cosmic-text-dim mt-2">
         Paiement unique · sécurisé par Stripe · sans abonnement
       </p>
     </div>
@@ -121,25 +123,42 @@
 
 <script>
   import { api } from '../lib/api';
+  import { Capacitor } from '@capacitor/core';
+  import { purchaseProPlan } from '../lib/revenuecat';
 
   const btn = document.getElementById('pro-checkout-btn') as HTMLButtonElement;
   const errorDiv = document.getElementById('pro-checkout-error') as HTMLDivElement;
+  const providerText = document.getElementById('payment-provider-text');
+
+  if (Capacitor.isNativePlatform() && providerText) {
+    providerText.innerHTML = 'Paiement unique &middot; sécurisé par Google Play &middot; sans abonnement';
+  }
 
   btn?.addEventListener('click', async () => {
     btn.disabled = true;
-    btn.textContent = 'Redirection…';
+    btn.textContent = 'Traitement...';
     errorDiv.textContent = '';
 
     try {
-      const resp = await api.stripeCheckout('pro');
-      if (resp.ok && resp.checkout_url) {
-        window.location.href = resp.checkout_url;
+      if (Capacitor.isNativePlatform()) {
+        const result = await purchaseProPlan();
+        if (result) {
+          window.location.reload(); // Recharger pour appliquer le plan
+        } else {
+          btn.disabled = false;
+          btn.innerHTML = '★ Passer à Pro';
+        }
       } else {
-        errorDiv.textContent = resp.beta
-          ? 'Mode bêta — la facturation n\'est pas encore active.'
-          : 'Erreur lors de la création du paiement.';
-        btn.disabled = false;
-        btn.innerHTML = '★ Passer à Pro';
+        const resp = await api.stripeCheckout('pro');
+        if (resp.ok && resp.checkout_url) {
+          window.location.href = resp.checkout_url;
+        } else {
+          errorDiv.textContent = resp.beta
+            ? 'Mode bêta — la facturation n\'est pas encore active.'
+            : 'Erreur lors de la création du paiement.';
+          btn.disabled = false;
+          btn.innerHTML = '★ Passer à Pro';
+        }
       }
     } catch (err: any) {
       errorDiv.textContent = err.message || 'Erreur réseau';

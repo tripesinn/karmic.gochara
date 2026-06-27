@@ -5,7 +5,7 @@
 ![Platform](https://img.shields.io/badge/Platform-Android_Capacitor-green)
 ![Version](https://img.shields.io/badge/Version-1.3.0-purple)
 
-**Gochara Karmique** est un moteur expert d'astrologie védique fonctionnant en "Edge AI" (intelligence artificielle locale). Il combine les calculs de précision du Jyotish sidéral avec une synthèse doctrinale originale pour transformer des transits astronomiques en conseils oraculaires profonds.
+**Gochara Karmique** est ton agent astrologue ! Un moteur expert d'astrologie védique fonctionnant en "Edge AI" (intelligence artificielle locale). Il combine les calculs de précision du Jyotish sidéral avec une synthèse doctrinale originale pour transformer des transits astronomiques en conseils oraculaires profonds.
 
 ---
 
@@ -43,7 +43,7 @@ L'innovation majeure de ce chatbot réside dans sa capacité à fonctionner **10
 La synthèse repose sur le mélange inédit de plusieurs concepts :
 - **ROM (Read-Only Memory)** : Le pôle Ketu, mémoires automatiques.
 - **RAM (Wound Processing)** : Le pôle Chiron, clé de transmutation.
-- **DHARMA (Direction)** : Le pôle Rahu, appel évolutif.
+- **THE STAGE (La Scène)** : Le pôle Rahu, appel évolutif.
 - **Les Portes (Castanier)** : Porte Visible (Résolution) et Porte Invisible (Enfermement).
 
 Pour plus de détails sur l'implémentation, consultez le fichier [doctrine.example.py](doctrine.example.py).
@@ -81,7 +81,7 @@ npx cap sync android
 - Node.js 16+
 - **Java 17** (important : le projet est optimisé pour Java 17)
 - Android Studio (pour le build Android)
-- 2 Go d'espace disque (modèle Gemma inclus)
+- 3 Go d'espace disque minimum (modèle Gemma inclus)
 
 ---
 
@@ -125,7 +125,7 @@ Le projet utilise Java 17 pour la compilation. Si vous rencontrez des problèmes
 
 ## 🤝 Contribuer
 
-Les contributions sont bienvenues sur la partie technique (engine). Pour proposer des améliorations :
+Les contributions sont les bienvenues sur la partie technique (engine). Pour proposer des améliorations :
 
 1. Forkez le projet
 2. Créez une branche (`git checkout -b feature/amelioration`)

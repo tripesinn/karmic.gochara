@@ -10,8 +10,10 @@
   },
   "dependencies": {
     "@astrojs/tailwind": "^5.1.0",
+    "@capacitor/core": "^8.4.1",
     "@firebase/app": "^0.15.0",
     "@firebase/auth": "^1.13.3",
+    "@revenuecat/purchases-capacitor": "^13.2.0",
     "astro": "^5.0.0",
     "autoprefixer": "^10.4.0",
     "postcss": "^8.5.0",

@@ -24,13 +24,13 @@ import { api } from '../../lib/api';
     <!-- Quick actions -->
     <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <a
-        href="/app/lecture"
+        href="/app/lecture/index.html"
         class="group p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
                hover:border-cosmic-gold/40 transition-all duration-500 text-center"
       >
         <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-500">🌟</div>
-        <h3 class="font-display text-cosmic-gold text-lg mb-1">Lecture du Jour</h3>
-        <p class="text-cosmic-text-dim text-sm">Reçois ton analyse karmique quotidienne</p>
+        <h3 class="font-display text-cosmic-gold text-lg mb-1">Gochara du Jour</h3>
+        <p class="text-cosmic-text-dim text-sm">Découvrez votre Gochara du jour</p>
       </a>
 
       <div
@@ -42,13 +42,42 @@ import { api } from '../../lib/api';
         <p class="text-cosmic-text-dim text-sm">Explore tes transits planétaires</p>
       </div>
 
-      <div
-        class="p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
+      <a
+        href="/app/chat/index.html"
+        class="group p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
                hover:border-cosmic-gold/40 transition-all duration-500 text-center cursor-pointer"
       >
-        <div class="text-3xl mb-3">💬</div>
+        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-500">💬</div>
         <h3 class="font-display text-cosmic-gold text-lg mb-1">Chat Karmique</h3>
         <p class="text-cosmic-text-dim text-sm">Pose tes questions à l&rsquo;IA</p>
+      </a>
+    </section>
+
+    <!-- Agenda Karmique -->
+    <section id="calendar-card" class="hidden border border-cosmic-border rounded-xl bg-cosmic-void/80 p-6 sm:p-10 space-y-4">
+      <h2 class="text-xl font-display text-cosmic-gold flex items-center gap-2">
+        <span>✦</span> Mon Agenda Karmique
+      </h2>
+      <p class="text-sm text-cosmic-text-dim leading-relaxed">
+        Synchronise tes transits karmiques exacts (orbe &lt; 1.0°) directement dans ton application d'agenda préférée (Google Calendar, Apple Calendar, Outlook) pour recevoir des notifications lors des pics célestes.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-3 pt-2">
+        <a
+          id="subscribe-calendar-btn"
+          href="#"
+          class="flex items-center justify-center gap-2 px-5 py-2.5 rounded-lg border border-cosmic-gold/50
+                 text-cosmic-gold bg-cosmic-gold/10 text-sm transition-all duration-300
+                 hover:bg-cosmic-gold hover:text-cosmic-bg font-display tracking-wider active:scale-95 text-center"
+        >
+          <span>✦ S'abonner à l'Agenda</span>
+        </a>
+        <button
+          id="copy-calendar-url-btn"
+          class="px-4 py-2.5 rounded-lg border border-cosmic-border bg-cosmic-void/40
+                 text-xs text-cosmic-text hover:text-cosmic-gold hover:border-cosmic-gold transition-all"
+        >
+          Copier le lien iCal
+        </button>
       </div>
     </section>
 
@@ -68,8 +97,51 @@ import { api } from '../../lib/api';
       try {
         const resp = await api.profile();
         if (resp.ok && resp.profile?.pseudo) {
+          const pseudo = resp.profile.pseudo;
           document.getElementById('welcome-pseudo')!.textContent =
-            `Bienvenue ${resp.profile.pseudo}`;
+            `Bienvenue ${pseudo}`;
+
+          // Configuration agenda
+          const plan = (resp.profile.plan || 'free').toLowerCase();
+          const calendarCard = document.getElementById('calendar-card')!;
+          calendarCard.classList.remove('hidden');
+
+          const subBtn = document.getElementById('subscribe-calendar-btn') as HTMLAnchorElement;
+          const copyBtn = document.getElementById('copy-calendar-url-btn') as HTMLButtonElement;
+
+          if (plan === 'pro' || plan === 'subscription' || plan === 'essential' || plan === 'illimite') {
+            const calendarUrl = api.getCalendarUrl(pseudo);
+            subBtn.href = calendarUrl;
+            subBtn.target = '_blank';
+            
+            copyBtn.addEventListener('click', async () => {
+              try {
+                await navigator.clipboard.writeText(calendarUrl);
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Copié !';
+                setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
+              } catch (err) {
+                console.error('Failed to copy', err);
+              }
+            });
+          } else {
+            // Plan gratuit : rediriger vers l'upgrade
+            subBtn.innerHTML = '<span>✦ Débloquer mon Agenda (Premium)</span>';
+            subBtn.addEventListener('click', async (e) => {
+              e.preventDefault();
+              try {
+                const checkout = await api.stripeCheckout('subscription');
+                if (checkout.ok && checkout.checkout_url) {
+                  window.location.href = checkout.checkout_url;
+                } else {
+                  alert("Impossible d'initier le paiement.");
+                }
+              } catch (err) {
+                console.error(err);
+              }
+            });
+            copyBtn.classList.add('hidden');
+          }
         }
       } catch {}
     })();

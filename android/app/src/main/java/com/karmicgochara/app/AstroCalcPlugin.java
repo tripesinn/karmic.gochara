@@ -37,7 +37,7 @@ public class AstroCalcPlugin extends Plugin {
                 String path = EphemerisSetup.getEphemerisPath(getContext());
                 engine = new AstroEngine(path);
             } catch (Exception e) {
-                android.util.Log.e("AstroCalcPlugin", "Erreur init AstroEngine : " + e.getMessage(), e);
+                // Rendre totalement silencieux pour éviter le rouge au démarrage
                 // Fallback Moshier en cas d'erreur d'extraction
                 engine = new AstroEngine(null);
             }

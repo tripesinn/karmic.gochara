@@ -9,6 +9,7 @@ import com.android.billingclient.api.BillingClient;
 import com.android.billingclient.api.BillingClientStateListener;
 import com.android.billingclient.api.BillingFlowParams;
 import com.android.billingclient.api.BillingResult;
+import com.android.billingclient.api.PendingPurchasesParams;
 import com.android.billingclient.api.ProductDetails;
 import com.android.billingclient.api.Purchase;
 import com.android.billingclient.api.PurchasesUpdatedListener;
@@ -50,7 +51,7 @@ public class UnlockPlugin extends Plugin implements PurchasesUpdatedListener {
     public void load() {
         billingClient = BillingClient.newBuilder(getContext())
                 .setListener(this)
-                .enablePendingPurchases()
+                .enablePendingPurchases(PendingPurchasesParams.newBuilder().enableOneTimeProducts().build())
                 .build();
     }
 
@@ -137,8 +138,9 @@ public class UnlockPlugin extends Plugin implements PurchasesUpdatedListener {
                             .build()
                     )).build();
 
-                billingClient.queryProductDetailsAsync(params, (br, productDetailsList) -> {
-                    if (productDetailsList == null || productDetailsList.isEmpty()) {
+                billingClient.queryProductDetailsAsync(params, (br, productDetailsResult) -> {
+                    List<ProductDetails> productDetailsList = productDetailsResult.getProductDetailsList();
+                    if (productDetailsList.isEmpty()) {
                         if (pendingCall != null) pendingCall.reject("PRODUCT_NOT_FOUND");
                         return;
                     }

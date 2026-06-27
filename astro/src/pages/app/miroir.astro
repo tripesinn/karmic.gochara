@@ -1,0 +1,64 @@
+---
+// src/pages/app/miroir.astro
+import AppLayout from '../../layouts/AppLayout.astro';
+import ChatBox from '../../components/ChatBox.astro';
+import ProUpgrade from '../../components/ProUpgrade.astro';
+---
+
+<AppLayout title="Miroir de l'âme — Karmic Gochara">
+  <div class="max-w-4xl mx-auto px-4 py-12 space-y-12">
+    <section class="text-center animate-fade-in">
+      <h1 class="text-4xl sm:text-5xl font-display text-cosmic-gold mb-3">✦ Miroir de l'âme</h1>
+      <p class="text-cosmic-text-dim text-lg">Dialogue avec ton IA Karmique sur la base de ton analyse complète.</p>
+    </section>
+
+    <div id="miroir-loading" class="text-center text-cosmic-text-dim">Connexion au miroir...</div>
+    
+    <section id="miroir-chat" class="hidden justify-center">
+      <ChatBox />
+    </section>
+
+    <section id="miroir-upgrade" class="hidden">
+      <div class="text-center mb-8">
+        <p class="text-cosmic-gold/80 text-lg">Cet espace est réservé aux comptes Pro.</p>
+      </div>
+      <ProUpgrade />
+    </section>
+  </div>
+
+  <script>
+    import { api } from '../../lib/api';
+
+    async function checkAccess() {
+      try {
+        const resp = await api.profile();
+        const loading = document.getElementById('miroir-loading');
+        const chatSection = document.getElementById('miroir-chat');
+        const upgradeSection = document.getElementById('miroir-upgrade');
+
+        if (loading) loading.style.display = 'none';
+
+        if (resp.ok && resp.profile) {
+          const plan = (resp.profile.plan || 'free').toLowerCase();
+          const isPro = ['pro', 'subscription', 'essential', 'illimite'].includes(plan);
+          
+          if (isPro) {
+            if (chatSection) {
+              chatSection.classList.remove('hidden');
+              chatSection.classList.add('flex');
+            }
+          } else {
+            if (upgradeSection) {
+              upgradeSection.classList.remove('hidden');
+            }
+          }
+        }
+      } catch (e) {
+        console.error("Erreur checkAccess Miroir:", e);
+      }
+    }
+
+    // Lance la vérification au chargement
+    checkAccess();
+  </script>
+</AppLayout>

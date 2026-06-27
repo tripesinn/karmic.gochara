@@ -1,0 +1,216 @@
+----------------------------- REMOTE BUILD OUTPUT ------------------------------
+starting build "ab422b65-4cac-4f66-88aa-2fddba383d37"
+FETCHSOURCE
+From https://github.com/tripesinn/karmic.gochara
+ * branch            30c8deebd570140c05d6384858371d5e4db8a400 -> FETCH_HEAD
+HEAD is now at 30c8dee feat: migrate to firestore
+GitCommit:
+30c8deebd570140c05d6384858371d5e4db8a400
+BUILD
+Starting Step #0 - "Build"
+Step #0 - "Build": Already have image (with digest): gcr.io/cloud-builders/docker
+Step #0 - "Build": latest: Pulling from karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api
+Step #0 - "Build": aaf5045899f1: Pulling fs layer
+Step #0 - "Build": aff2d9f8dc87: Pulling fs layer
+Step #0 - "Build": df79d931cd67: Pulling fs layer
+Step #0 - "Build": b32430367bf0: Pulling fs layer
+Step #0 - "Build": 528dd00b172d: Pulling fs layer
+Step #0 - "Build": 193c45a8eb3d: Pulling fs layer
+Step #0 - "Build": 6bbb1ce79677: Pulling fs layer
+Step #0 - "Build": f96a971806b1: Pulling fs layer
+Step #0 - "Build": 4ead34af9a03: Pulling fs layer
+Step #0 - "Build": 6bbb1ce79677: Waiting
+Step #0 - "Build": f96a971806b1: Waiting
+Step #0 - "Build": 4ead34af9a03: Waiting
+Step #0 - "Build": 528dd00b172d: Verifying Checksum
+Step #0 - "Build": 528dd00b172d: Download complete
+Step #0 - "Build": b32430367bf0: Verifying Checksum
+Step #0 - "Build": b32430367bf0: Download complete
+Step #0 - "Build": 6bbb1ce79677: Verifying Checksum
+Step #0 - "Build": 6bbb1ce79677: Download complete
+Step #0 - "Build": aff2d9f8dc87: Verifying Checksum
+Step #0 - "Build": aff2d9f8dc87: Download complete
+Step #0 - "Build": df79d931cd67: Verifying Checksum
+Step #0 - "Build": df79d931cd67: Download complete
+Step #0 - "Build": aaf5045899f1: Verifying Checksum
+Step #0 - "Build": aaf5045899f1: Download complete
+Step #0 - "Build": 4ead34af9a03: Verifying Checksum
+Step #0 - "Build": 4ead34af9a03: Download complete
+Step #0 - "Build": aaf5045899f1: Pull complete
+Step #0 - "Build": aff2d9f8dc87: Pull complete
+Step #0 - "Build": df79d931cd67: Pull complete
+Step #0 - "Build": b32430367bf0: Pull complete
+Step #0 - "Build": 528dd00b172d: Pull complete
+Step #0 - "Build": 193c45a8eb3d: Verifying Checksum
+Step #0 - "Build": 193c45a8eb3d: Download complete
+Step #0 - "Build": 193c45a8eb3d: Pull complete
+Step #0 - "Build": 6bbb1ce79677: Pull complete
+Step #0 - "Build": f96a971806b1: Verifying Checksum
+Step #0 - "Build": f96a971806b1: Download complete
+Step #0 - "Build": f96a971806b1: Pull complete
+Step #0 - "Build": 4ead34af9a03: Pull complete
+Step #0 - "Build": Digest: sha256:0f8de6ee9d88738dda292a8363601e7738bdc75e05e4272b134bf5496b32c7bf
+Step #0 - "Build": Status: Downloaded newer image for europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api:latest
+Step #0 - "Build": europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api:latest
+Step #0 - "Build": Sending build context to Docker daemon  2.602MB
+Step #0 - "Build": Step 1/9 : FROM python:3.12-slim
+Step #0 - "Build": 3.12-slim: Pulling from library/python
+Step #0 - "Build": e95a6c7ea7d4: Pulling fs layer
+Step #0 - "Build": aff2d9f8dc87: Pulling fs layer
+Step #0 - "Build": df79d931cd67: Pulling fs layer
+Step #0 - "Build": b32430367bf0: Pulling fs layer
+Step #0 - "Build": b32430367bf0: Verifying Checksum
+Step #0 - "Build": aff2d9f8dc87: Verifying Checksum
+Step #0 - "Build": aff2d9f8dc87: Download complete
+Step #0 - "Build": df79d931cd67: Verifying Checksum
+Step #0 - "Build": df79d931cd67: Download complete
+Step #0 - "Build": e95a6c7ea7d4: Verifying Checksum
+Step #0 - "Build": e95a6c7ea7d4: Download complete
+Step #0 - "Build": e95a6c7ea7d4: Pull complete
+Step #0 - "Build": aff2d9f8dc87: Pull complete
+Step #0 - "Build": df79d931cd67: Pull complete
+Step #0 - "Build": b32430367bf0: Pull complete
+Step #0 - "Build": Digest: sha256:6c4dd321d176d61ea848dc8c73a4f7dbae8f70e0ee48bb411ea2f045b599fa8e
+Step #0 - "Build": Status: Downloaded newer image for python:3.12-slim
+Step #0 - "Build":  ---> 9cbfea842643
+Step #0 - "Build": Step 2/9 : WORKDIR /app
+Step #0 - "Build":  ---> Using cache
+Step #0 - "Build":  ---> 895daaecb4c4
+Step #0 - "Build": Step 3/9 : RUN apt-get update && apt-get install -y --no-install-recommends     build-essential     && rm -rf /var/lib/apt/lists/*
+Step #0 - "Build":  ---> Using cache
+Step #0 - "Build":  ---> 6d4846dd714a
+Step #0 - "Build": Step 4/9 : COPY requirements.txt .
+Step #0 - "Build":  ---> Using cache
+Step #0 - "Build":  ---> 57a90fb04a9c
+Step #0 - "Build": Step 5/9 : RUN pip install --no-cache-dir -r requirements.txt
+Step #0 - "Build":  ---> Using cache
+Step #0 - "Build":  ---> 0ea5f1fc2685
+Step #0 - "Build": Step 6/9 : RUN echo "cache_buster_showRatingBar_20260616" > /dev/null
+Step #0 - "Build":  ---> Using cache
+Step #0 - "Build":  ---> c074a3e691e6
+Step #0 - "Build": Step 7/9 : COPY . .
+Step #0 - "Build":  ---> 5be02a8b8164
+Step #0 - "Build": Step 8/9 : EXPOSE 8080
+Step #0 - "Build":  ---> Running in de50253d0af8
+Step #0 - "Build": Removing intermediate container de50253d0af8
+Step #0 - "Build":  ---> be5ffde77edc
+Step #0 - "Build": Step 9/9 : CMD exec gunicorn --bind :$PORT --workers 1 --threads 8 --timeout 0 app:app
+Step #0 - "Build":  ---> Running in 5648a8441c98
+Step #0 - "Build": Removing intermediate container 5648a8441c98
+Step #0 - "Build":  ---> 35069a05ef0d
+Step #0 - "Build": Successfully built 35069a05ef0d
+Step #0 - "Build": Successfully tagged europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api:30c8deebd570140c05d6384858371d5e4db8a400
+Step #0 - "Build": Successfully tagged europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api:latest
+Finished Step #0 - "Build"
+Starting Step #1 - "Push"
+Step #1 - "Push": Already have image (with digest): gcr.io/cloud-builders/docker
+Step #1 - "Push": The push refers to repository [europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api]
+Step #1 - "Push": 2b1df0d9d262: Preparing
+Step #1 - "Push": 0a31abc7ad15: Preparing
+Step #1 - "Push": 026d6c8ce969: Preparing
+Step #1 - "Push": 1d14a6cc4161: Preparing
+Step #1 - "Push": ea05767ae440: Preparing
+Step #1 - "Push": aa898a312ca0: Preparing
+Step #1 - "Push": 96499d37fade: Preparing
+Step #1 - "Push": 1899ce896d03: Preparing
+Step #1 - "Push": 3edb2192497a: Preparing
+Step #1 - "Push": 026d6c8ce969: Layer already exists
+Step #1 - "Push": aa898a312ca0: Layer already exists
+Step #1 - "Push": 3edb2192497a: Layer already exists
+Step #1 - "Push": 1899ce896d03: Layer already exists
+Step #1 - "Push": ea05767ae440: Layer already exists
+Step #1 - "Push": 96499d37fade: Layer already exists
+Step #1 - "Push": 1d14a6cc4161: Layer already exists
+Step #1 - "Push": 0a31abc7ad15: Layer already exists
+Step #1 - "Push": 2b1df0d9d262: Pushed
+Step #1 - "Push": 30c8deebd570140c05d6384858371d5e4db8a400: digest: sha256:57089d634b2a8c378809f31ab15a751634b0f1355edb503acf61197cdd9327c4 size: 2211
+Step #1 - "Push": 2b1df0d9d262: Preparing
+Step #1 - "Push": 0a31abc7ad15: Preparing
+Step #1 - "Push": 2b1df0d9d262: Layer already exists
+Step #1 - "Push": 026d6c8ce969: Preparing
+Step #1 - "Push": 1d14a6cc4161: Preparing
+Step #1 - "Push": 0a31abc7ad15: Layer already exists
+Step #1 - "Push": ea05767ae440: Preparing
+Step #1 - "Push": aa898a312ca0: Preparing
+Step #1 - "Push": 1d14a6cc4161: Layer already exists
+Step #1 - "Push": 026d6c8ce969: Layer already exists
+Step #1 - "Push": ea05767ae440: Layer already exists
+Step #1 - "Push": 96499d37fade: Preparing
+Step #1 - "Push": aa898a312ca0: Layer already exists
+Step #1 - "Push": 1899ce896d03: Preparing
+Step #1 - "Push": 96499d37fade: Layer already exists
+Step #1 - "Push": 3edb2192497a: Preparing
+Step #1 - "Push": 1899ce896d03: Layer already exists
+Step #1 - "Push": 3edb2192497a: Layer already exists
+Step #1 - "Push": latest: digest: sha256:57089d634b2a8c378809f31ab15a751634b0f1355edb503acf61197cdd9327c4 size: 2211
+Finished Step #1 - "Push"
+Starting Step #2 - "Deploy"
+Step #2 - "Deploy": Pulling image: gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+Step #2 - "Deploy": slim: Pulling from google.com/cloudsdktool/cloud-sdk
+Step #2 - "Deploy": 72c03230f136: Already exists
+Step #2 - "Deploy": 123e17899fb5: Pulling fs layer
+Step #2 - "Deploy": 6c2eaf42c939: Pulling fs layer
+Step #2 - "Deploy": 3182c9f829c4: Pulling fs layer
+Step #2 - "Deploy": 3182c9f829c4: Download complete
+Step #2 - "Deploy": 123e17899fb5: Verifying Checksum
+Step #2 - "Deploy": 123e17899fb5: Download complete
+Step #2 - "Deploy": 123e17899fb5: Pull complete
+Step #2 - "Deploy": 6c2eaf42c939: Verifying Checksum
+Step #2 - "Deploy": 6c2eaf42c939: Download complete
+Step #2 - "Deploy": 6c2eaf42c939: Pull complete
+Step #2 - "Deploy": 3182c9f829c4: Pull complete
+Step #2 - "Deploy": Digest: sha256:e379150995766ed2575edcfc6183e6fe212ed7def3465e7aad0b59d7de8392da
+Step #2 - "Deploy": Status: Downloaded newer image for gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+Step #2 - "Deploy": gcr.io/google.com/cloudsdktool/cloud-sdk:slim
+Step #2 - "Deploy": Deploying...
+Step #2 - "Deploy": Creating Revision...............................................................................................................................................................................................done
+Step #2 - "Deploy": Routing traffic.....done
+Step #2 - "Deploy": Done.
+Step #2 - "Deploy": Service [gochara-api] revision [gochara-api-00116-x4n] has been deployed and is serving 100 percent of traffic.
+Step #2 - "Deploy": Service URL: https://gochara-api-732214018947.europe-west1.run.app
+Finished Step #2 - "Deploy"
+PUSH
+Pushing europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api:30c8deebd570140c05d6384858371d5e4db8a400
+The push refers to repository [europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api]
+2b1df0d9d262: Preparing
+0a31abc7ad15: Preparing
+026d6c8ce969: Preparing
+1d14a6cc4161: Preparing
+ea05767ae440: Preparing
+aa898a312ca0: Preparing
+96499d37fade: Preparing
+1899ce896d03: Preparing
+3edb2192497a: Preparing
+ea05767ae440: Layer already exists
+96499d37fade: Layer already exists
+1d14a6cc4161: Layer already exists
+0a31abc7ad15: Layer already exists
+3edb2192497a: Layer already exists
+2b1df0d9d262: Layer already exists
+aa898a312ca0: Layer already exists
+1899ce896d03: Layer already exists
+026d6c8ce969: Layer already exists
+30c8deebd570140c05d6384858371d5e4db8a400: digest: sha256:57089d634b2a8c378809f31ab15a751634b0f1355edb503acf61197cdd9327c4 size: 2211
+Pushing europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api:latest
+The push refers to repository [europe-west1-docker.pkg.dev/karmic-gochara-cloud/cloud-run-source-deploy/karmic.gochara/gochara-api]
+2b1df0d9d262: Preparing
+0a31abc7ad15: Preparing
+026d6c8ce969: Preparing
+1d14a6cc4161: Preparing
+ea05767ae440: Preparing
+aa898a312ca0: Preparing
+96499d37fade: Preparing
+1899ce896d03: Preparing
+3edb2192497a: Preparing
+026d6c8ce969: Layer already exists
+1d14a6cc4161: Layer already exists
+aa898a312ca0: Layer already exists
+2b1df0d9d262: Layer already exists
+96499d37fade: Layer already exists
+3edb2192497a: Layer already exists
+1899ce896d03: Layer already exists
+0a31abc7ad15: Layer already exists
+ea05767ae440: Layer already exists
+latest: digest: sha256:57089d634b2a8c378809f31ab15a751634b0f1355edb503acf61197cdd9327c4 size: 2211
+DONE
+--------------------------------------------------------------------------------

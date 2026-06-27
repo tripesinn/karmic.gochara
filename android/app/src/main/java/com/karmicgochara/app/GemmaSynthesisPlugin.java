@@ -1,6 +1,9 @@
 package com.karmicgochara.app;
 
 import android.content.Context;
+import android.os.Environment;
+import android.content.SharedPreferences;
+import android.os.ParcelFileDescriptor;
 import androidx.documentfile.provider.DocumentFile;
 import android.os.ParcelFileDescriptor;
 import android.content.SharedPreferences;
@@ -106,6 +109,29 @@ public class GemmaSynthesisPlugin extends Plugin {
         return prefs.getString("model_tree_uri", null) != null;
     }
 
+    private long getModelSize() {
+        SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+        String customUriStr = prefs.getString("custom_model_uri", null);
+        if (customUriStr != null) {
+            try {
+                ParcelFileDescriptor pfd = getContext().getContentResolver().openFileDescriptor(Uri.parse(customUriStr), "r");
+                if (pfd != null) {
+                    long size = pfd.getStatSize();
+                    pfd.close();
+                    if (size > 0) return size;
+                }
+            } catch (Exception e) {}
+        }
+        File f = getModelFile();
+        return f.exists() ? f.length() : 0;
+    }
+
+    private File getModelFile() {
+        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        if (!dir.exists()) dir.mkdirs();
+        return new File(dir, sModelFilename);
+    }
+
     private DocumentFile getTreeDocumentFile() {
         SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
         String uriStr = prefs.getString("model_tree_uri", null);
@@ -114,22 +140,6 @@ public class GemmaSynthesisPlugin extends Plugin {
         DocumentFile dir = DocumentFile.fromTreeUri(getContext(), treeUri);
         if (dir == null || !dir.exists() || !dir.canRead()) return null;
         return dir;
-    }
-
-    private DocumentFile getModelDocumentFile() {
-        DocumentFile dir = getTreeDocumentFile();
-        if (dir == null) return null;
-        return dir.findFile(sModelFilename);
-    }
-
-    private DocumentFile getOrCreateModelDocumentFile() {
-        DocumentFile dir = getTreeDocumentFile();
-        if (dir == null) return null;
-        DocumentFile file = dir.findFile(sModelFilename);
-        if (file == null) {
-            file = dir.createFile("application/octet-stream", sModelFilename);
-        }
-        return file;
     }
 
     @PluginMethod
@@ -169,16 +179,24 @@ public class GemmaSynthesisPlugin extends Plugin {
     @PluginMethod
     public void checkAvailability(PluginCall call) {
         JSObject result = new JSObject();
-        if (!hasStoredDocumentTree()) {
-            result.put("available",   false);
-            result.put("status",      "permission_required");
-            result.put("downloading", false);
-            call.resolve(result);
-            return;
+        SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+        String customUriStr = prefs.getString("custom_model_uri", null);
+        File modelFile = getModelFile();
+        boolean isAvailable = false;
+        if (customUriStr != null) {
+            try {
+                ParcelFileDescriptor pfd = getContext().getContentResolver().openFileDescriptor(Uri.parse(customUriStr), "r");
+                if (pfd != null) {
+                    isAvailable = pfd.getStatSize() > 0;
+                    pfd.close();
+                }
+            } catch (Exception e) {}
+        }
+        if (!isAvailable && modelFile.exists() && modelFile.length() > 0) {
+            isAvailable = true;
         }
 
-        DocumentFile modelFile = getModelDocumentFile();
-        if (modelFile != null && modelFile.exists() && modelFile.length() > 0) {
+        if (isAvailable) {
             result.put("available",   true);
             result.put("status",      "available");
             result.put("downloading", false);
@@ -225,19 +243,18 @@ public class GemmaSynthesisPlugin extends Plugin {
 
     @PluginMethod
     public void getModelStatus(PluginCall call) {
-        DocumentFile modelFile = getModelDocumentFile();
         JSObject result = new JSObject();
-        result.put("downloaded", modelFile != null && modelFile.exists() && modelFile.length() > 0);
+        long size = getModelSize();
+        result.put("downloaded", size > 0);
         result.put("modelId", sModelFilename);
-        result.put("sizeBytes", modelFile != null && modelFile.exists() ? modelFile.length() : 0);
+        result.put("sizeBytes", size);
         call.resolve(result);
     }
 
     @PluginMethod
     public void isModelDownloaded(PluginCall call) {
-        DocumentFile modelFile = getModelDocumentFile();
         JSObject result = new JSObject();
-        result.put("downloaded", modelFile != null && modelFile.exists() && modelFile.length() > 0);
+        result.put("downloaded", getModelSize() > 0);
         call.resolve(result);
     }
 
@@ -252,8 +269,10 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         executor.execute(() -> {
             try {
-                DocumentFile modelFile = getModelDocumentFile();
-                if (!force && modelFile != null && modelFile.exists() && modelFile.length() > 0) {
+                File modelFile = getModelFile();
+                // Clear custom URI if downloading explicitly
+                getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE).edit().remove("custom_model_uri").apply();
+                if (!force && modelFile.exists() && modelFile.length() > 0) {
                     JSObject result = new JSObject();
                     result.put("ok", true);
                     result.put("alreadyDownloaded", true);
@@ -261,13 +280,7 @@ public class GemmaSynthesisPlugin extends Plugin {
                     return;
                 }
 
-                DocumentFile destFile = getOrCreateModelDocumentFile();
-                if (destFile == null) {
-                    call.reject("DOWNLOAD_ERROR", "Dossier de stockage non configuré ou invalide.");
-                    return;
-                }
-
-                if (downloadModelWithProgress(destFile)) {
+                if (downloadModelWithProgress(modelFile)) {
                     JSObject result = new JSObject();
                     result.put("ok", true);
                     call.resolve(result);
@@ -299,56 +312,16 @@ public class GemmaSynthesisPlugin extends Plugin {
         if (result.getResultCode() == Activity.RESULT_OK && result.getData() != null) {
             Uri uri = result.getData().getData();
             if (uri != null) {
-                sDownloading = true;
-                executor.execute(() -> {
-                    try {
-                        long totalSize = -1;
-                        try (android.database.Cursor cursor = getContext().getContentResolver().query(uri, null, null, null, null)) {
-                            if (cursor != null && cursor.moveToFirst()) {
-                                int sizeIndex = cursor.getColumnIndex(android.provider.OpenableColumns.SIZE);
-                                if (sizeIndex != -1) {
-                                    totalSize = cursor.getLong(sizeIndex);
-                                }
-                            }
-                        }
-
-                        DocumentFile destFile = getOrCreateModelDocumentFile();
-                        if (destFile == null) {
-                            throw new IOException("Dossier de stockage non configuré ou invalide.");
-                        }
-                        try (java.io.InputStream in = getContext().getContentResolver().openInputStream(uri);
-                             java.io.OutputStream out = getContext().getContentResolver().openOutputStream(destFile.getUri())) {
-                            if (in == null) {
-                                throw new IOException("Impossible d'ouvrir le fichier sélectionné.");
-                            }
-                            byte[] buf = new byte[65536];
-                            int n;
-                            long copied = 0;
-                            while ((n = in.read(buf)) != -1) {
-                                out.write(buf, 0, n);
-                                copied += n;
-                                if (totalSize > 0) {
-                                    int progress = (int) (copied * 100 / totalSize);
-                                    JSObject data = new JSObject();
-                                    data.put("progress", progress);
-                                    data.put("bytes", copied);
-                                    data.put("total", totalSize);
-                                    notifyListeners("modelDownloadProgress", data);
-                                }
-                            }
-                        }
-
-                        sDownloading = false;
-                        JSObject res = new JSObject();
-                        res.put("ok", true);
-                        call.resolve(res);
-
-                    } catch (Exception e) {
-                        sDownloading = false;
-                        android.util.Log.e("GemmaSynthesis", "Erreur copie : " + e.getMessage());
-                        call.reject("COPY_FAILED", e.getMessage());
-                    }
-                });
+                try {
+                    getContext().getContentResolver().takePersistableUriPermission(uri, Intent.FLAG_GRANT_READ_URI_PERMISSION);
+                } catch (Exception ignored) {} // Some URIs don't support persistable permissions
+                
+                SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+                prefs.edit().putString("custom_model_uri", uri.toString()).apply();
+                
+                JSObject res = new JSObject();
+                res.put("ok", true);
+                call.resolve(res);
             } else {
                 call.reject("NO_URI", "Fichier non sélectionné.");
             }
@@ -357,7 +330,7 @@ public class GemmaSynthesisPlugin extends Plugin {
         }
     }
 
-    private boolean downloadModelWithProgress(DocumentFile dest) throws IOException {
+    private boolean downloadModelWithProgress(File dest) throws IOException {
         sDownloading = true;
         try {
             URL url = new URL(sModelUrl);
@@ -391,7 +364,7 @@ public class GemmaSynthesisPlugin extends Plugin {
             long downloaded = 0;
 
             try (InputStream in  = conn.getInputStream();
-                 java.io.OutputStream out = getContext().getContentResolver().openOutputStream(dest.getUri())) {
+                 java.io.OutputStream out = new java.io.FileOutputStream(dest)) {
                 byte[] buf = new byte[8192];
                 int n;
                 while ((n = in.read(buf)) != -1) {
@@ -417,9 +390,9 @@ public class GemmaSynthesisPlugin extends Plugin {
                 dest.delete();
                 throw new IOException("Fichier téléchargé trop petit (erreur ou redirection non suivie) : " + downloaded + " octets");
             }
-            return dest.exists() && dest.length() > 0;
+            return dest != null && dest.exists() && dest.length() > 0;
         } catch (Exception e) {
-            if (dest.exists()) dest.delete();
+            if (dest != null && dest.exists()) dest.delete();
             throw new IOException(e);
         } finally {
             sDownloading = false;
@@ -469,40 +442,41 @@ public class GemmaSynthesisPlugin extends Plugin {
 
         executor.execute(() -> {
             try {
-                DocumentFile modelFile = getModelDocumentFile();
-                if (modelFile == null || !modelFile.exists() || modelFile.length() == 0) {
-                    // Si absent, lancer le téléchargement
-                    modelFile = getOrCreateModelDocumentFile();
-                    if (modelFile == null) {
-                        throw new IOException("Dossier de stockage invalide ou manquant.");
-                    }
-                    if (!downloadModelWithProgress(modelFile)) {
-                        throw new IOException("Modèle absent et impossible d'initialiser le téléchargement.");
+                String modelPath = null;
+                SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+                String customUriStr = prefs.getString("custom_model_uri", null);
+                
+                if (customUriStr != null) {
+                    try {
+                        sModelPfd = getContext().getContentResolver().openFileDescriptor(Uri.parse(customUriStr), "r");
+                        if (sModelPfd != null) {
+                            modelPath = "/proc/self/fd/" + sModelPfd.getFd();
+                        }
+                    } catch (Exception e) {
+                        prefs.edit().remove("custom_model_uri").apply(); // invalid URI
                     }
                 }
                 
-                // Get the updated model file (in case it was just created)
-                if (modelFile == null) {
-                    modelFile = getModelDocumentFile();
+                if (modelPath == null) {
+                    File modelFile = getModelFile();
+                    if (!modelFile.exists() || modelFile.length() == 0) {
+                        if (!downloadModelWithProgress(modelFile)) {
+                            throw new IOException("Modèle absent et impossible d'initialiser le téléchargement.");
+                        }
+                    }
+                    modelPath = modelFile.getAbsolutePath();
                 }
-
-                // Open ParcelFileDescriptor for the model in SAF
-                if (sModelPfd != null) {
-                    try { sModelPfd.close(); } catch (Exception ignored) {}
-                }
-                sModelPfd = getContext().getContentResolver().openFileDescriptor(modelFile.getUri(), "r");
-                if (sModelPfd == null) {
-                    throw new IOException("Impossible d'ouvrir le descripteur de fichier pour le modèle.");
-                }
-                
-                int fd = sModelPfd.getFd();
-                String fdPath = "/proc/self/fd/" + fd;
 
                 // 2. Construire l'Engine LiteRT-LM
+                // Configuration multimodale explicite pour Gemma 4 (Text + Vision + Audio)
                 EngineConfig modelOpts = new EngineConfig(
-                    fdPath,
-                    new Backend.CPU(),
-                    null, null, sMaxTokens, null, null
+                    modelPath,
+                    new Backend.CPU(), // Text
+                    null,              // Vision (null for text-only model)
+                    null,              // Audio (null for text-only model)
+                    sMaxTokens,        // Tokens
+                    null,              // Max Images
+                    getContext().getCacheDir().getAbsolutePath() // Cache
                 );
 
                 Engine engine = new Engine(modelOpts);
@@ -531,15 +505,16 @@ public class GemmaSynthesisPlugin extends Plugin {
 
             } catch (Exception e) {
                 synchronized (GemmaSynthesisPlugin.class) { sPreparing = false; }
-                android.util.Log.w("GemmaSynthesis", "Erreur lors de la préparation : " + e.getMessage());
+                android.util.Log.e("GemmaSynthesis", "Erreur lors de la préparation", e);
                 String msg = e.getMessage() != null ? e.getMessage() : "";
                 if (msg.contains("Unsupported or unknown file format") || msg.contains("INVALID_ARGUMENT") || msg.contains("No such file or directory")) {
-                    DocumentFile modelFile = getModelDocumentFile();
-                    if (modelFile != null && modelFile.exists()) {
-                        modelFile.delete();
+                    File mf = getModelFile();
+                    if (mf.exists()) {
+                        mf.delete();
                     }
                 }
-                call.reject("PREPARE_ERROR", e.getMessage());
+                String stackTrace = android.util.Log.getStackTraceString(e);
+                call.reject("PREPARE_ERROR", msg + "\n" + stackTrace);
             }
         });
     }
@@ -574,40 +549,53 @@ public class GemmaSynthesisPlugin extends Plugin {
             // Lazy-init : charger le modèle au premier appel si pas déjà fait
             if (sEngineRef.get() == null) {
                 try {
-                    DocumentFile modelFile = getModelDocumentFile();
-                    if (modelFile == null || !modelFile.exists() || modelFile.length() == 0) {
-                        modelFile = getOrCreateModelDocumentFile();
-                        if (modelFile != null) downloadModelWithProgress(modelFile);
-                    }
-
-                    if (modelFile != null && modelFile.exists() && modelFile.length() > 0) {
-                        if (sModelPfd != null) {
-                            try { sModelPfd.close(); } catch (Exception ignored) {}
+                    String modelPath = null;
+                        SharedPreferences prefs = getContext().getSharedPreferences("GemmaPrefs", Context.MODE_PRIVATE);
+                        String customUriStr = prefs.getString("custom_model_uri", null);
+                        
+                        if (customUriStr != null) {
+                            try {
+                                sModelPfd = getContext().getContentResolver().openFileDescriptor(Uri.parse(customUriStr), "r");
+                                if (sModelPfd != null) {
+                                    modelPath = "/proc/self/fd/" + sModelPfd.getFd();
+                                }
+                            } catch (Exception e) {}
                         }
-                        sModelPfd = getContext().getContentResolver().openFileDescriptor(modelFile.getUri(), "r");
-                        if (sModelPfd != null) {
-                            int fd = sModelPfd.getFd();
-                            String fdPath = "/proc/self/fd/" + fd;
-
-                            EngineConfig modelOpts = new EngineConfig(
-                                fdPath,
-                                new Backend.CPU(),
-                                null, null, sMaxTokens, null, null
-                            );
-                            Engine engine = new Engine(modelOpts);
-                            engine.initialize();
-
-                            SamplerConfig samplerOpts = new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0);
-                            ConversationConfig conversationOpts = new ConversationConfig(
-                                null, new java.util.ArrayList<>(), new java.util.ArrayList<>(),
-                                samplerOpts, true, null, new java.util.HashMap<>(), null
-                            );
-                            Conversation conversation = engine.createConversation(conversationOpts);
-
-                            synchronized (GemmaSynthesisPlugin.class) {
-                                sEngineRef.set(engine);
-                                sBaseConversationRef.set(conversation);
+                        
+                        if (modelPath == null) {
+                            File modelFile = getModelFile();
+                            if (!modelFile.exists() || modelFile.length() == 0) {
+                                downloadModelWithProgress(modelFile);
                             }
+                            if (modelFile.exists() && modelFile.length() > 0) {
+                                modelPath = modelFile.getAbsolutePath();
+                            }
+                        }
+
+                        if (modelPath != null) {
+
+                        EngineConfig modelOpts = new EngineConfig(
+                            modelPath,
+                            new Backend.CPU(),
+                            null,
+                            null,
+                            sMaxTokens,
+                            null,
+                            getContext().getCacheDir().getAbsolutePath()
+                        );
+                        Engine engine = new Engine(modelOpts);
+                        engine.initialize();
+
+                        SamplerConfig samplerOpts = new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0);
+                        ConversationConfig conversationOpts = new ConversationConfig(
+                            null, new java.util.ArrayList<>(), new java.util.ArrayList<>(),
+                            samplerOpts, true, null, new java.util.HashMap<>(), null
+                        );
+                        Conversation conversation = engine.createConversation(conversationOpts);
+
+                        synchronized (GemmaSynthesisPlugin.class) {
+                            sEngineRef.set(engine);
+                            sBaseConversationRef.set(conversation);
                         }
                     }
                 } catch (Exception e) {

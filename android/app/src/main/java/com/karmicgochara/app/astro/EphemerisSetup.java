@@ -21,7 +21,6 @@ public final class EphemerisSetup {
     private static final String[] EPH_FILES = {
         "sepl_18.se1",
         "semo_18.se1",
-        "seas_18.se1",
     };
 
     private EphemerisSetup() {}

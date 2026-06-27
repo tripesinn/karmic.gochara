@@ -244,11 +244,20 @@ def calculate_v2():
     hour = int(data.get("hour", 12))
     minute = int(data.get("minute", 0))
     transit_loc = {
-        "city": data.get("transit_city", profile.get("transit_city", TRANSIT_LOC_DEFAULT["city"])),
-        "lat":  float(data.get("transit_lat", profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"]))),
-        "lon":  float(data.get("transit_lon", profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"]))),
-        "tz":   data.get("transit_tz", profile.get("transit_tz", TRANSIT_LOC_DEFAULT["tz"])),
+        "city": data.get("transit_city") or profile.get("transit_city", TRANSIT_LOC_DEFAULT["city"]),
+        "lat":  data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"]),
+        "lon":  data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"]),
+        "tz":   data.get("transit_tz") or profile.get("transit_tz", TRANSIT_LOC_DEFAULT["tz"]),
     }
+
+    # Nettoyage de "undefined" ou None
+    for d in (natal_input, transit_loc):
+        if str(d.get("tz")) == "undefined" or not d.get("tz"): d["tz"] = "UTC"
+        for k in ("lat", "lon"):
+            if str(d.get(k)) == "undefined": d[k] = 0.0
+            else:
+                try: d[k] = float(d[k])
+                except (ValueError, TypeError): d[k] = 0.0
 
     # 5. Performance & Local-First : Exécution des calculs astrologiques
     astro_start_time = time.perf_counter()
@@ -827,7 +836,7 @@ def synthesis_prompt():
     user_model = data.get("user_model")
     user_provider = data.get("user_provider")
 
-    # Synthèse complète + Alternative de Conscience : gate paiement
+    # Synthèse complète + Alternative de Conscience : gate paiement (hook freemium)
     is_free = False
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         plan = profile.get("plan", "free")

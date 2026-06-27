@@ -39,19 +39,19 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
       class="sticky top-0 z-40 border-b border-cosmic-border/50 bg-cosmic-bg/90 backdrop-blur-md"
     >
       <nav class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <a href="/app" class="font-display text-cosmic-gold text-lg tracking-wider hover:text-cosmic-gold/80 transition">
+        <a href="/app/index.html" class="font-display text-cosmic-gold text-lg tracking-wider hover:text-cosmic-gold/80 transition">
           ✦ Karmic Gochara
         </a>
 
         <div class="flex items-center gap-4 text-sm">
-          <a href="/app" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+          <a href="/app/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
             Tableau
           </a>
-          <a href="/app/lecture" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+          <a href="/app/lecture/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
             Lecture
           </a>
-          <a href="/app/profil" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
-            Profil
+          <a href="/app/miroir/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+            Miroir
           </a>
           <button
             id="logout-btn"
@@ -76,6 +76,9 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
 
   <script>
     import { api } from '../lib/api';
+    import { auth } from '../lib/firebase';
+    import { onAuthStateChanged } from '@firebase/auth';
+    import { initRevenueCat } from '../lib/revenuecat';
 
     // Vérification auth côté client
     (async () => {
@@ -86,36 +89,66 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
 
       try {
         await api.setLang(finalLang);
-        console.log(`🌐 [I18N] Langue définie sur : ${finalLang}`);
-      } catch (e) {
-        console.warn('⚠️ [I18N] Échec de la définition de la langue');
-      }
+      } catch (e) {}
 
-      console.log('📡 [AUTH] Vérification du profil...');
+      console.log('📡 [AUTH] Initialisation Layout protégé...');
+
+      // On attend que Firebase s'initialise (max 3s)
+      const getUser = () => new Promise((resolve) => {
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+          unsubscribe();
+          resolve(user);
+        });
+        setTimeout(() => resolve(auth.currentUser), 3000);
+      });
+
       try {
-        const resp = await api.profile();
+        let user = await getUser();
+
+        if (!user) {
+          console.warn('📡 [AUTH] Session Firebase absente après attente, redirection');
+          localStorage.removeItem('karmic_token');
+          window.location.replace('/');
+          return;
+        }
+
+        console.log('✅ [AUTH] Session active:', user.email);
+
+        // Vérification session backend
+        let resp = await api.profile().catch(() => ({ ok: false }));
+
         if (!resp.ok) {
-          console.warn('❌ [AUTH] Profil invalide ou inexistant:', resp);
-          if ((resp as any).needs_register) {
-            window.location.href = '/register/';
-          } else {
-            window.location.href = '/';
+          console.warn('🔄 [AUTH] Session backend invalide, tentative de restauration...');
+          const idToken = await user.getIdToken(true);
+          const loginResp = await api.loginFirebase(user.email || '', idToken);
+          if (loginResp.ok) {
+            resp = await api.profile();
+          }
+        }
+
+        if (resp.ok) {
+          console.log('🎊 [AUTH] Authentification complète OK');
+          const el = document.getElementById('welcome-pseudo');
+          if (el && resp.profile?.pseudo) el.textContent = `Bienvenue ${resp.profile.pseudo}`;
+          
+          if (resp.profile?.pseudo) {
+            await initRevenueCat(resp.profile.pseudo);
           }
         } else {
-          console.log('✅ [AUTH] Profil chargé pour:', resp.profile?.pseudo);
+          console.warn('📡 [AUTH] Impossible de valider la session backend');
+          window.location.replace('/');
         }
       } catch (err) {
-        console.error('❌ [AUTH] Échec de la vérification du profil:', err);
-        // On ne redirige pas immédiatement en cas de timeout pour éviter la boucle
-        // sauf si l'erreur est explicite
-        if (err instanceof Error && err.message.includes('401')) {
-           window.location.href = '/';
-        }
+        console.warn('📡 [AUTH] Erreur durant la vérification:', err);
+        window.location.replace('/');
       }
     })();
 
     document.getElementById('logout-btn')?.addEventListener('click', async () => {
-      try { await api.logout(); } catch {}
+      try {
+        await api.logout();
+        localStorage.removeItem('karmic_token');
+      } catch {}
       window.location.href = '/';
     });
   </script>

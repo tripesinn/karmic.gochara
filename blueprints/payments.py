@@ -157,3 +157,33 @@ def stripe_webhook():
                 current_app.logger.error("Erreur downgrade plan : %s", exc)
 
     return jsonify({"ok": True})
+
+# ── RevenueCat Webhook ────────────────────────────────────────────────────────
+@payments_bp.route("/revenuecat/webhook", methods=["POST"])
+def revenuecat_webhook():
+    """
+    Reçoit les événements depuis RevenueCat (pour Google Play / App Store).
+    """
+    # Optionnel: vérifier le secret si configuré sur le dashboard RevenueCat
+    auth_header = request.headers.get("Authorization", "")
+    rc_secret = os.environ.get("REVENUECAT_WEBHOOK_SECRET")
+    if rc_secret and auth_header != f"Bearer {rc_secret}" and auth_header != rc_secret:
+        current_app.logger.warning("Webhook RevenueCat : Mauvais secret d'auth")
+        return jsonify({"error": "Unauthorized"}), 401
+
+    payload = request.get_json() or {}
+    event = payload.get("event", {})
+    event_type = event.get("type", "")
+    app_user_id = event.get("app_user_id", "")
+    product_id = event.get("product_id", "")
+
+    # Types de paiement acceptés : achat in-app unique ou initialisation abonnement
+    if event_type in ("INITIAL_PURCHASE", "NON_RENEWING_PURCHASE", "RENEWAL"):
+        if app_user_id and product_id == "pro_lifetime_access":
+            current_app.logger.info("RevenueCat webhook: Activation PRO pour %s", app_user_id)
+            _fulfill_order(app_user_id, "pro", stripe_customer_id="revenuecat")
+            
+    elif event_type == "CANCELLATION":
+        current_app.logger.info("RevenueCat webhook: Annulation pour %s (expirera à la fin de la période)", app_user_id)
+
+    return jsonify({"ok": True})
