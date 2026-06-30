@@ -51,3 +51,6 @@ karmic-key
 *.jks
 *.keystore
 .aider*
+
+# Local scratch / large model files
+scratch/
