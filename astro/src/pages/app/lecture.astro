@@ -8,8 +8,8 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
 
 <AppLayout title="Lecture — Karmic Gochara">
   <div class="max-w-3xl mx-auto px-4 py-12 space-y-8">
-    <h1 class="text-3xl sm:text-4xl font-display text-cosmic-gold text-center">✦ Lecture du Jour</h1>
-    <p class="text-cosmic-text-dim text-center">
+    <h1 class="text-3xl sm:text-4xl font-display text-cosmic-gold text-center" data-i18n="lecture.title">✦ Lecture du Jour</h1>
+    <p class="text-cosmic-text-dim text-center" data-i18n="lecture.subtitle">
       Reçois ton analyse karmique personnalisée en temps réel.
     </p>
 
@@ -28,9 +28,9 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
           class="flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cosmic-gold/30 bg-cosmic-void/80 text-xs text-cosmic-gold/70 transition-all hover:text-cosmic-gold hover:border-cosmic-gold active:scale-95"
         >
           <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5H6a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2v-1M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 002 2h2a2 2 0 002-2M8 5a2 2 0 012-2h2a2 2 0 012 2m0 0h2a2 2 0 012 2v3m2 4H10m0 0l3-3m-3 3l3 3" />
           </svg>
-          <span>Copier la lecture</span>
+          <span data-i18n="lecture.copy">Copier la lecture</span>
         </button>
       </div>
     </div>

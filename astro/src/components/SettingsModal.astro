@@ -62,46 +62,72 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
       <!-- Langue -->
       <div>
-        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Langue</p>
-        <div class="flex gap-3">
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.language">Langue</p>
+        <div class="grid grid-cols-3 gap-2">
           <button
             id="lang-fr"
-            class="lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-                   transition-all duration-300"
+            class="lang-btn px-2 py-2 rounded-xl border text-center font-body text-xs transition-all duration-300"
             data-lang="fr"
           >
-            🇫🇷 Français
+            Français
           </button>
           <button
             id="lang-en"
-            class="lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-                   transition-all duration-300"
+            class="lang-btn px-2 py-2 rounded-xl border text-center font-body text-xs transition-all duration-300"
             data-lang="en"
           >
-            🇬🇧 English
+            English
+          </button>
+          <button
+            id="lang-es"
+            class="lang-btn px-2 py-2 rounded-xl border text-center font-body text-xs transition-all duration-300"
+            data-lang="es"
+          >
+            Español
+          </button>
+          <button
+            id="lang-pt"
+            class="lang-btn px-2 py-2 rounded-xl border text-center font-body text-xs transition-all duration-300"
+            data-lang="pt"
+          >
+            Português
+          </button>
+          <button
+            id="lang-nl"
+            class="lang-btn px-2 py-2 rounded-xl border text-center font-body text-xs transition-all duration-300"
+            data-lang="nl"
+          >
+            Nederlands
+          </button>
+          <button
+            id="lang-de"
+            class="lang-btn px-2 py-2 rounded-xl border text-center font-body text-xs transition-all duration-300"
+            data-lang="de"
+          >
+            Deutsch
           </button>
         </div>
       </div>
 
       <!-- Plan info -->
       <div id="settings-plan-section">
-        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Plan</p>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.plan">Plan</p>
         <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
           {currentPlan === 'pro' ? (
             <div class="flex items-center gap-3">
               <span class="text-cosmic-gold text-lg">✦</span>
               <div>
-                <p class="font-display text-sm text-cosmic-gold">Karmic Pro</p>
-                <p class="font-body text-xs text-cosmic-text-dim mt-0.5">Accès illimité</p>
+                <p class="font-display text-sm text-cosmic-gold" data-i18n="plan.pro">Karmic Pro</p>
+                <p class="font-body text-xs text-cosmic-text-dim mt-0.5" data-i18n="plan.unlimited">Accès illimité</p>
               </div>
             </div>
           ) : (
             <div class="flex items-center gap-3">
               <span class="text-cosmic-text-dim text-lg">✦</span>
               <div>
-                <p class="font-display text-sm text-cosmic-text">Plan Gratuit</p>
+                <p class="font-display text-sm text-cosmic-text" data-i18n="plan.free">Plan Gratuit</p>
                 <p class="font-body text-xs text-cosmic-dim mt-0.5">
-                  <a href="/app?upgrade=true" class="text-cosmic-gold hover:underline">Passer à Pro →</a>
+                  <a href="/app?upgrade=true" class="text-cosmic-gold hover:underline" data-i18n="plan.upgrade">Passer à Pro →</a>
                 </p>
               </div>
             </div>
@@ -111,9 +137,9 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
       <!-- Testeurs / IA -->
       <div>
-        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Expérimental (Testeurs)</p>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.local_ai">Expérimental (Testeurs)</p>
         <div class="flex items-center justify-between p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
-          <label for="use-local-ai" class="font-body text-sm text-cosmic-text cursor-pointer">
+          <label for="use-local-ai" class="font-body text-sm text-cosmic-text cursor-pointer" data-i18n="settings.use_local_ai">
             Souhaitez-vous utiliser votre LLM local ?
           </label>
           <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
@@ -139,15 +165,18 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         href="/logout"
         id="settings-logout"
         class="font-body text-xs text-cosmic-text-dim hover:text-red-400/80 transition-colors duration-300"
+        data-i18n="settings.logout"
       >
         Se déconnecter
       </a>
-      <p class="font-body text-[10px] text-cosmic-text-dim/40">Karmic Gochara v1.0</p>
+      <p class="font-body text-[10px] text-cosmic-text-dim/40">Karmic Gochara v1.5</p>
     </div>
   </div>
 </div>
 
 <script>
+  import { i18n } from '../lib/i18n';
+
   // ── DOM refs ──
   const modal = document.getElementById('settings-modal')!;
   const closeBtn = document.getElementById('settings-close')!;
@@ -160,6 +189,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
     modal.classList.add('flex');
     document.body.style.overflow = 'hidden';
     loadUserProfile();
+    updateActiveLangBtn(i18n.detect());
   }
 
   function closeModal() {
@@ -180,13 +210,13 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         if (planSection && data.profile.plan) {
           const isPro = data.profile.plan === 'pro';
           planSection.innerHTML = `
-            <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Plan</p>
+            <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">${i18n.t('settings.plan')}</p>
             <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
               <div class="flex items-center gap-3">
                 <span class="${isPro ? 'text-cosmic-gold' : 'text-cosmic-text-dim'} text-lg">✦</span>
                 <div>
-                  <p class="font-display text-sm ${isPro ? 'text-cosmic-gold' : 'text-cosmic-text'}">${isPro ? 'Karmic Pro' : 'Plan Gratuit'}</p>
-                  <p class="font-body text-xs text-cosmic-dim mt-0.5">${isPro ? 'Accès illimité' : '<a href="/app?upgrade=true" class="text-cosmic-gold hover:underline">Passer à Pro →</a>'}</p>
+                  <p class="font-display text-sm ${isPro ? 'text-cosmic-gold' : 'text-cosmic-text'}">${isPro ? i18n.t('plan.pro') : i18n.t('plan.free')}</p>
+                  <p class="font-body text-xs text-cosmic-dim mt-0.5">${isPro ? i18n.t('plan.unlimited') : `<a href="/app?upgrade=true" class="text-cosmic-gold hover:underline">${i18n.t('plan.upgrade')}</a>`}</p>
                 </div>
               </div>
             </div>
@@ -198,28 +228,17 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
     }
   }
 
-  // ── Langue toggle ──
-  async function setLang(lang: string) {
-    try {
-      await fetch('/set_lang', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ lang }),
-      });
-      // Update visual state
-      langBtns.forEach((btn) => {
-        const isActive = btn.dataset.lang === lang;
-        btn.className = `lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-          transition-all duration-300 ${
-            isActive
-              ? 'bg-cosmic-gold/15 border-cosmic-gold/50 text-cosmic-gold'
-              : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
-          }`;
-      });
-    } catch {
-      // Silent fail
-    }
+  // Helper to update active language UI style
+  function updateActiveLangBtn(lang: string) {
+    langBtns.forEach((btn) => {
+      const isActive = btn.dataset.lang === lang;
+      btn.className = `lang-btn px-2 py-2 rounded-xl border text-center font-body text-xs
+        transition-all duration-300 ${
+          isActive
+            ? 'bg-cosmic-gold/15 border-cosmic-gold/50 text-cosmic-gold font-medium'
+            : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
+        }`;
+    });
   }
 
   // ── Event listeners ──
@@ -251,19 +270,21 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
   // Langue buttons
   langBtns.forEach((btn) => {
-    btn.addEventListener('click', () => setLang(btn.dataset.lang || 'fr'));
+    btn.addEventListener('click', async () => {
+      const selected = btn.dataset.lang || 'fr';
+      await i18n.setLang(selected);
+      updateActiveLangBtn(selected);
+    });
   });
 
   // Initial language state
-  const currentLang = '{currentLang}';
-  langBtns.forEach((btn) => {
-    const isActive = btn.dataset.lang === currentLang;
-    btn.className = `lang-btn flex-1 px-4 py-2.5 rounded-xl border text-center font-body text-sm
-      transition-all duration-300 ${
-        isActive
-          ? 'bg-cosmic-gold/15 border-cosmic-gold/50 text-cosmic-gold'
-          : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
-      }`;
+  updateActiveLangBtn(i18n.detect());
+
+  // Listen to lang changes elsewhere
+  window.addEventListener('karmic-lang-changed', (e: any) => {
+    if (e.detail && e.detail.lang) {
+      updateActiveLangBtn(e.detail.lang);
+    }
   });
 
   // ── IA Locale Toggle ──

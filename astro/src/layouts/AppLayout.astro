@@ -44,18 +44,19 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
         </a>
 
         <div class="flex items-center gap-4 text-sm">
-          <a href="/app/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+          <a href="/app/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.reading">
             Tableau
           </a>
-          <a href="/app/lecture/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+          <a href="/app/lecture/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.reading">
             Lecture
           </a>
-          <a href="/app/miroir/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition">
+          <a href="/app/miroir/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.chart">
             Miroir
           </a>
           <button
             id="logout-btn"
             class="text-cosmic-text-dim/60 hover:text-red-400 transition text-xs ml-2"
+            data-i18n="settings.logout"
           >
             Quitter
           </button>
@@ -79,14 +80,19 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
     import { auth } from '../lib/firebase';
     import { onAuthStateChanged, signOut } from '@firebase/auth';
     import { initRevenueCat } from '../lib/revenuecat';
+    import { i18n } from '../lib/i18n';
+
+    // Initialisation i18n client-side
+    i18n.apply();
+
+    // Ré-appliquer si changement
+    window.addEventListener('karmic-lang-changed', () => {
+      i18n.apply();
+    });
 
     // Vérification auth côté client
     (async () => {
-      // Détection de la langue du navigateur
-      const browserLang = navigator.language.split('-')[0];
-      const supportedLangs = ['fr', 'en', 'es', 'pt', 'de', 'nl', 'it'];
-      const finalLang = supportedLangs.includes(browserLang) ? browserLang : 'fr';
-
+      const finalLang = i18n.detect();
       try {
         await api.setLang(finalLang);
       } catch (e) {}
@@ -129,7 +135,9 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
         if (resp.ok) {
           console.log('🎊 [AUTH] Authentification complète OK');
           const el = document.getElementById('welcome-pseudo');
-          if (el && resp.profile?.pseudo) el.textContent = `Bienvenue ${resp.profile.pseudo}`;
+          if (el && resp.profile?.pseudo) {
+            el.textContent = `${i18n.t('welcome.subtitle')} ${resp.profile.pseudo}`;
+          }
           
           if (resp.profile?.pseudo) {
             await initRevenueCat(resp.profile.pseudo);
