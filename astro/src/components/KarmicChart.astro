@@ -35,7 +35,7 @@ const {
         <dt class="font-body text-xs uppercase tracking-widest text-cosmic-text-dim">
           Date
         </dt>
-        <dd class="font-display text-base text-cosmic-text mt-0.5">
+        <dd id="chart-date" class="font-display text-base text-cosmic-text mt-0.5">
           {birthDate}
         </dd>
       </div>
@@ -43,7 +43,7 @@ const {
         <dt class="font-body text-xs uppercase tracking-widest text-cosmic-text-dim">
           Time
         </dt>
-        <dd class="font-display text-base text-cosmic-text mt-0.5">
+        <dd id="chart-time" class="font-display text-base text-cosmic-text mt-0.5">
           {birthTime}
         </dd>
       </div>
@@ -51,7 +51,7 @@ const {
         <dt class="font-body text-xs uppercase tracking-widest text-cosmic-text-dim">
           Location
         </dt>
-        <dd class="font-display text-base text-cosmic-text mt-0.5">
+        <dd id="chart-location" class="font-display text-base text-cosmic-text mt-0.5">
           {birthLocation}
         </dd>
       </div>
@@ -64,42 +64,38 @@ const {
       Planetary Positions
     </h2>
 
-    {
-      planets.length > 0 ? (
-        <table class="w-full text-left font-body">
-          <thead>
-            <tr class="border-b border-cosmic-border text-cosmic-text-dim text-xs uppercase tracking-widest">
-              <th class="pb-2 pr-3 font-medium">Planet</th>
-              <th class="pb-2 pr-3 font-medium">Sign</th>
-              <th class="pb-2 pr-3 font-medium">Degree</th>
-              <th class="pb-2 pr-3 font-medium">House</th>
-              <th class="pb-2 font-medium">Motion</th>
+    <table id="chart-planets-table" class="w-full text-left font-body hidden">
+      <thead>
+        <tr class="border-b border-cosmic-border text-cosmic-text-dim text-xs uppercase tracking-widest">
+          <th class="pb-2 pr-3 font-medium">Planet</th>
+          <th class="pb-2 pr-3 font-medium">Sign</th>
+          <th class="pb-2 pr-3 font-medium">Degree</th>
+          <th class="pb-2 pr-3 font-medium">House</th>
+          <th class="pb-2 font-medium">Motion</th>
+        </tr>
+      </thead>
+      <tbody id="chart-planets-body">
+        {
+          planets.map((planet) => (
+            <tr class="border-b border-cosmic-border/50 last:border-b-0">
+              <td class="py-2 pr-3 text-cosmic-gold font-display text-sm">
+                {planet.retrograde ? `℞ ` : ''}{planet.name}
+              </td>
+              <td class="py-2 pr-3 text-cosmic-text">{planet.sign}</td>
+              <td class="py-2 pr-3 text-cosmic-text">{planet.degree}°</td>
+              <td class="py-2 pr-3 text-cosmic-text">{planet.house}</td>
+              <td class="py-2 text-cosmic-text-dim text-xs italic">
+                {planet.retrograde ? 'Retrograde' : 'Direct'}
+              </td>
             </tr>
-          </thead>
-          <tbody>
-            {
-              planets.map((planet) => (
-                <tr class="border-b border-cosmic-border/50 last:border-b-0">
-                  <td class="py-2 pr-3 text-cosmic-gold font-display text-sm">
-                    {planet.retrograde ? `℞ ` : ''}{planet.name}
-                  </td>
-                  <td class="py-2 pr-3 text-cosmic-text">{planet.sign}</td>
-                  <td class="py-2 pr-3 text-cosmic-text">{planet.degree}°</td>
-                  <td class="py-2 pr-3 text-cosmic-text">{planet.house}</td>
-                  <td class="py-2 text-cosmic-text-dim text-xs italic">
-                    {planet.retrograde ? 'Retrograde' : 'Direct'}
-                  </td>
-                </tr>
-              ))
-            }
-          </tbody>
-        </table>
-      ) : (
-        <p class="font-body text-cosmic-text-dim italic text-sm">
-          No planetary data available.
-        </p>
-      )
-    }
+          ))
+        }
+      </tbody>
+    </table>
+    
+    <p id="chart-no-planets" class="font-body text-cosmic-text-dim italic text-sm">
+      No planetary data available.
+    </p>
   </section>
 
   <!-- SVG Chart Placeholder -->
