@@ -8,10 +8,10 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-06-30T10:39 (session orchestrateur)
+**Dernière mise à jour** : 2026-06-30T13:25 (session orchestrateur)
 
-**Build Astro** : ⏳ En attente de rebuild pour intégrer carte.astro
-**Capacitor Sync** : ⏳ En attente
+**Build Astro** : ✅ OK (chat.astro restauré)
+**Capacitor Sync** : ✅ OK
 **Pixel 10** : ⏳ À vérifier
 **Deploy Cloud Run** : ⏳ En attente de commit
 **IA Locale (port 8888)** : ✅ UP — gemma-4-E2B-it-qat-oQ4-fp16 (Analyse réussie)
@@ -74,3 +74,8 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 - Phase 2 : Build & Sync (OK)
 - Phase 3 : Deploy (Commit & Push OK)
 - Phase 4 : Pixel 10 (Install APK succès)
+
+### 2026-06-30 — Session orchestrateur (Restauration chat)
+- Phase 0 : Diagnostic IA locale indique l'absence de `chat.astro` dans le build (P2).
+- Phase 1 : Restauration de `chat.astro` depuis l'historique git.
+- Phase 2 : Build Astro & Sync Capacitor (OK, `chat` est bien présent dans `www/app/`).
