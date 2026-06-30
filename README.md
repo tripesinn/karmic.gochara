@@ -3,19 +3,41 @@
 ![Edge AI](https://img.shields.io/badge/AI-Gemma_4_E2B_Local-orange)
 ![License](https://img.shields.io/badge/License-Dual_MIT_CC-blue)
 ![Platform](https://img.shields.io/badge/Platform-Android_Capacitor-green)
-![Version](https://img.shields.io/badge/Version-1.3.0-purple)
+![Version](https://img.shields.io/badge/Version-1.4.0-purple)
 
-**Gochara Karmique** est ton agent astrologue ! Un moteur expert d'astrologie védique fonctionnant en "Edge AI" (intelligence artificielle locale). Il combine les calculs de précision du Jyotish sidéral avec une synthèse doctrinale originale pour transformer des transits astronomiques en conseils oraculaires profonds.
+**Gochara Karmique** est ton agent astrologue ! Un moteur
+expert d'astrologie védique fonctionnant en "Edge AI"
+(intelligence artificielle locale). Il combine les calculs
+de précision du Jyotish sidéral avec une synthèse
+doctrinale originale pour transformer des transits
+astronomiques en conseils oraculaires profonds.
 
 ---
 
 ## 🟢 Current Project Status (June 2026)
-This project is currently deployed on Google Cloud Run (`gochara-api`) as a web application and is entering a **Closed Beta Testing** phase. 
-- **User Recruitment**: Beta testers are being recruited on Reddit and X.com. 
-- **Beta Access**: To simplify testing, all new users created during this phase automatically default to the `pro` plan (in `profiles.py`), bypassing Stripe/Apple Pay integrations for now.
-- **Freemium Model**: The app has a Freemium tier that provides only the **"Daily Reading"** (short 4-sentence hook: Mirror, Wound, Friction, Open Door). The **"Natal Reading"** and full 4-act **"Complete Synthesis"** are locked behind the PRO plan.
-- **Doctrine Update**: La doctrine repose sur **Karmic Memory** (Ketu), **Core Wound** (Chiron), **The Stage / La Scène** (replaces "Dharma") et **Les Portes**.
-- **Multi-language**: Fully supports EN, FR, ES, PT, DE, NL, IT. Caching bugs with language switching on `hook_natal` and `hook_transit` have been fixed.
+
+Ce projet est déployé sur Google Cloud Run (`gochara-api`)
+et est en **phase de Tests Fermés** sur le Google Play Store.
+
+### v1.4.0 (versionCode 14) — 30 juin 2026
+- ✅ **Carte Karmique** : visualisation SVG interactive du
+  thème natal complet (planètes, maisons, aspects)
+- ✅ Build Astro + sync Capacitor automatisé
+- ✅ AAB signé uploadé en Tests Fermés Play Console
+
+### v1.3.0 (versionCode 13) — 16 juin 2026
+- ✅ Déploiement initial en Tests Fermés (12 414 appareils)
+- ✅ Taille install : 13.4 Mo · Téléchargement : 8s
+
+### Notes Beta
+- **Accès Beta** : Tous les nouveaux utilisateurs sont
+  automatiquement en plan `pro` pendant la beta (bypass
+  Stripe/Apple Pay).
+- **Freemium** : Lecture du Jour (4 phrases) gratuite.
+  Lecture Natale + Synthèse Complète réservées au plan PRO.
+- **Doctrine** : Karmic Memory (Ketu) · Core Wound (Chiron)
+  · The Stage (Rahu) · Les Portes (Castanier).
+- **Multi-langue** : EN, FR, ES, PT, DE, NL, IT.
 
 ---
 
