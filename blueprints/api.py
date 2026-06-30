@@ -31,16 +31,16 @@ def api_profile():
             
             natal_input = {
                 "name": profile.get("name", ""),
-                "year": profile.get("year", 1990), "month": profile.get("month", 1),
-                "day": profile.get("day", 1), "hour": profile.get("hour", 12),
-                "minute": profile.get("minute", 0), "lat": profile.get("lat", 48.8566),
-                "lon": profile.get("lon", 2.3522), "tz": profile.get("tz", "Europe/Paris"),
+                "year": int(profile.get("year", 1990)), "month": int(profile.get("month", 1)),
+                "day": int(profile.get("day", 1)), "hour": int(profile.get("hour", 12)),
+                "minute": int(profile.get("minute", 0)), "lat": float(profile.get("lat", 48.8566)),
+                "lon": float(profile.get("lon", 2.3522)), "tz": profile.get("tz", "Europe/Paris"),
                 "city": profile.get("city", ""),
             }
             today = _date.today()
             transit_loc = {
-                "city": profile.get("city", ""), "lat": profile.get("lat", 48.8566),
-                "lon": profile.get("lon", 2.3522), "tz": profile.get("tz", "Europe/Paris"),
+                "city": profile.get("city", ""), "lat": float(profile.get("lat", 48.8566)),
+                "lon": float(profile.get("lon", 2.3522)), "tz": profile.get("tz", "Europe/Paris"),
             }
             natal_result = calculate_transits(natal_input, transit_loc,
                                               today.year, today.month, today.day, 12, 0)

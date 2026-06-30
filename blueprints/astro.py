@@ -335,10 +335,22 @@ def karmic_chart_svg():
     natal_pos = profile.get("natal_positions")
     if not natal_pos:
         try:
+            natal_input = {
+                "name": profile.get("name", ""),
+                "year": int(profile.get("year", 1990)),
+                "month": int(profile.get("month", 1)),
+                "day": int(profile.get("day", 1)),
+                "hour": int(profile.get("hour", 12)),
+                "minute": int(profile.get("minute", 0)),
+                "lat": float(profile.get("lat", 48.8566)),
+                "lon": float(profile.get("lon", 2.3522)),
+                "tz": profile.get("tz", "Europe/Paris"),
+                "city": profile.get("city", "")
+            }
             res = calculate_transits(
-                profile, profile,
-                profile["year"], profile["month"], profile["day"],
-                profile["hour"], profile["minute"],
+                natal_input, natal_input,
+                natal_input["year"], natal_input["month"], natal_input["day"],
+                natal_input["hour"], natal_input["minute"],
             )
             natal_pos = res.get("natal", {})
         except Exception as exc:
