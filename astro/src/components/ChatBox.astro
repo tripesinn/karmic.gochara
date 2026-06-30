@@ -124,7 +124,27 @@
 
       // 4. Call native Gemma plugin or fallback
       let response = '';
-      if (capacitorBridge.isNative()) {
+
+      // Check if local AI is selected and available
+      let useLocalConfig = false;
+      const storedSettings = localStorage.getItem('karmic_ai_settings');
+      if (storedSettings) {
+        try {
+          useLocalConfig = JSON.parse(storedSettings).useLocal === true;
+        } catch (e) {}
+      }
+
+      let isLocalAvailable = false;
+      if (capacitorBridge.isNative() && useLocalConfig) {
+        try {
+          const avail = await capacitorBridge.gemma.checkAvailability();
+          if (avail && avail.available) {
+            isLocalAvailable = true;
+          }
+        } catch (e) {}
+      }
+
+      if (isLocalAvailable) {
         console.log('[Chat] Using Native Gemma Synthesis...');
         await capacitorBridge.gemma.prepareModel(false);
         const nativeRes = await capacitorBridge.gemma.generate(
@@ -135,7 +155,19 @@
         );
         response = nativeRes || "Oracle local indisponible.";
       } else {
-        response = await GemmaWebFallback.generate(lightPrompt);
+        // Roue de secours : Si non-natif ou si le modèle local n'est pas dispo, on utilise le fallback
+        // Pour les testeurs beta sans le modèle téléchargé, on effectue un appel API Cloud pour le chat !
+        try {
+          // Utilisation du endpoint de chat du backend API Cloud comme secours
+          const chatResult = await api.chat(chatState.currentAnalysisId || 'rom', userMessage);
+          if (chatResult && chatResult.ok && chatResult.reply) {
+            response = chatResult.reply;
+          } else {
+            response = await GemmaWebFallback.generate(lightPrompt);
+          }
+        } catch (e) {
+          response = await GemmaWebFallback.generate(lightPrompt);
+        }
       }
 
       // 5. Update UI with assistant response

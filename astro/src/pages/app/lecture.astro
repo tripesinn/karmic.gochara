@@ -261,9 +261,26 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       const output = document.getElementById('reading-output')!;
       const btn = document.getElementById('refresh-btn') as HTMLButtonElement;
 
-      // 1. Vérifier si le modèle est dispo (uniquement mobile natif)
-      const hasModel = await checkModelAvailability();
-      if (!hasModel) return;
+      // Détecter si l'utilisateur a configuré l'usage de l'IA locale (réglages de la modal)
+      let useLocalConfig = false;
+      const storedSettings = localStorage.getItem('karmic_ai_settings');
+      if (storedSettings) {
+        try {
+          useLocalConfig = JSON.parse(storedSettings).useLocal === true;
+        } catch (e) {}
+      }
+
+      // Si l'utilisateur veut utiliser le local sur mobile natif, on fait les vérifications associées
+      let forceCloudFallback = !useLocalConfig;
+      
+      if (capacitorBridge.isNative() && !forceCloudFallback) {
+        const hasModel = await checkModelAvailability();
+        if (!hasModel) {
+          // Si le modèle n'est pas dispo localement, au lieu de bloquer, on passe en Cloud de secours (roue de secours)
+          console.log("Modèle local absent ou non-téléchargé. Basculement sur l'IA Cloud de secours.");
+          forceCloudFallback = true;
+        }
+      }
 
       if (controller) controller.abort();
       controller = new AbortController();
@@ -287,7 +304,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       }
 
       try {
-        if (capacitorBridge.isNative()) {
+        if (capacitorBridge.isNative() && !forceCloudFallback) {
           status.textContent = 'Calcul des transits...';
           const nowTime = new Date();
           const hour = nowTime.getHours();
@@ -311,7 +328,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             promptData.system,
             promptData.user,
             "synthesis",
-            "fr"
+            i18n.detect()
           );
 
           if (response) {
@@ -326,7 +343,8 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             throw new Error("Gemma n'a pas répondu.");
           }
         } else {
-          // Mode Web/Réseau (SSE)
+          // Mode Web/Réseau (SSE) — Utilisé comme roue de secours ou en mode web
+          const lang = i18n.detect();
           for await (const chunk of api.calculate({
             pseudo,
             transit_date: today(),
