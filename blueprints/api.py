@@ -22,6 +22,35 @@ def api_profile():
     profile = session.get("profile")
     if not profile:
         return jsonify({"ok": False, "error": "Non authentifié"}), 401
+    
+    if "planets_info" not in profile:
+        try:
+            from datetime import date as _date
+            from astro_calc import calculate_transits
+            from app_common import _enrich_profile_with_natal
+            
+            natal_input = {
+                "name": profile.get("name", ""),
+                "year": profile.get("year", 1990), "month": profile.get("month", 1),
+                "day": profile.get("day", 1), "hour": profile.get("hour", 12),
+                "minute": profile.get("minute", 0), "lat": profile.get("lat", 48.8566),
+                "lon": profile.get("lon", 2.3522), "tz": profile.get("tz", "Europe/Paris"),
+                "city": profile.get("city", ""),
+            }
+            today = _date.today()
+            transit_loc = {
+                "city": profile.get("city", ""), "lat": profile.get("lat", 48.8566),
+                "lon": profile.get("lon", 2.3522), "tz": profile.get("tz", "Europe/Paris"),
+            }
+            natal_result = calculate_transits(natal_input, transit_loc,
+                                              today.year, today.month, today.day, 12, 0)
+            
+            enriched = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
+            profile = enriched
+            session["profile"] = profile
+        except Exception as e:
+            current_app.logger.error("Erreur auto-hydratation profile : %s", e)
+
     return jsonify({"ok": True, "profile": profile})
 
 

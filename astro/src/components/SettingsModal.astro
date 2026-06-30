@@ -108,6 +108,29 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
           )}
         </div>
       </div>
+
+      <!-- Testeurs / IA -->
+      <div>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Expérimental (Testeurs)</p>
+        <div class="flex items-center justify-between p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
+          <label for="use-local-ai" class="font-body text-sm text-cosmic-text cursor-pointer">
+            Souhaitez-vous utiliser votre LLM local ?
+          </label>
+          <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
+            <input type="checkbox" name="use-local-ai" id="use-local-ai" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-cosmic-void border-4 border-cosmic-border appearance-none cursor-pointer transition-transform duration-300"/>
+            <label for="use-local-ai" class="toggle-label block overflow-hidden h-6 rounded-full bg-cosmic-border cursor-pointer"></label>
+          </div>
+        </div>
+        <style>
+          .toggle-checkbox:checked {
+            right: 0;
+            border-color: #D4AF37;
+          }
+          .toggle-checkbox:checked + .toggle-label {
+            background-color: rgba(212, 175, 55, 0.3);
+          }
+        </style>
+      </div>
     </div>
 
     <!-- Footer -->
@@ -220,7 +243,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
     }
   });
 
-  // Listen for URL hash
+  // Listen for hash changes
   window.addEventListener('hashchange', () => {
     if (window.location.hash === '#settings') openModal();
   });
@@ -242,4 +265,26 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
           : 'bg-cosmic-bg border-cosmic-border text-cosmic-text-dim/70 hover:border-cosmic-text-dim/30'
       }`;
   });
+
+  // ── IA Locale Toggle ──
+  const localAIToggle = document.getElementById('use-local-ai') as HTMLInputElement;
+  if (localAIToggle) {
+    // Restaurer l'état initial
+    const stored = localStorage.getItem('karmic_ai_settings');
+    if (stored) {
+      try {
+        const settings = JSON.parse(stored);
+        if (settings.useLocal) {
+          localAIToggle.checked = true;
+        }
+      } catch (e) {}
+    }
+    
+    // Sauvegarder l'état
+    localAIToggle.addEventListener('change', (e) => {
+      const isChecked = (e.target as HTMLInputElement).checked;
+      const settings = { useLocal: isChecked };
+      localStorage.setItem('karmic_ai_settings', JSON.stringify(settings));
+    });
+  }
 </script>

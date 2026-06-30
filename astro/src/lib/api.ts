@@ -18,6 +18,13 @@ class ApiError extends Error {
 
 function getBaseUrl(): string {
   if (typeof window === 'undefined') return '';
+  
+  // Simplification pour le développement local : 
+  // Toujours pointer vers le backend local si on est sur localhost (navigateur ou Capacitor local)
+  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+    return 'http://127.0.0.1:5001';
+  }
+
   const isCapacitor = Capacitor.isNativePlatform();
   return isCapacitor
     ? 'https://gochara-api-drln4gv4fa-ew.a.run.app'
@@ -30,8 +37,26 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 
   console.log(`📡 [API] Fetch: ${url} (isCapacitor: ${isCapacitor})`);
 
-  // Récupérer le token si présent
+  // Récupérer le token et les paramètres IA locaux
   const token = typeof window !== 'undefined' ? localStorage.getItem('karmic_token') : null;
+  let customBody = options?.body;
+  
+  if (typeof window !== 'undefined' && options?.body && typeof options.body === 'string') {
+    try {
+      const storedAI = localStorage.getItem('karmic_ai_settings');
+      if (storedAI) {
+        const settings = JSON.parse(storedAI);
+        if (settings.useLocal) {
+          const parsedBody = JSON.parse(options.body);
+          parsedBody.user_provider = 'local';
+          customBody = JSON.stringify(parsedBody);
+        }
+      }
+    } catch (e) {
+      // Ignorer si JSON invalide
+    }
+  }
+
   const headers = {
     'Content-Type': 'application/json',
     'Referer': 'https://karmic-gochara.app',
@@ -46,7 +71,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
         method: (options?.method as any) || 'GET',
         url: url,
         headers: headers,
-        data: options?.body ? JSON.parse(options.body as string) : undefined,
+        data: customBody ? JSON.parse(customBody as string) : undefined,
         connectTimeout: 15000,
         readTimeout: 15000,
       });
@@ -74,6 +99,7 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
       headers: headers,
       credentials: 'include',
       ...options,
+      body: customBody,
     });
 
     if (!res.ok) {
@@ -92,6 +118,19 @@ async function request<T>(path: string, options?: RequestInit): Promise<T> {
 // Streaming via fetch + ReadableStream (remplace EventSource)
 async function* streamingRequest(path: string, body: Record<string, unknown>) {
   const url = `${getBaseUrl()}${path}`;
+  
+  if (typeof window !== 'undefined') {
+    try {
+      const storedAI = localStorage.getItem('karmic_ai_settings');
+      if (storedAI) {
+        const settings = JSON.parse(storedAI);
+        if (settings.useLocal) {
+          body.user_provider = 'local';
+        }
+      }
+    } catch (e) {}
+  }
+
   const res = await fetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
