@@ -37,9 +37,39 @@ import KarmicChart from '../../components/KarmicChart.astro';
           const p = resp.profile;
           
           // Hydratation Infos de Naissance
-          if (p.birth_date) document.getElementById('chart-date').textContent = p.birth_date;
-          if (p.birth_time) document.getElementById('chart-time').textContent = p.birth_time;
-          if (p.birth_location) document.getElementById('chart-location').textContent = p.birth_location;
+          if (p.day && p.month && p.year) {
+             const birthDateStr = `${p.day.toString().padStart(2, '0')}/${p.month.toString().padStart(2, '0')}/${p.year}`;
+             const el = document.getElementById('chart-date');
+             if (el) el.textContent = birthDateStr;
+          } else if (p.birth_date) {
+             const el = document.getElementById('chart-date');
+             if (el) el.textContent = p.birth_date;
+          }
+
+          if (p.hour !== undefined && p.minute !== undefined) {
+             const birthTimeStr = `${p.hour.toString().padStart(2, '0')}h${p.minute.toString().padStart(2, '0')}`;
+             const el = document.getElementById('chart-time');
+             if (el) el.textContent = birthTimeStr;
+          } else if (p.birth_time) {
+             const el = document.getElementById('chart-time');
+             if (el) el.textContent = p.birth_time;
+          }
+
+          if (p.city || p.birth_location) {
+             const el = document.getElementById('chart-location');
+             if (el) el.textContent = p.city || p.birth_location;
+          }
+
+          // Fetch and inject actual SVG chart
+          try {
+             const svgText = await api.getChartSvg();
+             const container = document.getElementById('chart-svg-container');
+             if (container && svgText) {
+                container.innerHTML = svgText;
+             }
+          } catch (e) {
+             console.error("Erreur récupération SVG:", e);
+          }
 
           // Hydratation Planètes
           const planets = p.planets_info || [];

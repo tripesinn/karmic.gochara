@@ -27,6 +27,7 @@
 | BUG-003 | Assets Capacitor stale | Rebuild Astro + sync Capacitor | 69f9f67 |
 | BUG-GIT | `scratch/gemma-4-E2B-it-web.task` (1.9GB) dans git | Ajouté `scratch/` au `.gitignore` | 69f9f67 amendé |
 | BUG-006 | Carte Astrale vide (données astrologiques manquantes) | Enrichissement profil ajouté dans `api.py` (`login_firebase`) | (en cours) |
+| BUG-008 | `ConnectException` 127.0.0.1 depuis l'app Android | Modification de `getBaseUrl` dans `api.ts` pour pointer vers l'API Cloud sur Capacitor natif | (en cours) |
 
 ---
 
@@ -35,7 +36,6 @@
 | ID | Priorité | Description | Fichier |
 |----|----------|-------------|---------|
 | BUG-004 | P2 | `lecture.astro` ne déclenche pas le modèle Gemma | `astro/src/pages/app/lecture.astro` |
-| BUG-007 | P3 | Intégration structurelle `carte.astro` (fichiers non suivis) | `astro/src/pages/app/carte.astro` |
 
 ---
 

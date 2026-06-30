@@ -3,14 +3,13 @@
 // This file is now purely a structural component for Astro, with all client-side logic moved to a script block.
 ---
 
-<div class="chat-container">
-      <h2 class="chat-title">Karmic Gochara RAG Chat</h2>
-      <div class="chat-history" id="chat-history">
+<div class="border border-cosmic-border bg-cosmic-bg/50 rounded-xl p-4 sm:p-6 flex flex-col h-[65vh] min-h-[400px]">
+      <div class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar" id="chat-history">
         <!-- Messages will be injected here by JavaScript -->
       </div>
-      <div class="chat-input-area">
-        <input type="text" id="user-input" placeholder="Ask a question..." class="chat-input" disabled>
-        <button id="send-button" class="send-button" disabled>Send</button>
+      <div class="chat-input-area flex items-center gap-2 mt-4">
+        <input type="text" id="user-input" placeholder="Ask a question..." class="flex-1 bg-cosmic-void border border-cosmic-border rounded px-4 py-3 text-cosmic-text placeholder-cosmic-text-dim focus:outline-none focus:border-cosmic-gold transition-colors" disabled>
+        <button id="send-button" class="px-6 py-3 bg-cosmic-gold/10 text-cosmic-gold border border-cosmic-gold/30 rounded font-display tracking-wide hover:bg-cosmic-gold/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Send</button>
       </div>
     </div>
 
@@ -56,10 +55,11 @@
         chatHistoryElement.innerHTML = '';
         chatState.messages.forEach((msg) => {
           const messageDiv = document.createElement('div');
-          messageDiv.className = `message ${msg.role}`;
+          const isUser = msg.role === 'user';
+          messageDiv.className = `p-4 rounded-lg max-w-[90%] sm:max-w-[80%] ${isUser ? 'ml-auto bg-cosmic-gold/10 border border-cosmic-gold/20' : 'mr-auto bg-cosmic-void border border-cosmic-border'}`;
           messageDiv.innerHTML = `
-            <strong class="role-tag">${msg.role === 'user' ? 'You' : 'Assistant'}</strong>
-            <p>${msg.content}</p>
+            <strong class="block text-xs uppercase tracking-wider mb-2 font-display ${isUser ? 'text-cosmic-gold' : 'text-cosmic-text-dim'}">${isUser ? 'Vous' : 'Oracle'}</strong>
+            <p class="text-cosmic-text leading-relaxed whitespace-pre-wrap">${msg.content}</p>
           `;
           chatHistoryElement.appendChild(messageDiv);
         });

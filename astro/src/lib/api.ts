@@ -19,16 +19,17 @@ class ApiError extends Error {
 function getBaseUrl(): string {
   if (typeof window === 'undefined') return '';
   
-  // Simplification pour le développement local : 
-  // Toujours pointer vers le backend local si on est sur localhost (navigateur ou Capacitor local)
+  const isCapacitor = Capacitor.isNativePlatform();
+  if (isCapacitor) {
+    return 'https://gochara-api-drln4gv4fa-ew.a.run.app';
+  }
+  
+  // Simplification pour le développement local web: 
   if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
     return 'http://127.0.0.1:5001';
   }
 
-  const isCapacitor = Capacitor.isNativePlatform();
-  return isCapacitor
-    ? 'https://gochara-api-drln4gv4fa-ew.a.run.app'
-    : ((import.meta as any).env.PUBLIC_API_URL || '');
+  return ((import.meta as any).env.PUBLIC_API_URL || '');
 }
 
 async function request<T>(path: string, options?: RequestInit): Promise<T> {
@@ -227,6 +228,31 @@ export const api = {
 
   getCalendarUrl(pseudo: string): string {
     return `${getBaseUrl()}/api/calendar/${encodeURIComponent(pseudo)}.ics`;
+  },
+
+  async getChartSvg(date?: string, hour?: number, minute?: number): Promise<string> {
+    let query = '';
+    if (date) {
+      query = `?date=${date}&hour=${hour || 12}&minute=${minute || 0}`;
+    }
+    const url = `${getBaseUrl()}/chart/karmic.svg${query}`;
+    const token = typeof window !== 'undefined' ? localStorage.getItem('karmic_token') : null;
+    const headers = token ? { 'Authorization': `Bearer ${token}` } : {};
+    
+    if (Capacitor.isNativePlatform()) {
+      const response = await CapacitorHttp.request({
+        method: 'GET',
+        url: url,
+        headers: headers,
+        connectTimeout: 15000,
+      });
+      if (response.status < 200 || response.status >= 300) throw new Error('API Error fetch SVG');
+      return response.data as string;
+    } else {
+      const res = await fetch(url, { headers, credentials: 'include' });
+      if (!res.ok) throw new Error('API Error fetch SVG');
+      return await res.text();
+    }
   },
 };
 
