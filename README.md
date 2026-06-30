@@ -1,6 +1,6 @@
 # ☸️ Gochara Karmique — Edge AI Astrology
 
-![Edge AI](https://img.shields.io/badge/AI-Gemma_2B_IT_Local-orange)
+![Edge AI](https://img.shields.io/badge/AI-Gemma_4_E2B_Local-orange)
 ![License](https://img.shields.io/badge/License-Dual_MIT_CC-blue)
 ![Platform](https://img.shields.io/badge/Platform-Android_Capacitor-green)
 ![Version](https://img.shields.io/badge/Version-1.3.0-purple)
@@ -119,7 +119,7 @@ Le projet utilise Java 17 pour la compilation. Si vous rencontrez des problèmes
 - **Synthèse Personnalisée** : Adaptation du conseil selon le thème natal
 - **Mode Hors-ligne** : Fonctionnement complet sans connexion internet
 - **Multi-langues** : Support complet pour EN, FR, ES, PT, DE, NL, IT.
-- **Performance Optimisée** : Utilisation du SDK LiteRT-LM (`com.google.ai.edge.litertlm`) pour la stabilité et l'exécution locale de Gemma 2B-IT (quantisé 4-bit)
+- **Performance Optimisée** : Utilisation du SDK LiteRT-LM (`com.google.ai.edge.litertlm`) pour la stabilité et l'exécution locale de Gemma 4 E2B-IT
 
 ---
 
