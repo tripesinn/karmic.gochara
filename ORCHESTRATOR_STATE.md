@@ -8,13 +8,13 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-06-30T13:25 (session orchestrateur)
+**Dernière mise à jour** : 2026-07-01T00:00 (session orchestrateur)
 
-**Build Astro** : ✅ OK (chat.astro restauré)
+**Build Astro** : ✅ OK
 **Capacitor Sync** : ✅ OK
-**Pixel 10** : ⏳ À vérifier
-**Deploy Cloud Run** : ⏳ En attente de commit
-**IA Locale (port 8888)** : ✅ UP — gemma-4-E2B-it-qat-oQ4-fp16 (Analyse réussie)
+**APK Debug** : ✅ Installé sur Pixel 10
+**Deploy Cloud Run** : ✅ Live (commit a8a81dd)
+**IA Locale (port 8888)** : ✅ UP — gemma-4-E2B-it-qat-oQ4-fp16
 
 ---
 
@@ -26,16 +26,15 @@
 | BUG-002 | LoginCard boucle sur `/register` | Guard `_path.includes('/register')` ligne 35 | 69f9f67 |
 | BUG-003 | Assets Capacitor stale | Rebuild Astro + sync Capacitor | 69f9f67 |
 | BUG-GIT | `scratch/gemma-4-E2B-it-web.task` (1.9GB) dans git | Ajouté `scratch/` au `.gitignore` | 69f9f67 amendé |
-| BUG-006 | Carte Astrale vide (données astrologiques manquantes) | Enrichissement profil ajouté dans `api.py` (`login_firebase`) | (en cours) |
-| BUG-008 | `ConnectException` 127.0.0.1 depuis l'app Android | Modification de `getBaseUrl` dans `api.ts` pour pointer vers l'API Cloud sur Capacitor natif | (en cours) |
+| BUG-006 | Carte Astrale vide (données astrologiques manquantes) | Enrichissement profil ajouté dans `api.py` (`login_firebase`) | a8a81dd |
+| BUG-008 | `ConnectException` 127.0.0.1 depuis l'app Android | Modification de `getBaseUrl` dans `api.ts` pour pointer vers l'API Cloud sur Capacitor natif | a8a81dd |
+| BUG-004 | `lecture.astro` — timeout au téléchargement du modèle Gemma | `readTimeout` passé à 0 (illimité) dans `GemmaSynthesisPlugin.java` | (en cours) |
 
 ---
 
 ## Bugs Restants
 
-| ID | Priorité | Description | Fichier |
-|----|----------|-------------|---------|
-| BUG-004 | P2 | `lecture.astro` ne déclenche pas le modèle Gemma | `astro/src/pages/app/lecture.astro` |
+Aucun bug actif identifié.
 
 ---
 

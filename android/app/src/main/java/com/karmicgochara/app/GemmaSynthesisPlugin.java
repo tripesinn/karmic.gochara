@@ -339,7 +339,7 @@ public class GemmaSynthesisPlugin extends Plugin {
             while (redirects < 5) {
                 conn = (HttpURLConnection) url.openConnection();
                 conn.setConnectTimeout(15_000);
-                conn.setReadTimeout(30_000);
+                conn.setReadTimeout(0); // Pas de timeout lecture — modèle de 2.58 Go
                 conn.setInstanceFollowRedirects(false); // Manual redirect
                 conn.connect();
 
