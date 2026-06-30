@@ -190,6 +190,12 @@ for path in "/" "/register" "/terms" "/app/chat/"; do
 done
 ```
 
+### ⚠️ Pièges Post-Déploiement (Cloud Run & Sessions)
+
+- **Délai Cloud Run** : Après un `git push`, Cloud Build/Cloud Run met entre **5 et 8 minutes** pour déployer la nouvelle version. L'API continuera de servir l'ancien code durant ce délai.
+- **Données de Profil / Sessions Obsolètes** : Si la modification touche à la logique de connexion (ex: calcul du thème astral lors du `/login_firebase`), tester l'application directement après le déploiement échouera. Le token de l'utilisateur contient des données obsolètes ou sa base de données n'a pas été mise à jour.
+- **Règle de test** : **TOUJOURS** demander à l'utilisateur d'attendre 5 minutes, de se **déconnecter totalement** de l'application, puis de se **reconnecter** pour valider un correctif touchant aux profils ou à l'API.
+
 ---
 
 ## PHASE 4 — Vérification Pixel 10

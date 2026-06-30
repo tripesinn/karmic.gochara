@@ -40,16 +40,12 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
         parts = (display or "").strip().split()
         return parts[2] if len(parts) >= 3 else ""
 
-    def _house(planet_key: str, asc_sign: str) -> str:
-        if not asc_sign or asc_sign not in _SIGNS_FR:
+    def _house(planet_sign: str, asc_sign: str) -> str:
+        if not asc_sign or asc_sign not in _SIGNS_FR or not planet_sign or planet_sign not in _SIGNS_FR:
             return ""
-        planet_to_house = {
-            "Nœud Sud ☋": 1, "Nœud Nord ☊": 7, "Chiron ⚷": 8,
-            "Lilith ⚸": 9, "Saturne ♄": 10, "Jupiter ♃": 4,
-            "Porte Visible ⊙": 11, "Porte Invisible ⊗": 12,
-        }
-        house_num = planet_to_house.get(planet_key, 0)
-        return str(house_num) if house_num else ""
+        asc_idx = _SIGNS_FR.index(asc_sign)
+        p_idx = _SIGNS_FR.index(planet_sign)
+        return str((p_idx - asc_idx) % 12 + 1)
 
     enriched = dict(profile)
     asc = natal.get("Ascendant") or natal.get("ASC ↑") or {}
@@ -68,8 +64,9 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
         ("Porte Invisible ⊗","porte_invisible_sign", "porte_invisible_house", None),
     ]:
         p = natal.get(key) or {}
-        enriched[s_field] = _sign(p.get("display", ""))
-        enriched[h_field] = _house(key, asc_sign)
+        p_sign = _sign(p.get("display", ""))
+        enriched[s_field] = p_sign
+        enriched[h_field] = _house(p_sign, asc_sign)
         if nak_field:
             enriched[nak_field] = p.get("nakshatra", "")
 
@@ -85,13 +82,50 @@ def _enrich_profile_with_natal(profile: dict, natal: dict) -> dict:
         enriched["moon_longitude_sid"]   = ""
         enriched["chandra_lagna_degree"] = ""
 
-    # Ajout de tous les degrés planétaires pour la carte SVG
+    # Ajout de tous les degrés planétaires pour la carte SVG et de planets_info pour l'UI
+    planets_info = []
     for p_key in ["Lune ☽", "Soleil ☀", "Mercure ☿", "Vénus ♀", "Mars ♂",
-                  "Jupiter ♃", "Saturne ♄", "Nœud Nord ☊", "Nœud Sud ☋",
-                  "Chiron ⚷", "Lilith ⚸", "Porte Visible ⊙", "Porte Invisible ⊗"]:
+                  "Jupiter ♃", "Saturne ♄", "Uranus ♅", "Neptune ♆", "Pluton ♇",
+                  "Nœud Nord ☊", "Nœud Sud ☋", "Chiron ⚷", "Lilith ⚸",
+                  "Porte Visible ⊙", "Porte Invisible ⊗"]:
         planet_name = p_key.split(" ")[0].lower()
         p_data = natal.get(p_key, {})
-        enriched[f"{planet_name}_deg"] = _deg(p_data.get("display", ""))
+        display = p_data.get("display", "")
+        p_sign = _sign(display)
+        p_deg = _deg(display)
+        enriched[f"{planet_name}_deg"] = p_deg
+        
+        if p_data:
+            planets_info.append({
+                "name": p_key.split(" ")[0],
+                "sign": p_sign,
+                "degree": p_deg.replace("°", ".").replace("′", ""), # Clean up for sorting if needed, but UI just adds °
+                "house": _house(p_sign, asc_sign),
+                "retrograde": p_data.get("retrograde", False)
+            })
+            
+    # Fix degree format for frontend (frontend adds °)
+    for p in planets_info:
+        if p["degree"]:
+            p["degree"] = p["degree"].replace("°", ".").replace("′", "")
+
+    enriched["planets_info"] = planets_info
+
+    # Ajout des informations de naissance formatées
+    year = enriched.get("year", "")
+    month = enriched.get("month", "")
+    day = enriched.get("day", "")
+    if year and month and day:
+        enriched["birth_date"] = f"{int(day):02d}/{int(month):02d}/{year}"
+    
+    hour = enriched.get("hour", "")
+    minute = enriched.get("minute", "")
+    if hour != "" and minute != "":
+        enriched["birth_time"] = f"{int(hour):02d}:{int(minute):02d}"
+        
+    city = enriched.get("city", "")
+    if city:
+        enriched["birth_location"] = city
 
     # On ajoute natal_positions pour l'interprétation immédiate
     # ATTENTION: à supprimer avant session storage pour limiter la taille du cookie (max 4KB)

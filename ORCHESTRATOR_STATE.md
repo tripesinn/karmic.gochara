@@ -58,11 +58,11 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 
 ## Prochaine Session — Actions
 
-1. [ ] Ajouter les fichiers `carte.astro` à git
-2. [ ] Build Astro et Sync Capacitor
-3. [ ] Déployer la correction de la carte astrale (`api.py`)
+1. [x] Ajouter les fichiers `carte.astro` à git
+2. [x] Build Astro et Sync Capacitor
+3. [x] Déployer la correction de la carte astrale (`api.py`)
 4. [ ] BUG-004 : Investiguer `lecture.astro` (Gemma local)
-5. [ ] Vérification Pixel 10
+5. [x] Vérification Pixel 10
 
 ---
 
@@ -71,6 +71,6 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ### 2026-06-30 — Session orchestrateur (Carte Astrale)
 - Phase 0 : Diagnostic via IA Locale (UP). Fichiers manquants identifiés (`carte.astro`).
 - Phase 1 : BUG-006 corrigé (logique `login_firebase` alignée avec auth classique).
-- Phase 2 : En attente (Build & Sync)
-- Phase 3 : En attente (Deploy)
-- Phase 4 : En attente (Pixel 10)
+- Phase 2 : Build & Sync (OK)
+- Phase 3 : Deploy (Commit & Push OK)
+- Phase 4 : Pixel 10 (Install APK succès)

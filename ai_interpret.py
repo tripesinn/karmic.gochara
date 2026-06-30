@@ -1230,7 +1230,7 @@ La bascule de cette énergie.
 
 STYLE: Percutant, chirurgical. Langage direct, français courant.
 LONGUEUR: 200 mots max, total."""
-        system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts. Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
+        system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts. Ne commence jamais ta réponse par 'Ecoute-moi bien' ou 'Écoute-moi bien' ou des formules similaires. Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
     else:
         if lang == "en":
             system = (
@@ -1273,6 +1273,7 @@ Length: 400-600 words. No generalities. Every sentence = a surgical truth."""
                 "LILITH=Point de rupture/épreuve. "
                 "DHARMA (Rahu)=Destination d'évolution. "
                 "Tutoie l'utilisateur. Sois direct et chirurgical. "
+                "Ne commence jamais ta réponse par 'Ecoute-moi bien' ou 'Écoute-moi bien' ou des formules similaires. "
                 "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
             )
             user_prompt = f"""Analyse karmique de transit pour {name} — {date}.
