@@ -1,0 +1,1 @@
+import{a as o}from"./api.DVb6-CDe.js";import"./index.CRukatdg.js";async function n(){try{const e=await o.profile(),t=document.getElementById("carte-loading"),c=document.getElementById("carte-content");t&&(t.style.display="none"),e.ok&&e.profile&&c&&c.classList.remove("hidden")}catch(e){console.error("Erreur checkAccess Carte Astrale:",e)}}n();

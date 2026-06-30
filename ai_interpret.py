@@ -1450,6 +1450,7 @@ def build_prompt_signal(signal_data: dict, lang: str = "fr") -> dict:
             "Tu es @siderealAstro13. Astrologie karmique vedique siderale. "
             "Tu ecris un signal karmique collectif court pour le jour. Sans profil personnel. "
             "Ton oraculaire. Direct. INTERDIT : signes zodiacaux. 120 mots max. "
+            "Ne commence jamais ta réponse par 'Ecoute-moi bien' ou des formules similaires.\n"
             "Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
         )
         user_prompt = (

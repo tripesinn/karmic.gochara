@@ -290,15 +290,66 @@ def login_firebase():
             "error": "Profil inexistant. Veuillez créer un profil."
         }), 404
 
-    from jwt_auth import create_tokens
     pseudo = profile.get("pseudo")
-    session["profile"] = profile
     session["pseudo"] = pseudo
+
+    # ── Hook natal : généré au login depuis données Sheets ───────────────────
+    hook_natal = ""
+    user_lang = session.get("lang", "fr")
+    cache_key = f"hook_natal_{pseudo}_{user_lang}"
+    if session.get(cache_key):
+        hook_natal = session[cache_key]
+
+    try:
+        from datetime import date as _date
+        from ai_interpret import get_hook_natal
+        from astro_calc import calculate_transits
+        from profiles import save_natal_to_sheet
+
+        natal_input = {
+            "name": profile.get("name", ""),
+            "year": profile.get("year", 1990), "month": profile.get("month", 1),
+            "day": profile.get("day", 1), "hour": profile.get("hour", 12),
+            "minute": profile.get("minute", 0), "lat": profile.get("lat", 48.8566),
+            "lon": profile.get("lon", 2.3522), "tz": profile.get("tz", "Europe/Paris"),
+            "city": profile.get("city", ""),
+        }
+        today = _date.today()
+        transit_loc = {
+            "city": profile.get("city", ""), "lat": profile.get("lat", 48.8566),
+            "lon": profile.get("lon", 2.3522), "tz": profile.get("tz", "Europe/Paris"),
+        }
+        natal_result = calculate_transits(natal_input, transit_loc,
+                                          today.year, today.month, today.day, 12, 0)
+
+        enriched = _enrich_profile_with_natal(profile, natal_result.get("natal", {}))
+
+        if not profile.get("chandra_lagna_sign"):
+            save_natal_to_sheet(pseudo, enriched)
+
+        profile = enriched
+        if not hook_natal and profile.get("plan", "free") != "free":
+            hook_natal = get_hook_natal(profile, lang=user_lang)
+            session[cache_key] = hook_natal
+
+        profile_session = profile.copy()
+        profile_session.pop("natal_positions", None)
+        profile_session.pop("user_key", None)
+        profile_session.pop("user_model", None)
+        profile_session.pop("user_provider", None)
+        session["profile"] = profile_session
+    except Exception as exc:
+        current_app.logger.warning("Hook natal login_firebase échoué : %s", exc)
+        session["profile"] = profile
+
+    from jwt_auth import create_tokens
 
     return jsonify({
         "ok": True,
         "pseudo": pseudo,
         "profile": profile,
+        "hook_natal": hook_natal,
+        "hook_engine": "claude",
         **create_tokens(pseudo)
     })
 
