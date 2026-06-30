@@ -1,6 +1,6 @@
 # ☸️ Gochara Karmique — Edge AI Astrology
 
-![Edge AI](https://img.shields.io/badge/AI-Gemma_4_E2B_Local-orange)
+![Edge AI](https://img.shields.io/badge/AI-Gemma_2B_IT_Local-orange)
 ![License](https://img.shields.io/badge/License-Dual_MIT_CC-blue)
 ![Platform](https://img.shields.io/badge/Platform-Android_Capacitor-green)
 ![Version](https://img.shields.io/badge/Version-1.3.0-purple)
@@ -14,7 +14,7 @@ This project is currently deployed on Google Cloud Run (`gochara-api`) as a web 
 - **User Recruitment**: Beta testers are being recruited on Reddit and X.com. 
 - **Beta Access**: To simplify testing, all new users created during this phase automatically default to the `pro` plan (in `profiles.py`), bypassing Stripe/Apple Pay integrations for now.
 - **Freemium Model**: The app has a Freemium tier that provides only the **"Daily Reading"** (short 4-sentence hook: Mirror, Wound, Friction, Open Door). The **"Natal Reading"** and full 4-act **"Complete Synthesis"** are locked behind the PRO plan.
-- **Doctrine Update**: The 3 pillars are now **Karmic Memory** (Ketu), **Core Wound** (Chiron), and **The Stage / La Scène** (replaces "Dharma").
+- **Doctrine Update**: La doctrine repose sur **Karmic Memory** (Ketu), **Core Wound** (Chiron), **The Stage / La Scène** (replaces "Dharma") et **Les Portes**.
 - **Multi-language**: Fully supports EN, FR, ES, PT, DE, NL, IT. Caching bugs with language switching on `hook_natal` and `hook_transit` have been fixed.
 
 ---
@@ -118,8 +118,8 @@ Le projet utilise Java 17 pour la compilation. Si vous rencontrez des problèmes
 - **Analyse Nakshatra** : Interprétation basée sur les 27 nakshatras védiques
 - **Synthèse Personnalisée** : Adaptation du conseil selon le thème natal
 - **Mode Hors-ligne** : Fonctionnement complet sans connexion internet
-- **Multi-langues** : Français et Anglais supportés
-- **Performance Optimisée** : Utilisation du SDK LiteRT-LM (`com.google.ai.edge.litertlm`) pour la stabilité et l'exécution locale de Gemma 4 E2B-IT
+- **Multi-langues** : Support complet pour EN, FR, ES, PT, DE, NL, IT.
+- **Performance Optimisée** : Utilisation du SDK LiteRT-LM (`com.google.ai.edge.litertlm`) pour la stabilité et l'exécution locale de Gemma 2B-IT (quantisé 4-bit)
 
 ---
 

@@ -2,6 +2,7 @@
 // src/pages/app/lecture.astro — Lecture karmique quotidienne
 // Composant client-side avec streaming SSE pour l'analyse
 import AppLayout from '../../layouts/AppLayout.astro';
+import ChatBox from '../../components/ChatBox.astro';
 import { capacitorBridge } from '../../lib/capacitor-bridge';
 ---
 
@@ -131,6 +132,15 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
         ✦ Nouvelle Lecture
       </button>
     </div>
+
+    <!-- Chat Karmique Intégré -->
+    <div id="integrated-chat-container" class="hidden animate-fade-in pt-8 border-t border-cosmic-border/30">
+      <div class="text-center mb-6">
+        <h2 class="text-2xl font-display text-cosmic-gold">💬 Oracle Karmique</h2>
+        <p class="text-sm text-cosmic-text-dim mt-2">Pose tes questions à l'Oracle sur ta lecture du jour.</p>
+      </div>
+      <ChatBox />
+    </div>
   </div>
 
   <script>
@@ -209,6 +219,43 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       }
     }
 
+    function makeTextInteractive(element: HTMLElement) {
+      const text = element.textContent || element.innerText || '';
+      // Regex pour séparer par les points tout en gardant le point, 
+      // ou on peut faire un split sur les points.
+      // Une approche simple:
+      const sentences = text.match(/[^.!?]+[.!?]+/g) || [text];
+      
+      element.innerHTML = '';
+      
+      sentences.forEach(sentence => {
+        const trimmed = sentence.trim();
+        if (!trimmed) {
+           element.appendChild(document.createTextNode(sentence));
+           return;
+        }
+        
+        const span = document.createElement('span');
+        span.textContent = sentence;
+        span.className = "cursor-pointer hover:bg-cosmic-gold/20 hover:text-cosmic-gold transition-colors underline decoration-dashed decoration-cosmic-border/50 underline-offset-4";
+        
+        span.addEventListener('click', () => {
+          if ((window as any).openChatWithQuote) {
+            (window as any).openChatWithQuote(trimmed);
+            document.getElementById('integrated-chat-container')?.scrollIntoView({ behavior: 'smooth' });
+          }
+        });
+        
+        element.appendChild(span);
+      });
+
+      // Ajouter l'indicateur
+      const indicator = document.createElement('div');
+      indicator.className = "text-center text-xs text-cosmic-gold mt-6 animate-pulse";
+      indicator.innerHTML = "✦ Clique sur une phrase pour en discuter avec l'Oracle ✦";
+      element.appendChild(indicator);
+    }
+
     async function startReading() {
       const status = document.getElementById('reading-status')!;
       const output = document.getElementById('reading-output')!;
@@ -272,6 +319,9 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             output.textContent = response;
             sessionStorage.setItem('last_lecture_output', response);
             document.getElementById('copy-container')?.classList.remove('hidden');
+            
+            makeTextInteractive(output);
+            document.getElementById('integrated-chat-container')?.classList.remove('hidden');
           } else {
             throw new Error("Gemma n'a pas répondu.");
           }
@@ -292,6 +342,9 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
           status.textContent = '';
           sessionStorage.setItem('last_lecture_output', output.textContent || output.innerHTML);
           document.getElementById('copy-container')?.classList.remove('hidden');
+          
+          makeTextInteractive(output);
+          document.getElementById('integrated-chat-container')?.classList.remove('hidden');
         }
       } catch (err: any) {
         if (err.name !== 'AbortError') {
@@ -409,8 +462,12 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
           const status = document.getElementById('reading-status');
           const output = document.getElementById('reading-output');
           if (status) status.style.display = 'none';
-          if (output) output.textContent = savedOutput;
+          if (output) {
+            output.textContent = savedOutput;
+            makeTextInteractive(output);
+          }
           document.getElementById('copy-container')?.classList.remove('hidden');
+          document.getElementById('integrated-chat-container')?.classList.remove('hidden');
         } else {
           startReading();
         }

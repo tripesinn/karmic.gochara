@@ -3,13 +3,13 @@
 // This file is now purely a structural component for Astro, with all client-side logic moved to a script block.
 ---
 
-<div class="border border-cosmic-border bg-cosmic-bg/50 rounded-xl p-4 sm:p-6 flex flex-col h-[65vh] min-h-[400px]">
+<div class="border border-cosmic-border bg-cosmic-bg/50 rounded-xl p-4 sm:p-6 flex flex-col h-[500px] w-full mx-auto max-w-3xl">
       <div class="flex-1 overflow-y-auto space-y-4 pr-2 custom-scrollbar" id="chat-history">
         <!-- Messages will be injected here by JavaScript -->
       </div>
       <div class="chat-input-area flex items-center gap-2 mt-4">
-        <input type="text" id="user-input" placeholder="Ask a question..." class="flex-1 bg-cosmic-void border border-cosmic-border rounded px-4 py-3 text-cosmic-text placeholder-cosmic-text-dim focus:outline-none focus:border-cosmic-gold transition-colors" disabled>
-        <button id="send-button" class="px-6 py-3 bg-cosmic-gold/10 text-cosmic-gold border border-cosmic-gold/30 rounded font-display tracking-wide hover:bg-cosmic-gold/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Send</button>
+        <input type="text" id="user-input" placeholder="Pose une question à l'Oracle..." class="flex-1 bg-cosmic-void border border-cosmic-border rounded px-4 py-3 text-cosmic-text placeholder-cosmic-text-dim focus:outline-none focus:border-cosmic-gold transition-colors" disabled>
+        <button id="send-button" class="px-6 py-3 bg-cosmic-gold/10 text-cosmic-gold border border-cosmic-gold/30 rounded font-display tracking-wide hover:bg-cosmic-gold/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors" disabled>Envoyer</button>
       </div>
     </div>
 
@@ -92,14 +92,17 @@
           const lectureContext = sessionStorage.getItem('last_lecture_output') || "Aucune lecture disponible.";
           
           const lightPrompt = `
-    Tu es un oracle karmique.
-    Utilise UNIQUEMENT le contexte suivant pour répondre à la question de l'utilisateur.
+    Agis comme un Oracle Karmique sage et profond.
+    L'utilisateur va te poser une question ou te soumettre une réflexion basée sur sa lecture astrologique (contexte ci-dessous).
+    Ne te contente pas de répéter le contexte. Développe, offre une perspective spirituelle, explique le sens caché des planètes impliquées, et guide l'utilisateur avec bienveillance.
     
-    --- CONTEXT ---
+    --- CONTEXTE DE LA LECTURE ---
     ${lectureContext}
-    --- END CONTEXT ---
+    --- FIN DU CONTEXTE ---
     
-    Question de l'utilisateur: ${userMessage}
+    Message de l'utilisateur: ${userMessage}
+    
+    Réponse de l'Oracle:
   `;
 
           // 4. Call native Gemma plugin or fallback
@@ -108,7 +111,7 @@
             console.log('[Chat] Using Native Gemma Synthesis...');
             await capacitorBridge.gemma.prepareModel(false);
             const nativeRes = await capacitorBridge.gemma.generate(
-              "Tu es un oracle karmique.",
+              "Tu es un Oracle Karmique sage, mystique et bienveillant. Fournis des réponses profondes et spirituelles.",
               lightPrompt,
               "synthesis",
               "fr"
@@ -147,4 +150,12 @@
 
       // --- Initial Render ---
       updateUI();
+
+      // Expose to global window so it can be called from outside
+      (window as any).openChatWithQuote = (quote: string) => {
+        if (userInputElement) {
+          userInputElement.value = `Peux-tu m'expliquer ce que tu entends par : "${quote}" ? `;
+          userInputElement.focus();
+        }
+      };
     </script>
