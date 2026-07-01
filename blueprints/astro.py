@@ -102,7 +102,12 @@ def calculate():
 
     try:
         import time as _time
-        year, month, day = map(int, date_str.split("-"))
+        from datetime import date as _date
+        try:
+            year, month, day = map(int, date_str.split("-"))
+        except (ValueError, AttributeError):
+            today = _date.today()
+            year, month, day = today.year, today.month, today.day
         result = calculate_transits(natal, transit_loc, year, month, day, hour, minute)
 
         # Enrichit le profil avec les positions natales calculées
