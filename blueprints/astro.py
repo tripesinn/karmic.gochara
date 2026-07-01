@@ -74,16 +74,16 @@ def calculate():
     # ─────────────────────────────────────────────────────────────────────────
 
     natal = {
-        "name":   profile["name"],
-        "year":   profile["year"],
-        "month":  profile["month"],
-        "day":    profile["day"],
-        "hour":   profile["hour"],
-        "minute": profile["minute"],
-        "lat":    profile["lat"],
-        "lon":    profile["lon"],
-        "tz":     profile["tz"],
-        "city":   profile["city"],
+        "name":   profile.get("name", ""),
+        "year":   int(profile.get("year", 1990)),
+        "month":  int(profile.get("month", 1)),
+        "day":    int(profile.get("day", 1)),
+        "hour":   int(profile.get("hour", 12)),
+        "minute": int(profile.get("minute", 0)),
+        "lat":    profile.get("lat", 48.8566),
+        "lon":    profile.get("lon", 2.3522),
+        "tz":     profile.get("tz", "Europe/Paris"),
+        "city":   profile.get("city", ""),
     }
 
     data = request.get_json() or {}
@@ -93,10 +93,29 @@ def calculate():
 
     transit_loc = {
         "city": data.get("transit_city") or profile.get("transit_city", TRANSIT_LOC_DEFAULT["city"]),
-        "lat":  float(data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"])),
-        "lon":  float(data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"])),
+        "lat":  data.get("transit_lat") or profile.get("transit_lat", TRANSIT_LOC_DEFAULT["lat"]),
+        "lon":  data.get("transit_lon") or profile.get("transit_lon", TRANSIT_LOC_DEFAULT["lon"]),
         "tz":   data.get("transit_tz")  or profile.get("transit_tz",  TRANSIT_LOC_DEFAULT["tz"]),
     }
+
+    # Nettoyage robuste de "undefined" ou None
+    for d in (natal, transit_loc):
+        if not d.get("tz") or str(d.get("tz")).strip().lower() in ("undefined", "none", ""):
+            d["tz"] = "Europe/Paris"
+        else:
+            try:
+                import pytz
+                pytz.timezone(str(d["tz"]))
+            except Exception:
+                d["tz"] = "Europe/Paris"
+        for k in ("lat", "lon"):
+            if not d.get(k) or str(d.get(k)).strip().lower() in ("undefined", "none", ""):
+                d[k] = 48.8566 if k == "lat" else 2.3522
+            else:
+                try:
+                    d[k] = float(d[k])
+                except (ValueError, TypeError):
+                    d[k] = 48.8566 if k == "lat" else 2.3522
 
     lang = session.get("lang", "fr")
 
