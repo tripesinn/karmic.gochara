@@ -54,3 +54,21 @@ karmic-key
 
 # Local scratch / large model files
 scratch/
+.env.local
+**/env.local
+
+# Logs and screenshots
+*.log
+*.png
+window_dump.xml
+logcat.txt
+
+# Test tools and local scripts
+create_test_user.py
+insert_tester.py
+scripts/moa.py
+scripts/start_emulator.sh
+**/.DS_Store
+*.bak
+.agents/skills/local-corrector/
+astro/.env.local.example

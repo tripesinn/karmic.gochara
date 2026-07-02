@@ -6,6 +6,8 @@ import {
   signOut as firebaseSignOut,
   onAuthStateChanged,
   signInWithPopup,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
   type User,
 } from '@firebase/auth';
 import { auth } from './firebase';
@@ -36,6 +38,36 @@ export async function signInWithGoogle(): Promise<User> {
   }
 }
 
+/**
+ * 🧪 TEST ONLY — Connexion avec un user fictif dans l'émulateur Firebase Auth.
+ * Crée le compte s'il n'existe pas, le réutilise sinon.
+ * Utiliser un email unique (ex: avec timestamp) pour simuler un NOUVEL utilisateur.
+ *
+ * Prérequis :
+ *   1. firebase emulators:start --only auth (sur le Mac)
+ *   2. adb reverse tcp:9099 tcp:9099 (pour que le Pixel accède au Mac)
+ *   3. PUBLIC_FIREBASE_EMULATOR=true dans l'env de build
+ */
+export async function signInTestUser(email?: string): Promise<User> {
+  const testEmail = email ?? `test-${Date.now()}@karmic.dev`;
+  const testPassword = 'KarmicTest2026!';
+
+  try {
+    // Essai : créer un nouveau compte (= nouvel utilisateur)
+    const cred = await createUserWithEmailAndPassword(auth, testEmail, testPassword);
+    console.info('🧪 [TEST] Nouvel utilisateur créé :', testEmail);
+    return cred.user;
+  } catch (err: any) {
+    if (err.code === 'auth/email-already-in-use') {
+      // Le compte existe → connexion normale (= utilisateur existant)
+      const cred = await signInWithEmailAndPassword(auth, testEmail, testPassword);
+      console.info('🧪 [TEST] Utilisateur existant récupéré :', testEmail);
+      return cred.user;
+    }
+    throw err;
+  }
+}
+
 export async function signOutUser(): Promise<void> {
   if (Capacitor.isNativePlatform()) {
     try { await KarmicGoogleAuth.signOut(); } catch (e) {}
@@ -46,3 +78,4 @@ export async function signOutUser(): Promise<void> {
 export function onAuthChange(callback: (user: User | null) => void): () => void {
   return onAuthStateChanged(auth, callback);
 }
+

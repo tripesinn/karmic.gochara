@@ -33,8 +33,14 @@ import KarmicChart from '../../components/KarmicChart.astro';
           if (contentSection) {
             contentSection.classList.remove('hidden');
           }
-          
           const p = resp.profile;
+          
+          const plan = p.plan || 'gratuit';
+          const isPro = ['pro', 'subscription', 'essential', 'illimite'].includes(plan.toLowerCase());
+          if (!isPro) {
+            window.location.href = '/app/?upgrade=1';
+            return;
+          }
           
           // Hydratation Infos de Naissance
           if (p.day && p.month && p.year) {

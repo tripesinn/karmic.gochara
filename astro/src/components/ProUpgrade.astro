@@ -124,7 +124,7 @@
 <script>
   import { api } from '../lib/api';
   import { Capacitor } from '@capacitor/core';
-  import { purchaseProPlan } from '../lib/revenuecat';
+  import { triggerUpgrade } from '../lib/upgrade';
 
   const btn = document.getElementById('pro-checkout-btn') as HTMLButtonElement;
   const errorDiv = document.getElementById('pro-checkout-error') as HTMLDivElement;
@@ -140,26 +140,10 @@
     errorDiv.textContent = '';
 
     try {
-      if (Capacitor.isNativePlatform()) {
-        const result = await purchaseProPlan();
-        if (result) {
-          window.location.reload(); // Recharger pour appliquer le plan
-        } else {
-          btn.disabled = false;
-          btn.innerHTML = '★ Passer à Pro';
-        }
-      } else {
-        const resp = await api.stripeCheckout('pro');
-        if (resp.ok && resp.checkout_url) {
-          window.location.href = resp.checkout_url;
-        } else {
-          errorDiv.textContent = resp.beta
-            ? 'Mode bêta — la facturation n\'est pas encore active.'
-            : 'Erreur lors de la création du paiement.';
-          btn.disabled = false;
-          btn.innerHTML = '★ Passer à Pro';
-        }
-      }
+      await triggerUpgrade('pro');
+      // Si la fonction ne throw pas d'erreur, on restaure le bouton (utile si l'utilisateur annule le paiement in-app sans erreur fatale)
+      btn.disabled = false;
+      btn.innerHTML = '★ Passer à Pro';
     } catch (err: any) {
       errorDiv.textContent = err.message || 'Erreur réseau';
       btn.disabled = false;

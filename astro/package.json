@@ -1,12 +1,14 @@
 {
   "name": "karmic-gochara-astro",
-  "version": "0.1.0",
+  "version": "1.8.0",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:emulator": "PUBLIC_FIREBASE_EMULATOR=true astro build",
     "preview": "astro preview",
-    "sync:capacitor": "astro build && cd .. && npx cap sync"
+    "sync:capacitor": "astro build && cd .. && npx cap sync",
+    "sync:emulator": "PUBLIC_FIREBASE_EMULATOR=true astro build && cd .. && npx cap sync"
   },
   "dependencies": {
     "@astrojs/tailwind": "^5.1.0",

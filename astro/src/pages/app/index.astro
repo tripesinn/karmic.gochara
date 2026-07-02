@@ -34,6 +34,7 @@ import { api } from '../../lib/api';
       </a>
 
       <a
+        id="nav-carte-link"
         href="/app/carte/index.html"
         class="group p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
                hover:border-cosmic-gold/40 transition-all duration-500 text-center cursor-pointer"
@@ -95,6 +96,7 @@ import { api } from '../../lib/api';
   <script>
     import { api } from '../../lib/api';
     import { i18n } from '../../lib/i18n';
+    import { triggerUpgrade } from '../../lib/upgrade';
 
     (async () => {
       try {
@@ -128,19 +130,19 @@ import { api } from '../../lib/api';
               }
             });
           } else {
-            // Plan gratuit : rediriger vers l'upgrade
+            // Plan gratuit : cacher le lien Carte Astrale
+            const carteLink = document.getElementById('nav-carte-link');
+            if (carteLink) carteLink.style.display = 'none';
+
+            // Plan gratuit : rediriger vers l'upgrade pour l'agenda
             subBtn.innerHTML = `<span>${i18n.t('calendar.subscribe_premium')}</span>`;
             subBtn.addEventListener('click', async (e) => {
               e.preventDefault();
               try {
-                const checkout = await api.stripeCheckout('subscription');
-                if (checkout.ok && checkout.checkout_url) {
-                  window.location.href = checkout.checkout_url;
-                } else {
-                  alert("Impossible d'initier le paiement.");
-                }
-              } catch (err) {
+                await triggerUpgrade('subscription');
+              } catch (err: any) {
                 console.error(err);
+                alert(err.message || "Impossible d'initier le paiement.");
               }
             });
             copyBtn.classList.add('hidden');

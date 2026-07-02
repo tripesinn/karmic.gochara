@@ -18,6 +18,13 @@ class ApiError extends Error {
 
 function getBaseUrl(): string {
   if (typeof window === 'undefined') return '';
+
+  // 🧪 Mode émulateur : Flask local via ADB reverse tcp:5001
+  // Prérequis : adb reverse tcp:5001 tcp:5001 && FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
+  const isEmulator = (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
+  if (isEmulator) {
+    return 'http://127.0.0.1:5001';
+  }
   
   const isCapacitor = Capacitor.isNativePlatform();
   if (isCapacitor) {
@@ -204,11 +211,11 @@ export const api = {
     return request<{ ok: boolean; profile?: any }>('/api/profile');
   },
 
-  calculate(body: { pseudo: string; transit_date: string; transit_time: string; transit_location?: string }) {
-    return streamingRequest('/calculate', body);
+  calculate(body: { pseudo: string; transit_date: string; transit_time: string; transit_location?: string; reading_type?: 'daily' | 'full' }) {
+    return streamingRequest('/v2/calculate', body);
   },
 
-  synthesisPrompt(body: { context: string; date?: string; hour?: number; minute?: number }) {
+  synthesisPrompt(body: { context: string; date?: string; hour?: number; minute?: number; reading_type?: 'daily' | 'full'; is_local?: boolean }) {
     return request<{ ok: boolean; system: string; user: string; error?: string }>('/synthesis/prompt', {
       method: 'POST',
       body: JSON.stringify(body),

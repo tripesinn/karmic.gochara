@@ -86,7 +86,13 @@ def _get_db():
     if _db is not None:
         return _db
     project_id = os.environ.get("PROJECT_ID", "karmic-gochara-cloud")
-    _db = firestore.Client(project=project_id)
+    
+    # 🧪 Configuration spéciale pour l'émulateur local pour éviter les timeouts de credentials GCP
+    if os.environ.get("FIRESTORE_EMULATOR_HOST"):
+        from google.auth.credentials import AnonymousCredentials
+        _db = firestore.Client(project=project_id, credentials=AnonymousCredentials())
+    else:
+        _db = firestore.Client(project=project_id)
     return _db
 
 def _current_month_str() -> str:

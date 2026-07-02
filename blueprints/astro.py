@@ -881,6 +881,7 @@ def synthesis_prompt():
     reading_type = data.get("reading_type", "daily")
     is_free = (reading_type == "daily")
 
+    is_local = data.get("is_local", False)
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")

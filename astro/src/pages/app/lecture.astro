@@ -120,16 +120,28 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       </details>
     </div>
 
-    <!-- Action principale -->
-    <div class="text-center">
+    <!-- Actions principales -->
+    <div class="flex flex-col items-center gap-4 sm:flex-row justify-center mt-6">
       <button
-        id="refresh-btn"
+        id="btn-daily-reading"
         class="px-6 py-3 font-display tracking-wider rounded-full border border-cosmic-gold/50
-               text-cosmic-gold transition-all duration-500
+               text-cosmic-gold transition-all duration-300
                hover:bg-cosmic-gold hover:text-cosmic-bg
-               hover:shadow-[0_0_30px_rgba(201,168,76,0.3)]"
+               hover:shadow-[0_0_20px_rgba(201,168,76,0.3)]
+               disabled:opacity-50 disabled:cursor-not-allowed"
+        onclick="startReading('daily')"
       >
-        ✦ Nouvelle Lecture
+        ✦ Lecture Quotidienne
+      </button>
+      <button
+        id="btn-full-synthesis"
+        class="px-6 py-3 font-display tracking-wider rounded-full bg-cosmic-gold text-cosmic-bg 
+               border border-transparent transition-all duration-300
+               hover:bg-[#E5BE5C] hover:shadow-[0_0_30px_rgba(201,168,76,0.5)]
+               disabled:opacity-50 disabled:cursor-not-allowed"
+        onclick="startReading('full')"
+      >
+        ✦ Synthèse Complète (Premium)
       </button>
     </div>
 
@@ -146,6 +158,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
   <script>
     import { api } from '../../lib/api';
     import { capacitorBridge } from '../../lib/capacitor-bridge';
+    import { triggerUpgrade } from '../../lib/upgrade';
     import { Capacitor } from '@capacitor/core';
     import { i18n } from '../../lib/i18n';
 
@@ -257,10 +270,11 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       element.appendChild(indicator);
     }
 
-    async function startReading() {
+    async function startReading(readingType: 'daily' | 'full' = 'daily') {
       const status = document.getElementById('reading-status')!;
       const output = document.getElementById('reading-output')!;
-      const btn = document.getElementById('refresh-btn') as HTMLButtonElement;
+      const btnDaily = document.getElementById('btn-daily-reading') as HTMLButtonElement;
+      const btnFull = document.getElementById('btn-full-synthesis') as HTMLButtonElement;
 
       // Détecter si l'utilisateur a configuré l'usage de l'IA locale (réglages de la modal)
       let useLocalConfig = false;
@@ -289,18 +303,38 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       status.textContent = 'Connexion à l&rsquo;oracle …';
       status.style.display = 'block';
       output.textContent = '';
-      btn.disabled = true;
+      if(btnDaily) btnDaily.disabled = true;
+      if(btnFull) btnFull.disabled = true;
       document.getElementById('copy-container')?.classList.add('hidden');
 
       let pseudo = 'TestUser';
+      let plan = 'free';
       try {
         const resp = await api.profile();
-        if (resp.ok && resp.profile?.pseudo) pseudo = resp.profile.pseudo;
+        if (resp.ok && resp.profile?.pseudo) {
+          pseudo = resp.profile.pseudo;
+          plan = resp.profile.plan || 'free';
+        }
       } catch {}
 
       if (!pseudo) {
         status.textContent = 'Impossible de récupérer ton profil.';
-        btn.disabled = false;
+        if(btnDaily) btnDaily.disabled = false;
+        if(btnFull) btnFull.disabled = false;
+        return;
+      }
+
+      if (readingType === 'full' && plan === 'free') {
+        status.innerHTML = `
+          <div class="text-center">
+            <p class="text-red-400 mb-4">La synthèse karmique est réservée au plan premium.</p>
+            <a href="/app/premium" class="px-4 py-2 bg-cosmic-gold text-cosmic-bg rounded-full text-sm font-display inline-block">
+              Découvrir l'abonnement
+            </a>
+          </div>
+        `;
+        if(btnDaily) btnDaily.disabled = false;
+        if(btnFull) btnFull.disabled = false;
         return;
       }
 
@@ -314,7 +348,9 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             context: 'synthesis',
             date: today(),
             hour,
-            minute
+            minute,
+            reading_type: readingType,
+            is_local: true
           });
 
           if (!promptData || !promptData.ok) {
@@ -350,6 +386,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             pseudo,
             transit_date: today(),
             transit_time: now(),
+            reading_type: readingType
           })) {
             status.style.display = 'none';
             if (chunk.text) {
@@ -368,13 +405,28 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           console.error(err);
-          status.textContent = 'Erreur de lecture. Réessaie.';
+          if (err.message?.includes('subscription_required') || err.message?.includes('quota') || err.status === 429) {
+            status.innerHTML = `
+              <div class="text-center">
+                <p class="text-red-400 mb-4">${err.message || 'La synthèse karmique est réservée au plan Lecture.'}</p>
+                <a href="/app/premium" class="px-4 py-2 bg-cosmic-gold text-cosmic-bg rounded-full text-sm font-display inline-block">
+                  Découvrir l'abonnement
+                </a>
+              </div>
+            `;
+          } else {
+            status.textContent = 'La connexion karmique a été interrompue. ' + (err.message || '');
+          }
         }
       } finally {
-        btn.disabled = false;
+        if(btnDaily) btnDaily.disabled = false;
+        if(btnFull) btnFull.disabled = false;
         controller = null;
       }
     }
+    
+    // Rendre la fonction accessible globalement pour les événements onclick des boutons HTML
+    (window as any).startReading = startReading;
 
     // Gérer l'action de téléchargement
     document.getElementById('request-permission-btn')?.addEventListener('click', async () => {

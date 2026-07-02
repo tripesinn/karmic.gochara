@@ -14,10 +14,10 @@ def apply_local_ai(file_path, instruction):
     with open(file_path, encoding='utf-8') as f:
         original_content = f.read()
         
-    url = "http://127.0.0.1:8000/v1/chat/completions"
+    url = "http://127.0.0.1:8888/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
-        "Authorization": "Bearer dummy"
+        "Authorization": "Bearer omlx_12345678910111213abcDEF"
     }
     
     system_prompt = (
@@ -32,7 +32,7 @@ def apply_local_ai(file_path, instruction):
     user_prompt = f"Fichier original :\n```\n{original_content}\n```\n\nInstructions de modification :\n{instruction}"
     
     payload = {
-        "model": "Qwen3.5-9B-MLX-4bit",
+        "model": "gemma-4-E2B-it-qat-oQ4-fp16",
         "messages": [
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt}

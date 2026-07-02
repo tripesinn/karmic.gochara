@@ -2,7 +2,7 @@
 // IMPORTANT: On importe les modules SÉPARÉMENT, pas le bundle monolithique 'firebase'
 // Cela empêche le SDK Firestore Web de s'auto-enregistrer et de lancer le Listen stream
 import { initializeApp } from '@firebase/app';
-import { getAuth } from '@firebase/auth';
+import { getAuth, connectAuthEmulator } from '@firebase/auth';
 
 // PATCH: Force REST API and disable WebChannel for Firestore
 // (Même si on utilise firestore-rest.ts, cette sécurité évite tout auto-load)
@@ -25,8 +25,19 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 
+// Mode émulateur — activé uniquement si PUBLIC_FIREBASE_EMULATOR=true
+// Sur Android Pixel (USB), l'émulateur Mac est accessible via ADB reverse :
+//   adb reverse tcp:9099 tcp:9099
+const isEmulator = (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
+if (isEmulator && typeof window !== 'undefined') {
+  // disableWarnings=true supprime le bandeau jaune dans l'UI
+  connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });
+  console.info('🧪 [Firebase] Auth connecté à l\'émulateur 127.0.0.1:9099');
+}
+
 // Firestore n'est PLUS initialisé via le SDK Web
 // Toutes les lectures/écritures passent par firestore-rest.ts (API REST)
 // Cela élimine les erreurs WebChannelConnection sur Android
 
 export default app;
+

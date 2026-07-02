@@ -3,7 +3,10 @@ import { Capacitor } from '@capacitor/core';
 import { CapacitorHttp } from '@capacitor/core';
 
 const PROJECT_ID = 'karmic-gochara-cloud';
-const BASE = `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
+const isEmulator = (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
+const BASE = isEmulator 
+  ? `http://127.0.0.1:8080/v1/projects/${PROJECT_ID}/databases/(default)/documents`
+  : `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
 
 export async function getFirestoreDoc(collection: string, docId: string, idToken: string): Promise<Record<string, any> | null> {
   const url = `${BASE}/${collection}/${docId}`;

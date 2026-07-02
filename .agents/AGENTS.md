@@ -64,3 +64,18 @@ python3 /Users/jero87/karmic.gochara/scripts/query_local_ai.py \
 Continuer manuellement et noter dans `ORCHESTRATOR_STATE.md` :
 `**IA Locale** : ❌ DOWN`.
 </RULE[local_ai_first]>
+
+<RULE[autonomous_ondevice_testing]>
+## Tests Autonomes et Validation Visuelle Mobile
+
+**Règle absolue :**
+Ne demandez JAMAIS à l'utilisateur de tester, de déverrouiller l'écran, ou de vérifier un flux sur son appareil Google Pixel. Si vous rencontrez un obstacle (écran de verrouillage, délai réseau), trouvez un contournement ou réessayez plus tard, mais n'interrompez PAS votre flux pour solliciter l'utilisateur.
+
+Pour chaque scénario de test d'interface ou de flux utilisateur :
+1. Déployez et lancez l'application via Gradle et ADB.
+2. Naviguez de façon autonome dans l'interface en simulant des clics tactiles (`adb shell input tap`) et des saisies clavier (`adb shell input text`).
+3. Prenez régulièrement des captures d'écran de l'appareil (`adb shell screencap` puis `adb pull`) et analysez-les avec le visualiseur pour confirmer visuellement l'état de l'application et la réponse de l'interface ou des API.
+4. Ajustez vos clics ou saisies en fonction des coordonnées réelles (ex: résolution 1080x2410).
+5. Testez en boucle jusqu'à ce que le correctif soit intégralement prouvé visuellement. Ne retournez à l'utilisateur QUE lorsque le problème initial est 100% résolu (ou si une erreur fatale inédite bloque techniquement l'ADB).
+</RULE[autonomous_ondevice_testing]>
+
