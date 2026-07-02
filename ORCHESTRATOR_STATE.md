@@ -110,6 +110,14 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ## Historique
 
 
+### 2026-07-02 — Session Déploiement Production (Correctif Émulateur & RAG OKF)
+- oMLX : ✅ UP (oMLX port 8888)
+- ✅ **Correction de la Pollution Émulateur** : Nettoyage du dossier `www/` en compilant Astro en mode production pure (`PUBLIC_FIREBASE_EMULATOR=false npm run build`), évitant que la prod ne pointe vers `127.0.0.1`.
+- ✅ **Intégration OKF en Production** : Forcé l'ajout du dossier `karmic_vault/okf/` dans git (auparavant bloqué par le `.gitignore` du dossier parent `karmic_vault/`).
+- ✅ **Support multilingue des planètes** : Ajout d'une table de traduction dans `load_okf_file` pour mapper les clés de planètes en anglais (ex: Saturn, Moon) vers les fiches OKF françaises (saturne, lune).
+- ✅ **Pipeline CI/CD** : Poussé les modifications sur `main` pour déclencher le déploiement sur Google Cloud Run.
+- ✅ **Vérification** : Validation du chargement sélectif des fiches OKF confirmée localement via `test_okf_vault.py`.
+
 ### 2026-07-02 — Optimisation RAG OKF (Open Knowledge Format)
 - oMLX : ✅ UP (oMLX port 8888)
 - ✅ **Migration OKF** : Conversion des mots-clés de planètes/aspects/nakshatras de formats legacy bruts vers des fiches Markdown + YAML frontmatter normalisées OKF sous `karmic_vault/okf/`.
