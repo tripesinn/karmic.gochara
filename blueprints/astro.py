@@ -236,12 +236,16 @@ def calculate_v2():
     # 3. Gestion d'erreur : Abonnement Stripe (Gate paiement)
     pseudo = profile.get("pseudo", "")
     user_key = data.get("user_key")
+    reading_type = data.get("reading_type", "daily")
+    is_free = (reading_type == "daily")
 
     if not (pseudo.lower() in UNLIMITED_PSEUDOS or user_key):
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
         if plan_normalized in ("subscription", "illimite"):
             pass  # illimité, pas de vérification sheet
+        elif is_free:
+            pass  # gratuit autorisé (quota 1/j géré côté client pour le moment)
         elif plan_normalized in ("test", "lecture", "essential"):
             if not consume_plan_synthesis(pseudo):
                 return jsonify({
@@ -251,14 +255,15 @@ def calculate_v2():
         else:
             return jsonify({
                 "error": "subscription_required",
-                "message": "La synthèse karmique est réservée au plan Lecture.",
+                "message": "La synthèse karmique complète est réservée au plan premium.",
             }), 402
 
     # 4. Local-First : Préparation des données pour le calcul local
     natal_input = {field: profile[field] for field in required_fields}
     date_str = data.get("date")
     if not date_str:
-        return jsonify({"error": "invalid_input", "message": "La date de transit est requise."}), 400
+        import datetime
+        date_str = datetime.date.today().isoformat()
 
     try:
         year, month, day = map(int, date_str.split("-"))
@@ -308,9 +313,9 @@ def calculate_v2():
 
             full_response = ""
             api_start_time = time.perf_counter()
-            for chunk in stream_synthesis(chart_data, enriched_profile, lang=lang):
+            for chunk in stream_synthesis(chart_data, enriched_profile, lang=lang, is_free=is_free):
                 full_response += chunk
-                yield f"data: {json.dumps({'chunk': chunk})}\n\n"
+                yield f"data: {json.dumps({'text': chunk})}\n\n"
             api_duration = time.perf_counter() - api_start_time
 
             # Tenter de parser le JSON complet pour l'envoyer en une fois
@@ -873,20 +878,24 @@ def synthesis_prompt():
     user_provider = data.get("user_provider")
 
     # Synthèse complète + Alternative de Conscience : gate paiement (hook freemium)
-    is_free = False
+    reading_type = data.get("reading_type", "daily")
+    is_free = (reading_type == "daily")
+
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
         if plan_normalized in ("subscription", "illimite"):
             pass  # illimité, pas de vérification sheet
+        elif is_free:
+            pass  # gratuit autorisé
         elif plan_normalized in ("test", "lecture", "essential"):
             from profiles import consume_plan_synthesis
             if not consume_plan_synthesis(pseudo):
                 return jsonify({"error": "quota_exceeded",
                                 "message": "Tu n'as plus de synthèses disponibles sur ton plan."}), 429
         else:
-            # Free tier: allowed but limited to 3 blocks
-            is_free = True
+            return jsonify({"error": "subscription_required",
+                            "message": "La synthèse karmique complète est réservée au plan premium."}), 402
 
     natal_data = {
         "name":   profile["name"],
