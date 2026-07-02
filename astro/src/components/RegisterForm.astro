@@ -313,7 +313,7 @@
         });
         if (result.ok) {
           sessionStorage.removeItem('is_redirecting_to_register');
-          window.location.href = "/app";
+          window.location.href = "/app/index.html";
         } else {
           showError(result.error || "Erreur inconnue.");
         }

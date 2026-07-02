@@ -37,6 +37,7 @@
 | BUG-009 | Sign-in failed combination conflict | Retrait de GetSignInWithGoogleOption dans KarmicGoogleAuthPlugin | 63fff38 |
 | BUG-004 | `lecture.astro` — timeout au téléchargement/génération du modèle Gemma | `readTimeout` passé à 0 dans `GemmaSynthesisPlugin.java` | ✅ Résolu |
 | BUG-010 | `invalid literal for int()` dans `/calculate` quand `date` est vide | Fallback `date.today()` dans `astro.py` L105 | 492f579 |
+| BUG-015 | Redirection /app échouée sur Android WebView | Redirection explicite vers `/app/index.html` dans `RegisterForm.astro` L316 | ✅ Résolu |
 
 ---
 
@@ -97,8 +98,8 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ## Checklist de Test AAB (à valider avant chaque release)
 
 - [ ] Connexion Google → /app (pas de crash, pas de boucle)
-- [ ] Nouveau compte → /register → géocode → submit → /app
-- [ ] Dashboard : pseudo affiché, 3 cartes visibles
+- [x] Nouveau compte → /register → géocode → submit → /app/index.html
+- [x] Dashboard : pseudo affiché, 3 cartes visibles
 - [ ] Lecture plan free : erreur 429 + bouton Stripe visible
 - [ ] Lecture plan payant : texte généré, bouton copier actif
 - [ ] Chat : question → réponse reçue
