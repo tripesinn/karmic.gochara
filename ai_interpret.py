@@ -412,10 +412,21 @@ def _load_vault(include_keywords: bool = True, user: dict = None, chart_data: di
             # 3. Charger les fiches OKF
             loaded_parts = []
             
+            PLANETS_MAP = {
+                "sun": "soleil",
+                "moon": "lune",
+                "mercury": "mercure",
+                "saturn": "saturne",
+                "pluto": "pluton"
+            }
+
             def load_okf_file(subdir, name):
                 clean_name = name.lower()
                 clean_name = clean_name.replace("é", "e").replace("è", "e").replace("à", "a").replace("ù", "u").replace("œ", "oe")
                 clean_name = re.sub(r"[^a-z0-9]+", "_", clean_name).strip("_")
+                
+                if subdir == "planets" and clean_name in PLANETS_MAP:
+                    clean_name = PLANETS_MAP[clean_name]
                 
                 path = os.path.join(okf_dir, subdir, f"{clean_name}.md")
                 if os.path.exists(path):

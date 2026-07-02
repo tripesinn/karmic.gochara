@@ -41,8 +41,10 @@ if vault:
     print("Contains Saturn (Transit Planet)?:", "Saturne" in vault)
     print("Contains Carré (Transit Aspect)?:", "carré" in vault or "Carré" in vault)
     
-    # Check if some unreferenced concepts are absent
-    print("Contains Purva Phalguni (Unused Nakshatra)?:", "Purva Phalguni" in vault)
-    print("Contains Pluton (Unused Planet)?:", "Pluton" in vault or "pluton" in vault)
+    # Check if some specific OKF content is loaded or not
+    saturn_okf_phrase = "Saturne ne punit pas — il exige la maturité"
+    pluto_okf_phrase = "Ce qui résiste à Pluton sera détruit de toute façon"
+    print("Contains Saturn OKF Phrase?:", saturn_okf_phrase in vault)
+    print("Contains Pluto OKF Phrase (Unused)?:", pluto_okf_phrase in vault)
 else:
     print("Failed to load vault.")
