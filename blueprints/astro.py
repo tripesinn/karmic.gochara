@@ -242,7 +242,7 @@ def calculate_v2():
     if not (pseudo.lower() in UNLIMITED_PSEUDOS or user_key):
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
-        if plan_normalized in ("subscription", "illimite"):
+        if plan_normalized in ("subscription", "illimite", "pro"):
             pass  # illimité, pas de vérification sheet
         elif is_free:
             pass  # gratuit autorisé (quota 1/j géré côté client pour le moment)
@@ -884,7 +884,7 @@ def synthesis_prompt():
     if pseudo.lower() not in UNLIMITED_PSEUDOS and not user_key:
         plan = profile.get("plan", "free")
         plan_normalized = plan.lower().replace("é", "e")
-        if plan_normalized in ("subscription", "illimite"):
+        if plan_normalized in ("subscription", "illimite", "pro"):
             pass  # illimité, pas de vérification sheet
         elif is_free:
             pass  # gratuit autorisé
