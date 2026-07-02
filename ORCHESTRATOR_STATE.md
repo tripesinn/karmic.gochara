@@ -10,7 +10,7 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-01T17:39 (session — update orchestrateur)
+**Dernière mise à jour** : 2026-07-02T21:45 (session — optimisation RAG OKF)
 
 **Build Astro** : ✅ OK (www/ à jour)
 **Environnement** :
@@ -18,8 +18,8 @@
 - **Firebase CLI** : `v13.6.0`
 - **Flutter** : Non utilisé
 - **Android Studio** : SDK Platform-Tools installés (adb fonctionnel)
-- **IA Locale** : ❌ DOWN
-- **Modèle Local configuré** : `gemma-2-9b-it` (port 8888)
+- **IA Locale** : ✅ UP (oMLX port 8888)
+- **Modèle Local configuré** : `gemma-4-E2B-it-qat-oQ4-fp16` (port 8888)
 **Pixel 10 ADB** : ✅ Connecté (55161FDCH0004E)
 
 ---
@@ -108,6 +108,14 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ---
 
 ## Historique
+
+
+### 2026-07-02 — Optimisation RAG OKF (Open Knowledge Format)
+- oMLX : ✅ UP (oMLX port 8888)
+- ✅ **Migration OKF** : Conversion des mots-clés de planètes/aspects/nakshatras de formats legacy bruts vers des fiches Markdown + YAML frontmatter normalisées OKF sous `karmic_vault/okf/`.
+- ✅ **Chargement sélectif dans l'API** : Modification de `_load_vault` dans `ai_interpret.py` pour analyser le thème natal (`user`) et les transits/aspects actifs (`chart_data`), et charger uniquement les fiches OKF correspondantes.
+- ✅ **Réduction des tokens** : Économie de plus de 50% de prompt tokens par rapport à la méthode legacy (~2 300 tokens au lieu de ~5 500 tokens).
+- ✅ **Validation** : Test unitaire et fonctionnel validé via `test_okf_vault.py`.
 
 
 ### 2026-07-01 — Session orchestrateur (check logs local IA)

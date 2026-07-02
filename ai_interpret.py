@@ -23,6 +23,12 @@ import gemini_api
 from astro_calc import NAKSHATRA_LORDS, NAKSHATRAS
 from rag_memory import retrieve_context, save_reading
 
+LANG_NAMES = {
+    "fr": "français",   "en": "English",
+    "es": "español",    "pt": "português",
+    "de": "Deutsch",    "nl": "Nederlands",
+    "it": "italiano",
+}
 # ── Router Multi-Provider ────────────────────────────────────────────────────
 _SERVER_ANTHROPIC_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
 _SERVER_GROK_KEY = os.environ.get("GROK_API_KEY", "")
@@ -350,25 +356,117 @@ from doctrine import (
 _VAULT_DIR = os.path.join(os.path.dirname(__file__), "karmic_vault")
 
 
-def _load_vault(include_keywords: bool = True) -> str | None:
+def _load_vault(include_keywords: bool = True, user: dict = None, chart_data: dict = None) -> str | None:
     """
-    Charge le vault doctrinal Markdown compressé (~800-1300 tokens).
-    Fallback silencieux vers doctrine.get_system_prompt() si vault absent.
-    include_keywords=False → 00 + 01 seulement (hooks, budget réduit).
+    Charge le vault doctrinal. Si user/chart_data sont fournis, charge uniquement
+    les fiches OKF correspondantes aux planètes, aspects et nakshatras actifs
+    pour optimiser les tokens. Sinon, fallback sur le vault legacy complet.
     """
     try:
         master = open(os.path.join(_VAULT_DIR, "00_MASTER_CONTEXT.md"), encoding="utf-8").read()
         rules  = open(os.path.join(_VAULT_DIR, "01_output_rules.md"),   encoding="utf-8").read()
         vault  = master + "\n\n---\n\n" + rules
-        if include_keywords:
-            kw_path = os.path.join(_VAULT_DIR, "02_planet_keywords.md")
-            if os.path.exists(kw_path):
-                vault += "\n\n---\n\n" + open(kw_path, encoding="utf-8").read()
-        import logging
-        logging.getLogger(__name__).info("VAULT chargé — %d tokens estimés", len(vault.split()))
+        
+        if not include_keywords:
+            return vault
 
+        # Tenter le chargement sélectif OKF
+        okf_dir = os.path.join(_VAULT_DIR, "okf")
+        if os.path.exists(okf_dir) and (user or chart_data):
+            import re
+            active_planets = set()
+            active_aspects = set()
+            active_nakshatras = set()
+
+            # 1. Identifier les planètes actives du natal
+            if user:
+                active_planets.add("lune")  # Chandra Lagna
+                for key in ["ketu", "rahu", "chiron", "lilith", "saturn", "jupiter"]:
+                    active_planets.add(key)
+                
+                # Nakshatras du natal
+                for key in ["ketu_nakshatra", "rahu_nakshatra", "chiron_nakshatra", "lilith_nakshatra"]:
+                    nak = user.get(key)
+                    if nak:
+                        active_nakshatras.add(nak.lower().strip())
+
+            # 2. Identifier les planètes et aspects du transit
+            if chart_data:
+                transits = chart_data.get("transits", {})
+                for p in transits.keys():
+                    active_planets.add(p.lower().strip())
+                
+                aspects = chart_data.get("aspects", [])
+                for a in aspects:
+                    if a.get("transit_planet"):
+                        active_planets.add(a["transit_planet"].lower().strip())
+                    if a.get("natal_planet"):
+                        active_planets.add(a["natal_planet"].lower().strip())
+                    if a.get("aspect"):
+                        active_aspects.add(a["aspect"].lower().strip())
+                    if a.get("transit_nakshatra"):
+                        active_nakshatras.add(a["transit_nakshatra"].lower().strip())
+                    if a.get("natal_nakshatra"):
+                        active_nakshatras.add(a["natal_nakshatra"].lower().strip())
+
+            # 3. Charger les fiches OKF
+            loaded_parts = []
+            
+            def load_okf_file(subdir, name):
+                clean_name = name.lower()
+                clean_name = clean_name.replace("é", "e").replace("è", "e").replace("à", "a").replace("ù", "u").replace("œ", "oe")
+                clean_name = re.sub(r"[^a-z0-9]+", "_", clean_name).strip("_")
+                
+                path = os.path.join(okf_dir, subdir, f"{clean_name}.md")
+                if os.path.exists(path):
+                    content = open(path, "r", encoding="utf-8").read()
+                    if content.startswith("---"):
+                        parts = content.split("---", 2)
+                        if len(parts) >= 3:
+                            content = parts[2].strip()
+                    return content
+                return None
+
+            planets_content = []
+            for p in sorted(active_planets):
+                c = load_okf_file("planets", p)
+                if c:
+                    planets_content.append(c)
+            if planets_content:
+                loaded_parts.append("## DOCTRINE - PLANÈTES ACTIVES\n\n" + "\n\n---\n\n".join(planets_content))
+
+            aspects_content = []
+            for a in sorted(active_aspects):
+                c = load_okf_file("aspects", a)
+                if c:
+                    aspects_content.append(c)
+            if aspects_content:
+                loaded_parts.append("## DOCTRINE - ASPECTS ACTIFS\n\n" + "\n\n---\n\n".join(aspects_content))
+
+            nakshatras_content = []
+            for n in sorted(active_nakshatras):
+                c = load_okf_file("nakshatras", n)
+                if c:
+                    nakshatras_content.append(c)
+            if nakshatras_content:
+                loaded_parts.append("## DOCTRINE - NAKSHATRAS ACTIFS\n\n" + "\n\n---\n\n".join(nakshatras_content))
+
+            if loaded_parts:
+                vault += "\n\n---\n\n" + "\n\n---\n\n".join(loaded_parts)
+                import logging
+                logging.getLogger(__name__).info("OKF VAULT sélectif chargé — %d tokens estimés", len(vault.split()))
+                return vault
+
+        # Fallback legacy
+        kw_path = os.path.join(_VAULT_DIR, "02_planet_keywords.md")
+        if os.path.exists(kw_path):
+            vault += "\n\n---\n\n" + open(kw_path, encoding="utf-8").read()
+        import logging
+        logging.getLogger(__name__).info("VAULT legacy chargé — %d tokens estimés", len(vault.split()))
         return vault
-    except FileNotFoundError:
+    except Exception as e:
+        import logging
+        logging.getLogger(__name__).error("Erreur chargement vault OKF: %s", str(e))
         return None
 
 
@@ -424,7 +522,7 @@ ABSOLUTE RULES:
 # PROMPT SYSTÈME — personnalisé par utilisateur, doctrine centralisée
 # ══════════════════════════════════════════════════════════════════════════════
 
-def _build_system_prompt(user: dict, use_vault: bool = True) -> str:
+def _build_system_prompt(user: dict, use_vault: bool = True, chart_data: dict = None) -> str:
     """
     Construit le prompt système complet.
     use_vault=True  → vault Karpathy (fallback doctrine.py si absent)
@@ -521,7 +619,7 @@ def _build_system_prompt(user: dict, use_vault: bool = True) -> str:
         friction_bloc = f"\n{friction['prompt_block']}\n"
 
     if use_vault:
-        vault_content = _load_vault(include_keywords=True)
+        vault_content = _load_vault(include_keywords=True, user=user, chart_data=chart_data)
         base_prompt = vault_content if vault_content else get_system_prompt(user)
     else:
         base_prompt = get_system_prompt(user)
@@ -966,10 +1064,10 @@ def _generate_generic_hook(regime: str) -> str:
 # SYNTHÈSE COMPLÈTE — payant, ~4000 tokens
 # ══════════════════════════════════════════════════════════════════════════════
 
-def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr") -> str:
+def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr", is_free: bool = False) -> str:
     """
-    Génère la synthèse karmique complète (payant).
-    Modèle : Opus pour la meilleure qualité doctrinal.
+    Génère la synthèse karmique complète (payant) ou quotidienne (gratuit).
+    Modèle : Opus pour la meilleure qualité doctrinal (si payant).
     chart_data : dict retourné par calculate_transits()
     user       : dict du profil utilisateur (session["profile"])
     """
@@ -1009,6 +1107,10 @@ def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr") -> str:
     }
     lang_name = LANG_NAMES.get(lang, "English")
 
+    if is_free:
+        prompts = build_prompt_only(chart_data, user, lang, is_free=True)
+        return generate_ai(prompts["system"], prompts["user"], user=user, max_tokens=1000)
+
     if lang == "fr":
         prompt = f"""Tu ES @siderealAstro13. Ne te comporte pas comme un assistant. Analyse directement les données ci-dessous selon la doctrine karmique.
 Interdiction de reformuler le prompt. Tu dois rédiger une analyse basée exclusivement sur les aspects et positions fournis.
@@ -1027,17 +1129,19 @@ STYLE OBLIGATOIRE : tu écris comme un lecteur d'âme, pas comme un astrologue t
 - Parle directement à {name} : "tu", "ton", "ta".
 - À la fin de chaque section (1, 2, 3), glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler.
 
-Applique le protocole en 4 étapes :
+Analyse ces données en 4 blocs :
 
-1. LA MÉMOIRE KARMIQUE (ROM ☋) — Quel piège l'âme de {name} rejoue-t-elle en ce moment ? Décris le comportement automatique, la sensation familière, ce que ça lui coûte. Termine par un aperçu en italique.
+1. DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé en ce moment ? Quel automatisme défensif est à l'œuvre pour {name} ?
 
-2. LA BLESSURE EN TRAITEMENT (RAM ⚷) — Qu'est-ce qui est réveillé dans la blessure profonde de {name} ? La Porte Invisible (prison/refoulement) est-elle sous pression ? La Porte Visible (guérison/Stage) s'ouvre-t-elle via Chiron ? Décris le mouvement vécu, pas la mécanique. Termine par un aperçu en italique.
+2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente de {name} ? Comment Chiron (RAM) peut-il ouvrir le passage vers le Stage ?
 
-3. L'ÉPREUVE KARMIQUE (⚸) — Qu'est-ce que la période rend insupportable à {name} ? Quel endroit de sa vie frotte le plus fort ? Vers quoi ça le pousse malgré lui ? Termine par un aperçu en italique.
+3. ÉPREUVE LILITH : Quelle friction karmique est en cours pour {name} ? Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
 
-4. ALTERNATIVE DE CONSCIENCE — Ce que {name} doit cesser de faire. Ce qu'il doit oser activer. Termine par UNE seule phrase directe, actionnable, personnelle.
+4. ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis, chirurgical, actionnable — ce que l'âme de {name} doit comprendre MAINTENANT pour avancer vers son Stage.
 
-Minimum 300 mots. Ne pas tronquer. Tout en français."""
+Style : direct, technique, non-astro-jargon dans les conclusions. Tutoiement direct ("tu", "ton").
+Longueur : 400-600 mots. Pas de généralités. Chaque bloc doit être développé : pas de liste à puces, prose continue avec enchaînement logique interne. Chaque phrase = une vérité chirurgicale. À la fin de chaque bloc, glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler.
+"""
     else:
         prompt = f"""You ARE @siderealAstro13. Do not behave as an assistant. Analyse the data below directly according to karmic doctrine.
 Forbidden to rephrase the prompt. Write analysis based exclusively on the aspects and positions provided.
@@ -1062,10 +1166,10 @@ MANDATORY STYLE: soul reader, not technical astrologer.
 
 Minimum 300 words. Do not truncate. Language: {lang_name}."""
 
-    return generate_ai(_build_system_prompt(user, use_vault=True), prompt, user=user, max_tokens=4000)
+    return generate_ai(_build_system_prompt(user, use_vault=True, chart_data=chart_data), prompt, user=user, max_tokens=4000)
 
 
-def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr"):
+def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr", is_free: bool = False):
     """
     Génère la synthèse karmique complète en streaming avec sortie JSON structurée.
     Modèle : Opus pour la meilleure qualité doctrinal.
@@ -1080,7 +1184,11 @@ def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr"):
     date          = chart_data.get("transit_date", "")
     name          = user.get("name", "l'utilisateur")
 
-    if lang == "fr":
+    if is_free:
+        prompts = build_prompt_only(chart_data, user, lang, is_free=True)
+        prompt = prompts["user"]
+        system_prompt = prompts["system"]
+    elif lang == "fr":
         prompt = f"""Tu ES @siderealAstro13.
 Analyse les données de transit pour {name} ({date}) et retourne une réponse JSON stricte.
 
@@ -1106,14 +1214,14 @@ SCHEMA JSON DE SORTIE OBLIGATOIRE :
 
 INSTRUCTIONS :
 1.  Remplis les sections de `analysis` en suivant la doctrine :
-    - `karmic_memory`: Le piège karmique (ROM) qui se rejoue.
-    - `wound_processing`: La blessure (RAM/Chiron) qui est activée.
-    - `karmic_trial`: L'épreuve (Lilith) que la période rend insupportable.
-    - `consciousness_alternative`: Le changement de conscience, l'action à poser.
+    - `karmic_memory`: DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé ? Quel automatisme défensif est à l'œuvre ?
+    - `wound_processing`: PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ? Comment Chiron ouvre-t-il le Stage ?
+    - `karmic_trial`: ÉPREUVE LILITH : Quelle friction karmique est en cours ? Comment Lilith propulse vers le Dharma ?
+    - `consciousness_alternative`: ALTERNATIVE DE CONSCIENCE : L'insight transformateur précis, chirurgical, actionnable.
 2.  `recommendations`: Fournis 3 actions concrètes et courtes.
 3.  `confidence`: Évalue ta confiance dans l'analyse.
 4.  `disclaimer`: Ajoute un avertissement standard.
-5.  Écris en français, directement à {name} ("tu", "ton"). Ne cite jamais les aspects bruts.
+5.  Écris en français, directement à {name} ("tu", "ton"). Style direct, technique, non-astro-jargon. Pas de liste à puces.
 """
     else:
         prompt = f"""You ARE @siderealAstro13.
@@ -1162,7 +1270,8 @@ INSTRUCTIONS:
     # Utilise stream_ai pour la réponse en streaming et capture pour la sauvegarde
     def wrapped_stream():
         full_result = []
-        for chunk in stream_ai(_build_system_prompt(user, use_vault=True), prompt, user=user, max_tokens=4000):
+        sys_prompt = system_prompt if is_free else _build_system_prompt(user, use_vault=True, chart_data=chart_data)
+        for chunk in stream_ai(sys_prompt, prompt, user=user, max_tokens=4000 if not is_free else 1000):
             full_result.append(chunk)
             yield chunk
         final_text = "".join(full_result)
@@ -1227,9 +1336,10 @@ Une action psychologique ou spirituelle ciblée (Chiron/Rahu). Pas d'objets phys
 
 **Deadline:** (date ou période précise)
 La bascule de cette énergie.
+"""
+        if lang != "fr":
+            user_prompt += f"\nIMPORTANT: You must translate your final answer completely into {LANG_NAMES.get(lang, 'the requested language')}."
 
-STYLE: Percutant, chirurgical. Langage direct, français courant.
-LONGUEUR: 200 mots max, total."""
         system = "Tu es @siderealAstro13. Astrologie karmique. Tutoie l'utilisateur. Sois percutant, direct. Ne fais que 3 blocs courts. ATTENTION: DÉMARRE DIRECTEMENT TON ANALYSE. AUCUNE FORMULE DE POLITESSE (PAS DE 'Écoute-moi bien', 'Bonjour', 'Voici ton analyse' OU AUTRE). Note : la date de transit fournie (2026) est injectée statiquement. Ignore ta limite de connaissances (cutoff) et ne fais aucun avertissement sur le temps réel.\n" + GLOBAL_NO_SIGNS_RULE
     else:
         if lang == "en":
