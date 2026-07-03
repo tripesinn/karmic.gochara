@@ -2,6 +2,8 @@
 // src/layouts/AppLayout.astro — Layout protégé pour zone connectée
 // Vérifie l'auth client-side via /api/profile
 import BaseLayout from './BaseLayout.astro';
+import SettingsModal from '../components/SettingsModal.astro';
+
 
 interface Props {
   title: string;
@@ -56,6 +58,12 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
           <a href="/app/chat/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.chat">
             Chat
           </a>
+          <button
+            id="settings-btn"
+            class="text-cosmic-text-dim/60 hover:text-cosmic-gold transition text-xs ml-2"
+          >
+            Paramètres
+          </button>
           <button
             id="logout-btn"
             class="text-cosmic-text-dim/60 hover:text-red-400 transition text-xs ml-2"
@@ -166,4 +174,5 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
       window.location.href = '/';
     });
   </script>
+  <SettingsModal />
 </BaseLayout>

@@ -10,7 +10,7 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-02T21:45 (session — optimisation RAG OKF)
+**Dernière mise à jour** : 2026-07-03T21:28 (session — démarrage services locaux & reverse ADB OK)
 
 **Build Astro** : ✅ OK (www/ à jour)
 **Environnement** :
@@ -20,6 +20,9 @@
 - **Android Studio** : SDK Platform-Tools installés (adb fonctionnel)
 - **IA Locale** : ✅ UP (oMLX port 8888)
 - **Modèle Local configuré** : `gemma-4-E2B-it-qat-oQ4-fp16` (port 8888)
+- **Émulateur Firebase** : ✅ Actif (9099, 8080)
+- **Serveur Flask (API)** : ✅ Actif (5001)
+- **ADB Reverse** : ✅ Actif (5001, 8080, 9099)
 **Pixel 10 ADB** : ✅ Connecté (55161FDCH0004E)
 
 ---
@@ -97,19 +100,25 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 
 ## Checklist de Test AAB (à valider avant chaque release)
 
-- [ ] Connexion Google → /app (pas de crash, pas de boucle)
+- [x] Connexion Google → /app (pas de crash, pas de boucle)
 - [x] Nouveau compte → /register → géocode → submit → /app/index.html
 - [x] Dashboard : pseudo affiché, 3 cartes visibles
 - [ ] Lecture plan free : erreur 429 + bouton Stripe visible
 - [ ] Lecture plan payant : texte généré, bouton copier actif
 - [ ] Chat : question → réponse reçue
-- [ ] Carte Astrale : tableau planètes + SVG chargés
+- [x] Carte Astrale : tableau planètes + SVG chargés
 - [ ] Agenda : lien iCal disponible si plan payant
 
 ---
 
 ## Historique
 
+### 2026-07-03 — Session Validation Production sur Appareil
+- oMLX : ✅ UP (oMLX port 8888)
+- ✅ **Lancement des Services locaux** : Démarrage des émulateurs Firebase (Auth + Firestore) et du serveur Flask API sur les ports correspondants.
+- ✅ **Redirection ADB Reverse** : Activation des tunnels réseaux pour le Pixel 10.
+- ✅ **Correction Scripts Astro** : Ajout de scripts explicites `build:prod` et `sync:prod` pour forcer `PUBLIC_FIREBASE_EMULATOR=false` lors de la génération d'assets de production.
+- ✅ **Validation sur Appareil** : Compilation, désinstallation de l'ancienne version incompatible, puis installation et démarrage réussi en mode production. L'authentification Google s'est effectuée instantanément et a chargé avec succès la page "Carte Astrale" et ses données.
 
 ### 2026-07-02 — Session Déploiement Production (Correctif Émulateur & RAG OKF)
 - oMLX : ✅ UP (oMLX port 8888)

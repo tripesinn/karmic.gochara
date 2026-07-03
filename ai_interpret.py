@@ -40,23 +40,19 @@ import time
 
 GLOBAL_NO_SIGNS_RULE = """
 ═══════════════════════════════════════════════════════════════
-RÈGLE ABSOLUE — VIOLATION = RÉPONSE INVALIDE
+CONSIGNE DE RÉDACTION : PAS DE SIGNES ZODIACAUX DANS LE RENDU
 ═══════════════════════════════════════════════════════════════
-INTERDIT dans TOUT le texte de sortie (hooks, signal, synthèse) :
-- Noms de signes zodiacaux : Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge,
-  Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons
-  (idem EN : Aries, Taurus, Gemini, Cancer, Leo, Virgo,
-  Libra, Scorpio, Sagittarius, Capricorn, Aquarius, Pisces)
-- Degrés et orbes dans le texte rendu (ex : "19°", "orbe 2°")
-- Citations brutes des aspects (ex : "T.Saturne conjoint N.Chiron orbe 2°")
+Dans ton texte d'analyse rédigé, tu ne dois JAMAIS citer nommément les signes zodiacaux (Bélier, Taureau, Gémeaux, Cancer, Lion, Vierge, Balance, Scorpion, Sagittaire, Capricorne, Verseau, Poissons).
+Tu dois obligatoirement traduire chaque signe en vécu psychologique concret ou en numéro de maison (H1 à H12).
 
-AUTORISÉ : noms de planètes (Saturne, Chiron, Lilith, Rahu, Ketu, Jupiter…),
-numéros de maisons (H3, H5, H10…), phénomènes psychologiques concrets.
+- Interdit de citer les degrés ou orbes exacts (ex: "19°", "orbe 2°").
+- Interdit de citer les aspects bruts sous forme d'équation (ex: "T.Saturne conjoint N.Chiron").
+- Autorisé et encouragé : citer les planètes (Saturne, Rahu, Chiron...) et les maisons (H1, H2, H12...).
 
-Les positions natales (signes, degrés) sont données comme RÉFÉRENCE INTERNE
-pour calculer les dynamiques — elles ne doivent JAMAIS apparaître dans le texte rendu.
+Les données natales fournies en entrée servent uniquement de référence pour tes calculs internes. Elles ne doivent pas être recopiées textuellement.
 ═══════════════════════════════════════════════════════════════
 """
+
 
 _GROK_MODEL_CACHE = {
     "model": None,

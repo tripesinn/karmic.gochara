@@ -5,9 +5,11 @@
   "scripts": {
     "dev": "astro dev",
     "build": "astro build",
+    "build:prod": "PUBLIC_FIREBASE_EMULATOR=false astro build",
     "build:emulator": "PUBLIC_FIREBASE_EMULATOR=true astro build",
     "preview": "astro preview",
     "sync:capacitor": "astro build && cd .. && npx cap sync",
+    "sync:prod": "PUBLIC_FIREBASE_EMULATOR=false astro build && cd .. && npx cap sync",
     "sync:emulator": "PUBLIC_FIREBASE_EMULATOR=true astro build && cd .. && npx cap sync"
   },
   "dependencies": {

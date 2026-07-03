@@ -139,9 +139,15 @@ async function* streamingRequest(path: string, body: Record<string, unknown>) {
     } catch (e) {}
   }
 
+  const token = typeof window !== 'undefined' ? localStorage.getItem('karmic_token') : null;
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+    ...(token ? { 'Authorization': `Bearer ${token}` } : {})
+  };
+
   const res = await fetch(url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
+    headers: headers,
     credentials: 'include',
     body: JSON.stringify(body),
   });
