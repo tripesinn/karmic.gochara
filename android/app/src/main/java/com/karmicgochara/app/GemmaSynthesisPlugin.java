@@ -127,7 +127,10 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
     private File getModelFile() {
-        File dir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File dir = getContext().getExternalFilesDir(Environment.DIRECTORY_DOWNLOADS);
+        if (dir == null) {
+            dir = getContext().getFilesDir();
+        }
         if (!dir.exists()) dir.mkdirs();
         return new File(dir, sModelFilename);
     }
