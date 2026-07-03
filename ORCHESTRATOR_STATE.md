@@ -10,13 +10,12 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-03T21:28 (session — démarrage services locaux & reverse ADB OK)
+**Dernière mise à jour** : 2026-07-03T21:58 (déploiement SettingsModal et simplification règles IA OK)
 
 **Build Astro** : ✅ OK (www/ à jour)
 **Environnement** :
 - **Node.js** : `v20.12.2` (via NVM)
 - **Firebase CLI** : `v13.6.0`
-- **Flutter** : Non utilisé
 - **Android Studio** : SDK Platform-Tools installés (adb fonctionnel)
 - **IA Locale** : ✅ UP (oMLX port 8888)
 - **Modèle Local configuré** : `gemma-4-E2B-it-qat-oQ4-fp16` (port 8888)
@@ -112,6 +111,12 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ---
 
 ## Historique
+
+### 2026-07-03 (Session 2) — Intégration Réglages & Correctif Synthèse
+- oMLX : ✅ UP (oMLX port 8888)
+- ✅ **Intégration du SettingsModal** : Importé et rendu le modal de paramètres dans `AppLayout.astro`, et ajouté un bouton accessible `⚙️ Réglages & IA` sur le tableau de bord pour permettre d'activer/désactiver l'IA locale (oMLX) en un clic.
+- ✅ **Correction Refus LLM Synthèse** : Remplacé les contraintes négatives absolues dans `ai_interpret.py` par une consigne positive et constructive. Cette modification a été poussée sur `main` pour mettre à jour la production via Google Cloud Build.
+- ✅ **Validation sur Appareil** : Construit et installé le build mis à jour sur le Pixel 10. Testé l'affichage du modal de paramètres et le basculement avec succès de l'IA locale.
 
 ### 2026-07-03 — Session Validation Production sur Appareil
 - oMLX : ✅ UP (oMLX port 8888)
