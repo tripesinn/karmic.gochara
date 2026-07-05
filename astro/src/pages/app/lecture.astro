@@ -278,17 +278,25 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
 
       // Détecter si l'utilisateur a configuré l'usage de l'IA locale (réglages de la modal)
       let useLocalConfig = false;
+      let localMode = 'cloud';
+      let networkHost = '';
+      let networkModel = '';
+      
       const storedSettings = localStorage.getItem('karmic_ai_settings');
       if (storedSettings) {
         try {
-          useLocalConfig = JSON.parse(storedSettings).useLocal === true;
+          const settings = JSON.parse(storedSettings);
+          localMode = settings.localMode || 'cloud';
+          useLocalConfig = localMode !== 'cloud';
+          networkHost = settings.networkHost || 'http://192.168.1.92:11434';
+          networkModel = settings.networkModel || 'gemma';
         } catch (e) {}
       }
 
       // Si l'utilisateur veut utiliser le local sur mobile natif, on fait les vérifications associées
       let forceCloudFallback = !useLocalConfig;
       
-      if (capacitorBridge.isNative() && !forceCloudFallback) {
+      if (localMode === 'native' && capacitorBridge.isNative() && !forceCloudFallback) {
         const hasModel = await checkModelAvailability();
         if (!hasModel) {
           // Si le modèle n'est pas dispo localement, au lieu de bloquer, on passe en Cloud de secours (roue de secours)
@@ -339,7 +347,60 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       }
 
       try {
-        if (capacitorBridge.isNative() && !forceCloudFallback) {
+        if (localMode === 'network') {
+          status.textContent = 'Calcul des transits...';
+          const nowTime = new Date();
+          const hour = nowTime.getHours();
+          const minute = nowTime.getMinutes();
+          const promptData = await api.synthesisPrompt({
+            context: 'synthesis',
+            date: today(),
+            hour,
+            minute,
+            reading_type: readingType,
+            is_local: true
+          });
+
+          if (!promptData || !promptData.ok) {
+            throw new Error("Impossible de calculer les transits.");
+          }
+
+          status.textContent = 'Appel du serveur IA réseau…';
+          
+          const response = await fetch(`${networkHost}/v1/chat/completions`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': 'Bearer omlx_12345678910111213abcDEF'
+            },
+            body: JSON.stringify({
+              model: networkModel,
+              messages: [
+                { role: 'system', content: promptData.system },
+                { role: 'user', content: promptData.user }
+              ],
+              temperature: 0.7
+            })
+          });
+
+          if (!response.ok) {
+            throw new Error(`Erreur serveur IA réseau (${response.status})`);
+          }
+
+          const resData = await response.json();
+          const reply = resData.choices?.[0]?.message?.content || resData.response;
+          if (reply) {
+            status.style.display = 'none';
+            output.textContent = reply;
+            sessionStorage.setItem('last_lecture_output', reply);
+            document.getElementById('copy-container')?.classList.remove('hidden');
+            
+            makeTextInteractive(output);
+            document.getElementById('integrated-chat-container')?.classList.remove('hidden');
+          } else {
+            throw new Error("Le serveur IA réseau n'a pas renvoyé de texte.");
+          }
+        } else if (localMode === 'native' && capacitorBridge.isNative() && !forceCloudFallback) {
           status.textContent = 'Calcul des transits...';
           const nowTime = new Date();
           const hour = nowTime.getHours();

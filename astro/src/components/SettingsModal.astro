@@ -138,24 +138,47 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
       <!-- Testeurs / IA -->
       <div>
         <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.local_ai">Expérimental (Testeurs)</p>
-        <div class="flex items-center justify-between p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
-          <label for="use-local-ai" class="font-body text-sm text-cosmic-text cursor-pointer" data-i18n="settings.use_local_ai">
-            Souhaitez-vous utiliser votre LLM local ?
-          </label>
-          <div class="relative inline-block w-12 h-6 align-middle select-none transition duration-200 ease-in">
-            <input type="checkbox" name="use-local-ai" id="use-local-ai" class="toggle-checkbox absolute block w-6 h-6 rounded-full bg-cosmic-void border-4 border-cosmic-border appearance-none cursor-pointer transition-transform duration-300"/>
-            <label for="use-local-ai" class="toggle-label block overflow-hidden h-6 rounded-full bg-cosmic-border cursor-pointer"></label>
+        <div class="space-y-4 p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
+          <div>
+            <label for="local-ai-mode" class="block font-body text-xs text-cosmic-text-dim mb-1.5">
+              Mode d'interprétation IA
+            </label>
+            <select
+              id="local-ai-mode"
+              class="w-full px-3 py-2 rounded-lg border border-cosmic-border bg-cosmic-void text-xs text-cosmic-text focus:border-cosmic-gold focus:outline-none transition-colors"
+            >
+              <option value="cloud">Désactivé (IA Cloud par défaut)</option>
+              <option value="native">IA Interne Mobile (Gemma sur l'appareil)</option>
+              <option value="network">Serveur IA Réseau (Ollama, oMLX...)</option>
+            </select>
+          </div>
+
+          <!-- Configuration Réseau Locale -->
+          <div id="local-network-config" class="hidden space-y-3 pt-3 border-t border-cosmic-border/30">
+            <div>
+              <label for="local-ai-host" class="block font-body text-[10px] text-cosmic-text-dim tracking-wider uppercase mb-1">
+                Adresse & Port du Serveur
+              </label>
+              <input
+                type="text"
+                id="local-ai-host"
+                placeholder="http://192.168.1.92:11434"
+                class="w-full px-3 py-2 rounded-lg border border-cosmic-border bg-cosmic-void text-xs text-cosmic-text focus:border-cosmic-gold focus:outline-none transition-colors"
+              />
+            </div>
+            <div>
+              <label for="local-ai-model-name" class="block font-body text-[10px] text-cosmic-text-dim tracking-wider uppercase mb-1">
+                Nom du Modèle
+              </label>
+              <input
+                type="text"
+                id="local-ai-model-name"
+                placeholder="gemma"
+                class="w-full px-3 py-2 rounded-lg border border-cosmic-border bg-cosmic-void text-xs text-cosmic-text focus:border-cosmic-gold focus:outline-none transition-colors"
+              />
+            </div>
           </div>
         </div>
-        <style>
-          .toggle-checkbox:checked {
-            right: 0;
-            border-color: #D4AF37;
-          }
-          .toggle-checkbox:checked + .toggle-label {
-            background-color: rgba(212, 175, 55, 0.3);
-          }
-        </style>
       </div>
     </div>
 
@@ -287,25 +310,59 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
     }
   });
 
-  // ── IA Locale Toggle ──
-  const localAIToggle = document.getElementById('use-local-ai') as HTMLInputElement;
-  if (localAIToggle) {
+  // ── IA Locale Selection ──
+  const modeSelect = document.getElementById('local-ai-mode') as HTMLSelectElement;
+  const configDiv = document.getElementById('local-network-config')!;
+  const hostInput = document.getElementById('local-ai-host') as HTMLInputElement;
+  const modelInput = document.getElementById('local-ai-model-name') as HTMLInputElement;
+
+  if (modeSelect) {
     // Restaurer l'état initial
     const stored = localStorage.getItem('karmic_ai_settings');
     if (stored) {
       try {
         const settings = JSON.parse(stored);
-        if (settings.useLocal) {
-          localAIToggle.checked = true;
+        if (settings.localMode) {
+          modeSelect.value = settings.localMode;
+        } else if (settings.useLocal) {
+          modeSelect.value = 'native';
         }
+        
+        if (settings.networkHost) hostInput.value = settings.networkHost;
+        if (settings.networkModel) modelInput.value = settings.networkModel;
+        
+        toggleConfigVisibility(modeSelect.value);
       } catch (e) {}
     }
-    
-    // Sauvegarder l'état
-    localAIToggle.addEventListener('change', (e) => {
-      const isChecked = (e.target as HTMLInputElement).checked;
-      const settings = { useLocal: isChecked };
+
+    function toggleConfigVisibility(mode: string) {
+      if (mode === 'network') {
+        configDiv.classList.remove('hidden');
+      } else {
+        configDiv.classList.add('hidden');
+      }
+    }
+
+    function saveSettings() {
+      const mode = modeSelect.value;
+      const host = hostInput.value.trim();
+      const model = modelInput.value.trim();
+      
+      const settings = {
+        localMode: mode,
+        useLocal: mode !== 'cloud',
+        networkHost: host,
+        networkModel: model
+      };
       localStorage.setItem('karmic_ai_settings', JSON.stringify(settings));
+    }
+
+    modeSelect.addEventListener('change', () => {
+      toggleConfigVisibility(modeSelect.value);
+      saveSettings();
     });
+
+    hostInput.addEventListener('input', saveSettings);
+    modelInput.addEventListener('input', saveSettings);
   }
 </script>

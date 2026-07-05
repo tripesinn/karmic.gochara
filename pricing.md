@@ -11,9 +11,9 @@
     *   Contenu : Hook nakshatra quotidien généré par Gemini Flash
     *   Durée : Illimité
 
-*   **Version Pro (9,90 € - Lifetime One-Time)**
+*   **Version Pro (9,99 € - Lifetime One-Time)**
     *   Plateforme : Web + App
-    *   Contenu : Synthèse karmique complète + Chatbot illimité
+    *   Contenu : Synthèse karmique complète (via Cloud) + Chatbot Pro (uniquement en Local)
     *   Durée : À vie (Achat unique)
 
 ---
@@ -21,7 +21,7 @@
 ## 2. Funnel d'acquisition
 
 ```
-Signal du Jour gratuit  →  Version Pro (9,90 € Achat Unique)
+Signal du Jour gratuit  →  Version Pro (9,99 € Achat Unique)
 ```
 
 ### Étape 1 — Signal du Jour (Gratuit · Web + App)
@@ -36,19 +36,22 @@ via TikTok (@siderealastro13) et sur le site/app.
 
 ---
 
-### Étape 2 — Version Pro (9,90 € · Lifetime)
+### Étape 2 — Version Pro (9,99 € · Lifetime)
 
 **Why :** Tarification simple et sans abonnement récurrent pour
 lever tous les freins.
 
 **How :** L'utilisateur entre ses coordonnées de naissance. Il
-reçoit sa synthèse karmique complète + accès illimité au chatbot
-de consultation astrale.
+reçoit sa synthèse karmique complète + accès au chatbot Pro.
 
-**Routage des coûts :**
-*   L'IA locale (si disponible) traite les requêtes gratuitement.
-*   En cas d'absence d'IA locale, Gemini Flash prend le relais
-    à un coût serveur infime.
+**Routage des coûts et protection API :**
+*   L'IA locale (si disponible sur l'appareil) gère l'intégralité
+    des conversations du chatbot.
+*   Il n'y a **aucun fallback cloud** pour le chatbot afin de garantir
+    que l'infrastructure ne génère aucune facture API récurrente.
+    Si l'appareil n'a pas d'IA locale disponible, le bouton du chatbot
+    Pro invite l'utilisateur à l'activer (Chrome Built-in AI sur web
+    ou Google AICore sur Android).
 
 ---
 
@@ -62,27 +65,27 @@ de consultation astrale.
     *   Thème natal sauvegardé : Non
     *   Alternative de Conscience : Teaser uniquement
 
-*   **Pro (9,90 € Lifetime)**
+*   **Pro (9,99 € Lifetime)**
     *   Signal du Jour (nakshatra) : Oui
-    *   Synthèse karmique complète : Oui
-    *   Questions chatbot : Oui (Illimité)
+    *   Synthèse karmique complète : Oui (Générée via cloud)
+    *   Questions chatbot : Illimité (uniquement si IA locale active)
     *   Alertes transit : Oui
     *   Thème natal sauvegardé : Oui
     *   Alternative de Conscience : Complète
-    *   IA locale : Oui (automatique si disponible sur l'appareil)
+    *   IA locale : Requise pour le chatbot (automatique sur appareils compatibles)
 
 ---
 
-## 4. Architecture IA Cloud
+## 4. Architecture IA Cloud & Local
 
-*   **Daily Reading & Synthèse : Gemini Flash**
+*   **Daily Reading & Synthèse initiale : Gemini Flash**
     *   Modèle par défaut sur serveur.
-    *   Coût extrêmement bas (idéal pour le lifetime 9,90 €).
+    *   Coût extrêmement bas (idéal pour le lifetime 9,99 €).
     *   Vitesse d'exécution optimale.
 
-*   **IA locale (oMLX, Gemma, Phi-4) :**
-    *   Priorité absolue pour le chatbot Pro sur mobile.
-    *   Réduit le coût cloud serveur à 0 € pour ces requêtes.
+*   **Chatbot Pro : IA locale uniquement (oMLX, Gemma, Phi-4, AICore)**
+    *   Exécution exclusive sur l'appareil.
+    *   Réduit le coût cloud chatbot serveur à 0 € absolu.
 
 ---
 
@@ -100,7 +103,7 @@ Saturne, ayanamsa DK, tutoiement direct).
 ## 6. Roadmap 6 mois
 
 *   **Jalon T0 — Launch (Avril 2026)**
-    *   Web + APK. Gemini Flash par défaut. Stripe Achat Unique.
+    *   Web + APK. Gemini Flash par défaut pour le cloud. Stripe Achat Unique.
 *   **Jalon T1 — Stabilisation (Juin 2026)**
     *   Alertes live transits. Optimisation des invites de prompts.
 *   **Jalon T2 — IA locale native (Décembre 2026)**
@@ -122,3 +125,5 @@ Saturne, ayanamsa DK, tutoiement direct).
     *   Pas d'abonnements récurrents compliqués.
     *   Pas de version freemium avec publicité dégradante.
     *   Pas de modèle Grok (sidelined).
+    *   Pas de requêtes chatbot Pro routées sur le cloud pour éliminer
+        toute possibilité de dérive des coûts API à long terme.
