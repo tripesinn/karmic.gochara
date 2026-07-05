@@ -201,6 +201,13 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       if (!capacitorBridge.isNative()) return true;
 
       try {
+        const memCheck = await capacitorBridge.gemma.getDeviceMemory();
+        if (memCheck && memCheck.sufficient === false) {
+          document.getElementById('model-download-card')?.classList.add('hidden');
+          document.getElementById('main-reading-card')?.classList.remove('hidden');
+          return true; // Proceed to reading, but it will fallback to cloud
+        }
+
         const avail = await capacitorBridge.gemma.checkAvailability();
         // Cacher par défaut
         document.getElementById('request-permission-btn')?.classList.add('hidden');
@@ -297,11 +304,17 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       let forceCloudFallback = !useLocalConfig;
       
       if (localMode === 'native' && capacitorBridge.isNative() && !forceCloudFallback) {
-        const hasModel = await checkModelAvailability();
-        if (!hasModel) {
-          // Si le modèle n'est pas dispo localement, au lieu de bloquer, on passe en Cloud de secours (roue de secours)
-          console.log("Modèle local absent ou non-téléchargé. Basculement sur l'IA Cloud de secours.");
+        const memCheck = await capacitorBridge.gemma.getDeviceMemory();
+        if (memCheck && memCheck.sufficient === false) {
+          console.log("Device memory insufficient for local model. Forcing cloud fallback.");
           forceCloudFallback = true;
+        } else {
+          const hasModel = await checkModelAvailability();
+          if (!hasModel) {
+            // Si le modèle n'est pas dispo localement, au lieu de bloquer, on passe en Cloud de secours (roue de secours)
+            console.log("Modèle local absent ou non-téléchargé. Basculement sur l'IA Cloud de secours.");
+            forceCloudFallback = true;
+          }
         }
       }
 

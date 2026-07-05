@@ -2,6 +2,9 @@
   "appId": "com.karmicgochara.app",
   "appName": "Karmic GoChara",
   "webDir": "www",
+  "server": {
+    "cleartext": true
+  },
   "plugins": {
     "KarmicGoogleAuth": {
       "serverClientId": "732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com"

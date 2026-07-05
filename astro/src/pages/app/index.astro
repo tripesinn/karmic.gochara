@@ -12,6 +12,24 @@ import { api } from '../../lib/api';
 
 <AppLayout title="Mon espace — Karmic Gochara">
   <div class="max-w-4xl mx-auto px-4 py-12 space-y-12">
+    <!-- Local AI Banner -->
+    <div id="local-ai-banner" class="hidden animate-fade-in bg-gradient-to-r from-emerald-900/40 to-cosmic-void border border-emerald-500/30 rounded-xl p-4 text-center">
+      <p class="text-sm text-emerald-400 font-medium flex items-center justify-center gap-2">
+        <span class="animate-pulse">✨</span> Puissance locale détectée : L'application utilise l'IA de votre appareil pour garantir une confidentialité totale.
+      </p>
+    </div>
+
+    <!-- Local AI Suggestion -->
+    <div id="local-ai-suggestion" class="hidden animate-fade-in border border-cosmic-border rounded-xl p-4 bg-cosmic-void/60 text-center space-y-2">
+      <p class="text-sm text-cosmic-text-dim flex items-center justify-center gap-2">
+        <span>💡</span> <strong>Le saviez-vous ?</strong>
+      </p>
+      <p class="text-xs text-cosmic-text-dim/80">
+        Pour une confidentialité maximale et des réponses hors-ligne, vous pouvez installer une IA locale sur votre téléphone (comme PocketPal AI ou MLC Chat). L'application s'y connectera automatiquement !
+      </p>
+      <a href="#" class="inline-block mt-1 text-xs text-cosmic-gold hover:underline">En savoir plus sur l'IA locale →</a>
+    </div>
+
     <!-- Welcome -->
     <section class="text-center animate-fade-in">
       <h1 class="text-4xl sm:text-5xl font-display text-cosmic-gold mb-3" data-i18n="welcome.title">✦ Bon retour</h1>
@@ -104,6 +122,29 @@ import { api } from '../../lib/api';
     import { triggerUpgrade } from '../../lib/upgrade';
 
     (async () => {
+      // Détection IA locale
+      api.detectLocalAI().then((url) => {
+        if (url) {
+          const banner = document.getElementById('local-ai-banner');
+          if (banner) banner.classList.remove('hidden');
+        } else {
+          // Afficher la suggestion d'installation d'une IA locale
+          // uniquement si le smartphone semble assez puissant
+          // navigator.deviceMemory renvoie la RAM en Go (seulement sur WebView/Chrome)
+          const ram = (navigator as any).deviceMemory;
+          const cores = navigator.hardwareConcurrency;
+          
+          // Si les API sont supportées, on vérifie que l'appareil a >= 6Go de RAM et >= 6 cœurs
+          const hasEnoughRam = ram ? ram >= 6 : true;
+          const hasEnoughCores = cores ? cores >= 6 : true;
+
+          if (hasEnoughRam && hasEnoughCores) {
+            const suggestion = document.getElementById('local-ai-suggestion');
+            if (suggestion) suggestion.classList.remove('hidden');
+          }
+        }
+      });
+
       try {
         const resp = await api.profile();
         if (resp.ok && resp.profile?.pseudo) {

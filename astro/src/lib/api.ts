@@ -267,6 +267,59 @@ export const api = {
       return await res.text();
     }
   },
+
+  async detectLocalAI(): Promise<string | null> {
+    // Les ports standards pour les moteurs d'inférence locaux sur Android
+    const candidates = [
+      'http://127.0.0.1:8888/v1/models', // oMLX / vLLM
+      'http://127.0.0.1:11434/api/tags', // Ollama (Termux)
+      'http://127.0.0.1:8080/v1/models', // Llama.cpp
+    ];
+    
+    // On peut utiliser CapacitorHttp pour s'assurer que ça passe côté natif
+    for (const url of candidates) {
+      try {
+        console.log(`🤖 [LOCAL-AI] Test ping sur ${url}...`);
+        const headers = url.includes('8888') ? { 'Authorization': 'Bearer omlx_12345678910111213abcDEF' } : {};
+        
+        let status = 0;
+        if (Capacitor.isNativePlatform()) {
+           const response = await CapacitorHttp.request({
+             method: 'GET',
+             url: url,
+             headers: headers,
+             connectTimeout: 1000, // 1 seconde max
+             readTimeout: 1000,
+           });
+           status = response.status;
+        } else {
+           const controller = new AbortController();
+           const id = setTimeout(() => controller.abort(), 1000);
+           const res = await fetch(url, { headers, signal: controller.signal }).catch(() => null);
+           clearTimeout(id);
+           if (res) status = res.status;
+        }
+        
+        console.log(`🤖 [LOCAL-AI] Status for ${url} : ${status}`);
+
+        if (status === 200) {
+          console.log(`✅ [LOCAL-AI] IA locale détectée sur: ${url}`);
+          // On retourne l'URL de base (ex: http://127.0.0.1:8888)
+          const baseUrl = new URL(url).origin;
+          
+          // Sauvegarde automatique des paramètres si souhaité
+          if (typeof window !== 'undefined') {
+            localStorage.setItem('karmic_ai_settings', JSON.stringify({ useLocal: true, localUrl: baseUrl }));
+          }
+          return baseUrl;
+        }
+      } catch (err: any) {
+        console.log(`❌ [LOCAL-AI] Erreur sur ${url}:`, err.message);
+      }
+    }
+    console.log(`❌ [LOCAL-AI] Aucune IA locale détectée.`);
+    return null;
+  }
 };
 
 export { ApiError };

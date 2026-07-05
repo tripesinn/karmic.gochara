@@ -395,6 +395,7 @@ public class GemmaSynthesisPlugin extends Plugin {
             }
             return dest != null && dest.exists() && dest.length() > 0;
         } catch (Exception e) {
+            android.util.Log.e("GemmaPlugin", "Erreur lors du téléchargement", e);
             if (dest != null && dest.exists()) dest.delete();
             throw new IOException(e);
         } finally {

@@ -87,6 +87,10 @@ export const capacitorBridge = {
       return await capacitorBridge.callPlugin('GemmaSynthesis', 'getModelStatus');
     },
 
+    async getDeviceMemory(): Promise<{ totalRamGb: number; sufficient: boolean; recommended: string } | null> {
+      return await capacitorBridge.callPlugin('GemmaSynthesis', 'getDeviceMemory');
+    },
+
     async unloadModel(): Promise<{ ok: boolean } | null> {
       return await capacitorBridge.callPlugin('GemmaSynthesis', 'unloadModel');
     },
