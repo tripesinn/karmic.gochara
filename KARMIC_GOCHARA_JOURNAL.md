@@ -187,3 +187,36 @@ L'insight transformateur est que **l'auto-affirmation n'est pas une opposition a
 - Tools calls : sequential chaining compatible (each tool can use previous output)
 
 **Pas touché** : Hermes config, Capacitor build, GCP infrastructure.
+
+
+---
+
+## 🗓️ 6 Juillet 2026 — Création de la skill `agent-astrologue`
+
+**Contexte :** Lancement du profil `astro` (agent astrologue). L'utilisateur a demandé la mise en place de la première compétence de l'agent.
+
+**Livré :**
+* Skill `agent-astrologue` (`~/.hermes/profiles/astro/skills/agent-astrologue/SKILL.md`, 6.7 Ko)
+  * Cœur métier : Doctrine Évolutive Synthétique (DES) — 4 piliers (natal / transits / lecture karmique / voie évolutive)
+  * Source de vérité : karmic-mcp (prod `http://34.163.125.49:8000`) — endpoints `/transits/today` + `/doctrine/reading`
+  * Référence ayanamsa DK Djwhal Khul, Chandra Lagna calculé par décalage depuis la Lune
+  * Templates de réponse (transit court / analyse DES complète)
+  * **Économie tokens :** délégation à oMLX (127.0.0.1:8888) via `delegate_task` pour analyses > 500 mots
+
+**Smoke-test validé (chaîne complète) :**
+1. karmic-mcp prod health → 200 OK ✅
+2. Transit pour DOB Jero (1974-10-31) → `{"date":"2026-06-20","planet_positions":{"sun":"Cancer","moon":"Gemini"}}` ✅
+3. Doctrine reading → réponse mockée (état connu, `karmic_lite.py` réel pas encore branché) ✅
+4. Génération analyse FR via omlx gemma-4-E2B-it-qat → 400 tokens en 8.8s, 0 cloud token ✅
+
+**Décisions clés :**
+* Skill **interne** (consommée par l'agent), pas distribuable — donc pas dans `wellness/` (qui est pour Edge Gallery) mais en top-level `agent-astrologue/`
+* Honneur aux sources : position API mockée signalée explicitement à l'utilisateur
+* Bug `_enrich_profile_with_natal` documenté pour ne pas le re-réenventer
+
+**Pas touché :** karmic-mcp dev-vm (injoignable depuis ce poste, à vérifier côté VM), `wellness/karmic-gochara` (skill de distribution, hors scope).
+
+**Next steps possibles :**
+* Skill B (routage auto local/omlx) — utile si l'agent astro a beaucoup de sous-tâches répétitives
+* Brancher le vrai `karmic_lite.py` (mocké actuellement) côté dev-vm
+* Skill D wrapper (routage + calcul + rédaction combinés)

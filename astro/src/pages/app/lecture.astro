@@ -339,7 +339,11 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       controller = new AbortController();
 
       setReadingStatus('Connexion à l&rsquo;oracle …');
-      output.textContent = '';
+      if (readingType === 'daily') {
+        output.textContent = '';
+      } else if (output.textContent) {
+        output.textContent += '\n\n✦ SYNTHÈSE COMPLÈTE ✦\n\n';
+      }
       if(btnDaily) btnDaily.disabled = true;
       if(btnFull) btnFull.disabled = true;
       document.getElementById('copy-container')?.classList.add('hidden');
