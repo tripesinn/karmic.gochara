@@ -424,8 +424,8 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
           const reply = resData.choices?.[0]?.message?.content || resData.response;
           if (reply) {
             setReadingStatus('');
-            output.textContent = reply;
-            sessionStorage.setItem('last_lecture_output', reply);
+            output.textContent += reply;
+            sessionStorage.setItem('last_lecture_output', output.textContent);
             document.getElementById('copy-container')?.classList.remove('hidden');
             
             makeTextInteractive(output);
@@ -464,8 +464,8 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
 
           if (response) {
             setReadingStatus('');
-            output.textContent = response;
-            sessionStorage.setItem('last_lecture_output', response);
+            output.textContent += response;
+            sessionStorage.setItem('last_lecture_output', output.textContent);
             document.getElementById('copy-container')?.classList.remove('hidden');
             
             makeTextInteractive(output);
