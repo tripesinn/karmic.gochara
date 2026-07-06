@@ -113,6 +113,12 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 
 ## Historique
 
+### 2026-07-06 — Session orchestrateur (Problème Réseau)
+- **Analyse** : Les tunnels ADB Reverse avaient "sauté" (probablement déconnexion USB ou crash ADB), causant l'impossibilité pour le téléphone de joindre l'API locale (`127.0.0.1:5001`), l'IA locale (`8888`) et Firebase Emulators.
+- **Action** : Restauration des tunnels réseaux (tcp:5001, tcp:8080, tcp:9099, tcp:8888).
+- oMLX : ✅ UP (port 8888).
+- **Prochaine étape** : L'utilisateur peut retester l'application sur le Pixel 10.
+
 ### 2026-07-05 — Session Analyse Logs Huawei (via IA locale)
 - oMLX : ✅ UP (Analyse réussie)
 - Logs Huawei (22X7N19504005360) analysés : 
