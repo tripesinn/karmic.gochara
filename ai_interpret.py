@@ -659,10 +659,16 @@ def _aspects_to_text(aspects: list, max_aspects: int = 20) -> str:
             entry = NAKSHATRA_KARMA.get(a["natal_nakshatra"], {})
             if entry.get(n_planet_key):
                 n_nak_theme = f" -> {entry[n_planet_key]}"
+        t_inner = f"{a.get('transit_display','')}{t_nak}{t_nak_theme}".strip()
+        t_parens = f" ({t_inner})" if t_inner else ""
+        
+        n_inner = f"{a.get('natal_display','')}{n_nak}{n_nak_theme}".strip()
+        n_parens = f" ({n_inner})" if n_inner else ""
+
         lines.append(
-            f"T.{a['transit_planet']}{retro} ({a.get('transit_display','')}{t_nak}{t_nak_theme}) "
+            f"T.{a['transit_planet']}{retro}{t_parens} "
             f"{a['aspect']} "
-            f"N.{a['natal_planet']} ({a.get('natal_display','')}{n_nak}{n_nak_theme}) "
+            f"N.{a['natal_planet']}{n_parens} "
             f"[orbe {a['orb']}°]"
         )
     return "\n".join(lines)
@@ -723,7 +729,8 @@ def _build_amsa_bloc(chart_data: dict, lang: str = "fr", compact: bool = False) 
         part  = data.get("part", "")
         lord  = data.get("lord", "")
         lord_s = f" [{lord}]" if lord else ""
-        return f"  {planet_key:<22} {sign}{lord_s} (part {part})"
+        part_s = f" (part {part})" if part else ""
+        return f"  {planet_key:<22} {sign}{lord_s}{part_s}"
 
     lines_d9  = [r for p in D9_PLANETS  if (r := fmt(p, "d9"))]
     lines_d10 = [r for p in D10_PLANETS if (r := fmt(p, "d10"))]
@@ -1178,7 +1185,7 @@ Minimum 300 words. Do not truncate. Language: {lang_name}."""
 
 def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr", is_free: bool = False):
     """
-    Génère la synthèse karmique complète en streaming avec sortie JSON structurée.
+    Génère la synthèse karmique complète en streaming avec sortie Markdown structurée.
     Modèle : Opus pour la meilleure qualité doctrinal.
     """
     user = user or {}
@@ -1196,8 +1203,11 @@ def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr", is_f
         prompt = prompts["user"]
         system_prompt = prompts["system"]
     elif lang == "fr":
-        prompt = f"""Tu ES @siderealAstro13.
-Analyse les données de transit pour {name} ({date}) et retourne une réponse JSON stricte.
+        prompt = f"""Tu ES @siderealAstro13. Ne te comporte pas comme un assistant. Analyse directement les données de transit pour {name} ({date}) selon la doctrine karmique.
+Interdiction de reformuler le prompt. Tu dois rédiger une analyse basée exclusivement sur les aspects et positions fournis.
+
+LANGUE : français uniquement. Aucun mot anglais.
+CONSIGNE : commence directement par "## 1. LA MÉMOIRE KARMIQUE". Aucune note préalable, aucune introduction.
 
 Thème natal de référence :
 {natal_context}
@@ -1205,34 +1215,30 @@ Thème natal de référence :
 Aspects actifs (données brutes pour ton analyse) :
 {aspects_text}
 
-SCHEMA JSON DE SORTIE OBLIGATOIRE :
-{{
-  "analysis": {{
-    "title": "Synthèse Karmique du {date}",
-    "karmic_memory": "...",
-    "wound_processing": "...",
-    "karmic_trial": "...",
-    "consciousness_alternative": "..."
-  }},
-  "recommendations": ["Action 1...", "Action 2...", "Action 3..."],
-  "confidence": "Élevée|Moyenne|Faible",
-  "disclaimer": "Cette analyse est une interprétation..."
-}}
+STYLE OBLIGATOIRE : tu écris comme un lecteur d'âme, pas comme un astrologue technique.
+- Traduis chaque aspect en vécu concret, en pattern comportemental reconnaissable.
+- Ne cite jamais les aspects bruts ("T.Saturne conjoint N.Chiron orbe 2°"). Traduis-les en ce que {name} ressent ou fait.
+- Parle directement à {name} : "tu", "ton", "ta".
+- À la fin de chaque section, glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler.
 
-INSTRUCTIONS :
-1.  Remplis les sections de `analysis` en suivant la doctrine :
-    - `karmic_memory`: DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé ? Quel automatisme défensif est à l'œuvre ?
-    - `wound_processing`: PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ? Comment Chiron ouvre-t-il le Stage ?
-    - `karmic_trial`: ÉPREUVE LILITH : Quelle friction karmique est en cours ? Comment Lilith propulse vers le Dharma ?
-    - `consciousness_alternative`: ALTERNATIVE DE CONSCIENCE : L'insight transformateur précis, chirurgical, actionnable.
-2.  `recommendations`: Fournis 3 actions concrètes et courtes.
-3.  `confidence`: Évalue ta confiance dans l'analyse.
-4.  `disclaimer`: Ajoute un avertissement standard.
-5.  Écris en français, directement à {name} ("tu", "ton"). Style direct, technique, non-astro-jargon. Pas de liste à puces.
+Analyse ces données en 4 blocs :
+
+1. DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé en ce moment ? Quel automatisme défensif est à l'œuvre pour {name} ?
+
+2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente de {name} ? Comment Chiron (RAM) peut-il ouvrir le passage vers le Stage ?
+
+3. ÉPREUVE LILITH : Quelle friction karmique est en cours pour {name} ? Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
+
+4. ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis, chirurgical, actionnable — ce que l'âme de {name} doit comprendre MAINTENANT pour avancer vers son Stage.
+
+Style : direct, technique, non-astro-jargon dans les conclusions. Tutoiement direct ("tu", "ton").
+Chaque phrase = une vérité chirurgicale. À la fin de chaque bloc, glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler.
 """
     else:
-        prompt = f"""You ARE @siderealAstro13.
-Analyze the transit data for {name} ({date}) and return a strict JSON response.
+        prompt = f"""You ARE @siderealAstro13. Do not behave as an assistant. Analyze the transit data for {name} ({date}) directly according to karmic doctrine.
+Forbidden to rephrase the prompt. Write analysis based exclusively on the aspects and positions provided.
+
+INSTRUCTION: start directly with "## 1. KARMIC MEMORY". No preamble, no introduction.
 
 Natal reference chart:
 {natal_context}
@@ -1240,30 +1246,18 @@ Natal reference chart:
 Active aspects (raw data for your analysis):
 {aspects_text}
 
-MANDATORY JSON OUTPUT SCHEMA:
-{{
-  "analysis": {{
-    "title": "Karmic Synthesis for {date}",
-    "karmic_memory": "...",
-    "wound_processing": "...",
-    "karmic_trial": "...",
-    "consciousness_alternative": "..."
-  }},
-  "recommendations": ["Action 1...", "Action 2...", "Action 3..."],
-  "confidence": "High|Medium|Low",
-  "disclaimer": "This analysis is an interpretation..."
-}}
+MANDATORY STYLE: soul reader, not technical astrologer.
+- Translate each aspect into lived experience, recognizable behavioral pattern.
+- Never quote raw aspects. Translate them into what {name} feels or does.
+- Speak directly to {name}: "you", "your".
+- End sections with an INSIGHT in italics.
 
-INSTRUCTIONS:
-1.  Fill the `analysis` sections following the doctrine:
-    - `karmic_memory`: The karmic trap (ROM) being replayed.
-    - `wound_processing`: The wound (RAM/Chiron) being activated.
-    - `karmic_trial`: The trial (Lilith) that the period makes unbearable.
-    - `consciousness_alternative`: The shift in consciousness, the action to take.
-2.  `recommendations`: Provide 3 concrete, short actions.
-3.  `confidence`: Assess your confidence in the analysis.
-4.  `disclaimer`: Add a standard disclaimer.
-5.  Write in English, directly to {name} ("you", "your"). Never quote raw aspects.
+1. KARMIC MEMORY (ROM ☋) — What trap replays? Automatic behavior, familiar feeling, what it costs. Insight in italics.
+2. THE WOUND IN PROCESSING (RAM ⚷) — What is awakened? Invisible Door (prison/blockage) under pressure? Visible Door (healing/Stage) opening via Chiron? Insight in italics.
+3. KARMIC TRIAL (⚸) — What is unbearable? Where does it chafe? Where does it push? Insight in italics.
+4. ALTERNATIVE OF CONSCIOUSNESS — What {name} must stop. What to dare activate. ONE direct actionable sentence.
+
+Style: direct, technical, no astro-jargon in conclusions.
 """
 
     pseudo = user.get("pseudo", "")

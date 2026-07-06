@@ -23,20 +23,9 @@ const isEmulator = import.meta.env.PUBLIC_FIREBASE_EMULATOR === 'true';
 </section>
 
 <script>
-  import capacitorBridge from '../lib/capacitor-bridge';
-  if (capacitorBridge.isNative()) {
-    setTimeout(async () => {
-      try {
-        const downloadStatus = document.getElementById("download-status");
-        if (downloadStatus) downloadStatus.innerText = "Downloading model...";
-        await capacitorBridge.gemma.downloadModel();
-        if (downloadStatus) downloadStatus.innerText = "Download complete!";
-      } catch(err: any) {
-        const downloadStatus = document.getElementById("download-status");
-        if (downloadStatus) downloadStatus.innerText = "Error: " + err;
-      }
-    }, 1000);
-  }
+  // Le téléchargement du modèle local a été désactivé ici car tous les téléphones
+  // n'ont pas la puissance pour l'exécuter (ex: Huawei P30 Pro).
+  // Le téléchargement devrait être déclenché manuellement via les paramètres.
 </script>
 <script>
   import { signInWithGoogle, signInTestUser } from '../lib/firebase-auth';

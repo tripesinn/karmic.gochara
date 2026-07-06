@@ -10,8 +10,7 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-03T21:58 (déploiement SettingsModal et simplification règles IA OK)
-
+**Dernière mise à jour** : 2026-07-05T21:15 (Analyse logs Pixel 10 - Firebase OK, oMLX DOWN)
 **Build Astro** : ✅ OK (www/ à jour)
 **Environnement** :
 - **Node.js** : `v20.12.2` (via NVM)
@@ -51,6 +50,8 @@
 | BUG-012 | P2 | `pVM is not available` dans `IsolatedStorageServiceM` (bug OS Pixel) | ⚠️ Ignorable (bug OS Pixel) |
 | BUG-013 | P3 | `App-specific configuration not found` (PackageConfigPersister) | ⚠️ Ignorable (Warning OS/Capacitor) |
 | BUG-014 | P3 | Spanner: `No data was found...` | ⚠️ Ignorable (Warning Google Play Services) |
+| BUG-016 | P2 | DNS: `Failed to resolve using system DNS resolver` | ⚠️ Ignorable (Pas d'internet) |
+| BUG-017 | P3 | Permission: `UID 10074 has no location permission` (`com.huawei.hwid`) | ⚠️ Ignorable (Warning système Huawei, pas de localisation requise) |
 
 
 ---
@@ -91,7 +92,7 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 2. [x] **Configurer Firebase Auth Emulator** (Mode test pour tester comme un nouvel utilisateur)
 3. [x] **Injecter `PUBLIC_REVENUECAT_ANDROID_KEY`** (Reporté, testeurs Pro auto)
 4. [x] Supprimer `lecture.astro.bak`
-5. [ ] **Commit** des modifications non commités (lecture.astro, apply_local_ai.py, www/)
+5. [x] **Commit** des modifications non commités (lecture.astro, apply_local_ai.py, www/)
 6. [x] BUG-004 : Résolu (Gemma local fonctionnel, confirmé par accès au chat)
 7. [ ] Diagnostiquer `pVM is not available` dans `IsolatedStorageServiceM`
 
@@ -111,6 +112,30 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ---
 
 ## Historique
+
+### 2026-07-05 — Session Analyse Logs Huawei (via IA locale)
+- oMLX : ✅ UP (Analyse réussie)
+- Logs Huawei (22X7N19504005360) analysés : 
+  - **BUG-016** : Résolution DNS (✅ Écarté, le téléphone n'était initialement pas connecté à internet).
+  - **BUG-017** : Violation de permission de localisation par `com.huawei.hwid` (⚠️ Ignorable, composant système Huawei appelé indirectement sans impact sur notre app).
+  - **Conclusion** : Après reconnexion à internet et relance des logs, aucune erreur ou crash de `com.karmicgochara.app` n'a été détecté. L'application est stable sur le Huawei.
+
+### 2026-07-05 — Session Analyse Logs (Firebase OK)
+- oMLX : ❌ DOWN (Erreur de connexion port 8888, analyse via logcat manuelle)
+- Firebase Emulators & Flask API relancés sur le host, tunnels ADB Reverse validés.
+- Logs Pixel 10 analysés : Le problème "Firebase Error" est ✅ RÉSOLU. L'application se connecte bien à l'API (`/register` et `/api/profile` renvoient 200 OK) et à l'émulateur Firebase Auth.
+- Seules les erreurs bénignes de connexion au port 8888/11434 pour l'IA locale sont présentes.
+
+### 2026-07-05 — Session Restauration Commit
+- oMLX : ✅ UP (Analyse réussie)
+- Bugs corrigés :
+  - **Git (P1)** : Les fichiers sources n'étaient pas commités.
+  - **Rebuild** : Astro a été recompilé et Capacitor synchronisé.
+  - **Perte de documentation** : Restauration de l'historique complet des fichiers `.md` supprimés par inadvertance.
+- Build : OK (Astro + Capacitor Sync)
+- Deploy : commit `dfa284d` → Cloud Run live
+- Pixel 10 : OK (Logs valides, aucun asset manquant)
+- Prochaine session : Continuer avec BUG-011 ou les problèmes P3 restants.
 
 ### 2026-07-03 (Session 2) — Intégration Réglages & Correctif Synthèse
 - oMLX : ✅ UP (oMLX port 8888)

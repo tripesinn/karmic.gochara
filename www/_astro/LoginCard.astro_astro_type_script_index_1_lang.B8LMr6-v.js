@@ -1,1 +1,0 @@
-import{c as e}from"./capacitor-bridge.CdArJQJJ.js";import"./index.CRukatdg.js";e.isNative()&&setTimeout(async()=>{try{const t=document.getElementById("download-status");t&&(t.innerText="Downloading model..."),await e.gemma.downloadModel(),t&&(t.innerText="Download complete!")}catch(t){const o=document.getElementById("download-status");o&&(o.innerText="Error: "+t)}},1e3);

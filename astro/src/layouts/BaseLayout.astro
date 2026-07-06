@@ -52,6 +52,22 @@ const ogImageUrl = ogImage || `${siteUrl}/static/icons/icon-512.png`;
 	<body class="bg-cosmic-bg text-cosmic-text font-body min-h-screen overflow-x-hidden">
 		<slot />
 
+		<!-- Error handler for debugging -->
+		<script is:inline>
+			window.addEventListener('error', (event) => {
+				const errDiv = document.createElement('div');
+				errDiv.style = 'position:fixed;top:10px;left:10px;right:10px;background:rgba(255,0,0,0.8);color:white;z-index:9999;padding:10px;font-size:12px;border-radius:4px;font-family:monospace;';
+				errDiv.innerText = 'JS ERR: ' + event.message + '\nAT ' + event.filename + ':' + event.lineno;
+				document.body.appendChild(errDiv);
+			});
+			window.addEventListener('unhandledrejection', (event) => {
+				const errDiv = document.createElement('div');
+				errDiv.style = 'position:fixed;top:80px;left:10px;right:10px;background:rgba(200,0,0,0.8);color:white;z-index:9999;padding:10px;font-size:12px;border-radius:4px;font-family:monospace;';
+				errDiv.innerText = 'PROMISE REJ: ' + (event.reason ? (event.reason.message || event.reason) : 'Unknown reason');
+				document.body.appendChild(errDiv);
+			});
+		</script>
+
 		<!-- Service Worker Registration -->
 		<script>
 			if ('serviceWorker' in navigator) {

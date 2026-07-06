@@ -16,8 +16,9 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
     <!-- Écran principal de lecture -->
     <div id="main-reading-card" class="border border-cosmic-border rounded-xl bg-cosmic-void/60 p-6 sm:p-10 min-h-[300px] flex flex-col justify-between">
       <div>
-        <div id="reading-status" class="text-cosmic-text-dim text-center italic py-10">
-          Prépare-toi &hellip;
+        <div id="reading-status" class="text-cosmic-text-dim flex justify-center items-center gap-3 italic py-10 w-full">
+          <svg class="animate-spin h-5 w-5 text-cosmic-gold flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>
+          <span>Prépare-toi &hellip;</span>
         </div>
         <div id="reading-output" class="text-cosmic-text leading-relaxed space-y-4 whitespace-pre-wrap"></div>
       </div>
@@ -171,6 +172,22 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       return d.toTimeString().slice(0, 5);
     }
 
+    function setReadingStatus(content: string, isErrorOrHtml = false) {
+      const status = document.getElementById('reading-status');
+      if (!status) return;
+      if (!content) {
+        status.style.display = 'none';
+        return;
+      }
+      status.style.display = 'flex';
+      status.className = "text-cosmic-text-dim flex justify-center items-center gap-3 italic py-10 w-full";
+      if (isErrorOrHtml) {
+        status.innerHTML = `<div class="w-full text-center">${content}</div>`;
+      } else {
+        status.innerHTML = `<svg class="animate-spin h-5 w-5 text-cosmic-gold flex-shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span>${content}</span>`;
+      }
+    }
+
     let controller: AbortController | null = null;
     let isDownloading = false;
 
@@ -321,8 +338,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       if (controller) controller.abort();
       controller = new AbortController();
 
-      status.textContent = 'Connexion à l&rsquo;oracle …';
-      status.style.display = 'block';
+      setReadingStatus('Connexion à l&rsquo;oracle …');
       output.textContent = '';
       if(btnDaily) btnDaily.disabled = true;
       if(btnFull) btnFull.disabled = true;
@@ -339,21 +355,21 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       } catch {}
 
       if (!pseudo) {
-        status.textContent = 'Impossible de récupérer ton profil.';
+        setReadingStatus('Impossible de récupérer ton profil.', true);
         if(btnDaily) btnDaily.disabled = false;
         if(btnFull) btnFull.disabled = false;
         return;
       }
 
       if (readingType === 'full' && plan === 'free') {
-        status.innerHTML = `
+        setReadingStatus(`
           <div class="text-center">
             <p class="text-red-400 mb-4">La synthèse karmique est réservée au plan premium.</p>
             <a href="/app/premium" class="px-4 py-2 bg-cosmic-gold text-cosmic-bg rounded-full text-sm font-display inline-block">
               Découvrir l'abonnement
             </a>
           </div>
-        `;
+        `, true);
         if(btnDaily) btnDaily.disabled = false;
         if(btnFull) btnFull.disabled = false;
         return;
@@ -361,7 +377,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
 
       try {
         if (localMode === 'network') {
-          status.textContent = 'Calcul des transits...';
+          setReadingStatus('Calcul des transits...');
           const nowTime = new Date();
           const hour = nowTime.getHours();
           const minute = nowTime.getMinutes();
@@ -378,7 +394,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             throw new Error("Impossible de calculer les transits.");
           }
 
-          status.textContent = 'Appel du serveur IA réseau…';
+          setReadingStatus('Appel du serveur IA réseau…');
           
           const response = await fetch(`${networkHost}/v1/chat/completions`, {
             method: 'POST',
@@ -403,7 +419,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
           const resData = await response.json();
           const reply = resData.choices?.[0]?.message?.content || resData.response;
           if (reply) {
-            status.style.display = 'none';
+            setReadingStatus('');
             output.textContent = reply;
             sessionStorage.setItem('last_lecture_output', reply);
             document.getElementById('copy-container')?.classList.remove('hidden');
@@ -414,7 +430,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             throw new Error("Le serveur IA réseau n'a pas renvoyé de texte.");
           }
         } else if (localMode === 'native' && capacitorBridge.isNative() && !forceCloudFallback) {
-          status.textContent = 'Calcul des transits...';
+          setReadingStatus('Calcul des transits...');
           const nowTime = new Date();
           const hour = nowTime.getHours();
           const minute = nowTime.getMinutes();
@@ -431,10 +447,10 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             throw new Error("Impossible de calculer les transits.");
           }
 
-          status.textContent = 'Initialisation de l&rsquo;Oracle local…';
+          setReadingStatus('Initialisation de l&rsquo;Oracle local…');
           await capacitorBridge.gemma.prepareModel(false);
 
-          status.textContent = 'Génération de ta lecture…';
+          setReadingStatus('Génération de ta lecture…');
           const response = await capacitorBridge.gemma.generate(
             promptData.system,
             promptData.user,
@@ -443,7 +459,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
           );
 
           if (response) {
-            status.style.display = 'none';
+            setReadingStatus('');
             output.textContent = response;
             sessionStorage.setItem('last_lecture_output', response);
             document.getElementById('copy-container')?.classList.remove('hidden');
@@ -462,14 +478,14 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             transit_time: now(),
             reading_type: readingType
           })) {
-            status.style.display = 'none';
+            setReadingStatus('');
             if (chunk.text) {
               output.textContent += chunk.text;
             } else if (chunk.html) {
               output.innerHTML += chunk.html;
             }
           }
-          status.textContent = '';
+          setReadingStatus('');
           sessionStorage.setItem('last_lecture_output', output.textContent || output.innerHTML);
           document.getElementById('copy-container')?.classList.remove('hidden');
           
@@ -480,16 +496,16 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
         if (err.name !== 'AbortError') {
           console.error(err);
           if (err.message?.includes('subscription_required') || err.message?.includes('quota') || err.status === 429) {
-            status.innerHTML = `
+            setReadingStatus(`
               <div class="text-center">
                 <p class="text-red-400 mb-4">${err.message || 'La synthèse karmique est réservée au plan Lecture.'}</p>
                 <a href="/app/premium" class="px-4 py-2 bg-cosmic-gold text-cosmic-bg rounded-full text-sm font-display inline-block">
                   Découvrir l'abonnement
                 </a>
               </div>
-            `;
+            `, true);
           } else {
-            status.textContent = 'La connexion karmique a été interrompue. ' + (err.message || '');
+            setReadingStatus('La connexion karmique a été interrompue. ' + (err.message || ''), true);
           }
         }
       } finally {
@@ -551,7 +567,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
         isDownloading = true;
         const res = await capacitorBridge.gemma.selectLocalModel();
         if (res && res.ok) {
-          statusText.textContent = 'Initialisation de l\'Oracle local…';
+          setReadingStatus('<div class="flex justify-center"><svg class="animate-spin h-5 w-5 text-cosmic-gold" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg></div> Initialisation de l\'Oracle local…', true);
           const prep = await capacitorBridge.gemma.prepareModel(false);
           if (prep && prep.ok) {
             document.getElementById('model-download-card')?.classList.add('hidden');
@@ -606,7 +622,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
         if (savedOutput) {
           const status = document.getElementById('reading-status');
           const output = document.getElementById('reading-output');
-          if (status) status.style.display = 'none';
+          if (status) setReadingStatus('');
           if (output) {
             output.textContent = savedOutput;
             makeTextInteractive(output);

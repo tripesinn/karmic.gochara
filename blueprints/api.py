@@ -64,6 +64,10 @@ def api_profile():
         except Exception as e:
             current_app.logger.error("Erreur auto-hydratation profile : %s", e)
 
+    from app_common import UNLIMITED_PSEUDOS
+    if profile.get("pseudo", "").lower() in UNLIMITED_PSEUDOS:
+        profile["plan"] = "illimite"
+
     return jsonify({"ok": True, "profile": profile})
 
 
@@ -386,6 +390,10 @@ def login_firebase():
         if not hook_natal and profile.get("plan", "free") != "free":
             hook_natal = get_hook_natal(profile, lang=user_lang)
             session[cache_key] = hook_natal
+
+        from app_common import UNLIMITED_PSEUDOS
+        if pseudo.lower() in UNLIMITED_PSEUDOS:
+            profile["plan"] = "illimite"
 
         profile_session = profile.copy()
         profile_session.pop("natal_positions", None)
