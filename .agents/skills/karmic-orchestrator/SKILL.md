@@ -163,6 +163,7 @@ Build cassé → retour Phase 1. Ne pas déployer avec erreurs.
 
 ## PHASE 3 — Déploiement Cloud
 
+> S'assure que tout le code en attente est poussé avant les tests physiques.
 ```bash
 cd /Users/jero87/karmic.gochara
 git add .
@@ -198,27 +199,56 @@ done
 
 ---
 
-## PHASE 4 — Vérification Pixel 10
+## PHASE 4 — Vérification Multi-Appareils
 
-### 4.1 Vérifier l'appareil
+### 4.1 Vérifier les appareils connectés
 
 ```bash
 ADB=~/Library/Android/sdk/platform-tools/adb
 $ADB devices
-# Attendu : "55161FDCH0004E  device"
+# Attendu : 
+# "55161FDCH0004E  device" (Pixel 10 - Dev/Emulator)
+# "22X7N19504005360  device" (Huawei - Prod/Standalone)
 ```
 
-### 4.2 Build et déployer APK debug
+### 4.2 Build et déployer sur Pixel 10 (Config Dev)
 
 ```bash
-export JAVA_HOME=\
-  "/Applications/Android Studio.app/Contents/jbr/Contents/Home"
+# S'assurer que les tunnels sont actifs
+$ADB -s 55161FDCH0004E reverse tcp:5001 tcp:5001
+$ADB -s 55161FDCH0004E reverse tcp:8080 tcp:8080
+$ADB -s 55161FDCH0004E reverse tcp:9099 tcp:9099
+$ADB -s 55161FDCH0004E reverse tcp:8888 tcp:8888
+
+export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
 
 cd /Users/jero87/karmic.gochara/android
 ./gradlew assembleDebug && \
-  ~/Library/Android/sdk/platform-tools/adb install -r \
-    app/build/outputs/apk/debug/app-debug.apk
+  $ADB -s 55161FDCH0004E install -r app/build/outputs/apk/debug/app-debug.apk
+$ADB -s 55161FDCH0004E shell am start -n com.karmicgochara.app/.MainActivity
+```
+
+### 4.3 Build et déployer sur Huawei (Config Prod)
+
+```bash
+# Build de production Astro
+cd /Users/jero87/karmic.gochara/astro
+
+# Masquer temporairement .env.local pour forcer le mode Prod
+if [ -f ".env.local" ]; then mv .env.local .env.local.bak; fi
+
+PUBLIC_FIREBASE_EMULATOR=false npm run build
+npm run sync:capacitor
+
+# Restaurer .env.local
+if [ -f ".env.local.bak" ]; then mv .env.local.bak .env.local; fi
+
+# Déploiement sur Huawei
+cd /Users/jero87/karmic.gochara/android
+./gradlew assembleDebug && \
+  $ADB -s 22X7N19504005360 install -r app/build/outputs/apk/debug/app-debug.apk
+$ADB -s 22X7N19504005360 shell am start -n com.karmicgochara.app/.MainActivity
 ```
 
 ### 4.3 Vérifier les logs Capacitor

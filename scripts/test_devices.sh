@@ -12,6 +12,11 @@ echo "=== 2. Checking devices ==="
 $ADB devices
 
 echo "=== 3. Deploying to Pixel 10 (Dev) ==="
+# S'assurer que le build Astro est en mode Dev
+cd /Users/jero87/karmic.gochara/astro
+PUBLIC_FIREBASE_EMULATOR=true npm run build
+npm run sync:capacitor
+
 # Ensure tunnels are active
 $ADB -s 55161FDCH0004E reverse tcp:5001 tcp:5001 || true
 $ADB -s 55161FDCH0004E reverse tcp:8080 tcp:8080 || true
@@ -28,8 +33,18 @@ $ADB -s 55161FDCH0004E shell am start -n com.karmicgochara.app/.MainActivity || 
 
 echo "=== 4. Deploying to Huawei (Prod) ==="
 cd /Users/jero87/karmic.gochara/astro
+# Renommer .env.local pour ne pas qu'il force le mode Emulator
+if [ -f ".env.local" ]; then
+  mv .env.local .env.local.bak
+fi
+
 PUBLIC_FIREBASE_EMULATOR=false npm run build
 npm run sync:capacitor
+
+# Restaurer .env.local
+if [ -f ".env.local.bak" ]; then
+  mv .env.local.bak .env.local
+fi
 
 cd /Users/jero87/karmic.gochara/android
 ./gradlew assembleDebug
