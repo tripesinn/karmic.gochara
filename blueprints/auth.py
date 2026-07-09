@@ -177,18 +177,30 @@ def register():
     data.setdefault("transit_tz", data.get("tz", "Europe/Paris"))
 
     try:
-        if pseudo_exists(pseudo):
-            return jsonify({"ok": False, "error": "Pseudo déjà pris"}), 409
         email = (data.get("email") or "").strip().lower()
-        if email and get_profile_by_email(email):
-            return jsonify({"ok": False, "error": "Email déjà enregistré"}), 409
+        logged_in_profile = session.get("profile", {})
+        logged_in_email = logged_in_profile.get("email", "").strip().lower()
 
-        # 1. Create basic profile in sheet
-        profile = create_profile(data)
+        is_update = bool(logged_in_email and email == logged_in_email)
+
+        if is_update:
+            if pseudo != logged_in_profile.get("pseudo") and pseudo_exists(pseudo):
+                return jsonify({"ok": False, "error": "Pseudo déjà pris"}), 409
+            from profiles import update_profile
+            update_profile(email, data)
+            profile = get_profile_by_email(email)
+        else:
+            if pseudo_exists(pseudo):
+                return jsonify({"ok": False, "error": "Pseudo déjà pris"}), 409
+            if email and get_profile_by_email(email):
+                return jsonify({"ok": False, "error": "Email déjà enregistré"}), 409
+            # 1. Create basic profile in sheet
+            profile = create_profile(data)
+
         session["pseudo"] = pseudo
         session["profile"] = profile
     except Exception as exc:
-        current_app.logger.error("Erreur Sheets register : %s", exc)
+        current_app.logger.error("Erreur Firebase register : %s", exc)
         return jsonify({"ok": False, "error": str(exc)}), 500
 
     # 2. Try to calculate natal and enrich
