@@ -38,7 +38,7 @@ import KarmicChart from '../../components/KarmicChart.astro';
           const plan = p.plan || 'gratuit';
           const isPro = ['pro', 'subscription', 'essential', 'illimite'].includes(plan.toLowerCase());
           if (!isPro) {
-            window.location.href = '/app/?upgrade=1';
+            window.location.href = '/app/index.html?upgrade=1';
             return;
           }
           

@@ -5,12 +5,13 @@ apply plugin: 'com.github.triplet.play'
 android {
     namespace = "com.karmicgochara.app"
     compileSdk = rootProject.ext.compileSdkVersion
+    ndkVersion = "26.1.10909125"
     defaultConfig {
         applicationId "com.karmicgochara.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 18
-        versionName "1.8"
+        versionCode 20
+        versionName "1.9.1"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.

@@ -152,16 +152,50 @@
     const errorEl   = $("reg-error");
     const submitBtn = $("reg-submit-btn");
 
-    // ─── URL Params: Pre-fill ────────────────────────────────
-    (function prefill() {
+    // ─── URL Params & API: Pre-fill ──────────────────────────
+    (async function prefill() {
       const urlParams = new URLSearchParams(window.location.search);
       const e = urlParams.get('email');
       const n = urlParams.get('name');
       if (e && email) email.value = e;
       if (n && pseudo) {
-        // Nettoyage basique pour le pseudo
         const cleanName = n.toLowerCase().replace(/\s+/g, '_').normalize("NFD").replace(/[\u0300-\u036f]/g, "");
         pseudo.value = cleanName;
+      }
+
+      // Fetch existing profile to edit
+      try {
+        const resp = await api.profile();
+        if (resp.ok && resp.profile) {
+          const p = resp.profile;
+          if (p.pseudo) pseudo.value = p.pseudo;
+          if (p.email) email.value = p.email;
+          if (p.day) day.value = p.day;
+          if (p.month) month.value = p.month;
+          if (p.year) year.value = p.year;
+          if (p.hour !== undefined) hour.value = p.hour;
+          if (p.minute !== undefined) minute.value = p.minute;
+          if (p.city) cityInput.value = p.city;
+          if (p.lat) latHid.value = p.lat;
+          if (p.lon) lonHid.value = p.lon;
+          if (p.tz) tzHid.value = p.tz;
+          
+          // Change UI to Edit mode
+          const title = document.querySelector('h2[data-i18n="login.register"]');
+          if (title) {
+            title.textContent = "✦ Modifier son profil";
+            title.removeAttribute("data-i18n");
+          }
+          const subtitle = document.querySelector('p[data-i18n="login.subtitle"]');
+          if (subtitle) {
+            subtitle.textContent = "Mets à jour tes données natales.";
+            subtitle.removeAttribute("data-i18n");
+          }
+          submitBtn.textContent = "Enregistrer les modifications";
+          submitBtn.removeAttribute("data-i18n");
+        }
+      } catch (err) {
+        console.log("No existing profile or error:", err);
       }
     })();
 

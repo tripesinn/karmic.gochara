@@ -127,7 +127,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
               <div>
                 <p class="font-display text-sm text-cosmic-text" data-i18n="plan.free">Plan Gratuit</p>
                 <p class="font-body text-xs text-cosmic-dim mt-0.5">
-                  <a href="/app?upgrade=true" class="text-cosmic-gold hover:underline" data-i18n="plan.upgrade">Passer à Pro →</a>
+                  <a href="/app/index.html?upgrade=true" class="text-cosmic-gold hover:underline" data-i18n="plan.upgrade">Passer à Pro →</a>
                 </p>
               </div>
             </div>
@@ -239,7 +239,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
                 <span class="${isPro ? 'text-cosmic-gold' : 'text-cosmic-text-dim'} text-lg">✦</span>
                 <div>
                   <p class="font-display text-sm ${isPro ? 'text-cosmic-gold' : 'text-cosmic-text'}">${isPro ? i18n.t('plan.pro') : i18n.t('plan.free')}</p>
-                  <p class="font-body text-xs text-cosmic-dim mt-0.5">${isPro ? i18n.t('plan.unlimited') : `<a href="/app?upgrade=true" class="text-cosmic-gold hover:underline">${i18n.t('plan.upgrade')}</a>`}</p>
+                  <p class="font-body text-xs text-cosmic-dim mt-0.5">${isPro ? i18n.t('plan.unlimited') : `<a href="/app/index.html?upgrade=true" class="text-cosmic-gold hover:underline">${i18n.t('plan.upgrade')}</a>`}</p>
                 </div>
               </div>
             </div>

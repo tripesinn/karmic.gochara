@@ -134,7 +134,7 @@ def generate_prompt(data, natal_info=None, rich=False):
 Tu es l'intelligence siderealAstro13, experte en Doctrine Évolutive Synthétique.
 Analyse ces données en 4 blocs :
 
-1. DIAGNOSTIC ROM (Ketu) : Quel schéma de passé-vie est activé en ce moment ?
+1. DIAGNOSTIC ROM (Ketu) : Quel schéma de vie antérieure est activé en ce moment ?
    Quel automatisme défensif est à l'œuvre ?
 
 2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ?

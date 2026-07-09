@@ -35,7 +35,7 @@ import { api } from '../../lib/api';
       <h1 class="text-4xl sm:text-5xl font-display text-cosmic-gold mb-3" data-i18n="welcome.title">✦ Bon retour</h1>
       <p class="text-cosmic-text-dim text-lg" id="welcome-pseudo" data-i18n="welcome.subtitle">Bienvenue dans ton espace</p>
       <p class="text-cosmic-text-dim text-sm mt-2">
-        <a href="/register" class="text-cosmic-gold hover:underline font-medium" data-i18n="welcome.complete_profile">✦ Compléter mon profil karmique →</a>
+        <a href="/register/index.html" class="text-cosmic-gold hover:underline font-medium" data-i18n="welcome.complete_profile">✦ Compléter mon profil →</a>
       </p>
       <p class="mt-4">
         <button id="settings-btn" class="px-4 py-1.5 rounded-full border border-cosmic-border bg-cosmic-void/40 text-xs text-cosmic-text hover:text-cosmic-gold hover:border-cosmic-gold transition-all">
@@ -151,6 +151,13 @@ import { api } from '../../lib/api';
           const pseudo = resp.profile.pseudo;
           document.getElementById('welcome-pseudo')!.textContent =
             `${i18n.t('welcome.subtitle')} ${pseudo}`;
+
+          // Change button to Edit Profile
+          const editLink = document.querySelector('a[href="/register/index.html"]');
+          if (editLink) {
+            editLink.textContent = "✦ Éditer mon profil →";
+            editLink.removeAttribute("data-i18n");
+          }
 
           // Configuration agenda
           const plan = (resp.profile.plan || 'free').toLowerCase();

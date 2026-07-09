@@ -14,7 +14,8 @@ try:
 except ImportError:
     import swisseph_ctypes as swe  # fallback ctypes (pas de compilation)
 import math
-from datetime import UTC, datetime
+from datetime import datetime, timezone
+UTC = timezone.utc
 
 import pytz
 
