@@ -79,18 +79,3 @@ Pour chaque scénario de test d'interface ou de flux utilisateur :
 5. Testez en boucle jusqu'à ce que le correctif soit intégralement prouvé visuellement. Ne retournez à l'utilisateur QUE lorsque le problème initial est 100% résolu (ou si une erreur fatale inédite bloque techniquement l'ADB).
 </RULE[autonomous_ondevice_testing]>
 
-<RULE[frontend_architecture]>
-## Architecture Frontend : Web vs Mobile
-
-**Règle absolue :** Ne confondez pas le site web et l'application mobile ! Le projet est divisé en deux parties bien distinctes pour le frontend :
-
-- **Site Web Public (`karmicgochara.app`)** : Propulsé par Flask. L'interface utilisateur est construite avec du HTML/CSS classique.
-  👉 **Dossier cible :** `/templates/` (ex: `templates/index.html` pour la landing page).
-
-- **Application Mobile (iOS/Android)** : Propulsée par Astro et Capacitor.
-  👉 **Dossier cible :** `/astro/` (ex: `astro/src/pages/index.astro` pour l'accueil de l'app mobile).
-  ⚠️ Les vues dans `astro/` se destinent UNIQUEMENT à être packagées dans l'app mobile. N'y mettez pas de landing pages de présentation avec des mockups de téléphones !
-
-Si l'utilisateur parle de "site web", "landing page" ou "karmicgochara.app", ciblez TOUJOURS `/templates/`.
-Si l'utilisateur parle de l'interface de "l'app mobile", ciblez TOUJOURS `/astro/`.
-</RULE[frontend_architecture]>

@@ -113,10 +113,16 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 
 ## Historique
 
+### 2026-07-11 — Session orchestrateur (Phase 0)
+- oMLX : ✅ UP (Relancé suite au timeout)
+- **Phase 0** : Diagnostic effectué. Aucun bug critique détecté dans l'état actuel de l'application. Astro pages et www/app intacts. Build Cloud Run succès. 
+- **Prochaine étape** : Reprendre avec la configuration du bot X (`x_grok_bot.py`) ou toute autre instruction.
+
 ### 2026-07-11 — Session orchestrateur (X Bot)
 - oMLX : ✅ UP (Analyse réussie)
 - **Phase 0** : Diagnostic effectué. Correction de la syntaxe de `query_local_ai.py`.
-- **Prochaine étape** : Configurer et déployer le bot X (`x_grok_bot.py`).
+- **Bot X.com** : Configuration de `grok-4.3`, résolution des conflits de tokens `.env`, ajout de `user_auth=True` pour régler le bug `401 Unauthorized` de Tweepy.
+- **Prochaine étape** : Tâche terminée, le X Bot tourne en tâche de fond (ou est prêt à être lancé par l'utilisateur).
 
 ### 2026-07-11 — Session orchestrateur (Landing Page)
 - oMLX : ✅ UP (port 8889)

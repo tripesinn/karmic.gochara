@@ -188,7 +188,8 @@ def process_mentions(client, my_user_id):
         mentions = client.get_users_mentions(
             id=my_user_id, 
             since_id=last_id,
-            tweet_fields=['author_id', 'created_at']
+            tweet_fields=['author_id', 'created_at'],
+            user_auth=True
         )
         
         if not mentions.data:
