@@ -162,7 +162,7 @@ def call_grok(prompt):
     )
     
     response = client.chat.completions.create(
-        model="grok-beta",
+        model="grok-4.3",
         messages=[
             {"role": "system", "content": system_instruction},
             {"role": "user", "content": prompt},

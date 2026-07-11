@@ -53,28 +53,28 @@ def query_local_ai(prompt: str, system: str = "") -> str:
                     json=payload,
                     timeout=120,
                 )
-            if resp.status_code == 507:
-                # Mémoire insuffisante → retente avec moins de tokens
-                last_error = f"507 OOM (max_tokens={max_tokens})"
-                print(
-                    f"[localAI] ⚠️  507 OOM — retry avec {max_tokens // 2} tokens",
-                    file=sys.stderr,
-                )
-                continue
-            if resp.status_code == 404:
-                last_error = f"404 sur le port {port}"
+                if resp.status_code == 507:
+                    # Mémoire insuffisante → retente avec moins de tokens
+                    last_error = f"507 OOM (max_tokens={max_tokens})"
+                    print(
+                        f"[localAI] ⚠️  507 OOM — retry avec {max_tokens // 2} tokens",
+                        file=sys.stderr,
+                    )
+                    continue
+                if resp.status_code == 404:
+                    last_error = f"404 sur le port {port}"
+                    break  # On essaye le port suivant
+                resp.raise_for_status()
+                return resp.json()["choices"][0]["message"]["content"]
+            except requests.exceptions.Timeout:
+                last_error = "timeout (120s)"
                 break  # On essaye le port suivant
-            resp.raise_for_status()
-            return resp.json()["choices"][0]["message"]["content"]
-        except requests.exceptions.Timeout:
-            last_error = "timeout (120s)"
-            break  # On essaye le port suivant
-        except requests.exceptions.ConnectionError:
-            last_error = f"connexion refusée sur le port {port}"
-            break  # On essaye le port suivant
-        except Exception as exc:
-            last_error = str(exc)
-            break  # On essaye le port suivant
+            except requests.exceptions.ConnectionError:
+                last_error = f"connexion refusée sur le port {port}"
+                break  # On essaye le port suivant
+            except Exception as exc:
+                last_error = str(exc)
+                break  # On essaye le port suivant
 
     raise RuntimeError(f"IA locale indisponible : {last_error}")
 

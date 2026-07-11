@@ -113,6 +113,21 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 
 ## Historique
 
+### 2026-07-11 — Session orchestrateur (X Bot)
+- oMLX : ✅ UP (Analyse réussie)
+- **Phase 0** : Diagnostic effectué. Correction de la syntaxe de `query_local_ai.py`.
+- **Prochaine étape** : Configurer et déployer le bot X (`x_grok_bot.py`).
+
+### 2026-07-11 — Session orchestrateur (Landing Page)
+- oMLX : ✅ UP (port 8889)
+- **Refonte Landing Page** :
+  - Création d'une interface en deux colonnes pour `index.astro`.
+  - Intégration d'un mockup de téléphone 100% CSS avec effet *Glassmorphism*.
+  - Mise à jour de l'accroche : "Ton agent astrologue".
+- Build : ✅ OK (Astro + Capacitor Sync)
+- Deploy : En attente
+- Prochaine session : Configurer le X Bot (`x_grok_bot.py`).
+
 ### 2026-07-09 — Session Initiale
 - **Diagnostic Phase 0** :
   - oMLX : ❌ DOWN (Erreur 404 sur le port 8888).

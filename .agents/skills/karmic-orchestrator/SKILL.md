@@ -3,7 +3,7 @@ name: karmic-orchestrator
 description: >
   Agent orchestrateur principal pour Karmic Gochara.
   Maintient un état persistant entre sessions, diagnostique
-  les problèmes systémiques (via IA locale port 8888),
+  les problèmes systémiques (via IA locale port 8889),
   applique les corrections dans le bon ordre, build et déploie,
   puis vérifie l'installation sur Pixel 10.
   À activer en début de session ou quand plusieurs bugs
@@ -22,8 +22,8 @@ Il ne corrige jamais un bug isolément sans avoir d'abord
 
 ## Références rapides
 
-### IA Locale (oMLX — port 8888)
-- **Endpoint** : `http://127.0.0.1:8888/v1/chat/completions`
+### IA Locale (oMLX — port 8889)
+- **Endpoint** : `http://127.0.0.1:8889/v1/chat/completions`
 - **Modèle actif** : `gemma-4-E2B-it-qat-oQ4-fp16`
   _(2B params quantisé QAT — tient en mémoire contrairement
   au modèle 4B qui causait des 507 OOM)_
@@ -58,7 +58,7 @@ cat /Users/jero87/karmic.gochara/ORCHESTRATOR_STATE.md
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" \
-  http://127.0.0.1:8888/v1/models \
+  http://127.0.0.1:8889/v1/models \
   -H "Authorization: Bearer omlx_12345678910111213abcDEF"
 # 200 = disponible, autre = redémarrer oMLX
 ```
@@ -218,7 +218,7 @@ $ADB devices
 $ADB -s 55161FDCH0004E reverse tcp:5001 tcp:5001
 $ADB -s 55161FDCH0004E reverse tcp:8080 tcp:8080
 $ADB -s 55161FDCH0004E reverse tcp:9099 tcp:9099
-$ADB -s 55161FDCH0004E reverse tcp:8888 tcp:8888
+$ADB -s 55161FDCH0004E reverse tcp:8889 tcp:8889
 
 export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home"
 export PATH="$JAVA_HOME/bin:$PATH"
@@ -293,7 +293,7 @@ Mettre à jour `ORCHESTRATOR_STATE.md` :
 ## Règles d'Or
 
 1. Lire `ORCHESTRATOR_STATE.md` en PREMIER à chaque session.
-2. Vérifier la disponibilité oMLX (curl port 8888) avant usage.
+2. Vérifier la disponibilité oMLX (curl port 8889) avant usage.
 3. Le script `query_local_ai.py` gère les 507 OOM seul.
 4. Ordre 0→1→2→3→4 — ne jamais sauter une phase.
 5. Un bug = une correction = une vérification.

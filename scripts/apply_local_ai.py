@@ -14,7 +14,7 @@ def apply_local_ai(file_path, instruction):
     with open(file_path, encoding='utf-8') as f:
         original_content = f.read()
         
-    url = "http://127.0.0.1:8888/v1/chat/completions"
+    url = "http://127.0.0.1:8889/v1/chat/completions"
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Bearer omlx_12345678910111213abcDEF"
