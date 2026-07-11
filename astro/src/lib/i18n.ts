@@ -17,7 +17,14 @@ const translations: Record<string, Record<string, string>> = {
 export const i18n = {
   /** Detect the current language based on localStorage or browser navigator */
   detect(): string {
-    return 'en';
+    if (typeof window !== 'undefined') {
+      const stored = localStorage.getItem('karmic_lang');
+      if (stored && translations[stored]) return stored;
+      
+      const navLang = navigator.language.split('-')[0].toLowerCase();
+      if (translations[navLang]) return navLang;
+    }
+    return 'fr';
   },
 
   /** Translate a key to the current language */
