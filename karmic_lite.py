@@ -152,22 +152,8 @@ Longueur : 400-600 mots MINIMUM. Pas de généralités. Chaque phrase = une vér
 prose continue avec enchaînement logique interne."""
     else:
         mission_content = """MISSION POUR L'IA :
-
-RÉPONSE - 3 BLOCS SEULEMENT:
-
-**Point chaud:** (3-4 phrases max)
-Décris EXACTEMENT ce qui explose en ce moment. Sois spécifique aux positions.
-Pas de généralités. Chaque phrase = une vérité chirurgicale.
-
-**Action:** (1-2 phrases, impératif)
-UNE SEULE chose à faire. Précise (lieu, timing, objet).
-Pas de "travaille sur toi-même" vague.
-
-**Deadline:** (date ou période précise)
-Quand la fenêtre se ferme. Pourquoi cette date.
-
-STYLE: Pas de jargon astro externe. Langage direct, français courant.
-LONGUEUR: 200 mots max, total."""
+Base-toi sur ces données astrologiques exactes.
+Respecte SCRUPULEUSEMENT les consignes de format et de ton (brut, anti-jargon) données dans ton prompt système !"""
 
     prompt = f"""═══════════════════════════════════════════════════════
 KARMIC GOCHARA — DOCTRINE ÉVOLUTIVE SYNTHÉTIQUE

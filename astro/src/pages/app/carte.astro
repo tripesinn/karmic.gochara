@@ -42,6 +42,14 @@ import KarmicChart from '../../components/KarmicChart.astro';
             return;
           }
           
+          // Hydratation Lysa Demo
+          p.day = 15;
+          p.month = 8;
+          p.year = 1994;
+          p.hour = 9;
+          p.minute = 15;
+          p.city = 'Lyon, France';
+
           // Hydratation Infos de Naissance
           if (p.day && p.month && p.year) {
              const birthDateStr = `${p.day.toString().padStart(2, '0')}/${p.month.toString().padStart(2, '0')}/${p.year}`;

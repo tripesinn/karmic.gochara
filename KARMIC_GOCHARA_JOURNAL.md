@@ -220,3 +220,44 @@ L'insight transformateur est que **l'auto-affirmation n'est pas une opposition a
 * Skill B (routage auto local/omlx) — utile si l'agent astro a beaucoup de sous-tâches répétitives
 * Brancher le vrai `karmic_lite.py` (mocké actuellement) côté dev-vm
 * Skill D wrapper (routage + calcul + rédaction combinés)
+
+---
+
+## 🗓️ 11 Juillet 2026 — Configuration X Bot & Pause Prompt Engineering
+
+**Contexte :** Finalisation de la plomberie technique pour le bot X (Grok) et préparation au lancement. L'utilisateur prend la main sur l'affinement du prompt.
+
+**Livré :**
+* **Connexion X (Twitter) :** Résolution des erreurs `401 Unauthorized` avec l'API OAuth 1.0a (ajout de `user_auth=True` dans Tweepy).
+* **Intégration Grok :** Migration vers le modèle `grok-4.3`. 
+* **Nettoyage du code :** Suppression des instructions en dur dans `karmic_lite.py` qui entraient en conflit avec les consignes de `x_grok_bot.py`.
+* **Clean-up dossier :** Suppression des anciens fichiers de log `karmic_prompt_*.txt` générés par l'algorithme, afin de désencombrer l'espace de travail.
+* **Formatage du Prompt (Doctrine Évolutive) :** Refonte du prompt système dans `x_grok_bot.py` pour garantir une réponse brute, tranchante, et sans jargon (pas d'horoscope). Sélection de l'aspect avec l'orbe le plus proche de 0.00°. Remplacement du terme "Deadline" par "L'Ouverture".
+
+**Décision en cours：**
+* L'utilisateur met en pause le développement technique ("2 mois que je suis sur du dev") pour se concentrer sur son cœur de métier : l'astrologie et la doctrine.
+* Le système est opérationnel, le prompt actuel dans `x_grok_bot.py` donne d'excellents résultats ("tranchant"), mais l'utilisateur va continuer de le peaufiner manuellement pour s'assurer qu'il garde l'axe et la philosophie des anciens prompts.
+
+**Prochaine étape post-pause：**
+* Lancer et maintenir le bot en production une fois le prompt définitivement validé par l'utilisateur.
+
+---
+
+## 🗓️ 11 Juillet 2026 — Déploiement vidéo & QA Android
+
+**Contexte :** Finalisation de la présentation de l'application sur la landing page. L'utilisateur souhaitait remplacer les images statiques par une vidéo dynamique démontrant le fonctionnement réel de l'appli.
+
+**Livré :**
+* **Build et Sync Capacitor :** Restauration du composant `index.astro` et exécution de `npx cap sync android` puis `npx cap run android` (avec configuration de `JAVA_HOME`).
+* **Automatisation de capture (`karmic-app-showcase`) :** Création d'une skill pour documenter l'enregistrement vidéo autonome via ADB.
+* **Enregistrement sur Device :** Capture vidéo de 12 secondes avec scrolls simulés (`adb input swipe`) directement sur le Pixel 10 Pro connecté.
+* **Intégration HTML5 :** Remplacement de l'image statique par une balise `<video autoplay loop muted playsinline>` dans `templates/index.html`.
+* **Support Multilingue :** Duplication du fichier `demo_app_fr.mp4` (`en`, `it`, `nl`) pour le routing Jinja.
+* **Clean-up :** Nettoyage de ~150 screenshots temporaires obsolètes.
+* **Déploiement :** Commit et push sur GitHub, déclenchant le workflow Google Cloud Build.
+
+**Décision en cours :**
+* En attente de la validation Play Store pour générer des assets définitifs si besoin, la vidéo actuelle faisant très bien le travail pour l'instant.
+
+**Prochaine étape :** 
+* Recette visuelle sur `karmicgochara.app` post-déploiement.

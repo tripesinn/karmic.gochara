@@ -36,7 +36,7 @@ import { api } from '../../lib/api';
     </section>
 
     <!-- Quick actions -->
-    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+    <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
       <a
         href="/app/lecture/index.html"
         class="group p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
@@ -58,15 +58,6 @@ import { api } from '../../lib/api';
         <p class="text-cosmic-text-dim text-sm" data-i18n="nav.chart_desc">Explore tes transits planétaires</p>
       </a>
 
-      <a
-        href="/app/chat/index.html"
-        class="group p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
-               hover:border-cosmic-gold/40 transition-all duration-500 text-center cursor-pointer"
-      >
-        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-500">💬</div>
-        <h3 class="font-display text-cosmic-gold text-lg mb-1" data-i18n="nav.chat">Chat Karmique</h3>
-        <p class="text-cosmic-text-dim text-sm" data-i18n="nav.chat_desc">Pose tes questions à l&rsquo;IA</p>
-      </a>
     </section>
 
     <!-- Agenda Karmique -->
@@ -145,7 +136,7 @@ import { api } from '../../lib/api';
         }
         const resp = await api.profile();
         if (resp.ok && resp.profile?.pseudo) {
-          const pseudo = resp.profile.pseudo;
+          const pseudo = "Lysa"; // Demo hardcode
           document.getElementById('welcome-pseudo')!.textContent =
             `${i18n.t('welcome.subtitle')} ${pseudo}`;
 

@@ -41,49 +41,88 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
       class="sticky top-0 z-40 border-b border-cosmic-border/50 bg-cosmic-bg/90 backdrop-blur-md"
     >
       <nav class="max-w-6xl mx-auto px-4 h-14 flex items-center justify-between">
-        <a href="/app/index.html" class="font-display text-cosmic-gold text-lg tracking-wider hover:text-cosmic-gold/80 transition">
+        <a href="/app/index.html" class="font-display text-cosmic-gold text-lg tracking-wider hover:text-cosmic-gold/80 transition flex items-center gap-2">
           ✦ Karmic Gochara
         </a>
 
-        <div class="flex items-center gap-4 text-sm">
-          <a href="/app/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.dashboard">
-            Accueil
-          </a>
+        <!-- Desktop Navigation -->
+        <div class="hidden md:flex items-center gap-4 text-sm">
+
           <a href="/app/lecture/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.reading">
             Gochara
           </a>
           <a href="/app/miroir/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.chart">
             Carte Astrale
           </a>
-          <a href="/app/chat/index.html" class="text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.chat">
-            Chat
-          </a>
+
           <button
-            id="settings-btn"
+            id="settings-btn-desktop"
             class="text-cosmic-text-dim/60 hover:text-cosmic-gold transition text-xs ml-2"
           >
             Paramètres
           </button>
           <button
-            id="logout-btn"
+            id="logout-btn-desktop"
             class="text-cosmic-text-dim/60 hover:text-red-400 transition text-xs ml-2"
             data-i18n="settings.logout"
           >
             Quitter
           </button>
         </div>
+
+        <!-- Mobile Header Actions (Settings/Logout only, main nav is in bottom bar) -->
+        <div class="flex md:hidden items-center gap-3">
+          <button
+            id="settings-btn-mobile"
+            class="text-cosmic-gold/80 hover:text-cosmic-gold transition p-2"
+            aria-label="Paramètres"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+          </button>
+          <button
+            id="logout-btn-mobile"
+            class="text-red-400/80 hover:text-red-400 transition p-2"
+            aria-label="Quitter"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+          </button>
+        </div>
       </nav>
     </header>
 
     <!-- Main content -->
-    <main class="flex-1">
+    <main class="flex-1 pb-20 md:pb-0">
       <slot />
     </main>
 
-    <!-- Footer -->
-    <footer class="border-t border-cosmic-border/30 py-6 text-center text-cosmic-text-dim/40 text-xs">
+    <!-- Footer (Desktop only) -->
+    <footer class="hidden md:block border-t border-cosmic-border/30 py-6 text-center text-cosmic-text-dim/40 text-xs">
       <p>Karmic Gochara &mdash; L&rsquo;alchimie des cycles cosmiques</p>
     </footer>
+
+    <!-- Mobile Bottom Tab Bar -->
+    <nav class="md:hidden fixed bottom-0 w-full bg-cosmic-bg/95 backdrop-blur-xl border-t border-cosmic-border/50 z-40 pb-safe">
+      <div class="flex justify-around items-center h-16 px-2">
+        <a href="/app/lecture/index.html" class="flex flex-col items-center justify-center w-1/2 h-full text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.reading">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+          </svg>
+          <span class="text-[10px]">Gochara</span>
+        </a>
+        <a href="/app/miroir/index.html" class="flex flex-col items-center justify-center w-1/2 h-full text-cosmic-text-dim hover:text-cosmic-gold transition" data-i18n="nav.chart">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M11 3.055A9.001 9.001 0 1020.945 13H11V3.055z" />
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M20.488 9H15V3.512A9.025 9.025 0 0120.488 9z" />
+          </svg>
+          <span class="text-[10px]">Carte</span>
+        </a>
+      </div>
+    </nav>
   </div>
 
   <script>
@@ -163,7 +202,18 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
       }
     })();
 
-    document.getElementById('logout-btn')?.addEventListener('click', async () => {
+    // Gérer l'ouverture des paramètres (desktop & mobile)
+    const settingsBtnDesktop = document.getElementById('settings-btn-desktop');
+    const settingsBtnMobile = document.getElementById('settings-btn-mobile');
+    const onSettingsClick = () => {
+      const modal = document.getElementById('settings-modal');
+      if (modal) modal.classList.remove('hidden');
+    };
+    if (settingsBtnDesktop) settingsBtnDesktop.addEventListener('click', onSettingsClick);
+    if (settingsBtnMobile) settingsBtnMobile.addEventListener('click', onSettingsClick);
+
+    // Gérer la déconnexion (desktop & mobile)
+    const onLogoutClick = async () => {
       try {
         await api.logout();
         await signOut(auth);
@@ -172,6 +222,18 @@ const { title, description = 'Espace Karmic Gochara', ogImage } = Astro.props;
         console.error('Logout error:', e);
       }
       window.location.href = '/';
+    };
+    document.getElementById('logout-btn-desktop')?.addEventListener('click', onLogoutClick);
+    document.getElementById('logout-btn-mobile')?.addEventListener('click', onLogoutClick);
+
+    // Initialisation du surlignement de l'onglet actif (mobile)
+    const currentPath = window.location.pathname;
+    const mobileNavLinks = document.querySelectorAll('.md\\:hidden.fixed.bottom-0 a');
+    mobileNavLinks.forEach(link => {
+      if (currentPath.includes(link.getAttribute('href')!)) {
+        link.classList.remove('text-cosmic-text-dim');
+        link.classList.add('text-cosmic-gold');
+      }
     });
   </script>
   <SettingsModal />

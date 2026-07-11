@@ -86,7 +86,7 @@ public class GemmaSynthesisPlugin extends Plugin {
     private static final AtomicReference<Engine> sEngineRef = new AtomicReference<>(null);
     // Session de base créée pour LiteRT-LM
     private static final AtomicReference<Conversation> sBaseConversationRef = new AtomicReference<>(null);
-    private static ParcelFileDescriptor sModelPfd = null;
+
     private static boolean             sLoraLoaded = false;
     private static boolean             sPreparing  = false;
     private static boolean             sDownloading = false;
@@ -306,6 +306,7 @@ public class GemmaSynthesisPlugin extends Plugin {
         Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
         intent.setType("*/*");
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION | Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION);
         startActivityForResult(call, intent, "pickModelResult");
     }
 
@@ -412,10 +413,7 @@ public class GemmaSynthesisPlugin extends Plugin {
         if (conversation != null) {
             try { conversation.close(); } catch (Exception ignored) {}
         }
-        if (sModelPfd != null) {
-            try { sModelPfd.close(); } catch (Exception ignored) {}
-            sModelPfd = null;
-        }
+
         sLoraLoaded = false;
     }
 
@@ -452,12 +450,51 @@ public class GemmaSynthesisPlugin extends Plugin {
                 
                 if (customUriStr != null) {
                     try {
-                        sModelPfd = getContext().getContentResolver().openFileDescriptor(Uri.parse(customUriStr), "r");
-                        if (sModelPfd != null) {
-                            modelPath = "/proc/self/fd/" + sModelPfd.getFd();
+                        Uri customUri = Uri.parse(customUriStr);
+                        File targetFile = getModelFile();
+                        java.io.InputStream in = getContext().getContentResolver().openInputStream(customUri);
+                        if (in != null) {
+                            java.io.FileOutputStream out = new java.io.FileOutputStream(targetFile);
+                            byte[] buffer = new byte[8192];
+                            int read;
+                            long total = 0;
+                            try {
+                                android.os.ParcelFileDescriptor pfd = getContext().getContentResolver().openFileDescriptor(customUri, "r");
+                                if (pfd != null) {
+                                    total = pfd.getStatSize();
+                                    pfd.close();
+                                }
+                            } catch (Exception ignored) {}
+                            
+                            long copied = 0;
+                            long lastReport = 0;
+                            sDownloading = true; // Use downloading flag to prevent concurrent actions
+                            while ((read = in.read(buffer)) != -1) {
+                                out.write(buffer, 0, read);
+                                copied += read;
+                                
+                                // Report progress every 50MB
+                                if (total > 0 && copied - lastReport > 50_000_000) {
+                                    lastReport = copied;
+                                    int progress = (int) (copied * 100 / total);
+                                    JSObject data = new JSObject();
+                                    data.put("progress", progress);
+                                    data.put("bytes", copied);
+                                    data.put("total", total);
+                                    notifyListeners("modelDownloadProgress", data);
+                                }
+                            }
+                            out.flush();
+                            out.close();
+                            in.close();
+                            sDownloading = false;
+                            
+                            prefs.edit().remove("custom_model_uri").apply();
+                            modelPath = targetFile.getAbsolutePath();
                         }
                     } catch (Exception e) {
-                        prefs.edit().remove("custom_model_uri").apply(); // invalid URI
+                        prefs.edit().remove("custom_model_uri").apply();
+                        throw new IOException("Erreur lors de la copie du modèle importé", e);
                     }
                 }
                 
@@ -559,9 +596,44 @@ public class GemmaSynthesisPlugin extends Plugin {
                         
                         if (customUriStr != null) {
                             try {
-                                sModelPfd = getContext().getContentResolver().openFileDescriptor(Uri.parse(customUriStr), "r");
-                                if (sModelPfd != null) {
-                                    modelPath = "/proc/self/fd/" + sModelPfd.getFd();
+                                Uri customUri = Uri.parse(customUriStr);
+                                File targetFile = getModelFile();
+                                java.io.InputStream in = getContext().getContentResolver().openInputStream(customUri);
+                                if (in != null) {
+                                    java.io.FileOutputStream out = new java.io.FileOutputStream(targetFile);
+                                    byte[] buffer = new byte[8192];
+                                    int read;
+                                    long total = 0;
+                                    try {
+                                        android.os.ParcelFileDescriptor pfd = getContext().getContentResolver().openFileDescriptor(customUri, "r");
+                                        if (pfd != null) {
+                                            total = pfd.getStatSize();
+                                            pfd.close();
+                                        }
+                                    } catch (Exception ignored) {}
+                                    
+                                    long copied = 0;
+                                    long lastReport = 0;
+                                    sDownloading = true;
+                                    while ((read = in.read(buffer)) != -1) {
+                                        out.write(buffer, 0, read);
+                                        copied += read;
+                                        if (total > 0 && copied - lastReport > 50_000_000) {
+                                            lastReport = copied;
+                                            int progress = (int) (copied * 100 / total);
+                                            JSObject data = new JSObject();
+                                            data.put("progress", progress);
+                                            data.put("bytes", copied);
+                                            data.put("total", total);
+                                            notifyListeners("modelDownloadProgress", data);
+                                        }
+                                    }
+                                    out.flush();
+                                    out.close();
+                                    in.close();
+                                    sDownloading = false;
+                                    prefs.edit().remove("custom_model_uri").apply();
+                                    modelPath = targetFile.getAbsolutePath();
                                 }
                             } catch (Exception e) {}
                         }
@@ -678,13 +750,13 @@ public class GemmaSynthesisPlugin extends Plugin {
             new android.app.ActivityManager.MemoryInfo();
         am.getMemoryInfo(memInfo);
 
-        long totalRamGb = memInfo.totalMem / (1024L * 1024L * 1024L);
+        double totalRamGb = (double) memInfo.totalMem / (1024.0 * 1024.0 * 1024.0);
 
         JSObject result = new JSObject();
         result.put("totalRamGb",  totalRamGb);
-        result.put("sufficient",  totalRamGb >= 4);
-        result.put("recommended", totalRamGb >= 6 ? "full"
-                                 : totalRamGb >= 4 ? "standard"
+        result.put("sufficient",  totalRamGb >= 3.5);
+        result.put("recommended", totalRamGb >= 5.5 ? "full"
+                                 : totalRamGb >= 3.5 ? "standard"
                                  : "unavailable");
         call.resolve(result);
     }

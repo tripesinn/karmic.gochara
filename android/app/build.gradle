@@ -71,6 +71,14 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:1.9.24"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+    constraints {
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3") {
+            because("litertlm-android crashes with 1.8+ due to SendChannel.close signature change")
+        }
+        implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3") {
+            because("litertlm-android crashes with 1.8+ due to SendChannel.close signature change")
+        }
+    }
 
     // ── Google Play Billing (achat one-shot "Karmic PRO" 9,99€) ─────────────
     implementation 'com.android.billingclient:billing:7.1.1'

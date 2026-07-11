@@ -113,6 +113,12 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 
 ## Historique
 
+### 2026-07-11 — Session orchestrateur (check logs manuelle)
+- oMLX : ❌ DOWN (Analyse manuelle car connexion refusée)
+- **Phase 0** : Lecture des logs via adb. Aucune exception ou crash détecté pour com.karmicgochara.app.
+- L'avertissement "App-specific configuration not found" (BUG-013) a été remarqué mais est déjà répertorié.
+- **Prochaine étape** : L'application semble stable, attente des instructions.
+
 ### 2026-07-11 — Session orchestrateur (Phase 0)
 - oMLX : ✅ UP (Relancé suite au timeout)
 - **Phase 0** : Diagnostic effectué. Aucun bug critique détecté dans l'état actuel de l'application. Astro pages et www/app intacts. Build Cloud Run succès. 

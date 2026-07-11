@@ -197,6 +197,31 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
               />
             </div>
           </div>
+
+          <!-- Configuration Native Locale (Capacitor) -->
+          <div id="local-native-config" class="hidden space-y-3 pt-3 border-t border-cosmic-border/30">
+            <button
+              id="settings-select-local-model-btn"
+              class="w-full py-2 font-display text-xs tracking-wider rounded-lg border border-cosmic-gold/50 text-cosmic-gold bg-cosmic-gold/10 hover:bg-cosmic-gold hover:text-cosmic-bg transition-all"
+            >
+              📁 Importer un modèle (.litertlm)
+            </button>
+            <button
+              id="settings-download-model-btn"
+              class="w-full py-2 font-display text-xs tracking-wider rounded-lg border border-cosmic-border text-cosmic-text-dim bg-cosmic-void/20 hover:border-cosmic-gold hover:text-cosmic-gold hover:bg-cosmic-gold/5 transition-all"
+            >
+              ⬇️ Télécharger le modèle officiel (2.58 Go)
+            </button>
+            <div id="settings-download-progress-container" class="hidden space-y-2 mt-2">
+              <div class="flex justify-between text-xs text-cosmic-text-dim">
+                <span>Téléchargement...</span>
+                <span id="settings-download-percentage">0%</span>
+              </div>
+              <div class="w-full bg-cosmic-bg/60 rounded-full h-2 overflow-hidden border border-cosmic-border/30">
+                <div id="settings-download-progress-bar" class="bg-cosmic-gold h-full w-0 transition-all duration-300"></div>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -218,6 +243,8 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
 <script>
   import { i18n } from '../lib/i18n';
+  import { capacitorBridge } from '../lib/capacitor-bridge';
+  import { Capacitor } from '@capacitor/core';
 
   // ── DOM refs ──
   const modal = document.getElementById('settings-modal')!;
@@ -383,11 +410,18 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
       } catch (e) {}
     }
 
+    const nativeConfigDiv = document.getElementById('local-native-config')!;
+
     function toggleConfigVisibility(mode: string) {
       if (mode === 'network') {
         configDiv.classList.remove('hidden');
+        if(nativeConfigDiv) nativeConfigDiv.classList.add('hidden');
+      } else if (mode === 'native') {
+        configDiv.classList.add('hidden');
+        if(nativeConfigDiv) nativeConfigDiv.classList.remove('hidden');
       } else {
         configDiv.classList.add('hidden');
+        if(nativeConfigDiv) nativeConfigDiv.classList.add('hidden');
       }
     }
 
@@ -424,5 +458,74 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
     hostInput.addEventListener('input', saveSettings);
     modelInput.addEventListener('input', saveSettings);
+
+    // Native buttons
+    const btnSelectNative = document.getElementById('settings-select-local-model-btn');
+    const btnDownloadNative = document.getElementById('settings-download-model-btn');
+    const nativeProgressContainer = document.getElementById('settings-download-progress-container');
+    const nativeProgressBar = document.getElementById('settings-download-progress-bar');
+    const nativeProgressText = document.getElementById('settings-download-percentage');
+
+    if (Capacitor.isNativePlatform()) {
+      const { GemmaSynthesis } = Capacitor.Plugins as any;
+      if (GemmaSynthesis) {
+        GemmaSynthesis.addListener('modelDownloadProgress', (data: { progress: number; bytes: number; total: number }) => {
+          if (nativeProgressContainer && nativeProgressBar && nativeProgressText) {
+            nativeProgressContainer.classList.remove('hidden');
+            const progress = data.progress || 0;
+            nativeProgressBar.style.width = `${progress}%`;
+            nativeProgressText.textContent = `${progress}%`;
+          }
+        });
+      }
+    }
+
+    if (btnSelectNative) {
+      btnSelectNative.addEventListener('click', async () => {
+        if (!capacitorBridge.isNative()) {
+          alert("L'importation de modèle n'est disponible que sur l'application mobile native.");
+          return;
+        }
+        try {
+          const res = await capacitorBridge.gemma.selectLocalModel();
+          if (res && res.ok) {
+            alert("Modèle importé avec succès.");
+          } else {
+            alert("Importation annulée ou échouée.");
+          }
+        } catch (e: any) {
+          alert(`Erreur d'importation : ${e.message || e}`);
+        }
+      });
+    }
+
+    if (btnDownloadNative) {
+      btnDownloadNative.addEventListener('click', async () => {
+        if (!capacitorBridge.isNative()) {
+          alert("Le téléchargement n'est disponible que sur l'application mobile native.");
+          return;
+        }
+        
+        btnDownloadNative.textContent = "Téléchargement initié...";
+        btnDownloadNative.setAttribute('disabled', 'true');
+        if(nativeProgressContainer) nativeProgressContainer.classList.remove('hidden');
+
+        try {
+          // Ask for permission first if necessary
+          await capacitorBridge.gemma.requestStoragePermission();
+          const res = await capacitorBridge.gemma.prepareModel(false);
+          if (res && res.ok) {
+            alert("Modèle téléchargé et prêt.");
+          } else {
+            alert("Échec du téléchargement du modèle local.");
+          }
+        } catch (e: any) {
+          alert(`Erreur : ${e.message || e}`);
+        } finally {
+          btnDownloadNative.textContent = "⬇️ Télécharger le modèle officiel (2.58 Go)";
+          btnDownloadNative.removeAttribute('disabled');
+        }
+      });
+    }
   }
 </script>
