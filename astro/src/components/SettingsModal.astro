@@ -391,6 +391,21 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
   const modelInput = document.getElementById('local-ai-model-name') as HTMLInputElement;
 
   if (modeSelect) {
+    const nativeConfigDiv = document.getElementById('local-native-config')!;
+
+    function toggleConfigVisibility(mode: string) {
+      if (mode === 'network') {
+        configDiv.classList.remove('hidden');
+        if(nativeConfigDiv) nativeConfigDiv.classList.add('hidden');
+      } else if (mode === 'native') {
+        configDiv.classList.add('hidden');
+        if(nativeConfigDiv) nativeConfigDiv.classList.remove('hidden');
+      } else {
+        configDiv.classList.add('hidden');
+        if(nativeConfigDiv) nativeConfigDiv.classList.add('hidden');
+      }
+    }
+
     // Restaurer l'état initial
     const stored = localStorage.getItem('karmic_ai_settings');
     if (stored) {
@@ -408,21 +423,6 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         
         toggleConfigVisibility(modeSelect.value);
       } catch (e) {}
-    }
-
-    const nativeConfigDiv = document.getElementById('local-native-config')!;
-
-    function toggleConfigVisibility(mode: string) {
-      if (mode === 'network') {
-        configDiv.classList.remove('hidden');
-        if(nativeConfigDiv) nativeConfigDiv.classList.add('hidden');
-      } else if (mode === 'native') {
-        configDiv.classList.add('hidden');
-        if(nativeConfigDiv) nativeConfigDiv.classList.remove('hidden');
-      } else {
-        configDiv.classList.add('hidden');
-        if(nativeConfigDiv) nativeConfigDiv.classList.add('hidden');
-      }
     }
 
     function saveSettings() {
