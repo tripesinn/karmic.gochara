@@ -5,16 +5,18 @@ description: Procédure pour intégrer une capture vidéo (MP4) ou une image dé
 
 # Karmic App Showcase Integration
 
-Cette compétence (skill) doit être utilisée lorsque l'utilisateur indique qu'il a pris les captures d'écran vidéo (MP4) ou les longues images de son application finale, et qu'il souhaite les intégrer dans la landing page du site web (`templates/index.html`).
+Cette compétence (skill) doit être utilisée lorsque l'application est prête et que l'utilisateur demande d'intégrer une démonstration vidéo dans la landing page du site web (`templates/index.html`). L'agent IA est responsable de réaliser lui-même la capture vidéo via ADB sur l'appareil connecté.
 
 ## Contexte
-Le site web (projet Flask) possède une structure HTML/CSS reproduisant un téléphone (`.mockup-container`, `.mockup-screen`). L'objectif est de remplacer l'image statique actuelle par une vidéo MP4 ou une longue image défilante pour montrer le fonctionnement de l'application (le moment "Aha!").
+Le site web (projet Flask) possède une structure HTML/CSS reproduisant un téléphone (`.mockup-container`, `.mockup-screen`). L'objectif est de remplacer l'image statique actuelle par une vidéo MP4 fluide enregistrée directement depuis le Pixel de l'utilisateur.
 
 ## Procédure d'intégration
 
-### Étape 1 : Vérifier et optimiser les médias fournis
-1. Vérifier la présence du fichier vidéo (ex: `demo_app_fr.mp4`) ou de l'image longue dans le dossier de travail.
-2. S'assurer que le fichier est copié dans le dossier `static/img/` du projet Flask.
+### Étape 1 : Réaliser la capture vidéo via ADB
+1. Assurez-vous que l'application est lancée sur le téléphone Pixel de l'utilisateur.
+2. Utilisez la commande `adb shell screenrecord --time-limit 15 /sdcard/demo_app.mp4` pour filmer l'écran pendant 15 secondes.
+3. Pendant l'enregistrement, utilisez des commandes `adb shell input swipe` pour simuler un scroll fluide (ex: faire défiler la synthèse karmique).
+4. Récupérez la vidéo avec `adb pull /sdcard/demo_app.mp4 static/img/demo_app.mp4` puis supprimez-la de l'appareil (`adb shell rm /sdcard/demo_app.mp4`).
 
 ### Étape 2 : Modification du template HTML (`templates/index.html`)
 
