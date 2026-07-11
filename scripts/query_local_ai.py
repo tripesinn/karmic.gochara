@@ -2,7 +2,7 @@ import sys
 import requests
 
 # ── Configuration ──────────────────────────────────────────
-LOCAL_AI_URL  = "http://127.0.0.1:8888/v1/chat/completions"
+LOCAL_AI_PORTS = [8889, 8888]
 LOCAL_AI_AUTH = "Bearer omlx_12345678910111213abcDEF"
 
 # Modèle léger quantisé — tient en mémoire malgré les limites
@@ -16,7 +16,7 @@ MAX_TOKENS_STEPS = [1024, 512, 256]
 
 def query_local_ai(prompt: str, system: str = "") -> str:
     """
-    Envoie un prompt à l'IA locale (oMLX, port 8888).
+    Envoie un prompt à l'IA locale (oMLX, ports 8889 ou 8888).
     Retente automatiquement avec moins de tokens si OOM (507).
 
     Args:
@@ -37,20 +37,22 @@ def query_local_ai(prompt: str, system: str = "") -> str:
     messages.append({"role": "user", "content": prompt})
 
     last_error = None
-    for max_tokens in MAX_TOKENS_STEPS:
-        payload = {
-            "model": LOCAL_AI_MODEL,
-            "messages": messages,
-            "temperature": 0.4,
-            "max_tokens": max_tokens,
-        }
-        try:
-            resp = requests.post(
-                LOCAL_AI_URL,
-                headers=headers,
-                json=payload,
-                timeout=120,
-            )
+    for port in LOCAL_AI_PORTS:
+        local_ai_url = f"http://127.0.0.1:{port}/v1/chat/completions"
+        for max_tokens in MAX_TOKENS_STEPS:
+            payload = {
+                "model": LOCAL_AI_MODEL,
+                "messages": messages,
+                "temperature": 0.4,
+                "max_tokens": max_tokens,
+            }
+            try:
+                resp = requests.post(
+                    local_ai_url,
+                    headers=headers,
+                    json=payload,
+                    timeout=120,
+                )
             if resp.status_code == 507:
                 # Mémoire insuffisante → retente avec moins de tokens
                 last_error = f"507 OOM (max_tokens={max_tokens})"
@@ -59,17 +61,20 @@ def query_local_ai(prompt: str, system: str = "") -> str:
                     file=sys.stderr,
                 )
                 continue
+            if resp.status_code == 404:
+                last_error = f"404 sur le port {port}"
+                break  # On essaye le port suivant
             resp.raise_for_status()
             return resp.json()["choices"][0]["message"]["content"]
         except requests.exceptions.Timeout:
             last_error = "timeout (120s)"
-            break
+            break  # On essaye le port suivant
         except requests.exceptions.ConnectionError:
-            last_error = "connexion refusée — oMLX démarré ?"
-            break
+            last_error = f"connexion refusée sur le port {port}"
+            break  # On essaye le port suivant
         except Exception as exc:
             last_error = str(exc)
-            break
+            break  # On essaye le port suivant
 
     raise RuntimeError(f"IA locale indisponible : {last_error}")
 

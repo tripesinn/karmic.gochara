@@ -135,6 +135,9 @@ async function* streamingRequest(path: string, body: Record<string, unknown>) {
         if (settings.useLocal) {
           body.user_provider = 'local';
         }
+        if (settings.oracleStyle) {
+          body.oracle_style = settings.oracleStyle;
+        }
       }
     } catch (e) {}
   }
@@ -221,7 +224,18 @@ export const api = {
     return streamingRequest('/v2/calculate', body);
   },
 
-  synthesisPrompt(body: { context: string; date?: string; hour?: number; minute?: number; reading_type?: 'daily' | 'full'; is_local?: boolean }) {
+  synthesisPrompt(body: { context: string; date?: string; hour?: number; minute?: number; reading_type?: 'daily' | 'full'; is_local?: boolean; oracle_style?: string }) {
+    if (typeof window !== 'undefined') {
+      try {
+        const storedAI = localStorage.getItem('karmic_ai_settings');
+        if (storedAI) {
+          const settings = JSON.parse(storedAI);
+          if (settings.oracleStyle) {
+            body.oracle_style = settings.oracleStyle;
+          }
+        }
+      } catch (e) {}
+    }
     return request<{ ok: boolean; system: string; user: string; error?: string }>('/synthesis/prompt', {
       method: 'POST',
       body: JSON.stringify(body),

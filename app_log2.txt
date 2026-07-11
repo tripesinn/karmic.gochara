@@ -1,0 +1,41 @@
+07-06 21:37:19.860 31946 31946 I WebViewFactory: Loading com.google.android.webview version 149.0.7827.91 (code 782709103)
+07-06 21:37:19.865 31946 31946 D ApplicationLoaders: createClassLoader zip: /data/app/com.google.android.webview-CHeID31Bfr5VotQ0R7myNg==/base.apk librarySearchPath: /data/app/com.google.android.webview-CHeID31Bfr5VotQ0R7myNg==/lib/arm64:/data/app/com.google.android.webview-CHeID31Bfr5VotQ0R7myNg==/base.apk!/lib/arm64-v8a libraryPermittedPath:  parent: java.lang.BootClassLoader@149f7c5 targetSdkVersion: 36 isBundled: false classLoaderName: null sharedLibraries: null
+07-06 21:37:19.880 31946 31946 W linker  : Warning: "/data/app/com.google.android.webview-CHeID31Bfr5VotQ0R7myNg==/base.apk!/lib/arm64-v8a/libwebviewchromium.so" unused DT entry: unknown processor-specific (type 0x70000001 arg 0x0) (ignoring)
+07-06 21:37:20.084 31946 32012 I chromium: [0706/213720.083771:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-06 21:37:20.086 31946 32012 I chromium: [0706/213720.086496:INFO:android_webview/browser/variations/variations_seed_loader.cc:67] Failed to open file for reading.: No such file or directory (2)
+07-06 21:37:20.275 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.kernel.android.tracing>
+07-06 21:37:20.279 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.config.hw_log>
+07-06 21:37:20.279 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.config.hw_module_log>
+07-06 21:37:20.279 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.debuggable>
+07-06 21:37:20.280 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.logsystem.usertype>
+07-06 21:37:20.280 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.config.jank_skipped_threshold>
+07-06 21:37:20.282 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.config.hw_getservice_stat>
+07-06 21:37:20.288 32037 32037 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.config.hw_getservice_stat>
+07-06 21:37:20.309 32037 32057 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.config.enable_perfhub_fling>
+07-06 21:37:20.310 32037 32057 I libc    : [hwfix]gms proc <com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0>, getprop <ro.config.aiprotection>
+07-06 21:37:20.357 32037 32037 I cr_WebViewApkApp: version=149.0.7827.91 (782709103) minSdkVersion=29 processName=com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 splits=<none>
+07-06 21:37:20.388 32037 32057 I AwareBitmapCacher: init processName:com.google.android.webview:sandboxed_process0:org.chromium.content.app.SandboxedProcessService0:0 pid=32037 uid=99080
+07-06 21:37:20.498 31946 31946 W chromium: [WARNING:android_webview/browser/network_service/net_helpers.cc:137] HTTP Cache size is: 20971520
+07-06 21:37:20.819 31946 31946 D Capacitor: Starting BridgeActivity
+07-06 21:37:22.806  1553  1999 V ActivityManager: startProcess: name=com.google.android.webview:webview_service app=null knownToBeDead=true thread=null pid=-1 preloadStatus=-1
+07-06 21:37:22.827  1553  1814 I ActivityManager: Start proc 32239:com.google.android.webview:webview_service/u0a197 for service {com.google.android.webview/org.chromium.android_webview.services.VariationsSeedServer}
+07-06 21:37:22.837 32239 32239 E webview_servic: LoadAppImageStartupCache enabled : 1
+07-06 21:37:22.838 32239 32239 I webview_servic: Reinit property: dalvik.vm.checkjni= false
+07-06 21:37:22.838 32239 32239 I webview_servic: ReInitProperties: persist.vm.debug.dumpapi= false
+07-06 21:37:22.842 32239 32239 E webview_servic: Not starting debugger since process cannot load the jdwp agent.
+07-06 21:37:22.844 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.kernel.android.tracing>
+07-06 21:37:22.848 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.config.hw_log>
+07-06 21:37:22.849 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.config.hw_module_log>
+07-06 21:37:22.849 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.debuggable>
+07-06 21:37:22.850 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.logsystem.usertype>
+07-06 21:37:22.851 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.config.jank_skipped_threshold>
+07-06 21:37:22.853 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.config.hw_getservice_stat>
+07-06 21:37:22.868 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.config.hw_getservice_stat>
+07-06 21:37:22.871 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.sf.lcd_density>
+07-06 21:37:22.872 32239 32239 I libc    : [hwfix]gms proc <com.google.android.webview:webview_service>, getprop <ro.sf.real_lcd_density>
+07-06 21:37:22.883 32239 32239 D ApplicationLoaders: createClassLoader zip: /data/app/com.google.android.webview-CHeID31Bfr5VotQ0R7myNg==/base.apk librarySearchPath: /data/app/com.google.android.webview-CHeID31Bfr5VotQ0R7myNg==/lib/arm64:/data/app/com.google.android.webview-CHeID31Bfr5VotQ0R7myNg==/base.apk!/lib/arm64-v8a libraryPermittedPath: /data/user/0/com.google.android.webview parent: java.lang.BootClassLoader@149f7c5 targetSdkVersion: 36 isBundled: false classLoaderName: null sharedLibraries: null
+07-06 21:37:22.904 32239 32257 I HwApiCacheMangerEx: apicache path=/storage/emulated/0 state=mounted key=com.google.android.webview#10197#256
+07-06 21:37:22.905 32239 32257 I HwApiCacheMangerEx: apicache path=/storage/emulated/0 state=mounted key=com.google.android.webview#10197#0
+07-06 21:37:22.906 32239 32239 I webview_servic: QarthPatchMonintor::Run
+07-06 21:37:22.910 32239 32239 I cr_WebViewApkApp: version=149.0.7827.91 (782709103) minSdkVersion=29 processName=com.google.android.webview:webview_service splits=<none>
+07-06 21:37:22.927 32239 32257 I AwareBitmapCacher: init processName:com.google.android.webview:webview_service pid=32239 uid=10197

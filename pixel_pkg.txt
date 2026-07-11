@@ -1,0 +1,232 @@
+Activity Resolver Table:
+  Schemes:
+      https:
+        ee1e771 com.karmicgochara.app/.MainActivity filter b3ffdd7
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "https"
+          Authority: "karmicgochara.app": -1
+          AutoVerify=true
+      genericidp:
+        4e0c6c4 com.karmicgochara.app/com.google.firebase.auth.internal.GenericIdpActivity filter fdc89ad
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "genericidp"
+          Authority: "firebase.auth": -1
+          Path: "PatternMatcher{LITERAL: /}"
+      recaptcha:
+        ba784e2 com.karmicgochara.app/com.google.firebase.auth.internal.RecaptchaActivity filter 99ca073
+          Action: "android.intent.action.VIEW"
+          Category: "android.intent.category.DEFAULT"
+          Category: "android.intent.category.BROWSABLE"
+          Scheme: "recaptcha"
+          Authority: "firebase.auth": -1
+          Path: "PatternMatcher{LITERAL: /}"
+
+  Non-Data Actions:
+      android.intent.action.MAIN:
+        ee1e771 com.karmicgochara.app/.MainActivity filter d1a2956
+          Action: "android.intent.action.MAIN"
+          Category: "android.intent.category.LAUNCHER"
+
+Receiver Resolver Table:
+  Non-Data Actions:
+      androidx.profileinstaller.action.SAVE_PROFILE:
+        bd0d2e com.karmicgochara.app/androidx.profileinstaller.ProfileInstallReceiver filter 1d24165
+          Action: "androidx.profileinstaller.action.SAVE_PROFILE"
+      com.amazon.inapp.purchasing.NOTIFY:
+        c858b30 com.karmicgochara.app/com.amazon.device.iap.ResponseReceiver filter c6513a9
+          Action: "com.amazon.inapp.purchasing.NOTIFY"
+      androidx.profileinstaller.action.INSTALL_PROFILE:
+        bd0d2e com.karmicgochara.app/androidx.profileinstaller.ProfileInstallReceiver filter a16d0cf
+          Action: "androidx.profileinstaller.action.INSTALL_PROFILE"
+      androidx.profileinstaller.action.SKIP_FILE:
+        bd0d2e com.karmicgochara.app/androidx.profileinstaller.ProfileInstallReceiver filter e702a5c
+          Action: "androidx.profileinstaller.action.SKIP_FILE"
+      androidx.profileinstaller.action.BENCHMARK_OPERATION:
+        bd0d2e com.karmicgochara.app/androidx.profileinstaller.ProfileInstallReceiver filter f90ce3a
+          Action: "androidx.profileinstaller.action.BENCHMARK_OPERATION"
+
+Domain verification status:
+  com.karmicgochara.app:
+    ID: 6ab9b3e0-b8ce-402f-a9ae-ffa5c8e910b0
+    Signatures: [06:E5:4A:A8:5B:5F:58:D7:EA:27:6F:71:AF:18:CC:83:43:78:B4:52:4E:49:25:E9:E2:FC:06:E8:BE:CD:D1:EF]
+    Domain verification state:
+      karmicgochara.app: 1024
+    User all:
+      Verification link handling allowed: true
+      Selection state:
+        Disabled:
+          karmicgochara.app
+
+Permissions:
+  Permission [com.karmicgochara.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION] (a00dfdd):
+    sourcePackage=com.karmicgochara.app
+    uid=10503 gids=[] type=0 prot=signature
+    perm=PermissionInfo{882d752 com.karmicgochara.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION}
+    flags=0x0
+
+Registered ContentProviders:
+  com.karmicgochara.app/androidx.core.content.FileProvider:
+    Provider{8bcda23 com.karmicgochara.app/androidx.core.content.FileProvider}
+  com.karmicgochara.app/com.google.firebase.provider.FirebaseInitProvider:
+    Provider{cf1bb20 com.karmicgochara.app/com.google.firebase.provider.FirebaseInitProvider}
+  com.karmicgochara.app/androidx.startup.InitializationProvider:
+    Provider{4b09cd9 com.karmicgochara.app/androidx.startup.InitializationProvider}
+
+ContentProvider Authorities:
+  [com.karmicgochara.app.firebaseinitprovider]:
+    Provider{cf1bb20 com.karmicgochara.app/com.google.firebase.provider.FirebaseInitProvider}
+      applicationInfo=ApplicationInfo{7d3169e com.karmicgochara.app}
+  [com.karmicgochara.app.androidx-startup]:
+    Provider{4b09cd9 com.karmicgochara.app/androidx.startup.InitializationProvider}
+      applicationInfo=ApplicationInfo{1f8f57f com.karmicgochara.app}
+  [com.karmicgochara.app.fileprovider]:
+    Provider{8bcda23 com.karmicgochara.app/androidx.core.content.FileProvider}
+      applicationInfo=ApplicationInfo{107694c com.karmicgochara.app}
+
+Key Set Manager:
+  [com.karmicgochara.app]
+      Signing KeySets: 312
+
+Packages:
+  Package [com.karmicgochara.app] (d0b8e99):
+    appId=10503
+    pccId=-1
+    pkg=Package{f052d95 com.karmicgochara.app}
+    codePath=/data/app/~~q7wVORT0aBiHx1_Q0wfqYg==/com.karmicgochara.app-Hy1KmS5MsyarUcz27q4ROA==
+    resourcePath=/data/app/~~q7wVORT0aBiHx1_Q0wfqYg==/com.karmicgochara.app-Hy1KmS5MsyarUcz27q4ROA==
+    legacyNativeLibraryDir=/data/app/~~q7wVORT0aBiHx1_Q0wfqYg==/com.karmicgochara.app-Hy1KmS5MsyarUcz27q4ROA==/lib
+    extractNativeLibs=false
+    primaryCpuAbi=arm64-v8a
+    secondaryCpuAbi=null
+    cpuAbiOverride=null
+    versionCode=20 minSdk=32 targetSdk=35
+    minExtensionVersions=[]
+    versionName=1.9.1
+    hiddenApiEnforcementPolicy=2
+    usesNonSdkApi=false
+    splits=[base, config.arm64_v8a, config.fr, config.xxhdpi]
+    apkSigningVersion=3
+    flags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP KILL_AFTER_RESTORE ]
+    privateFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE HAS_DOMAIN_URLS PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    forceQueryable=false
+    pageSizeCompat=0
+    queriesIntents=[Intent { act=com.android.vending.billing.InAppBillingService.BIND }, Intent { act=com.google.android.apps.play.billingtestcompanion.BillingOverrideService.BIND }]
+    scannedAsStoppedSystemApp=false
+    supportsScreens=[small, medium, large, xlarge, resizeable, anyDensity]
+    timeStamp=2026-07-10 09:51:31
+    lastUpdateTime=2026-07-10 09:51:31
+    installerPackageName=com.android.vending
+    installerPackageUid=10194
+    initiatingPackageName=com.android.vending
+    originatingPackageName=null
+    updateOwnerPackageName=com.android.vending
+    packageSource=0
+    appMetadataFilePath=/data/app/~~q7wVORT0aBiHx1_Q0wfqYg==/com.karmicgochara.app-Hy1KmS5MsyarUcz27q4ROA==/app.metadata
+    appMetadataSource=2
+    signatures=PackageSignatures{f55feaa version:3, signatures:[20df597e], past signatures:[]}
+    installPermissionsFixed=false
+    pkgFlags=[ HAS_CODE ALLOW_CLEAR_USER_DATA ALLOW_BACKUP KILL_AFTER_RESTORE ]
+    privatePkgFlags=[ PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE_VIA_SDK_VERSION ALLOW_AUDIO_PLAYBACK_CAPTURE HAS_DOMAIN_URLS PARTIALLY_DIRECT_BOOT_AWARE PRIVATE_FLAG_ALLOW_NATIVE_HEAP_POINTER_TAGGING ]
+    apexModuleName=null
+    declared permissions:
+      com.karmicgochara.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: prot=signature
+    requested permissions:
+      android.permission.USE_CREDENTIALS
+      com.google.android.providers.gsf.permission.READ_GSERVICES
+      android.permission.INTERNET
+      com.android.vending.CHECK_LICENSE
+      com.android.vending.BILLING
+      android.permission.ACCESS_NETWORK_STATE
+      android.permission.USE_FINGERPRINT
+      com.karmicgochara.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION
+      android.permission.USE_BIOMETRIC
+      com.google.android.gms.permission.AD_ID
+      android.permission.WAKE_LOCK
+    install permissions:
+      android.permission.USE_CREDENTIALS: granted=true
+      com.google.android.providers.gsf.permission.READ_GSERVICES: granted=true
+      android.permission.INTERNET: granted=true
+      com.android.vending.CHECK_LICENSE: granted=true
+      com.android.vending.BILLING: granted=true
+      android.permission.ACCESS_NETWORK_STATE: granted=true
+      android.permission.USE_FINGERPRINT: granted=true
+      com.karmicgochara.app.DYNAMIC_RECEIVER_NOT_EXPORTED_PERMISSION: granted=true
+      android.permission.USE_BIOMETRIC: granted=true
+      com.google.android.gms.permission.AD_ID: granted=true
+      android.permission.WAKE_LOCK: granted=true
+    User 0: ceDataInode=169794 deDataInode=163783 installed=true hidden=false suspended=false appLockEnabled=false distractionFlags=0 stopped=false notLaunched=false enabled=0 instant=false virtual=false quarantined=false
+      installReason=4
+      dataDir=/data/user/0/com.karmicgochara.app
+      firstInstallTime=2026-07-10 09:51:31
+      uninstallReason=0
+      overlay paths:
+        /product/overlay/NavigationBarModeGestural/NavigationBarModeGesturalOverlay.apk
+        /data/resource-cache/com.android.systemui-neutral-eSwM.frro
+        /data/resource-cache/com.android.systemui-accent-MP2s.frro
+        /data/resource-cache/com.android.systemui-dynamic-NsiM.frro
+      legacy overlay paths:
+        /product/overlay/NavigationBarModeGestural/NavigationBarModeGesturalOverlay.apk
+      lastDisabledCaller: com.android.vending
+      gids=[3003]
+      runtime permissions:
+
+Queries:
+  system apps queryable: false
+  queries via forceQueryable:
+  queries via package name:
+  queries via component:
+    com.google.android.as.oss:
+      com.karmicgochara.app
+    com.google.android.as:
+      com.karmicgochara.app
+    com.google.android.apps.camera.services:
+      com.karmicgochara.app
+    com.google.android.apps.diagnosticstool:
+      com.karmicgochara.app
+    com.google.android.apps.messaging:
+      com.karmicgochara.app
+    com.google.android.settings.intelligence:
+      com.karmicgochara.app
+    com.google.android.apps.accessibility.voiceaccess:
+      com.karmicgochara.app
+    com.verizon.mips.services:
+      com.karmicgochara.app
+    com.zath.ctapptracker:
+      com.karmicgochara.app
+    com.phlox.simpleserver.plus:
+      com.karmicgochara.app
+    com.lemon.lvoverseas:
+      com.karmicgochara.app
+    com.nextCustom.Tunnel:
+      com.karmicgochara.app
+    com.whatsapp:
+      com.karmicgochara.app
+    com.zhiliaoapp.musically.go:
+      com.karmicgochara.app
+    com.google.android.apps.searchlite:
+      com.karmicgochara.app
+  queryable via interaction:
+    User 0:
+      [com.android.location.fused,com.android.dynsystem,com.google.android.satellite,com.android.providers.settings,com.android.keychain,com.google.SSRestartDetector,com.android.settings,com.android.inputdevices,com.android.localtransport,com.google.android.settings.future.biometrics.faceenroll,com.android.server.telecom,com.google.android.repairmode,com.google.android.iwlan,android,com.android.DeviceAsWebcam,com.google.pixel.camera.services,com.android.qns]:
+        com.karmicgochara.app
+      com.google.android.gms:
+        com.karmicgochara.app
+      com.android.vending:
+        com.karmicgochara.app
+      com.google.android.inputmethod.latin:
+        com.karmicgochara.app
+      com.google.android.webview:
+        com.karmicgochara.app
+      com.karmicgochara.app:
+        com.google.android.webview
+  queryable via uses-library:
+
+Dexopt state:
+  [com.karmicgochara.app]
+    path: /data/app/~~q7wVORT0aBiHx1_Q0wfqYg==/com.karmicgochara.app-Hy1KmS5MsyarUcz27q4ROA==/base.apk
+      arm64: [status=verify] [reason=vdex-dm] [primary-abi]
+        [location is primary.vdex mapped directly in memory from /data/app/~~q7wVORT0aBiHx1_Q0wfqYg==/com.karmicgochara.app-Hy1KmS5MsyarUcz27q4ROA==/base.dm]

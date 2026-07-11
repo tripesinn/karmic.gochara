@@ -138,6 +138,8 @@ def calculate():
             enriched_profile["user_model"] = user_model
         if user_provider:
             enriched_profile["user_provider"] = user_provider
+        
+        enriched_profile["oracle_style"] = data.get("oracle_style", "chirurgical")
 
         # Retry 3x sur surcharge Anthropic (529 / overloaded_error)
         synthesis = None
@@ -226,6 +228,8 @@ def calculate_v2():
 
     data = request.get_json() or {}
     lang = session.get("lang", "fr")
+    
+    profile["oracle_style"] = data.get("oracle_style", "chirurgical")
 
     # 2. Gestion d'erreur : Validation du profil (présence des données de naissance)
     required_fields = ["name", "year", "month", "day", "hour", "minute", "lat", "lon", "tz", "city"]

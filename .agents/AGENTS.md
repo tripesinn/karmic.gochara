@@ -39,7 +39,7 @@ et lui déléguer la tâche si c'est le cas.
 
 ```bash
 curl -s -o /dev/null -w "%{http_code}" \
-  http://127.0.0.1:8888/v1/models \
+  http://127.0.0.1:8889/v1/models \
   -H "Authorization: Bearer omlx_12345678910111213abcDEF"
 # 200 = UP → déléguer | autre = DOWN → analyser soi-même
 ```

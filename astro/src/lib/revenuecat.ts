@@ -27,7 +27,11 @@ export async function purchaseProPlan() {
   if (!Capacitor.isNativePlatform()) return null;
 
   try {
-    const result = await Purchases.purchaseProduct({ productIdentifier: 'pro_lifetime_access' });
+    const { products } = await Purchases.getProducts({ productIdentifiers: ['pro_lifetime_access'] });
+    if (!products || products.length === 0) {
+      throw new Error("Produit introuvable sur le Play Store");
+    }
+    const result = await Purchases.purchaseStoreProduct({ product: products[0] });
     console.log("✅ [RevenueCat] Achat réussi:", result);
     return result;
   } catch (error: any) {

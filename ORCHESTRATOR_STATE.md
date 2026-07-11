@@ -10,13 +10,13 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-05T21:15 (Analyse logs Pixel 10 - Firebase OK, oMLX DOWN)
+**Dernière mise à jour** : 2026-07-09T18:41 (Session en cours, oMLX UP)
 **Build Astro** : ✅ OK (www/ à jour)
 **Environnement** :
 - **Node.js** : `v20.12.2` (via NVM)
 - **Firebase CLI** : `v13.6.0`
 - **Android Studio** : SDK Platform-Tools installés (adb fonctionnel)
-- **IA Locale** : ✅ UP (oMLX port 8888)
+- **IA Locale** : ✅ UP (oMLX port 8889)
 - **Modèle Local configuré** : `gemma-4-E2B-it-qat-oQ4-fp16` (port 8888)
 - **Émulateur Firebase** : ✅ Actif (9099, 8080)
 - **Serveur Flask (API)** : ✅ Actif (5001)
@@ -112,6 +112,13 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ---
 
 ## Historique
+
+### 2026-07-09 — Session Initiale
+- **Diagnostic Phase 0** :
+  - oMLX : ❌ DOWN (Erreur 404 sur le port 8888).
+  - Git : Fichiers sources propres, quelques fichiers untracked/logs générés.
+  - Build Astro : OK.
+- **Prochaine étape** : En attente d'instructions de l'utilisateur (ex: résoudre BUG-012, analyser les logs, ou implémenter une nouvelle fonctionnalité).
 
 ### 2026-07-06 — Session orchestrateur (Problème Réseau)
 - **Analyse** : Les tunnels ADB Reverse avaient "sauté" (probablement déconnexion USB ou crash ADB), causant l'impossibilité pour le téléphone de joindre l'API locale (`127.0.0.1:5001`), l'IA locale (`8888`) et Firebase Emulators.
@@ -222,3 +229,5 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 - Phase 0 : Diagnostic IA locale indique l'absence de `chat.astro` dans le build (P2).
 - Phase 1 : Restauration de `chat.astro` depuis l'historique git.
 - Phase 2 : Build Astro & Sync Capacitor (OK, `chat` est bien présent dans `www/app/`).
+
+**IA Locale** : ❌ DOWN

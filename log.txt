@@ -1,0 +1,200 @@
+07-06 21:37:46.101 I/SmartChgBase/Arb_HidlParam( 2424): SetHidlValue Success:[module:BASP, scene:vterm_dec, value:pd 48]
+07-06 21:37:46.102 I/power_hidl(  762): ExeSetState type=vterm_dec, value=wl 48
+07-06 21:37:46.102 I/power_hidl(  762): start write compatible, scene: vterm_dec, value: wl 48
+07-06 21:37:46.102 I/power_hidl(  762): ExeSetState success, type=vterm_dec, index=45
+07-06 21:37:46.102 I/SmartChgBase/Arb_HidlParam( 2424): SetHidlValue Success:[module:BASP, scene:vterm_dec, value:wl 48]
+07-06 21:37:46.103 I/power_hidl(  762): ExeSetState type=basp_coul_vdec, value=48
+07-06 21:37:46.103 I/power_hidl(  762): start hvdp mmi test, type=basp_coul_vdec, value=48
+07-06 21:37:46.104 I/power_hidl(  762): ExeSetState success, type=basp_coul_vdec, index=52
+07-06 21:37:46.104 I/SmartChgBase/Arb_HidlParam( 2424): SetHidlValue Success:[module:BASP, scene:basp_coul_vdec, value:48]
+07-06 21:37:46.104 I/SmartChgBase/Arb_HidlParam( 2424): Apply Skipped: IsApplyExcept return true. [moduleName:ASW, param:soc_control, detailsWithValue:source=trigger;event=heartbeat;chargestatus=start;value=1 95 100 1 1;]
+07-06 21:37:46.105 E/SmartChgBase/File( 2424): file /data/user_de/0/com.huawei.systemmanager/files/smart_charge/base/mock/enable is invalid in IsFileExist
+07-06 21:37:46.105 E/SmartChgBase/File( 2424): file /data/user_de/0/com.huawei.systemmanager/files/smart_charge/base/mock/enable is invalid in IsFileExist
+07-06 21:37:46.113 E/RSLog   (16693): DistributedDataProxy:updateSharedData failMap size: 0
+07-06 21:37:46.123 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:46.123 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:46.123 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:46.123 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:46.123 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:46.124 I/chatty  (32293): uid=1000(system) pool-1-thread-1 expire 7 lines
+07-06 21:37:46.127 I/RSLog   (16693): DistributedDataProxy:querySharedData end result size: 1
+07-06 21:37:46.134 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:46.134 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:46.134 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:46.134 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:46.134 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:46.135 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:46.135 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:46.135 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:46.135 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:46.135 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:46.135 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:46.135 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:46.135 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:46.135 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:46.135 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:46.135 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:46.137 I/RSLog   (16693): DistributedDataProxy:querySharedData end result size: 1
+07-06 21:37:46.168 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:46.168 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:46.169 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:46.169 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:46.169 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:46.169 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:46.169 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:46.169 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:46.173 E/RSLog   (16693): DistributedDataProxy:updateSharedData failMap size: 0
+07-06 21:37:46.216 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:46.216 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:46.216 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:46.216 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:46.216 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:46.216 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:46.216 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:46.216 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:46.217 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:46.217 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:46.217 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:46.217 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:46.217 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:46.217 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:46.217 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:46.217 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:46.219 I/RSLog   (16693): DistributedDataProxy:querySharedData end result size: 1
+07-06 21:37:46.251 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:46.251 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:46.251 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:46.251 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:46.251 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:46.251 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:46.251 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:46.251 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:46.257 E/RSLog   (16693): DistributedDataProxy:updateSharedData failMap size: 0
+07-06 21:37:47.041 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:47.041 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:47.041 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:47.041 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:47.041 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:47.041 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:47.041 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:47.041 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:84
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): NativePutBatch: key len:84
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:84
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): NativePutBatch: key len:84
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:85
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): NativePutBatch: key len:85
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:84
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): NativePutBatch: key len:84
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:84
+07-06 21:37:47.048 D/DevKvMgrJNI(32293): NativePutBatch: key len:84
+07-06 21:37:47.049 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:84
+07-06 21:37:47.049 D/DevKvMgrJNI(32293): NativePutBatch: key len:84
+07-06 21:37:47.049 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:83
+07-06 21:37:47.049 D/DevKvMgrJNI(32293): NativePutBatch: key len:83
+07-06 21:37:47.056 I/RSLog   (32293): Manager:onChangeNative, insert 0, update 33, delete 0
+07-06 21:37:47.056 D/RSLog   (32293): Manager:onChangeNative: listener getSubscribeMode == 2
+07-06 21:37:47.056 I/RSLog   (32293): Manager:onChange native changes of syncable kv store
+07-06 21:37:47.056 D/RSLog   (32293): MicroThumbnailListener:onNativeDataChange already push max count.
+07-06 21:37:47.056 E/RSLog   (16693): DistributedDataProxy:updateSharedData failMap size: 0
+07-06 21:37:47.066 E/RSLog   (32293): DistributedDataServiceCore:code: 10 data size: 608 reply size: 0
+07-06 21:37:47.066 I/RSLog   (32293): CommunicationDeathManager:isNeedToBindCommunicationService isCommunicationDied: false interval: 1783366667066
+07-06 21:37:47.066 D/GroupManager(32293): isInGroup begin
+07-06 21:37:47.066 I/GroupManager(32293): getMemberList begin
+07-06 21:37:47.066 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:47.066 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:47.066 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:47.066 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:47.066 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:47.066 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:47.066 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:47.066 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:47.067 D/RSLog   (32293): DistributedDataServiceCore:checkDeviceInGroup ret: true
+07-06 21:37:47.067 D/GroupManager(32293): isInGroup begin
+07-06 21:37:47.067 I/GroupManager(32293): getMemberList begin
+07-06 21:37:47.067 I/TrustEngineService( 2616): getGroupMemberList
+07-06 21:37:47.067 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:47.067 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:47.067 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:47.067 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:47.067 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:47.067 I/TrustEngineService( 2616): getGroupMemberList: same id group
+07-06 21:37:47.067 I/TcisSameIdGroup( 2616): getGroupMemberList
+07-06 21:37:47.067 D/RSLog   (32293): DistributedDataServiceCore:checkDeviceInGroup ret: true
+07-06 21:37:47.067 I/RSLog   (32293): DistributedDataServiceCore:createManagerIfNeeded groupId: 30810848445DE0D5BC4D760544B8AFC1D97CC40B015B207319672542168F576C pkgName: com.android.gallery3d
+07-06 21:37:47.067 I/RSLog   (32293): Manager:start kvStore is not null
+07-06 21:37:47.067 D/AppDistributedKvDataManagerImpl(32293): GetKvStoreDiskSize: start
+07-06 21:37:47.068 D/AppDistributedKvDataManagerImpl(32293): GetKvStoreDiskSize: end, size:21750016
+07-06 21:37:47.068 I/RSLog   (32293): Manager:already registerKvStoreObserver
+07-06 21:37:47.068 D/RSLog   (32293): DistributedDataServiceCore:manager code: 167083642
+07-06 21:37:47.068 I/RSLog   (32293): Manager:checkKvStoreCorruption start: false
+07-06 21:37:47.068 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:71
+07-06 21:37:47.068 D/AppKvStoreImpl(32293): GetEntries: start.
+07-06 21:37:47.068 D/AppKvStoreImpl(32293): GetEntries: vector size: 1 status: 0.
+07-06 21:37:47.069 I/RSLog   (32293): Manager:entries size: 1 sharedDataList size: 1
+07-06 21:37:47.069 I/RSLog   (32293): Manager:sum value size is : 539
+07-06 21:37:47.069 I/RSLog   (32293): Manager:querySharedData if 33 token: com.huawei.distributed.data.client.Token@ed406ce
+07-06 21:37:47.069 I/RSLog   (16693): DistributedDataProxy:querySharedData end result size: 1
+07-06 21:37:47.070 E/RSLog   (32293): DistributedDataServiceCore:code: 12 data size: 472 reply size: 0
+07-06 21:37:47.070 I/RSLog   (32293): CommunicationDeathManager:isNeedToBindCommunicationService isCommunicationDied: false interval: 1783366667070
+07-06 21:37:47.070 D/GroupManager(32293): getTrustGroupListByType begin
+07-06 21:37:47.070 I/TrustEngineService( 2616): getGroupListByType
+07-06 21:37:47.070 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:47.070 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:47.070 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:47.070 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:47.070 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:47.071 D/GroupManager(32293): getTrustGroupListByType: type = 0, count = 1
+07-06 21:37:47.071 I/RSLog   (32293): DistributedDataServiceCore:createManagerIfNeeded groupId: 30810848445DE0D5BC4D760544B8AFC1D97CC40B015B207319672542168F576C pkgName: com.android.gallery3d
+07-06 21:37:47.071 I/RSLog   (32293): Manager:start kvStore is not null
+07-06 21:37:47.071 D/AppDistributedKvDataManagerImpl(32293): GetKvStoreDiskSize: start
+07-06 21:37:47.071 D/AppDistributedKvDataManagerImpl(32293): GetKvStoreDiskSize: end, size:21750016
+07-06 21:37:47.071 I/RSLog   (32293): Manager:already registerKvStoreObserver
+07-06 21:37:47.071 D/RSLog   (32293): DistributedDataServiceCore:manager code: 167083642
+07-06 21:37:47.071 I/RSLog   (32293): Manager:checkKvStoreCorruption start: false
+07-06 21:37:47.071 D/DevKvMgrJNI(32293): CopyKeyFromJava2C: key len:71
+07-06 21:37:47.071 D/AppKvStoreImpl(32293): GetEntries: start.
+07-06 21:37:47.072 I/RSLog   (32293): Manager:createSharedDataWindow resultSet: zidaneos.data.distributed.common.KvStoreResultSetImpl@badd9ef
+07-06 21:37:47.072 I/RSLog   (16693): SharedDataWindow:getSharedDataCount
+07-06 21:37:47.072 I/RSLog   (32293): SharedDataWindowImpl:getSharedDataCount
+07-06 21:37:47.073 I/RSLog   (16693): SharedDataWindow:getSharedDataCount ret: 0
+07-06 21:37:47.073 E/RSLog   (32293): DistributedDataServiceCore:code: 13 data size: 340 reply size: 0
+07-06 21:37:47.073 I/RSLog   (32293): CommunicationDeathManager:isNeedToBindCommunicationService isCommunicationDied: false interval: 1783366667073
+07-06 21:37:47.073 D/GroupManager(32293): getTrustGroupListByType begin
+07-06 21:37:47.073 I/TrustEngineService( 2616): getGroupListByType
+07-06 21:37:47.073 I/TcisSameIdGroup( 2616): getGroupList
+07-06 21:37:47.073 I/TcisSameIdGroup( 2616): getTcisSameIdGroupId
+07-06 21:37:47.073 I/HwIdHandler( 2616): getCurUserId: false
+07-06 21:37:47.073 I/HwIdHandler( 2616): isDefaultId:
+07-06 21:37:47.073 I/TcisSameIdGroup( 2616): getGroupList: group count:1
+07-06 21:37:47.073 D/GroupManager(32293): getTrustGroupListByType: type = 0, count = 1
+07-06 21:37:47.073 I/RSLog   (32293): Manager:checkKvStoreCorruption start: false
+07-06 21:37:47.073 I/RSLog   (32293): Manager:closeSharedDataWindow remove resultSet: zidaneos.data.distributed.common.KvStoreResultSetImpl@badd9ef
+07-06 21:37:47.268 W/health@2.0-serv(  733): type=1400 audit(0.0:59486): avc: denied { read } for pid=733 name="u:object_r:system_prop:s0" dev="tmpfs" ino=11068 scontext=u:r:hal_health_default:s0 tcontext=u:object_r:system_prop:s0 tclass=file permissive=0
+07-06 21:37:47.268 W/health@2.0-serv(  733): type=1400 audit(0.0:59487): avc: denied { write } for pid=733 name="property_service" dev="tmpfs" ino=15575 scontext=u:r:hal_health_default:s0 tcontext=u:object_r:property_socket:s0 tclass=sock_file permissive=0
+07-06 21:37:47.268 I/HwBatteryService( 1553): power_ui state= 1 mQuickChargeStatus=1
+07-06 21:37:47.268 I/HwBatteryService( 1553): handleWirelessTxStatus
+07-06 21:37:47.268 I/HwBatteryService( 1553): switch not open, return, mWirelessTxFlag : 0
+07-06 21:37:47.268 W/HwBatteryService( 1553): need return. Invalid value: -1
+07-06 21:37:47.268 D/HwBatteryService( 1553): setHwChargeTimeRemaining, time = -1 String time: -1
+07-06 21:37:47.268 I/HwBatteryService( 1553): IS_WATCH : false
+07-06 21:37:47.271 E/libc    (  733): Access denied finding property "sys.check.usbupdate"
+07-06 21:37:47.271 W/libc    (  733): Unable to set property "sys.check.usbupdate" to "stop": connection failed; errno=13 (Permission denied)
+07-06 21:37:47.721 E/HSM_BG-11.1.1.361( 2424): SmartControlDbOpenHelper:queryInfo catch exception with SmartControlRecordTable
+07-06 21:37:47.735 E/HSM_BG-11.1.1.361( 2424): SmartControlDbOpenHelper:queryInfo catch exception with SmartControlRecordTable
+07-06 21:37:48.056 I/DistributedDB(32293): Task pool thread exit, cur:0 idle:0, genericTaskCount:0, queuedTaskCount:0.
+07-06 21:37:48.412 I/SpeedTestNotifier( 2515): is low speed scene
+07-06 21:37:49.572 I/PlayCommon(30667): [7362] Preparing logs for uploading
+07-06 21:37:49.576 I/PlayCommon(30667): [7362] Connecting to server for timestamp: https://play.googleapis.com/play/log/timestamp
+07-06 21:37:49.581 W//system/bin/netd(  675): A binder object at 0x7b43693d40 is being transacted on, however, this object is in the same process as its proxy. Transacting with this binder is expensive compared to just calling the corresponding functionality in the same process.
+07-06 21:37:49.581 I/PreDnsController(  675): CanPreDnsQuery,persist.sys.predns is false!
+07-06 21:37:49.581 I/OemNetd (  675): startPreDnsQuery(10179)
+07-06 21:37:49.583 E/PlayCommon(30667): [7362] Failed to connect to server for server timestamp: java.net.UnknownHostException: Unable to resolve host "play.googleapis.com": No address associated with hostname
+07-06 21:37:49.586 I/PlayCommon(30667): [7362] Connecting to server: https://play.googleapis.com/play/log?format=raw&proto_v2=true
+07-06 21:37:49.588 E/PlayCommon(30667): [7362] Failed to connect to server for log upload.
+07-06 21:37:50.412 E/Thermal-daemon:hw_thermal( 1062): [pa_0] tempNew :30  tempOld :31
+07-06 21:37:50.413 E/Thermal-daemon:hw_thermal( 1062): Report temperature: [pa_0] temp :30  reportThreshold:1
+07-06 21:37:53.947 I/MediaLibraryService( 6099): ACTION_STOP_SERVICE 1
+07-06 21:37:53.949 I/MediaLibraryService( 6099): onDestroy
+07-06 21:37:53.950 I/MediaLibraryThreadPool( 6099): terminated 0 finish
+07-06 21:37:53.953 W/ProcessStats( 1553): Tracking association SourceState{9281543 com.karmicgochara.app/10354 Top #281260} whose proc state 1 is better than process ProcessState{edf5269 com.google.android.gms.persistent/10172 pkg=com.google.android.gms} proc state 2 (13 skipped)

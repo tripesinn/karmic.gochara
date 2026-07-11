@@ -365,6 +365,11 @@ def _load_vault(include_keywords: bool = True, user: dict = None, chart_data: di
         
         if not include_keywords:
             return vault
+            
+        oracle_style = user.get("oracle_style", "chirurgical") if user else "chirurgical"
+        if oracle_style == "bienveillant":
+            vault = vault.replace("Ton : oraculaire, chirurgical, sans hedging.", "Ton : empathique, rassurant, pédagogique.")
+            vault = vault.replace("- Formulations douces : \"peut-être\", \"il semblerait\", \"il est possible que\"\n- Consolation, encouragement, validation émotionnelle", "- Formulations incertaines : \"peut-être\", \"il semblerait\", \"il est possible que\"")
 
         # Tenter le chargement sélectif OKF
         okf_dir = os.path.join(_VAULT_DIR, "okf")
@@ -635,6 +640,66 @@ def _build_system_prompt(user: dict, use_vault: bool = True, chart_data: dict = 
 
     return base_prompt + natal_bloc + friction_bloc + "\n" + GLOBAL_NO_SIGNS_RULE
 
+
+def _get_style_instructions(name: str, oracle_style: str) -> str:
+    if oracle_style == "bienveillant":
+        return f"""STYLE OBLIGATOIRE : tu écris comme un guide spirituel bienveillant et pédagogue, pas comme un astrologue technique ou rigide.
+- Traduis chaque aspect en vécu concret, en schéma comportemental reconnaissable, de façon très accessible.
+- Ne cite jamais les aspects bruts ("T.Saturne conjoint N.Chiron orbe 2°"). Traduis-les en ce que {name} ressent ou fait.
+- Parle directement à {name} : "tu", "ton", "ta" de manière douce et encourageante.
+- À la fin de chaque section, glisse un APERÇU : une phrase courte en italique qui ouvre une perspective positive et inspirante.
+
+Analyse ces données en 4 blocs, avec des mots simples pour un débutant :
+
+1. DIAGNOSTIC ROM (Ketu) : Quel schéma de vie antérieure ou ancienne habitude est réactivé en ce moment ? Quel automatisme de défense {name} doit-il apprendre à lâcher avec douceur ?
+
+2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits viennent toucher la vulnérabilité de {name} ? Comment cette sensibilité (Chiron/RAM) peut-elle devenir une belle force d'évolution ?
+
+3. ÉPREUVE LILITH : Quel est le défi émotionnel ou la friction du moment ? Comment ce défi aide-t-il {name} à grandir vers sa véritable mission (Rahu) ?
+
+4. ALTERNATIVE DE CONSCIENCE : Formule un conseil transformateur, clair et positif — ce que l'âme de {name} gagnerait à comprendre MAINTENANT pour avancer en paix.
+
+Style : empathique, rassurant, accessible, sans aucun jargon astrologique. Tutoiement chaleureux ("tu", "ton").
+Longueur : 400-600 mots. Chaque phrase doit guider et soutenir. À la fin de chaque bloc, glisse un APERÇU : une phrase courte en italique qui ouvre une porte lumineuse sans tout imposer."""
+    elif oracle_style == "expert":
+        return f"""STYLE OBLIGATOIRE : tu écris comme un expert en astrologie karmique et sidérale.
+- Tu DOIS expliciter l'astrologie derrière tes conclusions.
+- Cite les aspects bruts et explique leur mécanique (ex: "Saturne en transit fait une conjonction exacte à ton Chiron natal, ce qui...").
+- Conserve la doctrine d'évolution karmique (ROM, RAM, Stage), mais ajoute le squelette astrologique (signes, maisons, orbes si pertinents).
+- Parle directement à {name} : "tu", "ton", "ta".
+- À la fin de chaque section, glisse un APERÇU : une phrase courte en italique qui ouvre une porte sur l'évolution globale.
+
+Analyse ces données en 4 blocs :
+
+1. DIAGNOSTIC ROM (Ketu) : Quel schéma de vie antérieure est activé ? Cite les astres et maisons impliqués.
+
+2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits touchent la vulnérabilité (Chiron/RAM) ? Détaille l'aspect astrologique (carré, opposition, conjonction...).
+
+3. ÉPREUVE LILITH : Quelle friction karmique est en cours ? Comment s'exprime-t-elle astrologiquement ?
+
+4. ALTERNATIVE DE CONSCIENCE : Formule le conseil transformateur en t'appuyant sur les forces planétaires actuelles.
+
+Style : technique, précis, pédagogique sur la mécanique astrologique, mais toujours tourné vers l'évolution de l'âme. Tutoiement direct.
+Longueur : 400-600 mots. Chaque phrase = une explication karmique ET céleste. À la fin de chaque bloc, glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler."""
+    else:
+        return f"""STYLE OBLIGATOIRE : tu écris comme un lecteur d'âme, pas comme un astrologue technique.
+- Traduis chaque aspect en vécu concret, en pattern comportemental reconnaissable.
+- Ne cite jamais les aspects bruts ("T.Saturne conjoint N.Chiron orbe 2°"). Traduis-les en ce que {name} ressent ou fait.
+- Parle directement à {name} : "tu", "ton", "ta".
+- À la fin de chaque section (1, 2, 3), glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler.
+
+Analyse ces données en 4 blocs :
+
+1. DIAGNOSTIC ROM (Ketu) : Quel schéma de vie antérieure est activé en ce moment ? Quel automatisme défensif est à l'œuvre pour {name} ?
+
+2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente de {name} ? Comment Chiron (RAM) peut-il ouvrir le passage vers le Stage ?
+
+3. ÉPREUVE LILITH : Quelle friction karmique est en cours pour {name} ? Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
+
+4. ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis, chirurgical, actionnable — ce que l'âme de {name} doit comprendre MAINTENANT pour avancer vers son Stage.
+
+Style : direct, technique, non-astro-jargon dans les conclusions. Tutoiement direct ("tu", "ton").
+Longueur : 400-600 mots. Pas de généralités. Chaque bloc doit être développé : pas de liste à puces, prose continue avec enchaînement logique interne. Chaque phrase = une vérité chirurgicale. À la fin de chaque bloc, glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler."""
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HELPERS
@@ -1127,6 +1192,9 @@ def get_synthesis(chart_data: dict, user: dict = None, lang: str = "fr", is_free
         prompts = build_prompt_only(chart_data, user, lang, is_free=True)
         return generate_ai(prompts["system"], prompts["user"], user=user, max_tokens=1000)
 
+    oracle_style = user.get("oracle_style", "chirurgical") if user else "chirurgical"
+    style_instructions = _get_style_instructions(name, oracle_style)
+
     if lang == "fr":
         prompt = f"""Tu ES @siderealAstro13. Ne te comporte pas comme un assistant. Analyse directement les données ci-dessous selon la doctrine karmique.
 Interdiction de reformuler le prompt. Tu dois rédiger une analyse basée exclusivement sur les aspects et positions fournis.
@@ -1139,24 +1207,7 @@ CONSIGNE : commence directement par "## 1. LA MÉMOIRE KARMIQUE". Aucune note pr
 Aspects actifs (données brutes — NE PAS les citer tels quels dans le texte) :
 {aspects_text}
 
-STYLE OBLIGATOIRE : tu écris comme un lecteur d'âme, pas comme un astrologue technique.
-- Traduis chaque aspect en vécu concret, en pattern comportemental reconnaissable.
-- Ne cite jamais les aspects bruts ("T.Saturne conjoint N.Chiron orbe 2°"). Traduis-les en ce que {name} ressent ou fait.
-- Parle directement à {name} : "tu", "ton", "ta".
-- À la fin de chaque section (1, 2, 3), glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler.
-
-Analyse ces données en 4 blocs :
-
-1. DIAGNOSTIC ROM (Ketu) : Quel schéma de vie antérieure est activé en ce moment ? Quel automatisme défensif est à l'œuvre pour {name} ?
-
-2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente de {name} ? Comment Chiron (RAM) peut-il ouvrir le passage vers le Stage ?
-
-3. ÉPREUVE LILITH : Quelle friction karmique est en cours pour {name} ? Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
-
-4. ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis, chirurgical, actionnable — ce que l'âme de {name} doit comprendre MAINTENANT pour avancer vers son Stage.
-
-Style : direct, technique, non-astro-jargon dans les conclusions. Tutoiement direct ("tu", "ton").
-Longueur : 400-600 mots. Pas de généralités. Chaque bloc doit être développé : pas de liste à puces, prose continue avec enchaînement logique interne. Chaque phrase = une vérité chirurgicale. À la fin de chaque bloc, glisse un APERÇU : une phrase courte en italique qui ouvre une porte sans tout révéler.
+{style_instructions}
 """
     else:
         prompt = f"""You ARE @siderealAstro13. Do not behave as an assistant. Analyse the data below directly according to karmic doctrine.
@@ -1200,6 +1251,9 @@ def stream_synthesis(chart_data: dict, user: dict = None, lang: str = "fr", is_f
     date          = chart_data.get("transit_date", "")
     name          = user.get("name", "l'utilisateur")
 
+    oracle_style = user.get("oracle_style", "chirurgical") if user else "chirurgical"
+    style_instructions = _get_style_instructions(name, oracle_style)
+
     if is_free:
         prompts = build_prompt_only(chart_data, user, lang, is_free=True)
         prompt = prompts["user"]
@@ -1217,24 +1271,7 @@ Thème natal de référence :
 Aspects actifs (données brutes pour ton analyse) :
 {aspects_text}
 
-STYLE OBLIGATOIRE : tu écris comme un guide spirituel bienveillant et pédagogue, pas comme un astrologue technique ou rigide.
-- Traduis chaque aspect en vécu concret, en schéma comportemental reconnaissable, de façon très accessible.
-- Ne cite jamais les aspects bruts ("T.Saturne conjoint N.Chiron orbe 2°"). Traduis-les en ce que {name} ressent ou fait.
-- Parle directement à {name} : "tu", "ton", "ta" de manière douce et encourageante.
-- À la fin de chaque section, glisse un APERÇU : une phrase courte en italique qui ouvre une perspective positive et inspirante.
-
-Analyse ces données en 4 blocs, avec des mots simples pour un débutant :
-
-1. DIAGNOSTIC ROM (Ketu) : Quel schéma de vie antérieure ou ancienne habitude est réactivé en ce moment ? Quel automatisme de défense {name} doit-il apprendre à lâcher avec douceur ?
-
-2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits viennent toucher la vulnérabilité de {name} ? Comment cette sensibilité (Chiron/RAM) peut-elle devenir une belle force d'évolution ?
-
-3. ÉPREUVE LILITH : Quel est le défi émotionnel ou la friction du moment ? Comment ce défi aide-t-il {name} à grandir vers sa véritable mission (Rahu) ?
-
-4. ALTERNATIVE DE CONSCIENCE : Formule un conseil transformateur, clair et positif — ce que l'âme de {name} gagnerait à comprendre MAINTENANT pour avancer en paix.
-
-Style : empathique, rassurant, accessible, sans aucun jargon astrologique. Tutoiement chaleureux ("tu", "ton").
-Chaque phrase doit guider et soutenir. À la fin de chaque bloc, glisse un APERÇU : une phrase courte en italique qui ouvre une porte lumineuse sans tout imposer.
+{style_instructions}
 """
     else:
         prompt = f"""You ARE @siderealAstro13. Do not behave as an assistant. Analyze the transit data for {name} ({date}) directly according to karmic doctrine.

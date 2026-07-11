@@ -19,16 +19,7 @@ import { api } from '../../lib/api';
       </p>
     </div>
 
-    <!-- Local AI Suggestion -->
-    <div id="local-ai-suggestion" class="hidden animate-fade-in border border-cosmic-border rounded-xl p-4 bg-cosmic-void/60 text-center space-y-2">
-      <p class="text-sm text-cosmic-text-dim flex items-center justify-center gap-2">
-        <span>💡</span> <strong>Le saviez-vous ?</strong>
-      </p>
-      <p class="text-xs text-cosmic-text-dim/80">
-        Pour une confidentialité maximale et des réponses hors-ligne, vous pouvez installer une IA locale sur votre téléphone (comme PocketPal AI ou MLC Chat). L'application s'y connectera automatiquement !
-      </p>
-      <a href="#" class="inline-block mt-1 text-xs text-cosmic-gold hover:underline">En savoir plus sur l'IA locale →</a>
-    </div>
+
 
     <!-- Welcome -->
     <section class="text-center animate-fade-in">
@@ -146,6 +137,12 @@ import { api } from '../../lib/api';
       });
 
       try {
+        if (new URLSearchParams(window.location.search).get('upgrade') === 'true') {
+          triggerUpgrade('pro').catch(err => {
+            console.error(err);
+            alert(err.message || "Impossible d'initier le paiement.");
+          });
+        }
         const resp = await api.profile();
         if (resp.ok && resp.profile?.pseudo) {
           const pseudo = resp.profile.pseudo;

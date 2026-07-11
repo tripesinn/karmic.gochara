@@ -17,20 +17,7 @@ const translations: Record<string, Record<string, string>> = {
 export const i18n = {
   /** Detect the current language based on localStorage or browser navigator */
   detect(): string {
-    if (typeof window === 'undefined') return 'fr';
-    
-    // 1. Explicit choice from localStorage
-    const saved = localStorage.getItem('karmic_lang');
-    if (saved && translations[saved]) return saved;
-    
-    // 2. Navigator language matching
-    const navLang = navigator.language.slice(0, 2).toLowerCase();
-    if (translations[navLang]) {
-      return navLang;
-    }
-    
-    // 3. Fallback
-    return 'fr';
+    return 'en';
   },
 
   /** Translate a key to the current language */

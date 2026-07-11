@@ -344,7 +344,10 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       } else if (output.textContent) {
         output.textContent += '\n\n✦ SYNTHÈSE COMPLÈTE ✦\n\n';
       }
-      if(btnDaily) btnDaily.disabled = true;
+      if(btnDaily) {
+        btnDaily.disabled = true;
+        btnDaily.classList.add('hidden');
+      }
       if(btnFull) btnFull.disabled = true;
       document.getElementById('copy-container')?.classList.add('hidden');
 
@@ -499,6 +502,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       } catch (err: any) {
         if (err.name !== 'AbortError') {
           console.error(err);
+          if (btnDaily) btnDaily.classList.remove('hidden');
           if (err.message?.includes('subscription_required') || err.message?.includes('quota') || err.status === 429) {
             setReadingStatus(`
               <div class="text-center">
@@ -631,6 +635,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
             output.textContent = savedOutput;
             makeTextInteractive(output);
           }
+          document.getElementById('btn-daily-reading')?.classList.add('hidden');
           document.getElementById('copy-container')?.classList.remove('hidden');
           document.getElementById('integrated-chat-container')?.classList.remove('hidden');
         } else {

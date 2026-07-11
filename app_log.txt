@@ -1,0 +1,88 @@
+07-06 20:58:31.995  2515  2515 D DEF_PackageChangedBroadcastReceiver: onReceive com.karmicgochara.app android.intent.action.PACKAGE_REMOVED replacing: true
+07-06 20:58:31.996  2515  3010 I SmartDualCardConfig: onPackageInstallStateUpdate uid=10354,appName=com.karmicgochara.app,packageAddFlag=0
+07-06 20:58:32.055  2515  2515 D DEF_PackageChangedBroadcastReceiver: onReceive com.karmicgochara.app android.intent.action.PACKAGE_ADDED replacing: true
+07-06 20:58:32.129  2515  2515 D DEF_PackageChangedBroadcastReceiver: onReceive com.karmicgochara.app android.intent.action.PACKAGE_REPLACED replacing: true
+07-06 20:58:32.483  2515  3010 I SmartDualCardConfig: onPackageInstallStateUpdate uid=10354,appName=com.karmicgochara.app,packageAddFlag=1
+07-06 20:58:34.947 27223 27757 W PackageParser: Unknown element under <manifest>: queries at /data/app/com.karmicgochara.app-k3Co6di64Y1ksGcXHXuXwg==/base.apk Binary XML file line #24
+07-06 20:58:35.037 27730 27756 W PackageParser: Unknown element under <manifest>: queries at /data/app/com.karmicgochara.app-k3Co6di64Y1ksGcXHXuXwg==/base.apk Binary XML file line #24
+07-06 21:33:00.073  2515  3010 I SmartDualCardConfig: onPackageInstallStateUpdate uid=10354,appName=com.karmicgochara.app,packageAddFlag=0
+07-06 21:33:00.077  2515  2515 D DEF_PackageChangedBroadcastReceiver: onReceive com.karmicgochara.app android.intent.action.PACKAGE_REMOVED replacing: true
+07-06 21:33:00.151  2515  2515 D DEF_PackageChangedBroadcastReceiver: onReceive com.karmicgochara.app android.intent.action.PACKAGE_ADDED replacing: true
+07-06 21:33:00.232  2515  2515 D DEF_PackageChangedBroadcastReceiver: onReceive com.karmicgochara.app android.intent.action.PACKAGE_REPLACED replacing: true
+07-06 21:33:00.446  2515  3010 I SmartDualCardConfig: onPackageInstallStateUpdate uid=10354,appName=com.karmicgochara.app,packageAddFlag=1
+07-06 21:33:01.802 31273 31298 W PackageParser: Unknown element under <manifest>: queries at /data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/base.apk Binary XML file line #24
+07-06 21:37:17.665  2654  2654 I ASSET_SERVICE: RemoveAssetData start, packageName is :com.karmicgochara.app.
+07-06 21:37:17.667  2515  2515 I HwCoreAppHelperService: LocalReceiver receives:android.intent.action.PACKAGE_RESTARTED,pkg:com.karmicgochara.app,uid:10354
+07-06 21:37:17.667  2515  2515 I HwCoreAppHelperService: LocalReceiver receives:android.intent.action.PACKAGE_DATA_CLEARED,pkg:com.karmicgochara.app,uid:10354
+07-06 21:37:17.668  6634  6634 I HiAdKit.AppRemovedReceiver.main:  uninstallReceiver.onReceive, package:com.karmicgochara.app
+07-06 21:37:17.674 26099 31761 D HMSPushLog61600304: [PushKit DataClearReceiver.java:65] pkgName=com.karmicgochara.app
+07-06 21:37:17.674  6634  6634 I HiAdKit.AppDownloadDelegate.main:  installReceiver.onReceive, action:android.intent.action.PACKAGE_DATA_CLEARED, pkg: com.karmicgochara.app
+07-06 21:37:17.745  2729  2729 I HwLauncher: PowerSaveLauncherModel  onReceive intent=Intent { act=android.intent.action.PACKAGE_DATA_CLEARED dat=package:com.karmicgochara.app flg=0x1000010 (has extras) }
+07-06 21:37:17.746  2729  2729 I HwLauncher: StreetModeLauncherModel  onReceive intent=Intent { act=android.intent.action.PACKAGE_DATA_CLEARED dat=package:com.karmicgochara.app flg=0x1000010 (has extras) }
+07-06 21:37:17.747  2729  2729 I HwLauncher: Model onReceive intent=Intent { act=android.intent.action.PACKAGE_DATA_CLEARED dat=package:com.karmicgochara.app flg=0x1000010 (has extras) }
+07-06 21:37:17.748  2729  2729 I HwLauncher: Model handlePkgDataCleared ACTION_PACKAGE_DATA_CLEARED pkg=com.karmicgochara.app, op=0
+07-06 21:37:17.799 31009 31764 I HiAnalyticsKit: HiAnalyticsSysEvtReceiver=> intent.getData().getSchemeSpecificPart(): com.karmicgochara.app
+07-06 21:37:18.252 30001 31868 E PhSharedDirectoryWriter: Failed to delete the CE shared dir for Android package: com.karmicgochara.app. [CONTEXT service_id=51 ]
+07-06 21:37:18.252 30001 31868 E PhSharedDirectoryWriter: Failed to delete the DE shared dir for Android package: com.karmicgochara.app. [CONTEXT service_id=51 ]
+07-06 21:37:18.287 27662 16828 I Icing   : doRemovePackageData com.karmicgochara.app
+07-06 21:37:19.317 31779 31779 W Monkey  : args: [-p, com.karmicgochara.app, -c, android.intent.category.LAUNCHER, 1]
+07-06 21:37:19.318 31779 31779 W Monkey  :  arg: "com.karmicgochara.app"
+07-06 21:37:19.320 31779 31779 W Monkey  : data="com.karmicgochara.app"
+07-06 21:37:19.415  1075  1095 D AwareLog: iawared: WorkingsetProcessCommand subCmd = 354, userId=10354, pid=0, com.karmicgochara.app
+07-06 21:37:19.416  1075  1095 D AwareLog: iawared: WorkingsetSendPrereadMsg com.karmicgochara.app
+07-06 21:37:19.416  1075  1095 D AwareLog: iawared: WorkingsetStart com.karmicgochara.app in monitor0
+07-06 21:37:19.506  1075  1095 D AwareLog: iawared: WorkingsetProcessCommand subCmd = 354, userId=10354, pid=0, com.karmicgochara.app
+07-06 21:37:19.507  1075  1095 D AwareLog: iawared: WorkingsetStart com.karmicgochara.app in monitor0
+07-06 21:37:19.525  1075  1095 D AwareLog: iawared: WorkingsetProcessCommand subCmd = 350, userId=10354, pid=31946, com.karmicgochara.app
+07-06 21:37:19.526  1075  1095 D AwareLog: iawared: WorkingsetStart com.karmicgochara.app in monitor0
+07-06 21:37:19.573  1030 24674 D ITouchService: itouch stylusCurrentPkgName = com.karmicgochara.app lastOneFramePkgName = 
+07-06 21:37:19.573  1030 24674 D ITouchService: itouch currentPackageName = com.karmicgochara.app
+07-06 21:37:19.573  1030 24674 D ITouchService: itouch:app com.karmicgochara.app is  not game app
+07-06 21:37:19.573  1030 24674 D ITouchService: itouch:app com.karmicgochara.app is  not in StylusPenList
+07-06 21:37:19.580 31946 31946 D ApplicationLoaders: createClassLoader zip: /data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/base.apk:/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/split_config.arm64_v8a.apk:/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/split_config.fr.apk:/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/split_config.xxhdpi.apk librarySearchPath: /data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/lib/arm64:/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/base.apk!/lib/arm64-v8a:/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/split_config.fr.apk!/lib/arm64-v8a:/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/split_config.xxhdpi.apk!/lib/arm64-v8a libraryPermittedPath: /data/user/0/com.karmicgochara.app parent: java.lang.BootClassLoader@149f7c5 targetSdkVersion: 35 isBundled: false classLoaderName: null sharedLibraries: null
+07-06 21:37:19.599 31946 31946 I chatty  : uid=10354(com.karmicgochara.app) identical 1 line
+07-06 21:37:19.626 31946 31964 I HwApiCacheMangerEx: apicache path=/storage/emulated/0 state=mounted key=com.karmicgochara.app#10354#256
+07-06 21:37:19.628 31946 31964 I HwApiCacheMangerEx: apicache path=/storage/emulated/0 state=mounted key=com.karmicgochara.app#10354#0
+07-06 21:37:19.656 31946 31964 I AwareBitmapCacher: init processName:com.karmicgochara.app pid=31946 uid=10354
+07-06 21:37:19.755 31946 31980 I OpenGLRenderer: RenderThread: progress name = [com.karmicgochara.app], viewCornerType = 0
+07-06 21:37:19.757 31946 31982 I iGraphics: [0020080c] pn: com.karmicgochara.app, p: 31946
+07-06 21:37:19.757 31946 31982 I iGraphics: [0030080c] no spt app: com.karmicgochara.app
+07-06 21:37:19.826 31946 31946 I DecorView[]: pkgName:com.karmicgochara.app old windowMode:0 new windoMode:1, isFixedSize:false
+07-06 21:37:20.735 31946 31946 I ConnectivityManager: requestNetwork and the calling app is: com.karmicgochara.app
+07-06 21:37:20.980 31946 31946 D ActivityThread: add activity client record, r= ActivityRecord{e4164a8 token=android.os.BinderProxy@904f53 {com.karmicgochara.app/com.karmicgochara.app.MainActivity}} token= android.os.BinderProxy@904f53
+07-06 21:37:21.046  6597  6667 I CAWARENESS_AppUsageManager: onEvent, packageName=com.karmicgochara.app, activityName=com.karmicgochara.app.MainActivity
+07-06 21:37:21.052 31946 32146 D HiTouch_PressGestureDetector: onAttached, package=com.karmicgochara.app, windowType=1, mIsHiTouchRestricted=true
+07-06 21:37:21.113  2515  3010 I SmartDualCardConfig: getAppType,pkgName=com.karmicgochara.app,appType=-1
+07-06 21:37:21.143  1553  6034 D ActivityTaskManager: canShowActivityWhileKeyguardShowing false r=ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}
+07-06 21:37:21.144  1553  1743 I HwAudioServiceEx: ComponentInfo : className = com.karmicgochara.app.MainActivity, flag = onPause, isHomeActivity = , isTop = false
+07-06 21:37:21.145  2515  3010 D DollieActivityManagerAdapter: [Paused] pid:31946 uid:10354 ComponentInfo{com.karmicgochara.app/com.karmicgochara.app.MainActivity} uidState:13
+07-06 21:37:21.145  2515  3010 E DollieAdapterService: notifyActivityState pkg:com.karmicgochara.app/com.karmicgochara.app.MainActivity state:13 fg:false mUid:10354
+07-06 21:37:21.147  2515  3010 I HidataAppQoeP: foregroundUidRemove uid: 10354 name: com.karmicgochara.app
+07-06 21:37:21.154  1553  1999 D ActivityTaskManager: canShowActivityWhileKeyguardShowing false r=ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}
+07-06 21:37:21.154  1553  1999 D ActivityTaskManager: canShowActivityWhileKeyguardShowing false r=ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}
+07-06 21:37:21.158  2515  3010 I SmartDualCardConfig: getAppType,pkgName=com.karmicgochara.app,appType=-1
+07-06 21:37:21.175  1553  6700 I WindowManager: notifyAppStopped: AppWindowToken{54b7bdc token=Token{7ee784f ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}}}
+07-06 21:37:21.179  1553  1999 V ActivityTaskManager: Activity idle: Token{7ee784f ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}}
+07-06 21:37:21.179  1553  1999 D ActivityTaskManager: canShowActivityWhileKeyguardShowing false r=ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}
+07-06 21:37:21.736 31946 32109 I chatty  : uid=10354(com.karmicgochara.app) ThreadPoolSingl identical 2 lines
+07-06 21:37:22.859  1553  1999 D ActivityTaskManager: canShowActivityWhileKeyguardShowing false r=ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}
+07-06 21:37:23.054  2515  3010 D ConnCureConfigUtil: isCaredApp: input = com.karmicgochara.app
+07-06 21:37:26.448  1553  6041 D ActivityTaskManager: canShowActivityWhileKeyguardShowing false r=ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}
+07-06 21:37:26.836 31946 32341 D ProfileInstaller: Installing profile for com.karmicgochara.app
+07-06 21:37:28.681  1553  1999 I PackageManager.DexOptimizer: Running dexopt (dexoptNeeded=-3) on: /data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/base.apk pkg=com.karmicgochara.app isa=arm64 dexoptFlags=boot_complete,profile_guided,enable_hidden_api_checks targetFilter=speed-profile oatDir=/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/oat classLoaderContext=PCL[]
+07-06 21:37:28.682  1041 10436 D installd: forkNotifyToRMS parcel pid=0, ppid=1041, pkg=com.karmicgochara.app, status=1, num=1, time=1783366648
+07-06 21:37:28.683  1041 10436 V installd: DexInv: --- BEGIN '/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/base.apk' ---
+07-06 21:37:28.684  1041 10436 D installd: forkNotifyToRMS parcel pid=32357, ppid=1041, pkg=com.karmicgochara.app, status=0, num=0, time=0
+07-06 21:37:28.713 32357 32357 I dex2oat : /apex/com.android.runtime/bin/dex2oat --input-vdex-fd=11 --output-vdex-fd=12 --resolve-startup-const-strings=true --max-image-block-size=1048576 --compiler-filter=speed-profile -j1 --profile-file-fd=15 --classpath-dir=/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg== --class-loader-context=PCL[] --generate-mini-debug-info --compilation-reason=unknown
+07-06 21:37:29.577  1553  1649 D ActivityTaskManager: canShowActivityWhileKeyguardShowing false r=ActivityRecord{6af8f29 u0 com.karmicgochara.app/.MainActivity t9794}
+07-06 21:37:29.579  1075  1095 D AwareLog: iawared: WorkingsetProcessCommand subCmd = 353, userId=10354, pid=31946, com.karmicgochara.app
+07-06 21:37:29.582  1075  1095 D AwareLog: iawared: WorkingsetAbort com.karmicgochara.app
+07-06 21:37:30.645  1553  6041 W ProcessStats: Tracking association SourceState{33e02d5 com.karmicgochara.app/10354 Top #281201} whose proc state 1 is better than process ProcessState{edf5269 com.google.android.gms.persistent/10172 pkg=com.google.android.gms} proc state 2 (169 skipped)
+07-06 21:37:32.496  1041 10436 V installd: DexInv: --- END '/data/app/com.karmicgochara.app-_rjzOVn2r0c0nQqFpGKyKg==/base.apk' (success) ---
+07-06 21:37:32.496  1041 10436 D installd: forkNotifyToRMS parcel pid=0, ppid=1041, pkg=com.karmicgochara.app, status=2, num=0, time=0
+07-06 21:37:39.311 31946 32367 E FilePhenotypeFlags: Config package com.google.android.gms.clearcut_client#com.karmicgochara.app cannot use FILE backing without declarative registration. See go/phenotype-android-integration#phenotype for more information. This will lead to stale flags.
+07-06 21:37:39.352 31946 32367 I chatty  : uid=10354(com.karmicgochara.app) ProcessStablePh identical 1 line
+07-06 21:37:39.352 31946 32367 E FilePhenotypeFlags: Config package com.google.android.gms.clearcut_client#com.karmicgochara.app cannot use FILE backing without declarative registration. See go/phenotype-android-integration#phenotype for more information. This will lead to stale flags.
+07-06 21:37:42.104  1553  6700 W ProcessStats: Tracking association SourceState{9281543 com.karmicgochara.app/10354 Top #281244} whose proc state 1 is better than process ProcessState{edf5269 com.google.android.gms.persistent/10172 pkg=com.google.android.gms} proc state 2 (40 skipped)
+07-06 21:37:53.953  1553  6041 W ProcessStats: Tracking association SourceState{9281543 com.karmicgochara.app/10354 Top #281260} whose proc state 1 is better than process ProcessState{edf5269 com.google.android.gms.persistent/10172 pkg=com.google.android.gms} proc state 2 (13 skipped)
+07-06 21:38:02.069 31009 31355 I keyringKit-UninstallAppReceiver: com.karmicgochara.app installed: true.

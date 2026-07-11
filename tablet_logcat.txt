@@ -1,0 +1,1029 @@
+--------- beginning of system
+07-10 10:07:06.301  3725  3725 I SDHMS:LOAD: type: LoadsFreqs, value: 0:0:0:741260:1469000:650000:741260:1469000:650000:0:0:0
+07-10 10:07:06.363   601   601 D io_stats: !@   8,0 r 41963984 849195004 w 7154596 121738008 d 0 0 f 0 0 iot 10093288 0 th 0 0 0 pt 0 inp 0 0 296761.633
+--------- beginning of main
+07-10 10:07:06.390 11502 11502 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+07-10 10:07:06.928  5662  5666 I ding:background: Background concurrent copying GC freed 7206KB AllocSpace bytes, 20(776KB) LOS objects, 60% free, 4083KB/10227KB, paused 161us,76us total 125.232ms
+07-10 10:07:07.696  5735  5740 I ng:quick_launch: Background concurrent copying GC freed 2574KB AllocSpace bytes, 12(536KB) LOS objects, 64% free, 3449KB/9593KB, paused 143us,62us total 114.103ms
+07-10 10:07:08.363   601   601 D io_stats: !@   8,0 r 41964001 849195296 w 7154599 121738068 d 0 0 f 0 0 iot 10093308 0 th 0 0 0 pt 0 inp 0 0 296763.634
+07-10 10:07:09.578  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:09.579  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:09.584  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:10.133  1468  2321 D BatteryService: Sending ACTION_BATTERY_CHANGED: level:99, status:2, health:2, ac:false, usb:true, wireless:false, pogo:false, misc:0x0, charge_type:1, charger_type:0, voltage:4186, temperature:305, online:5, current_avg:470, ps:false, hvc:false, capacity:280000, current_event:0x0, current_now:457, mcc:0, mcv:0, cc:4339410, present:true, scale:100, technology:Li-ion
+07-10 10:07:10.133  1129  1129 E sehhealth-service: Could not open /sys/class/power_supply/battery/lrp
+07-10 10:07:10.135  1468  1468 D PhoneWindowManagerExt: ACTION_BATTERY_CHANGED - Level=99, status=2
+07-10 10:07:10.136  1468  1636 D MotionRecognitionService: [SAR]  onReceive : ACTION_BATTERY_CHANGED, Plugged: 2
+07-10 10:07:10.136  1468  1866 I DeviceBatteryInfoService: action: android.intent.action.BATTERY_CHANGED
+07-10 10:07:10.137  1468  1866 I DeviceBatteryInfoService: phone battery level: 99
+07-10 10:07:10.137  1468  1866 I DeviceBatteryInfoService: phone battery status: 2
+07-10 10:07:10.137  1468  1468 D SemWifiApBroadcastReceiver: Received : android.intent.action.BATTERY_CHANGED
+07-10 10:07:10.138  1942  1942 D SemBigDataInfoController: Intent: android.intent.action.BATTERY_CHANGED
+07-10 10:07:10.139  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:10.139  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:10.140  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:10.140  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:10.140  1957  1957 D KeyguardUpdateMonitor: received broadcast android.intent.action.BATTERY_CHANGED
+07-10 10:07:10.141  1957  1957 I PowerUI : mBootCompleted = true |  mFullyConnected = true
+07-10 10:07:10.141  1957  1957 I PowerUI : BATTERY_HEALTH_CHECK extraHealth=2 mBatteryMiscEvent=0
+07-10 10:07:10.141  1957  1957 W PowerUI : Plug reason
+07-10 10:07:10.141  1957  1957 W PowerUI : Skip charging animation - by plug status
+07-10 10:07:10.141  1957  1957 D PowerUI : priorPlugType = 2 mPlugType = 2 priorBatteryStatus = 2 mBatteryStatus = 2
+07-10 10:07:10.141  1957  1957 W PowerUI : Plug reason
+07-10 10:07:10.141  1957  1957 W PowerUI : Skip charging sound - by plug status
+07-10 10:07:10.141  1957  1957 I PowerUI : oldMisalign : false, curMisalign : false
+07-10 10:07:10.142  1957  2970 D SecPowerUI.Notification: dismissing low battery warning: level=99
+07-10 10:07:10.142  1957  2970 D SecPowerUI.Notification: updateNotification mWarning=false mPlaySound=false
+07-10 10:07:10.142  1957  2970 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=99, currentBatteryMode=0, chargingTime=150000, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:10.143  1957  2970 D SecPowerUI.Notification: 1. restoreScreenTimeOut - saved_value : :
+07-10 10:07:10.143  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 150000 / mChargingTime : 116000
+07-10 10:07:10.143  1957  2970 E SecPowerUI.Notification: no saved value, so we do nothing !!
+07-10 10:07:10.143  1957  1957 D SecPowerUI.Notification: showChargingNotification()
+07-10 10:07:10.144  1957  1957 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=99, currentBatteryMode=0, chargingTime=116000, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:10.150  1957  1957 I NotificationManager: com.android.systemui: notify(2131429007, charging_state, Notification(channel=CHR shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0xa color=0xff5075a1 category=sys groupKey=CHARGING vis=PUBLIC semFlags=0x0 semPriority=0 semMissedCount=0)) as user
+07-10 10:07:10.159  1957  1957 D PowerUI : Battery swelling mode - priorBatterySwellingMode = 0 mBatterySwellingMode = 0 mBatteryStatus = 2
+07-10 10:07:10.159  1957  1957 I PowerUI : mBatteryMiscEvent = 0
+07-10 10:07:10.160  1957  1957 I AODBatteryManager: updateBatteryData: ACTION_BATTERY_CHANGED
+07-10 10:07:10.162  1957  1957 I AODBatteryManager: saveBatteryData : AOD BatteryData [mBatteryLevel=99, mBatteryStatus=CHARGING, mBatteryPlugType=USB, mBatteryPlugged=true, mRemainingChargeTime=116000, mBatteryChargingType=1, mBatteryChargerType=NORMAL, mBatteryOnline=NOT_DEFINED, mBatterySwellingMode=NONE, mBatteryProtectMode=false]
+07-10 10:07:10.165  1957  1957 I ChargingInfoManager: updateChargingInfo: newState = AOD ChargingInfo [mState=BATTERY_AND_REMAIN_TIME, mIsCharging=true, mIsFullyCharged=false, mIsBatteryProtectMode=false], oldState = AOD ChargingInfo [mState=BATTERY_AND_REMAIN_TIME, mIsCharging=true, mIsFullyCharged=false, mIsBatteryProtectMode=false]
+07-10 10:07:10.166  1957  1957 D KeyguardUpdateMonitor: handleBatteryUpdate
+07-10 10:07:10.180  1957  1957 D KeyguardSecIndicationPolicy:  add T Event pos = DEFAULT, type =              BATTERY, id = 10646, text =   99%
+07-10 10:07:10.180  1957  1957 D KeyguardSecIndicationPolicy: 1 min avant pleine charge, duration = 3000
+07-10 10:07:10.180  1957  1957 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, pos = DEFAULT, item = [id=10646|ty=BATTERY|pr=40|txt=  99%
+07-10 10:07:10.180  1957  1957 D KeyguardSecIndicationController: 1 min avant pleine charge|ti=duration=3000|an=false]
+07-10 10:07:10.181  1957  1957 D KeyguardSecIndicationPolicy: update Event pos = DEFAULT, type =      BATTERY_RESTING, id = 10647, text =   99%
+07-10 10:07:10.181  1957  1957 D KeyguardSecIndicationPolicy: 1 min avant pleine charge
+07-10 10:07:10.182  1957  1957 D KeyguardSecIndicationController: addBatteryAndOwnerInfoIndication() battery status = BatteryStatus{status=2,level=99,plugged=2,health=2,maxChargingWattage=-1,remaining=116000ultraFastCharger=0}
+07-10 10:07:10.364   601   601 D io_stats: !@   8,0 r 41964035 849196244 w 7154599 121738068 d 0 0 f 0 0 iot 10093320 0 th 0 0 0 pt 0 inp 0 5 296765.635
+07-10 10:07:10.387  9571  9571 I Edge.badge: updateBadge item = com.android.systemui:-1 1
+07-10 10:07:10.388  2465  2465 I Launcher.NotificationListener: onNotificationPosted : com.android.systemui number : 0
+07-10 10:07:10.390  1957  1957 D InterruptionStateProvider: Group alert behavior is suppressed but we want to alert bubble
+07-10 10:07:10.432  1147  1147 I SurfaceFlinger: SFWD update time=296765701531926
+07-10 10:07:10.583  1957  1957 D BubblesManager: onEntryUpdated : shouldBubbleUp=false ,key=-1|com.android.systemui|2131429007|charging_state|10054
+07-10 10:07:10.587  1957  1957 D InterruptionStateProvider:  no Heads up : edgelighting enabled app. -1|com.android.systemui|2131429007|charging_state|10054
+07-10 10:07:10.719  1468  1818 I ChimeraAggressivePolicyHandler: executePolicy() - triggerSource: TRIGGER_SOURCE_LMKD
+07-10 10:07:10.721  1468  1818 I ChimeraAggressivePolicyHandler: available memory: 1322492, free memory target: 645120, quit chimera
+07-10 10:07:11.117 29267 29293 I ContactsProvider_EventLog: cp_s: [CONTACT con(2012) dat(16048) acc({phone(1)=1768, google(12)=49, com.google.android.apps.tachyon(7)=321, sim(2)=13, com.whatsapp(8)=1234}) calls([logtype:100 cnt:1725, logtype:200 cnt:15, logtype:300 cnt:184]) Iso(FR) uId(0) ]
+07-10 10:07:11.117 29267 29293 I ContactsProvider_EventLog: cp_s: [ agr({[8 ,8 ,8 ,8 ,1]=1, [1 ,8 ,1 ,8 ,7]=1, [8]=169, [1 ,7]=75, [1 ,8 ,2]=2, [1 ,1]=7, [1 ,8 ,8 ,8]=1, [2]=2, [1 ,8 ,8]=14, [12 ,7]=1, [8 ,1 ,8]=2, [12]=9, [8 ,12]=1, [1 ,1 ,8 ,7]=2, [8 ,2]=1, [8 ,2 ,7]=1, [8 ,8 ,8 ,1 ,7]=1, [1 ,8 ,1]=11, [7]=20, [8 ,7]=32, [1 ,8 ,7]=74, [1]=705, [1 ,2]=7, [1 ,8 ,8 ,7]=4, [12 ,8]=31, [8 ,1 ,7]=95, [1 ,1 ,8]=4, [1 ,8]=286, [1 ,8 ,8 ,1]=1, [8 ,8 ,1]=12, [12 ,8 ,7]=7, [8 ,8 ,8 ,1]=1, [8 ,8 ,1 ,7]=4, [8 ,1]=423, [1 ,1 ,8 ,8]=1, [1 ,7 ,8]=1, [1 ,8 ,1 ,7]=3}) ]
+07-10 10:07:11.117 29267 29293 I ContactsProvider_EventLog: cp_s: [ cnt({acore(29267)=1}) ]
+07-10 10:07:11.117 29267 29293 I ContactsProvider_EventLog: cp_s: [PROFILE ] [SAPROFILE con(1) acc({phone(1)=1}) ]
+07-10 10:07:11.117 29267 29293 I ContactsProvider_EventLog: cp_s: [STATE R(F) ]
+07-10 10:07:12.056  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=3, vendorLevel=3
+07-10 10:07:12.061  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:12.061  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:12.365   601   601 D io_stats: !@   8,0 r 41964443 849201768 w 7154749 121751204 d 0 0 f 0 0 iot 10093476 0 th 0 0 0 pt 0 inp 0 0 296767.636
+07-10 10:07:12.832  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:07:12.852 30336 30368 I ReactNativeJNI: Memory warning (pressure level: TRIM_MEMORY_COMPLETE) received by JS VM, running a GC
+07-10 10:07:12.856  3725  4639 I SDHMS:D : SIOP:: AP:389 BAT:305 USB:288 CHG:392 PA:358 WIFI:382 BLK:347 SKIN:382 SKINF:382 SKINB:372 LRP:382 LRF:382 LRB:372 
+07-10 10:07:12.871 30336 30370 D OpenGLRenderer: setSurface called with nullptr
+07-10 10:07:12.908  1468  1499 I ActivityManager: com.samsung.android.lool is exempt from freezer
+07-10 10:07:12.909  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 1000; state: DISABLED
+07-10 10:07:12.910  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 1000; state: DISABLED
+07-10 10:07:12.911  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 1000; state: DISABLED
+07-10 10:07:12.911  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 1000; state: ENABLED
+07-10 10:07:12.919 28792 28792 I CMHJobService: [#CMH#] onStartJob Called at juil. 10,2026 10:07:12 
+07-10 10:07:12.934 28792 28792 I CMHJobService: [#CMH#] Battery Percentage is:  0.99, High Temp: 0
+07-10 10:07:12.940  1101  1101 D Zygote  : Forked child process 5866
+07-10 10:07:12.941  1468  1500 I ActivityManager: Start proc 5866:com.samsung.android.lool/1000 for broadcast {com.samsung.android.lool/com.samsung.android.sm.security.model.trigger.SecurityBridgeReceiver}
+07-10 10:07:12.966  1468  3832 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 1000; state: DISABLED
+07-10 10:07:12.976  5866  5866 I ng.android.lool: Using generational CollectorTypeCC GC.
+07-10 10:07:12.982  1468  1888 D SyncManager: userId - 0 auto - true
+07-10 10:07:12.985 28792 28792 I CMHApplication: [#CMH#] Block to verify, Change Trim Memory Level: 80 
+07-10 10:07:12.985  1244  9241 I CameraService: onUidStateChanged: uid=10234, procState is changed. (16 -> 10)
+07-10 10:07:12.987  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:07:12.988  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:07:12.993  5866  5866 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-10 10:07:12.994 32746  1541 I ForwardSyncCache: reclaimMemory: Clearing caches
+07-10 10:07:12.995 32746  1541 W Bugle   : TextClassifierLibManagerImpl: Reclaiming memory at level: 60
+07-10 10:07:12.996  5866  5866 D ActivityThread: setConscryptValidator
+07-10 10:07:12.996  5866  5866 D ActivityThread: setConscryptValidator - put
+07-10 10:07:13.001  1468  3832 I ActivityManager: DSS OFF for com.samsung.android.lool
+07-10 10:07:13.007  1244  5945 I CameraService: onUidStateChanged: uid=10234, procState is changed. (10 -> 16)
+07-10 10:07:13.008  5866  5866 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 1000; state: ENABLED
+07-10 10:07:13.060  1468  2041 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.091  1468  2041 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.098  1468  2041 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.177  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:13.179  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:13.182  1957  1957 D KeyguardSecIndicationPolicy:  remove Item pos = DEFAULT                             , id = 10646, 
+07-10 10:07:13.183  1957  1957 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, skip ownerInfo
+07-10 10:07:13.183  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:13.245  5866  5866 I CapsuleProvider_1.1.3: onCreate
+07-10 10:07:13.247  5866  5866 I com.samsung.android.sm.iafd.InitializationProvider: doInit
+07-10 10:07:13.248  5866  5891 I Dc.IafdDbManager: iafd_libVersion = 2.0.6
+07-10 10:07:13.251  1468  2041 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 1000; state: DISABLED
+07-10 10:07:13.258  5866  5866 I DC.SettingSearchProvider: version : 1388201000, lang : fr_FR
+07-10 10:07:13.269  5866  5866 I SmApplication: onCreate s
+07-10 10:07:13.269  5866  5866 I SmApplication: current process is com.samsung.android.lool
+07-10 10:07:13.269  5866  5866 I SmApplication: initializeApplication
+07-10 10:07:13.285  5866  5866 I DMT-StubUpdateUtils: current : 1388201000, market : 0
+07-10 10:07:13.287  5866  5866 I DMT-StubUpdateUtils: current : 732405110, market : 0
+07-10 10:07:13.290  5866  5866 I SamsungAnalytics605079: Tracker start:6.05.079
+07-10 10:07:13.295  5866  5866 I DIAGMON_SDK[605079]: DiagMonAgent type: 2
+07-10 10:07:13.296  5866  5866 I DIAGMON_SDK[605079][dc60qlc6ri] : generated SR object
+07-10 10:07:13.297  5866  5866 I SmApplication: current process is com.samsung.android.lool
+07-10 10:07:13.300  1468  2321 I GenerationRegistry: mBackingStore.isClosed() : false
+07-10 10:07:13.305  5866  5866 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1926 android.content.ContextWrapper.startService:834 com.samsung.android.sm.common.SmApplication.onCreate:120 android.app.Instrumentation.callApplicationOnCreate:1277 android.app.ActivityThread.handleBindApplication:7667 
+07-10 10:07:13.311  5866  5866 I SmApplication: onCreate e
+07-10 10:07:13.314  5866  5866 W SmApplication: onTrimMemory : 10
+07-10 10:07:13.315  5866  5866 I SB_Receiver: action : com.samsung.android.sm.security.service.ACTION_SERVICE_STATUS_CHANGED
+07-10 10:07:13.315  5866  5866 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1926 android.content.ContextWrapper.startService:834 android.content.ContextWrapper.startService:834 com.samsung.android.sm.security.model.trigger.SecurityBridgeReceiver.onReceive:77 android.app.ActivityThread.handleReceiver:4909 
+07-10 10:07:13.325  5866  5904 I RegistryService: Received action com.samsung.android.sm.external.service.action.REGISTER_SERVICE
+07-10 10:07:13.325  5866  5904 I CapsuleProvider_1.1.3: releasing initialize wait lock.
+07-10 10:07:13.326  5866  5904 I Sbixby_1.1.3: initialized
+07-10 10:07:13.328  5866  5904 I Routine@Sdk[3.1.23]: RoutineSdkImpl: setHandler - conditionHandler=yh.a@a9b6ccd, actionHandler=wh.a@2e1f982
+07-10 10:07:13.333  5866  5906 I SecurityBridgeService: action : com.samsung.android.sm.security.ACTION_SECURITY_PROVIDER_CALL
+07-10 10:07:13.340  5866  5906 W ContextImpl: Calling a method in the system process without a qualified user: android.app.ContextImpl.startService:1926 android.content.ContextWrapper.startService:834 com.samsung.android.sm.security.model.trigger.SecurityBridgeProvider.call:374 android.content.ContentProvider.call:2582 android.content.ContentProvider$Transport.call:530 
+07-10 10:07:13.346  5866  5907 I SB_Processor: action : com.samsung.android.sm.security.service.ACTION_SERVICE_STATUS_CHANGED
+07-10 10:07:13.346  5866  5907 I SB_BgScanServiceCompleted : name : background_update, status  : completed
+07-10 10:07:13.353  5866  5866 W SmApplication: onTrimMemory : 60
+07-10 10:07:13.358  5866  5866 I DC.AppIconCache: clear icon cache
+07-10 10:07:13.640  1735  1735 W bfmd    : Already started: bfmd@af036bb
+07-10 10:07:13.685  1468  3875 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.738  1468  2041 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.780  1735  5882 W baqp    : Job(ItemListsService:stopItemList#0.789) Attempting to unregister unknown list: itemlist-ViewType(96)-33
+07-10 10:07:13.801  1468  2041 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.855  1468  2041 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.891  1735  5883 W baqp    : Job(ItemListsService:stopItemList#0.795) Attempting to unregister unknown list: itemlist-ViewType(97)-34
+07-10 10:07:13.905  1468  3875 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.951  1468  3875 D SyncManager: userId - 0 auto - true
+07-10 10:07:13.988  1735  5882 W baqp    : Job(ItemListsService:stopItemList#0.801) Attempting to unregister unknown list: itemlist-ViewType(98)-35
+07-10 10:07:13.996  1468  2321 D SyncManager: userId - 0 auto - true
+07-10 10:07:14.027  1468  2041 D SyncManager: userId - 0 auto - true
+07-10 10:07:14.043  1735  5880 W baqp    : Job(ItemListsService:stopItemList#0.807) Attempting to unregister unknown list: itemlist-ViewType(99)-36
+07-10 10:07:14.138  1244  9241 I CameraService: onUidStateChanged: uid=10234, procState is changed. (16 -> 10)
+07-10 10:07:14.144  1735  1735 W prs     : [Gmail] MailSyncAdapterService: MailSyncAdapterService is destroyed! [CONTEXT android_log_tag="MailSyncAdapterService" ]
+07-10 10:07:14.146 32746  1541 I ForwardSyncCache: reclaimMemory: Clearing caches
+07-10 10:07:14.146  1244  9241 I CameraService: onUidStateChanged: uid=10234, procState is changed. (10 -> 16)
+07-10 10:07:14.147 32746  1541 W Bugle   : TextClassifierLibManagerImpl: Reclaiming memory at level: 60
+07-10 10:07:14.174 11502  4220 W CCTFlatFileLogStore: Excessive logging: 1 events, 180795 bytes from log source ANDROID_GMAIL last 0s
+07-10 10:07:14.366   601   601 D io_stats: !@ 179,0 r 2655 109822 w 571 22905 d 0 0 f 0 0 iot 16160 0 th 0 0 0 pt 0 inp 0 0 296769.636
+07-10 10:07:14.366   601   601 D io_stats: !@   8,0 r 41966891 849264588 w 7154787 121752268 d 0 0 f 0 0 iot 10093972 0 th 0 0 0 pt 0 inp 0 0 296769.636
+07-10 10:07:15.164  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 116000 / mChargingTime : 116000
+07-10 10:07:15.165  1957  1957 D SecPowerUI.Notification: There is no change about charging status, so return!
+07-10 10:07:16.367   601   601 D io_stats: !@   8,0 r 41966902 849264748 w 7154813 121752488 d 0 0 f 0 0 iot 10093988 0 th 0 0 0 pt 0 inp 0 0 296771.638
+07-10 10:07:16.393  3725  3725 I SDHMS:LOAD: type: LoadsFreqs, value: 0:0:0:709539:1469000:650000:709539:1469000:650000:5:260:0
+07-10 10:07:17.174  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:17.178  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:17.178  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:18.368   601   601 D io_stats: !@   8,0 r 41966904 849264756 w 7154813 121752488 d 0 0 f 0 0 iot 10093992 0 th 0 0 0 pt 0 inp 0 0 296773.639
+07-10 10:07:20.339  1129  1129 E sehhealth-service: Could not open /sys/class/power_supply/battery/lrp
+07-10 10:07:20.339  1468  2041 D BatteryService: Sending ACTION_BATTERY_CHANGED: level:99, status:2, health:2, ac:false, usb:true, wireless:false, pogo:false, misc:0x0, charge_type:1, charger_type:0, voltage:4184, temperature:305, online:5, current_avg:461, ps:false, hvc:false, capacity:280000, current_event:0x0, current_now:438, mcc:0, mcv:0, cc:4361260, present:true, scale:100, technology:Li-ion
+07-10 10:07:20.344  1468  1636 D MotionRecognitionService: [SAR]  onReceive : ACTION_BATTERY_CHANGED, Plugged: 2
+07-10 10:07:20.344  1468  1866 I DeviceBatteryInfoService: action: android.intent.action.BATTERY_CHANGED
+07-10 10:07:20.344  1468  1866 I DeviceBatteryInfoService: phone battery level: 99
+07-10 10:07:20.345  1468  1866 I DeviceBatteryInfoService: phone battery status: 2
+07-10 10:07:20.345  1942  1942 D SemBigDataInfoController: Intent: android.intent.action.BATTERY_CHANGED
+07-10 10:07:20.346  1468  1468 D PhoneWindowManagerExt: ACTION_BATTERY_CHANGED - Level=99, status=2
+07-10 10:07:20.346  1468  1468 D SemWifiApBroadcastReceiver: Received : android.intent.action.BATTERY_CHANGED
+07-10 10:07:20.351  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:20.352  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:20.352  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:20.352  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:20.353  1957  1957 D KeyguardUpdateMonitor: received broadcast android.intent.action.BATTERY_CHANGED
+07-10 10:07:20.353  1957  1957 I PowerUI : mBootCompleted = true |  mFullyConnected = true
+07-10 10:07:20.353  1957  1957 I PowerUI : BATTERY_HEALTH_CHECK extraHealth=2 mBatteryMiscEvent=0
+07-10 10:07:20.353  1957  1957 W PowerUI : Plug reason
+07-10 10:07:20.353  1957  1957 W PowerUI : Skip charging animation - by plug status
+07-10 10:07:20.354  1957  1957 D PowerUI : priorPlugType = 2 mPlugType = 2 priorBatteryStatus = 2 mBatteryStatus = 2
+07-10 10:07:20.354  1957  1957 W PowerUI : Plug reason
+07-10 10:07:20.354  1957  1957 W PowerUI : Skip charging sound - by plug status
+07-10 10:07:20.354  1957  1957 I PowerUI : oldMisalign : false, curMisalign : false
+07-10 10:07:20.354  1957  3207 D SecPowerUI.Notification: dismissing low battery warning: level=99
+07-10 10:07:20.354  1957  3207 D SecPowerUI.Notification: updateNotification mWarning=false mPlaySound=false
+07-10 10:07:20.354  1957  3207 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=99, currentBatteryMode=0, chargingTime=116000, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:20.356  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 116000 / mChargingTime : 116000
+07-10 10:07:20.356  1957  3207 D SecPowerUI.Notification: 1. restoreScreenTimeOut - saved_value : :
+07-10 10:07:20.356  1957  1957 D SecPowerUI.Notification: There is no change about charging status, so return!
+07-10 10:07:20.356  1957  3207 E SecPowerUI.Notification: no saved value, so we do nothing !!
+07-10 10:07:20.356  1957  1957 D PowerUI : Battery swelling mode - priorBatterySwellingMode = 0 mBatterySwellingMode = 0 mBatteryStatus = 2
+07-10 10:07:20.356  1957  1957 I PowerUI : mBatteryMiscEvent = 0
+07-10 10:07:20.358  1957  1957 D KeyguardUpdateMonitor: handleBatteryUpdate
+07-10 10:07:20.370   601   601 D io_stats: !@   8,0 r 41966936 849265164 w 7154815 121752492 d 0 0 f 0 0 iot 10094008 0 th 0 0 0 pt 0 inp 0 3 296775.640
+07-10 10:07:20.374  1957  1957 I AODBatteryManager: updateBatteryData: ACTION_BATTERY_CHANGED
+07-10 10:07:20.376  1957  1957 I AODBatteryManager: saveBatteryData : AOD BatteryData [mBatteryLevel=99, mBatteryStatus=CHARGING, mBatteryPlugType=USB, mBatteryPlugged=true, mRemainingChargeTime=116000, mBatteryChargingType=1, mBatteryChargerType=NORMAL, mBatteryOnline=NOT_DEFINED, mBatterySwellingMode=NONE, mBatteryProtectMode=false]
+07-10 10:07:20.420  1468  2321 W ProcessStats: Tracking association SourceState{b7909d0 system/1000 BTopFgs #574757} whose proc state 2 is better than process ProcessState{4970d1d com.tailscale.ipn/10404 pkg=com.tailscale.ipn} proc state 3 (21 skipped)
+07-10 10:07:20.530  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:20.535  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:20.535  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:22.371   601   601 D io_stats: !@   8,0 r 41967010 849266476 w 7154823 121752540 d 0 0 f 0 0 iot 10094048 0 th 0 0 0 pt 0 inp 0 0 296777.641
+07-10 10:07:22.858  3725  4639 I SDHMS:D : SIOP:: AP:380 BAT:305 USB:287 CHG:389 PA:358 WIFI:378 BLK:347 SKIN:382 SKINF:382 SKINB:369 LRP:382 LRF:382 LRB:369 
+07-10 10:07:23.979  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:23.981  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:23.985  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:24.372   601   601 D io_stats: !@ 179,0 r 2655 109822 w 571 22905 d 0 0 f 0 0 iot 16160 0 th 0 0 0 pt 0 inp 0 0 296779.642
+07-10 10:07:24.372   601   601 D io_stats: !@   8,0 r 41967036 849267384 w 7154827 121752564 d 0 0 f 0 0 iot 10094064 0 th 0 0 0 pt 0 inp 0 0 296779.643
+07-10 10:07:24.583  1735  2182 I cn_CronetUrlRequestContext: destroyNativeStreamLocked android.net.http.internal.org.chromium.net.impl.CronetBidirectionalStream@12db656
+07-10 10:07:25.362  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 116000 / mChargingTime : 116000
+07-10 10:07:25.362  1957  1957 D SecPowerUI.Notification: There is no change about charging status, so return!
+07-10 10:07:26.374   601   601 D io_stats: !@   8,0 r 41967046 849267728 w 7154836 121752604 d 0 0 f 0 0 iot 10094076 0 th 0 0 0 pt 0 inp 0 0 296781.644
+07-10 10:07:26.514  3725  3725 I SDHMS:LOAD: type: LoadsFreqs, value: 0:0:0:650000:650000:650000:650000:650000:650000:0:0:0
+07-10 10:07:29.271  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10211; state: DISABLED
+07-10 10:07:29.271  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10211; state: DISABLED
+07-10 10:07:29.272  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10211; state: DISABLED
+07-10 10:07:29.272  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10211; state: ENABLED
+07-10 10:07:29.274  1468  1500 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10211; state: ENABLED
+07-10 10:07:29.307  1101  1101 D Zygote  : Forked child process 5912
+07-10 10:07:29.309  1468  1500 I ActivityManager: Start proc 5912:com.google.android.apps.turbo/u0a211 for broadcast {com.google.android.apps.turbo/com.google.android.apps.turbo.nudges.broadcasts.BatteryStatusChangedReceiver}
+07-10 10:07:29.345  5912  5912 I roid.apps.turbo: Using generational CollectorTypeCC GC.
+07-10 10:07:29.361  5912  5912 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-10 10:07:29.364  5912  5912 D ActivityThread: setConscryptValidator
+07-10 10:07:29.364  5912  5912 D ActivityThread: setConscryptValidator - put
+07-10 10:07:29.368  1468  3875 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10211; state: DISABLED
+07-10 10:07:29.370  1468  3875 I ActivityManager: DSS OFF for com.google.android.apps.turbo
+07-10 10:07:29.389  5912  5912 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10211; state: ENABLED
+07-10 10:07:29.407  5912  5912 D nativeloader: Configuring clns-shared-4 for other apk /system/framework/org.apache.http.legacy.jar. target_sdk_version=33, uses_libraries=ALL, library_path=/product/priv-app/Turbo/lib/arm64:/product/priv-app/Turbo/Turbo.apk!/lib/arm64-v8a:/system/lib64:/system/system_ext/lib64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.apps.turbo:/product/priv-app/Turbo:/system/lib64:/system/system_ext/lib64
+07-10 10:07:29.407  5912  5912 D nativeloader: Extending system_exposed_libraries: libsmpsft.smps.samsung.so:libSDKRecognitionOCR.spenocr.samsung.so:libSDKMoireDetector.spenocr.samsung.so:libtensorflowlite_c.spenocr.samsung.so:libBestComposition.polarr.so:libTracking.polarr.so:libFeature.polarr.so:libaudiomirroring_jni.audiomirroring.samsung.so:libteecl.teegris.samsung.so:lib.engmodejni.samsung.so:libSDKRecognitionText.spensdk.samsung.so:lib_vnd_client.dk.samsung.so:lib_native_client.dk.samsung.so:lib_nativeJni.dk.samsung.so:libSEF.quram.so:libimagecodec.quram.so:libagifencoder.quram.so:libneural.snap.samsung.so:libsnap_aidl.snap.samsung.so:libface_landmark.arcsoft.so:libFacialStickerEngine.arcsoft.so:liblow_light_hdr.arcsoft.so:libhigh_dynamic_range.arcsoft.so:libheifcapture_jni.media.samsung.so:libjpegsq.media.samsung.so:libslljpeg.media.samsung.so:libsemimagecrop_jni.media.samsung.so:libsimba.media.samsung.so:libapex_jni.media.samsung.so:libvesgraphicframework.videoeditor.samsung.so:libvesinterface.videoeditor.samsung.so:libvesframework.videoeditor.sa
+07-10 10:07:29.414  5912  5912 D nativeloader: Configuring clns-shared-5 for other apk /system_ext/framework/androidx.window.extensions.jar. target_sdk_version=33, uses_libraries=ALL, library_path=/product/priv-app/Turbo/lib/arm64:/product/priv-app/Turbo/Turbo.apk!/lib/arm64-v8a:/system/lib64:/system/system_ext/lib64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.apps.turbo:/product/priv-app/Turbo:/system/lib64:/system/system_ext/lib64
+07-10 10:07:29.414  5912  5912 D nativeloader: Extending system_exposed_libraries: libsmpsft.smps.samsung.so:libSDKRecognitionOCR.spenocr.samsung.so:libSDKMoireDetector.spenocr.samsung.so:libtensorflowlite_c.spenocr.samsung.so:libBestComposition.polarr.so:libTracking.polarr.so:libFeature.polarr.so:libaudiomirroring_jni.audiomirroring.samsung.so:libteecl.teegris.samsung.so:lib.engmodejni.samsung.so:libSDKRecognitionText.spensdk.samsung.so:lib_vnd_client.dk.samsung.so:lib_native_client.dk.samsung.so:lib_nativeJni.dk.samsung.so:libSEF.quram.so:libimagecodec.quram.so:libagifencoder.quram.so:libneural.snap.samsung.so:libsnap_aidl.snap.samsung.so:libface_landmark.arcsoft.so:libFacialStickerEngine.arcsoft.so:liblow_light_hdr.arcsoft.so:libhigh_dynamic_range.arcsoft.so:libheifcapture_jni.media.samsung.so:libjpegsq.media.samsung.so:libslljpeg.media.samsung.so:libsemimagecrop_jni.media.samsung.so:libsimba.media.samsung.so:libapex_jni.media.samsung.so:libvesgraphicframework.videoeditor.samsung.so:libvesinterface.videoeditor.samsung.so:libvesframework.videoeditor.sa
+07-10 10:07:29.440  5912  5912 D nativeloader: Configuring clns-shared-6 for other apk /product/priv-app/Turbo/Turbo.apk. target_sdk_version=33, uses_libraries=, library_path=/product/priv-app/Turbo/lib/arm64:/product/priv-app/Turbo/Turbo.apk!/lib/arm64-v8a:/system/lib64:/system/system_ext/lib64, permitted_path=/data:/mnt/expand:/data/user/0/com.google.android.apps.turbo:/product/priv-app/Turbo:/system/lib64:/system/system_ext/lib64
+07-10 10:07:29.456  5912  5912 D nativeloader: Load libframework-connectivity-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity.jar: ok
+07-10 10:07:29.461  5912  5912 V GraphicsEnvironment: ANGLE Developer option for 'com.google.android.apps.turbo' set to: 'default'
+07-10 10:07:29.461  5912  5912 V GraphicsEnvironment: ANGLE GameManagerService for com.google.android.apps.turbo: false
+07-10 10:07:29.462  5912  5912 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+07-10 10:07:29.466  5912  5912 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+07-10 10:07:29.473  5912  5912 D NetworkSecurityConfig: No Network Security Config specified, using platform default
+07-10 10:07:29.513  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:29.516  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:29.517  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:29.522  5912  5925 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10211; state: ENABLED
+07-10 10:07:30.376   601   601 D io_stats: !@   8,0 r 41967301 849278412 w 7154836 121752604 d 0 0 f 0 0 iot 10094176 0 th 0 0 0 pt 0 inp 0 0 296785.647
+07-10 10:07:30.450  1468  3875 W ProcessStats: Tracking association SourceState{b7909d0 system/1000 BTopFgs #574765} whose proc state 2 is better than process ProcessState{4970d1d com.tailscale.ipn/10404 pkg=com.tailscale.ipn} proc state 3 (4 skipped)
+07-10 10:07:30.451 11502 11502 D BoundBrokerSvc: onUnbind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+07-10 10:07:30.518  1468  3875 D BatteryService: Sending ACTION_BATTERY_CHANGED: level:100, status:2, health:2, ac:false, usb:true, wireless:false, pogo:false, misc:0x0, charge_type:1, charger_type:0, voltage:4183, temperature:305, online:5, current_avg:453, ps:false, hvc:false, capacity:280000, current_event:0x0, current_now:455, mcc:0, mcv:0, cc:4361260, present:true, scale:100, technology:Li-ion
+07-10 10:07:30.518  1129  1129 E sehhealth-service: Could not open /sys/class/power_supply/battery/lrp
+07-10 10:07:30.524  1468  1636 D MotionRecognitionService: [SAR]  onReceive : ACTION_BATTERY_CHANGED, Plugged: 2
+07-10 10:07:30.524  1468  1866 I DeviceBatteryInfoService: action: android.intent.action.BATTERY_CHANGED
+07-10 10:07:30.524  1468  1866 I DeviceBatteryInfoService: phone battery level: 100
+07-10 10:07:30.524  1468  1866 I DeviceBatteryInfoService: phone battery status: 2
+07-10 10:07:30.525  1468  1866 D DeviceBatteryInfoService: setBatteryStatus : 2
+07-10 10:07:30.525  1468  1468 D PhoneWindowManagerExt: ACTION_BATTERY_CHANGED - Level=100, status=2
+07-10 10:07:30.529  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:30.530  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:30.530  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:30.530  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:30.532  1957  1957 D KeyguardUpdateMonitor: received broadcast android.intent.action.BATTERY_CHANGED
+07-10 10:07:30.532  1957  1957 I PowerUI : mBootCompleted = true |  mFullyConnected = true
+07-10 10:07:30.532  1957  1957 I PowerUI : BATTERY_HEALTH_CHECK extraHealth=2 mBatteryMiscEvent=0
+07-10 10:07:30.534  1468  1468 D SemWifiApBroadcastReceiver: Received : android.intent.action.BATTERY_CHANGED
+07-10 10:07:30.534  1942  1942 D SemBigDataInfoController: Intent: android.intent.action.BATTERY_CHANGED
+07-10 10:07:30.536  1957  3391 D SecPowerUI.Notification: dismissing low battery warning: level=100
+07-10 10:07:30.537  1957  3391 D SecPowerUI.Notification: updateNotification mWarning=false mPlaySound=false
+07-10 10:07:30.537  1957  3391 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=116000, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:30.540  1957  3391 D SecPowerUI.Notification: 1. restoreScreenTimeOut - saved_value : :
+07-10 10:07:30.540  1957  3391 E SecPowerUI.Notification: no saved value, so we do nothing !!
+07-10 10:07:30.541  1957  1957 W PowerUI : Plug reason
+07-10 10:07:30.541  1957  1957 W PowerUI : Skip charging animation - by plug status
+07-10 10:07:30.542  1957  1957 D PowerUI : priorPlugType = 2 mPlugType = 2 priorBatteryStatus = 2 mBatteryStatus = 2
+07-10 10:07:30.542  1957  1957 W PowerUI : Plug reason
+07-10 10:07:30.542  1957  1957 W PowerUI : Skip charging sound - by plug status
+07-10 10:07:30.542  1957  1957 I PowerUI : oldMisalign : false, curMisalign : false
+07-10 10:07:30.549  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : 116000 / mChargingTime : -1
+07-10 10:07:30.549  1957  1957 D SecPowerUI.Notification: showChargingNotification()
+07-10 10:07:30.549  1957  1957 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=-1, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:30.558  1957  1957 I NotificationManager: com.android.systemui: notify(2131429007, charging_state, Notification(channel=CHR shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0xa color=0xff5075a1 category=sys groupKey=CHARGING vis=PUBLIC semFlags=0x0 semPriority=0 semMissedCount=0)) as user
+07-10 10:07:30.572  1957  1957 D PowerUI : Battery swelling mode - priorBatterySwellingMode = 0 mBatterySwellingMode = 0 mBatteryStatus = 2
+07-10 10:07:30.572  1957  1957 I PowerUI : mBatteryMiscEvent = 0
+07-10 10:07:30.586  1957  1957 V QsExpandAnimator: setQsExpansionPosition 0.0
+07-10 10:07:30.607  1957  1957 D KeyguardUpdateMonitor: handleBatteryUpdate
+07-10 10:07:30.618  1957  1957 D KeyguardSecIndicationPolicy:  add T Event pos = DEFAULT, type =              BATTERY, id = 10649, text =   100%, duration = 3000
+07-10 10:07:30.618  1957  1957 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, pos = DEFAULT, item = [id=10649|ty=BATTERY|pr=40|txt=  100%|ti=duration=3000|an=false]
+07-10 10:07:30.619  1957  1957 D KeyguardSecIndicationPolicy: update Event pos = DEFAULT, type =      BATTERY_RESTING, id = 10650, text =   100%
+07-10 10:07:30.621  1957  1957 D KeyguardSecIndicationController: addBatteryAndOwnerInfoIndication() battery status = BatteryStatus{status=2,level=100,plugged=2,health=2,maxChargingWattage=-1,remaining=-1ultraFastCharger=0}
+07-10 10:07:30.621  1957  1957 I AODBatteryManager: updateBatteryData: ACTION_BATTERY_CHANGED
+07-10 10:07:30.626  1957  1957 I AODBatteryManager: saveBatteryData : AOD BatteryData [mBatteryLevel=100, mBatteryStatus=CHARGING, mBatteryPlugType=USB, mBatteryPlugged=true, mRemainingChargeTime=-1, mBatteryChargingType=1, mBatteryChargerType=NORMAL, mBatteryOnline=NOT_DEFINED, mBatterySwellingMode=NONE, mBatteryProtectMode=false]
+07-10 10:07:30.626  1957  1957 I ChargingInfoManager: updateChargingInfo: newState = AOD ChargingInfo [mState=BATTERY_AND_REMAIN_TIME, mIsCharging=true, mIsFullyCharged=false, mIsBatteryProtectMode=false], oldState = AOD ChargingInfo [mState=BATTERY_AND_REMAIN_TIME, mIsCharging=true, mIsFullyCharged=false, mIsBatteryProtectMode=false]
+07-10 10:07:30.724  3725  3725 E SDHMS:SDHMS_UTIL_IO: e = /sys/class/power_supply/battery/chg_type: open failed: ENOENT (No such file or directory)
+07-10 10:07:30.793  1957  1957 D InterruptionStateProvider: Group alert behavior is suppressed but we want to alert bubble
+07-10 10:07:30.798  2465  2465 I Launcher.NotificationListener: onNotificationPosted : com.android.systemui number : 0
+07-10 10:07:30.799  9571  9571 I Edge.badge: updateBadge item = com.android.systemui:-1 1
+07-10 10:07:30.997  1957  1957 D BubblesManager: onEntryUpdated : shouldBubbleUp=false ,key=-1|com.android.systemui|2131429007|charging_state|10054
+07-10 10:07:30.999  1957  1957 D InterruptionStateProvider:  no Heads up : edgelighting enabled app. -1|com.android.systemui|2131429007|charging_state|10054
+07-10 10:07:32.378   601   601 D io_stats: !@   8,0 r 41967661 849284084 w 7155374 121786288 d 0 0 f 0 0 iot 10094364 0 th 0 0 0 pt 0 inp 0 0 296787.648
+07-10 10:07:32.858  3725  4639 I SDHMS:D : SIOP:: AP:377 BAT:305 USB:287 CHG:387 PA:358 WIFI:375 BLK:347 SKIN:382 SKINF:382 SKINB:367 LRP:382 LRF:382 LRB:367 
+07-10 10:07:32.861  1468  1523 D BatteryExternalStatsWorker: update stats : wakelock-change (1)
+07-10 10:07:33.022  1468  1523 D BatteryExternalStatsWorker: Update CPU state
+07-10 10:07:33.022  1468  1523 D BatteryExternalStatsWorker: mStats lock released
+07-10 10:07:33.022  1468  1523 D BatteryExternalStatsWorker: done updateExternalStatsLocked
+07-10 10:07:33.026  1468  1523 D KernelCpuUidUserSysTimeReader: Removing uids 99237-99237
+07-10 10:07:33.032  1468  1523 D KernelCpuUidUserSysTimeReader: Removing uids 10442-10442
+07-10 10:07:33.047  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:33.051  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:33.058  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:33.204  1468  1495 E Watchdog: !@Sync: 9882 heap: 101 / 109 FD: 1084 [2026-07-10 10:07:33.203]
+07-10 10:07:33.620  1957  1957 D KeyguardSecIndicationPolicy:  remove Item pos = DEFAULT                             , id = 10649, 
+07-10 10:07:33.621  1957  1957 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, skip ownerInfo
+07-10 10:07:34.379   601   601 D io_stats: !@ 179,0 r 2655 109822 w 571 22905 d 0 0 f 0 0 iot 16160 0 th 0 0 0 pt 0 inp 0 0 296789.649
+07-10 10:07:34.380   601   601 D io_stats: !@   8,0 r 41967691 849284832 w 7155374 121786288 d 0 0 f 0 0 iot 10094376 0 th 0 0 0 pt 0 inp 0 0 296789.650
+07-10 10:07:35.578  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : -1 / mChargingTime : -1
+07-10 10:07:35.578  1957  1957 D SecPowerUI.Notification: There is no change about charging status, so return!
+07-10 10:07:36.531  1468  3875 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 10211; state: DISABLED
+07-10 10:07:36.640  3725  3725 I SDHMS:LOAD: type: LoadsFreqs, value: 0:0:0:668719:1066000:650000:670799:1066000:650000:0:0:0
+07-10 10:07:38.382   601   601 D io_stats: !@   8,0 r 41967754 849285704 w 7155383 121786376 d 0 0 f 0 0 iot 10094396 0 th 0 0 0 pt 0 inp 0 0 296793.652
+07-10 10:07:40.069  5662  5676 I Finsky:background: [473] Stats for Executor: bgExecutor wij@9969759[Running, pool size = 4, active threads = 0, queued tasks = 0, completed tasks = 86]
+07-10 10:07:40.082  5662  5676 I Finsky:background: [473] Stats for Executor: LightweightExecutor wij@aeddb77[Running, pool size = 4, active threads = 0, queued tasks = 0, completed tasks = 8]
+07-10 10:07:40.130  5662  5676 I Finsky:background: [473] Stats for Executor: BlockingExecutor wij@96d3a35[Running, pool size = 1, active threads = 0, queued tasks = 0, completed tasks = 1]
+07-10 10:07:40.497  5662  5733 I PlayCommon: [509] Preparing logs for uploading
+07-10 10:07:40.509  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:07:40.514  5866  5866 W SmApplication: onTrimMemory : 80
+07-10 10:07:40.514  5866  5866 I DC.AppIconCache: clear icon cache
+07-10 10:07:40.515  1468  3875 W ProcessStats: Tracking association SourceState{b7909d0 system/1000 BTopFgs #574772} whose proc state 2 is better than process ProcessState{4970d1d com.tailscale.ipn/10404 pkg=com.tailscale.ipn} proc state 3 (3 skipped)
+07-10 10:07:40.531  5662  5733 I PlayCommon: [509] Connecting to server for timestamp: https://play.googleapis.com/play/log/timestamp
+07-10 10:07:40.542  1468  1872 D NetdEventListenerService: DNS Requested by : 101, 10218
+07-10 10:07:40.580  5735  5757 I Finsky:quick_launch: [473] Stats for Executor: bgExecutor wij@87ab0a3[Running, pool size = 4, active threads = 0, queued tasks = 0, completed tasks = 4]
+07-10 10:07:40.589  5735  5757 I Finsky:quick_launch: [473] Stats for Executor: LightweightExecutor wij@fc47976[Running, pool size = 4, active threads = 0, queued tasks = 0, completed tasks = 4]
+07-10 10:07:40.689  1129  1129 E sehhealth-service: Could not open /sys/class/power_supply/battery/lrp
+07-10 10:07:40.689  1468  3875 D BatteryService: Sending ACTION_BATTERY_CHANGED: level:100, status:2, health:2, ac:false, usb:true, wireless:false, pogo:false, misc:0x0, charge_type:1, charger_type:0, voltage:4184, temperature:306, online:5, current_avg:446, ps:false, hvc:false, capacity:280000, current_event:0x0, current_now:453, mcc:0, mcv:0, cc:4370000, present:true, scale:100, technology:Li-ion
+07-10 10:07:40.692  1468  1636 D MotionRecognitionService: [SAR]  onReceive : ACTION_BATTERY_CHANGED, Plugged: 2
+07-10 10:07:40.693  1468  1468 D PhoneWindowManagerExt: ACTION_BATTERY_CHANGED - Level=100, status=2
+07-10 10:07:40.697  1468  1866 I DeviceBatteryInfoService: action: android.intent.action.BATTERY_CHANGED
+07-10 10:07:40.697  1468  1866 I DeviceBatteryInfoService: phone battery level: 100
+07-10 10:07:40.697  1468  1866 I DeviceBatteryInfoService: phone battery status: 2
+07-10 10:07:40.701  1468  1468 D SemWifiApBroadcastReceiver: Received : android.intent.action.BATTERY_CHANGED
+07-10 10:07:40.704  1942  1942 D SemBigDataInfoController: Intent: android.intent.action.BATTERY_CHANGED
+07-10 10:07:40.705  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:40.706  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:40.706  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:40.707  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: false
+07-10 10:07:40.707  1957  1957 D KeyguardUpdateMonitor: received broadcast android.intent.action.BATTERY_CHANGED
+07-10 10:07:40.707  1957  1957 I PowerUI : mBootCompleted = true |  mFullyConnected = true
+07-10 10:07:40.708  1957  1957 I PowerUI : BATTERY_HEALTH_CHECK extraHealth=2 mBatteryMiscEvent=0
+07-10 10:07:40.708  1957  1957 W PowerUI : Plug reason
+07-10 10:07:40.708  1957  1957 W PowerUI : Skip charging animation - by plug status
+07-10 10:07:40.708  1957  3403 D SecPowerUI.Notification: dismissing low battery warning: level=100
+07-10 10:07:40.709  1957  3403 D SecPowerUI.Notification: updateNotification mWarning=false mPlaySound=false
+07-10 10:07:40.709  1957  3403 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=-1, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:40.709  1957  1957 D PowerUI : priorPlugType = 2 mPlugType = 2 priorBatteryStatus = 2 mBatteryStatus = 2
+07-10 10:07:40.709  1957  1957 W PowerUI : Plug reason
+07-10 10:07:40.709  1957  1957 W PowerUI : Skip charging sound - by plug status
+07-10 10:07:40.709  1957  1957 I PowerUI : oldMisalign : false, curMisalign : false
+07-10 10:07:40.712  1957  3403 D SecPowerUI.Notification: 1. restoreScreenTimeOut - saved_value : :
+07-10 10:07:40.712  1957  3403 E SecPowerUI.Notification: no saved value, so we do nothing !!
+07-10 10:07:40.721  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : -1 / mChargingTime : -1
+07-10 10:07:40.721  1957  1957 D SecPowerUI.Notification: There is no change about charging status, so return!
+07-10 10:07:40.722  1957  1957 D PowerUI : Battery swelling mode - priorBatterySwellingMode = 0 mBatterySwellingMode = 0 mBatteryStatus = 2
+07-10 10:07:40.722  1957  1957 I PowerUI : mBatteryMiscEvent = 0
+07-10 10:07:40.723  1957  1957 D KeyguardUpdateMonitor: handleBatteryUpdate
+07-10 10:07:40.724  1957  1957 I AODBatteryManager: updateBatteryData: ACTION_BATTERY_CHANGED
+07-10 10:07:40.726  1957  1957 I AODBatteryManager: saveBatteryData : AOD BatteryData [mBatteryLevel=100, mBatteryStatus=CHARGING, mBatteryPlugType=USB, mBatteryPlugged=true, mRemainingChargeTime=-1, mBatteryChargingType=1, mBatteryChargerType=NORMAL, mBatteryOnline=NOT_DEFINED, mBatterySwellingMode=NONE, mBatteryProtectMode=false]
+07-10 10:07:40.796  5662  5733 I PlayCommon: [509] Connecting to server: https://play.googleapis.com/play/log?format=raw&proto_v2=true
+07-10 10:07:40.912  5662  5733 I PlayCommon: [509] Successfully uploaded logs.
+07-10 10:07:42.262  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:42.265  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:42.269  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:42.384   601   601 D io_stats: !@   8,0 r 41967761 849285732 w 7155470 121787280 d 0 0 f 0 0 iot 10094432 0 th 0 0 0 pt 0 inp 0 0 296797.655
+07-10 10:07:42.858  3725  4639 I SDHMS:D : SIOP:: AP:371 BAT:306 USB:287 CHG:384 PA:357 WIFI:372 BLK:347 SKIN:381 SKINF:381 SKINB:364 LRP:381 LRF:381 LRB:364 
+07-10 10:07:44.386   601   601 D io_stats: !@ 179,0 r 2655 109822 w 571 22905 d 0 0 f 0 0 iot 16160 0 th 0 0 0 pt 0 inp 0 0 296799.656
+07-10 10:07:45.400  1468  2041 D CustomizedBinderCallsStatsInternal: reportCpuUsage() : 0%
+07-10 10:07:45.400  1468  1498 I BinderCallsStats: Collected cpu time : 0us, collected call count : 0 for 60288 ms
+07-10 10:07:45.419 22033  3346 I android.vending: oneway function results for code 2 on binder at 0x76f2419820 will be dropped but finished with status UNKNOWN_TRANSACTION
+07-10 10:07:45.427  1468  1609 I UMR     : B|Compact com.google.process.gservices(5707)
+07-10 10:07:45.429  5662  5662 I Finsky:background: [2] Memory trim requested to level 60
+07-10 10:07:45.506  1468  1609 I UMR     : E|Compact d_rss=-13776KB
+07-10 10:07:45.728  1957  1957 D SecPowerUI.Notification: showChargingNotice oldChargingType : 11 / currentChargingType : 11, oldChargingTime : -1 / mChargingTime : -1
+07-10 10:07:45.728  1957  1957 D SecPowerUI.Notification: There is no change about charging status, so return!
+07-10 10:07:46.055 22033  4184 I android.vending: oneway function results for code 2 on binder at 0x76f243d4c0 will be dropped but finished with status UNKNOWN_TRANSACTION
+07-10 10:07:46.072  5735  5735 I Finsky:quick_launch: [2] Memory trim requested to level 60
+07-10 10:07:46.387   601   601 D io_stats: !@   8,0 r 41967870 849288612 w 7155470 121787280 d 0 0 f 0 0 iot 10094472 0 th 0 0 0 pt 0 inp 0 0 296801.657
+07-10 10:07:46.759  3725  3725 I SDHMS:LOAD: type: LoadsFreqs, value: 0:0:0:654160:858000:650000:654160:858000:650000:0:0:0
+07-10 10:07:47.180  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:47.184  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:47.189  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:48.389   601   601 D io_stats: !@   8,0 r 41967874 849288688 w 7155483 121787380 d 0 0 f 0 0 iot 10094488 0 th 0 0 0 pt 0 inp 0 0 296803.659
+07-10 10:07:49.054  1468  1787 W DeviceStorageMonitorService: updateBroadcasts(/data) oldLevel:0, newLevel:0, seq:1
+07-10 10:07:49.055  1468  1787 D DeviceStorageMonitorService: Available File Node Number is [12809660]
+07-10 10:07:49.056  1468  1787 W DeviceStorageMonitorService: updateBroadcasts_filenode(/data) fn_oldLevel:0, fn_newLevel:0, seq:1
+07-10 10:07:49.440  1957  2094 D MobileStatusTracker(0/1): onSignalStrengthsChanged level=4, vendorLevel=3
+07-10 10:07:49.445  1957  2094 D MobileSignalController(0/1): notifyListener: enabled=true, connected=true, dataConnected=true, networkType=LTE/LTE_CA (4G+), emergencyOnly=false, roaming=false, isDefault=true, dataActivity=inout, level=3, ca=true, mmWave=false, disabledDataIcon=false, simCard=ETC, sosState=false, satelliteState=0
+07-10 10:07:49.445  1957  2094 D NetworkController: SignalStrength from intent slotId=0
+07-10 10:07:50.390   601   601 D io_stats: !@   8,0 r 41967898 849289172 w 7155483 121787380 d 0 0 f 0 0 iot 10094504 0 th 0 0 0 pt 0 inp 0 0 296805.660
+07-10 10:07:50.880  1468  3875 D BatteryService: Sending ACTION_BATTERY_CHANGED: level:100, status:5, health:2, ac:false, usb:true, wireless:false, pogo:false, misc:0x0, charge_type:1, charger_type:0, voltage:4184, temperature:306, online:5, current_avg:439, ps:false, hvc:false, capacity:280000, current_event:0x0, current_now:427, mcc:0, mcv:0, cc:4370000, present:true, scale:100, technology:Li-ion
+07-10 10:07:50.883  1468  1636 D MotionRecognitionService: [SAR]  onReceive : ACTION_BATTERY_CHANGED, Plugged: 2
+07-10 10:07:50.885  1468  1866 I DeviceBatteryInfoService: action: android.intent.action.BATTERY_CHANGED
+07-10 10:07:50.885  1468  1866 I DeviceBatteryInfoService: phone battery level: 100
+07-10 10:07:50.885  1468  1866 I DeviceBatteryInfoService: phone battery status: 5
+07-10 10:07:50.886  1468  1468 D PhoneWindowManagerExt: ACTION_BATTERY_CHANGED - Level=100, status=5
+07-10 10:07:50.886  1468  1866 D DeviceBatteryInfoService: setBatteryStatus : 5
+07-10 10:07:50.888  1942  1942 D SemBigDataInfoController: Intent: android.intent.action.BATTERY_CHANGED
+07-10 10:07:50.889  1468  1468 D SemWifiApBroadcastReceiver: Received : android.intent.action.BATTERY_CHANGED
+07-10 10:07:50.891  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:50.892  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:50.893  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:50.893  1957  1957 D SamsungBatteryMeterDrawable: onBatteryLevelChanged isSomethingChanged: true
+07-10 10:07:50.896  1129  1129 E sehhealth-service: Could not open /sys/class/power_supply/battery/lrp
+07-10 10:07:50.907  1957  1957 D KeyguardUpdateMonitor: received broadcast android.intent.action.BATTERY_CHANGED
+07-10 10:07:50.907  1957  1957 I PowerUI : mBootCompleted = true |  mFullyConnected = true
+07-10 10:07:50.907  1957  1957 I PowerUI : BATTERY_HEALTH_CHECK extraHealth=2 mBatteryMiscEvent=0
+07-10 10:07:50.908  1957  3405 D SecPowerUI.Notification: dismissing low battery warning: level=100
+07-10 10:07:50.908  1957  3405 D SecPowerUI.Notification: updateNotification mWarning=false mPlaySound=false
+07-10 10:07:50.908  1957  3405 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=-1, chargingType=11, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:50.910  1957  3405 D SecPowerUI.Notification: 1. restoreScreenTimeOut - saved_value : :
+07-10 10:07:50.910  1957  3405 E SecPowerUI.Notification: no saved value, so we do nothing !!
+07-10 10:07:50.911  1957  1957 W PowerUI : Plug reason
+07-10 10:07:50.911  1957  1957 W PowerUI : Skip charging animation - by plug status
+07-10 10:07:50.911  1957  1957 D PowerUI : priorPlugType = 2 mPlugType = 2 priorBatteryStatus = 2 mBatteryStatus = 5
+07-10 10:07:50.911  1957  1957 W PowerUI : Plug reason
+07-10 10:07:50.911  1957  1957 W PowerUI : Skip charging sound - by plug status
+07-10 10:07:50.911  1957  1957 I PowerUI : oldMisalign : false, curMisalign : false
+07-10 10:07:50.911  1957  1957 D SecPowerUI.Notification: dismissSlowByChargerConnectionInfoPopUp()
+07-10 10:07:50.911  1957  1957 D SecPowerUI.Notification: dismissChargingNotification()
+07-10 10:07:50.911  1957  1957 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=0, chargingType=0, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:50.913  1957  1957 D PowerUI : Battery swelling mode - priorBatterySwellingMode = 0 mBatterySwellingMode = 0 mBatteryStatus = 5
+07-10 10:07:50.913  1957  1957 D SecPowerUI.Notification: dismissBatterySwellingNotice()
+07-10 10:07:50.913  1957  1957 D SecPowerUI.Notification: SecBatteryStatsSnapshot{batteryLevel=100, currentBatteryMode=0, chargingTime=0, chargingType=0, batteryHealth=2, automaticTestMode=false, isHiccupState=false}
+07-10 10:07:50.914  1957  1957 D SecPowerUI.Notification: dismissBatterySwellingPopup()
+07-10 10:07:50.915  1957  1957 I PowerUI : mBatteryMiscEvent = 0
+07-10 10:07:50.916  1957  1957 I AODBatteryManager: updateBatteryData: ACTION_BATTERY_CHANGED
+07-10 10:07:50.916  1957  1957 I AODBatteryManager: getChargeEstimateTime: not charging
+07-10 10:07:50.917  1957  1957 I AODBatteryManager: saveBatteryData : AOD BatteryData [mBatteryLevel=100, mBatteryStatus=FULL, mBatteryPlugType=USB, mBatteryPlugged=true, mRemainingChargeTime=0, mBatteryChargingType=0, mBatteryChargerType=NORMAL, mBatteryOnline=NOT_DEFINED, mBatterySwellingMode=NONE, mBatteryProtectMode=false]
+07-10 10:07:50.920  1468  1468 D EdgeLightingManager: isCallingUserSupported : callingUserId=-1, mUserId=0, isDualAppId=false, isKnoxId=false
+07-10 10:07:50.920  1957  1957 I ChargingInfoManager: updateChargingInfo: newState = AOD ChargingInfo [mState=HIDE_IN_FULLY_CHARGED, mIsCharging=false, mIsFullyCharged=true, mIsBatteryProtectMode=false], oldState = AOD ChargingInfo [mState=BATTERY_AND_REMAIN_TIME, mIsCharging=true, mIsFullyCharged=false, mIsBatteryProtectMode=false]
+07-10 10:07:50.920  1468  1468 D EdgeLightingManager: hideForNotification : packageName = com.android.systemui
+07-10 10:07:50.920  1957  1957 D KeyguardUpdateMonitor: handleBatteryUpdate
+07-10 10:07:50.922  1468  1468 D EdgeLightingPolicyManager:NotificationGroup: remove : sbn : StatusBarNotification(pkg=com.android.systemui user=UserHandle{-1} id=2131429007 tag=charging_state key=-1|com.android.systemui|2131429007|charging_state|10054: Notification(channel=CHR shortcut=null contentView=null vibrate=null sound=null defaults=0x0 flags=0xa color=0xff5075a1 category=sys groupKey=CHARGING vis=PUBLIC semFlags=0x0 semPriority=0 semMissedCount=0))
+07-10 10:07:50.922  1468  1468 D EdgeLightingPolicyManager.NotificationGroup: group notification count : 6
+07-10 10:07:50.922  1468  1468 D EdgeLightingManager: hideForNotification : isInteractive is true
+07-10 10:07:50.924  1957  1957 D KeyguardSecIndicationPolicy:  add T Event pos = DEFAULT, type =              BATTERY, id = 10652, text = Chargement terminé, duration = 3000
+07-10 10:07:50.924  1957  1957 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, pos = DEFAULT, item = [id=10652|ty=BATTERY|pr=40|txt=Chargement terminé|ti=duration=3000|an=false]
+07-10 10:07:50.928  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 175319604; UID 1000; state: ENABLED
+07-10 10:07:50.929  1957  1957 D KeyguardSecIndicationPolicy: update Event pos = DEFAULT, type =      BATTERY_RESTING, id = 10653, text = Chargement terminé
+07-10 10:07:50.932  1957  1957 D KeyguardSecIndicationController: addBatteryAndOwnerInfoIndication() battery status = BatteryStatus{status=5,level=100,plugged=2,health=2,maxChargingWattage=-1,remaining=-1ultraFastCharger=0}
+07-10 10:07:50.944  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 195579280; UID 1000; state: ENABLED
+07-10 10:07:50.948  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 195579280; UID 1000; state: DISABLED
+07-10 10:07:50.950  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 175319604; UID 10054; state: ENABLED
+07-10 10:07:50.951  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 195579280; UID 10054; state: ENABLED
+07-10 10:07:50.952  1147  1147 I SurfaceFlinger: SFWD update time=296806222547935
+07-10 10:07:50.965  1468  1468 D NotificationReminder: removeFromNotificationList record com.android.systemui
+07-10 10:07:50.970  1957  1957 D BubblesManager: setupNotifPipeline(), onEntryRemoved : reason=8
+07-10 10:07:50.992  1957  1957 D PluginInstanceManager: stopListening
+07-10 10:07:51.605  1468  2041 W ProcessStats: Tracking association SourceState{b7909d0 system/1000 BTopFgs #574782} whose proc state 2 is better than process ProcessState{4970d1d com.tailscale.ipn/10404 pkg=com.tailscale.ipn} proc state 3 (6 skipped)
+07-10 10:07:52.391   601   601 D io_stats: !@   8,0 r 41968027 849295308 w 7155562 121788012 d 0 0 f 0 0 iot 10094556 0 th 0 0 0 pt 0 inp 0 0 296807.662
+07-10 10:07:52.859  3725  4639 I SDHMS:D : SIOP:: AP:369 BAT:306 USB:287 CHG:382 PA:356 WIFI:369 BLK:346 SKIN:379 SKINF:379 SKINB:363 LRP:379 LRF:379 LRB:363 
+07-10 10:07:52.875  1468  1468 D SemWifiP2pGoPowerSave: GopsReceiver : received : com.samsung.intent.action.CHECK_SIOP_LEVEL
+07-10 10:07:52.876  1468  1468 I SemWifiP2pGoPowerSave: siop_level = 0
+07-10 10:07:52.881 28792 28843 I SystemBroadcastReceiver: [#CMH#] onReceive completed :  1
+07-10 10:07:52.883 28792 28792 I PolicyManager: [#CMH#] onReceive action = EVENT_SIOP
+07-10 10:07:52.898  1120  1120 I Sensors : batch(5) - uncal_light_sensor try to batching with 200000000
+07-10 10:07:52.899  1120  1120 I Sensors : UncalLightSensor old sensor_state 17024, new sensor_state : 282574488355456 en : 1
+07-10 10:07:52.903  1120  1120 I Sensors : enable:: uncal_light_sensor(5)
+07-10 10:07:52.999  1120  1585 I Sensors : Uncalibrated lux = 4, CCT = 3855, r = 26, g = 22, b = 21, c = 37, atime = 17, again = 3, time = 386964859400441
+07-10 10:07:52.999  1120  1585 I Sensors : luminance 0
+07-10 10:07:53.119  1120  1585 I Sensors : Uncalibrated lux = 3, CCT = 4207, r = 26, g = 22, b = 22, c = 37, atime = 17, again = 3, time = 386964981659049
+07-10 10:07:53.119  1120  1585 I Sensors : luminance 0
+07-10 10:07:53.121  1468  2041 D SensorService: Calling activate off 41
+07-10 10:07:53.122  1120  1120 I Sensors : UncalLightSensor old sensor_state 17024, new sensor_state : 281474976727680 en : 0
+07-10 10:07:53.127  1120  1120 I Sensors : disable:: uncal_light_sensor(5)
+07-10 10:07:53.932  1957  1957 D KeyguardSecIndicationPolicy:  remove Item pos = DEFAULT                             , id = 10652, 
+07-10 10:07:53.933  1957  1957 D KeyguardSecIndicationController: onIndicationChanged() return - keyguard is not visible, skip ownerInfo
+07-10 10:07:54.392   601   601 D io_stats: !@ 179,0 r 2655 109822 w 571 22905 d 0 0 f 0 0 iot 16160 0 th 0 0 0 pt 0 inp 0 0 296809.663
+07-10 10:07:54.393   601   601 D io_stats: !@   8,0 r 41968069 849296880 w 7155562 121788012 d 0 0 f 0 0 iot 10094568 0 th 0 0 0 pt 0 inp 0 0 296809.663
+07-10 10:07:54.908  1468  2041 D SGM:GameManager: identifyForegroundApp. com.karmicgochara.app, mCurrentUserId: 0, callerUserId: 0
+07-10 10:07:54.909  1468  2041 D SGM:PkgDataHelper: getGamePkgData(). com.karmicgochara.app
+07-10 10:07:54.910 28792 28847 I PolicyManager: [#CMH#] Is foreground game app: false
+07-10 10:07:55.507  1468  1523 D BatteryExternalStatsWorker: update stats : procstate-change (14)
+07-10 10:07:55.509  1468  1523 D BatteryExternalStatsWorker: Fetch WiFi data
+07-10 10:07:55.509  1468  1523 D BatteryExternalStatsWorker: Update Rail Energy data
+07-10 10:07:55.510  1468  1523 D BatteryExternalStatsWorker: Fetch Bluetooth data
+07-10 10:07:55.512  1468  1523 D BatteryExternalStatsWorker: Fetch modem data
+07-10 10:07:55.513  1468  3875 W BatteryExternalStatsWorker: error reading Bluetooth stats: 11
+07-10 10:07:55.530  1468  2041 D TelephonyManager: requestModemActivityInfo: Sending result to app: ModemActivityInfo{ mTimestamp=386967393 mSleepTimeMs=183047756 mIdleTimeMs=34965793 mActivityStatsTechSpecificInfo=[{mRat=UNKNOWN,mFrequencyRange=UNKNOWN,mTxTimeMs[]=[3196972, 1134347, 4011866, 5481086, 1397043],mRxTimeMs=168175296}]}
+07-10 10:07:55.530  1468  1523 D BatteryExternalStatsWorker: mStats lock released
+07-10 10:07:55.571  1468  1523 D BatteryExternalStatsWorker: Update modem state
+07-10 10:07:55.571  1468  1523 D BatteryExternalStatsWorker: done updateExternalStatsLocked
+07-10 10:07:56.394   601   601 D io_stats: !@   8,0 r 41970809 849310216 w 7155562 121788012 d 0 0 f 0 0 iot 10095064 0 th 0 0 0 pt 0 inp 0 0 296811.664
+07-10 10:07:56.884  3725  3725 I SDHMS:LOAD: type: LoadsFreqs, value: 0:0:0:654160:858000:650000:654160:858000:650000:0:0:0
+07-10 10:07:58.395   601   601 D io_stats: !@   8,0 r 41970813 849310268 w 7155572 121788188 d 0 0 f 0 0 iot 10095072 0 th 0 0 0 pt 0 inp 0 0 296813.665
+07-10 10:08:00.007  1957  2540 I DateTimeView: updateAll - getTimeFormat
+07-10 10:08:00.007  1957  1957 D KeyguardUpdateMonitor: received broadcast android.intent.action.TIME_TICK
+07-10 10:08:00.008  1957  1957 D KeyguardUpdateMonitor: handleTimeUpdate
+07-10 10:08:00.009  1957  1957 D FaceWidgetPagesController: onTimeChanged()
+07-10 10:08:00.010  1957  2540 D QSClockBellTower: onReceive(android.intent.action.TIME_TICK) mTimeZoneString:null
+07-10 10:08:00.023  1957  1957 D QSClockBellTower: He is ready to ring the bell. (((QSClockBellSound - TimeText:10:08, TimeContentDescription:10:08, DateText:ven. 10 juillet, ShortDateText:ven. 10 juil., Demo:false, QuickStar-Second(false|12:34:56))))
+07-10 10:08:00.024  1957  1957 D QSClockIndicatorView: Home Indicator status_bar_clock 10:08   ven. 10 juil. notifyTimeChanged(QSClockBellSound - TimeText:10:08, TimeContentDescription:10:08, DateText:ven. 10 juillet, ShortDateText:ven. 10 juil., Demo:false, QuickStar-Second(false|12:34:56)) ClockVisibleByPolicy:true, ClockVisibleByUser:true, visible?true, parent:android.widget.LinearLayout{56cfd46 V.E...... ......ID 0,0-256,48 #7f0b0510 app:id/left_clock_container}
+07-10 10:08:00.025  1957  1957 D QSClockBellTower: Everyone heard the bell. run(currentTime:1783670880020,   getTime():Fri Jul 10 10:08:00 GMT+02:00 2026,   getTimeZone():libcore.util.ZoneInfo[mDstSavings=3600000,mUseDst=true,mDelegate=[id="Europe/Paris",mRawOffset=3600000,mEarliestRawOffset=561000,transitions=184]])
+07-10 10:08:00.044 11502  5856 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.reportNetworkConnectivity(ConnectivityManager.java:3691)] [ccsq.a(:com.google.android.gms@262233029@26.22.33 (190400-932714197):15)] [ccuz.o(:com.google.android.gms@262233029@26.22.33 (190400-932714197):6)] [ccun.run(:com.google.android.gms@262233029@26.22.33 (190400-932714197):460)] [ccvk.run(:com.google.android.gms@262233029@26.22.33 (190400-932714197):5)] [hbzv.run(:com.google.android.gms@262233029@26.22.33 (190400-932714197):23)] [bjwy.c(:com.google.android.gms@262233029@26.22.33 (190400-932714197):50)] [bjwy.run(:com.google.android.gms@262233029@26.22.33 (190400-932714197):66)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [bkcq.run(:com.google.android.gms@262233029@26.22.33 (190400-932714197):8)] [java.lang.Thread.run(Thread.java:1572)]
+07-10 10:08:00.047  1957  1957 V QsExpandAnimator: setQsExpansionPosition 0.0
+07-10 10:08:00.056  1957  1957 V QsExpandAnimator: updateAnimators
+07-10 10:08:00.056  1957  1957 V QsExpandAnimator: clearAnimationState 
+07-10 10:08:00.058  1957  1957 V QsExpandAnimator: updateViews
+07-10 10:08:00.064  1957  1957 V QsExpandAnimator: updateTileAnimator
+07-10 10:08:00.066  1957  1957 V QsExpandAnimator: updateHeaderAnimator
+07-10 10:08:00.067  1957  1957 V QsExpandAnimator: updateBarAnimator
+07-10 10:08:00.067  1957  1957 V QsExpandAnimator: setQsExpansionPosition 0.0
+07-10 10:08:00.067  1957  1957 V QsExpandAnimator: onAnimationAtStart
+07-10 10:08:00.079 11502  4220 I AlarmManager: setExactAndAllowWhileIdle [name: FcmRetry type: 2 triggerAtMillis: 387091944]
+07-10 10:08:00.094  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10297; state: DISABLED
+07-10 10:08:00.094  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10297; state: DISABLED
+07-10 10:08:00.094  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10297; state: DISABLED
+07-10 10:08:00.094  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10297; state: ENABLED
+07-10 10:08:00.096  1468  1500 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10297; state: ENABLED
+07-10 10:08:00.102  1468  1818 I ChimeraAggressivePolicyHandler: executePolicy() - triggerSource: TRIGGER_SOURCE_LMKD
+07-10 10:08:00.104  1468  1818 I ChimeraAggressivePolicyHandler: available memory: 1382028, free memory target: 645120, quit chimera
+07-10 10:08:00.110  1101  1101 D Zygote  : Forked child process 5958
+07-10 10:08:00.111  1468  1500 I ActivityManager: Start proc 5958:com.whatsapp/u0a297 for broadcast {com.whatsapp/com.google.firebase.iid.FirebaseInstanceIdReceiver}
+07-10 10:08:00.148  5958  5958 I com.whatsapp: Using generational CollectorTypeCC GC.
+07-10 10:08:00.168  5958  5958 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-10 10:08:00.171  5958  5958 D ActivityThread: setConscryptValidator
+07-10 10:08:00.171  5958  5958 D ActivityThread: setConscryptValidator - put
+07-10 10:08:00.178  1468  3875 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10297; state: DISABLED
+07-10 10:08:00.179  1468  3875 I ActivityManager: DSS OFF for com.whatsapp
+07-10 10:08:00.198  5958  5958 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10297; state: ENABLED
+07-10 10:08:00.211  5958  5958 D nativeloader: Configuring clns-4 for other apk /system/framework/org.apache.http.legacy.jar. target_sdk_version=36, uses_libraries=ALL, library_path=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/lib/arm64:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.xhdpi.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_i18n_fr.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.whatsapp
+07-10 10:08:00.211  5958  5958 D nativeloader: Extending system_exposed_libraries: libsmpsft.smps.samsung.so:libSDKRecognitionOCR.spenocr.samsung.so:libSDKMoireDetector.spenocr.samsung.so:libtensorflowlite_c.spenocr.samsung.so:libBestComposition.polarr.so:libTracking.polarr.so:libFeature.polarr.so:libaudiomirroring_jni.audiomirroring.samsung.so:libteecl.teegris.samsung.so:lib.engmodejni.samsung.so:libSDKRecognitionText.spensdk.samsung.so:lib_vnd_client.dk.samsung.so:lib_native_client.dk.samsung.so:lib_nativeJni.dk.samsung.so:libSEF.quram.so:libimagecodec.quram.so:libagifencoder.quram.so:libneural.snap.samsung.so:libsnap_aidl.snap.samsung.so:libface_landmark.arcsoft.so:libFacialStickerEngine.arcsoft.so:liblow_light_hdr.arcsoft.so:libhigh_dynamic_range.arcsoft.so:libheifcapture_jni.media.samsung.so:libjpegsq.media.samsung.so:libslljpeg.media.samsung.so:libsemimagecrop_jni.media.samsung.so:libsimba.media.samsung.so:libapex_jni.media.samsung.so:libvesgraphicframework.videoeditor.samsung.so:libvesinterface.videoeditor.samsung.so:libvesframework.videoeditor.sa
+07-10 10:08:00.217  5958  5958 D nativeloader: Configuring clns-5 for other apk /system_ext/framework/androidx.window.extensions.jar. target_sdk_version=36, uses_libraries=ALL, library_path=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/lib/arm64:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.xhdpi.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_i18n_fr.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/data/user/0/com.whatsapp
+07-10 10:08:00.217  5958  5958 D nativeloader: Extending system_exposed_libraries: libsmpsft.smps.samsung.so:libSDKRecognitionOCR.spenocr.samsung.so:libSDKMoireDetector.spenocr.samsung.so:libtensorflowlite_c.spenocr.samsung.so:libBestComposition.polarr.so:libTracking.polarr.so:libFeature.polarr.so:libaudiomirroring_jni.audiomirroring.samsung.so:libteecl.teegris.samsung.so:lib.engmodejni.samsung.so:libSDKRecognitionText.spensdk.samsung.so:lib_vnd_client.dk.samsung.so:lib_native_client.dk.samsung.so:lib_nativeJni.dk.samsung.so:libSEF.quram.so:libimagecodec.quram.so:libagifencoder.quram.so:libneural.snap.samsung.so:libsnap_aidl.snap.samsung.so:libface_landmark.arcsoft.so:libFacialStickerEngine.arcsoft.so:liblow_light_hdr.arcsoft.so:libhigh_dynamic_range.arcsoft.so:libheifcapture_jni.media.samsung.so:libjpegsq.media.samsung.so:libslljpeg.media.samsung.so:libsemimagecrop_jni.media.samsung.so:libsimba.media.samsung.so:libapex_jni.media.samsung.so:libvesgraphicframework.videoeditor.samsung.so:libvesinterface.videoeditor.samsung.so:libvesframework.videoeditor.sa
+07-10 10:08:00.325  5958  5958 W com.whatsapp: Failed to find entry 'classes.dex': Entry not found
+07-10 10:08:00.328  5958  5958 W com.whatsapp: Failed to find entry 'classes.dex': Entry not found
+07-10 10:08:00.330  5958  5958 W com.whatsapp: Failed to find entry 'classes.dex': Entry not found
+07-10 10:08:00.331  5958  5958 D nativeloader: Configuring clns-6 for other apk /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.arm64_v8a.apk:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.xhdpi.apk:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_i18n_fr.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/lib/arm64:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.arm64_v8a.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.xhdpi.apk!/lib/arm64-v8a:/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_i18n_fr.apk!/lib/arm64-v8a, permitted_path=/data:/mnt/expand:/da
+07-10 10:08:00.396   601   601 D io_stats: !@   8,0 r 41971296 849327728 w 7155579 121788216 d 0 0 f 0 0 iot 10095192 0 th 0 0 0 pt 0 inp 0 0 296815.666
+07-10 10:08:00.419  5958  5958 D nativeloader: Load libframework-connectivity-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity.jar: ok
+07-10 10:08:00.428  5958  5958 V GraphicsEnvironment: ANGLE Developer option for 'com.whatsapp' set to: 'default'
+07-10 10:08:00.429  5958  5958 V GraphicsEnvironment: ANGLE GameManagerService for com.whatsapp: false
+07-10 10:08:00.429  5958  5958 V GraphicsEnvironment: Neither updatable production driver nor prerelease driver is supported.
+07-10 10:08:00.435  5958  5958 D NetworkSecurityConfig: Using Network Security Config from resource (name removed) debugBuild: false
+07-10 10:08:00.444  5958  5958 D NetworkSecurityConfig: Using Network Security Config from resource (name removed) debugBuild: false
+07-10 10:08:00.499  5958  5958 D CompatibilityChangeReporter: Compat change id reported: 183155436; UID 10297; state: ENABLED
+07-10 10:08:00.502  5958  5958 I FirebaseApp: Device unlocked: initializing all Firebase APIs for app [DEFAULT]
+07-10 10:08:00.512  5958  5958 I FirebaseInitProvider: FirebaseApp initialization successful
+07-10 10:08:00.515  1468  2321 I GenerationRegistry: mBackingStore.isClosed() : false
+07-10 10:08:00.529  5958  5958 I ProcessNameUtil: getMyProcessName
+07-10 10:08:00.529  5958  5958 I ProcessNameUtil: isSecondaryProcess/process name: com.whatsapp/processing time: 0 ms
+07-10 10:08:00.536  5958  5958 W EndToEnd-Test: Cannot find E2E config file `/data/user/0/com.whatsapp/files/config.json`.
+07-10 10:08:00.582  5958  5958 W SoLoader: Initializing SoLoader: 0
+07-10 10:08:00.584  5958  5958 I SoLoader: Recording new base apk path: /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk
+07-10 10:08:00.584  5958  5958 I SoLoader: Previously recorded 0 base apk paths.
+07-10 10:08:00.585  5958  5958 I SoLoader: Preparing SO source: DirectorySoSource[root = /vendor/lib64 flags = 2]
+07-10 10:08:00.585  5958  5958 I SoLoader: Preparing SO source: DirectorySoSource[root = /system/system_ext/lib64 flags = 2]
+07-10 10:08:00.585  5958  5958 I SoLoader: Preparing SO source: DirectorySoSource[root = /system/lib64 flags = 2]
+07-10 10:08:00.585  5958  5958 I SoLoader: Preparing SO source: DirectApkSoSource[root = [/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk!/lib/arm64-v8a, /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.arm64_v8a.apk!/lib/arm64-v8a, /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.xhdpi.apk!/lib/arm64-v8a, /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_i18n_fr.apk!/lib/arm64-v8a]]
+07-10 10:08:00.606  5958  5958 I SoLoader: Preparing SO source: ApplicationSoSource[DirectorySoSource[root = /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/lib/arm64 flags = 0]]
+07-10 10:08:00.606  5958  5958 W SoLoader: SoLoader initialized: 8
+07-10 10:08:00.618  5958  5958 D nativeloader: Load /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.arm64_v8a.apk!/lib/arm64-v8a/libsuperpack.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.623  5958  5958 W SoLoader: Loading wa_log on the main thread
+07-10 10:08:00.627  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libwa_log.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.627  5958  5958 W SoLoader: Loading essential on the main thread
+07-10 10:08:00.634  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libc++_shared.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.636  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libfbjni.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.637  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libfbsofterror.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.639  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libglog.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.641  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libfb.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.641  5958  5958 W SoLoader: Loading fb on the main thread
+07-10 10:08:00.643  5958  5958 I com.whatsapp: Thread[1,tid=5958,Native,Thread*=0x7876be8800,peer=0x725f50e8,"main"] recursive attempt to load library "/data/data/com.whatsapp/files/decompressed/libs.spo/libfb.so"
+07-10 10:08:00.647  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libessential.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.647  5958  5958 I essential-jni: JNI_OnLoad start
+07-10 10:08:00.647  5958  5958 I essential-jni: fbjni lambda running
+07-10 10:08:00.647  5958  5958 I essential-jni: JNI_OnLoad lambda complete
+07-10 10:08:00.674  5958  5958 I SigquitBasedANRDetector: Function PaletteWriteCrashThreadStacks hooked with result=0
+07-10 10:08:00.675  5958  5958 W SoLoader: Loading rtvip on the main thread
+07-10 10:08:00.678  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/librtvip.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.678  5958  5958 W SoLoader: Loading rtvip on the main thread
+07-10 10:08:00.679  5958  5958 E rtvip   : error 10 (0xd503245f)
+07-10 10:08:00.679  5958  5958 E rtvip   : error 2
+07-10 10:08:00.679  5958  5958 W SoLoader: Loading vlc on the main thread
+07-10 10:08:00.682  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libvlc.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.682  5958  5958 W SoLoader: Loading native_utils on the main thread
+07-10 10:08:00.685  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libnative_utils.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.685  5958  5958 W SoLoader: Loading curve25519 on the main thread
+07-10 10:08:00.688  5958  5958 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libcurve25519.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.726  1468  1655 I HqmInfo::HqmManagerService: MSG_TYPE:MSG_TYPE_PROCESS_LOG_BY_HQM
+07-10 10:08:00.729  1468  1499 I ActivityManager: com.samsung.android.dqagent is exempt from freezer
+07-10 10:08:00.729  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 1000; state: DISABLED
+07-10 10:08:00.729  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 1000; state: DISABLED
+07-10 10:08:00.729  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 1000; state: DISABLED
+07-10 10:08:00.729  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 1000; state: ENABLED
+07-10 10:08:00.737 24409 24409 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color,raw:screencap -p /sdcard/tablet_error.png'
+07-10 10:08:00.744  1101  1101 D Zygote  : Forked child process 5991
+07-10 10:08:00.745  1468  1500 I ActivityManager: Start proc 5991:com.samsung.android.dqagent/1000 for broadcast {com.samsung.android.dqagent/com.samsung.android.dqagent.receiver.DQADataReceiver}
+07-10 10:08:00.760  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libar-bundle3.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.760  1468  2321 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10216; state: DISABLED
+07-10 10:08:00.767  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libfortify.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.768  1468  1531 E MARsVersionManager: Package name: com.sec.android.app.shealth cannot be found.android.content.pm.PackageManager$NameNotFoundException: com.sec.android.app.shealth
+07-10 10:08:00.782  5991  5991 I android.dqagent: Using generational CollectorTypeCC GC.
+07-10 10:08:00.797  5991  5991 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-10 10:08:00.801  5991  5991 D ActivityThread: setConscryptValidator
+07-10 10:08:00.801  5991  5991 D ActivityThread: setConscryptValidator - put
+07-10 10:08:00.812  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:08:00.814  1468  2041 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 1000; state: DISABLED
+07-10 10:08:00.816  1468  2041 I ActivityManager: DSS OFF for com.samsung.android.dqagent
+07-10 10:08:00.829  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libpytorch.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.835  5991  5991 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 1000; state: ENABLED
+07-10 10:08:00.844  5958  5981 W libc    : Access denied finding property "ro.mediatek.platform"
+07-10 10:08:00.865  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libexecutorch.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.906  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libpyspeech.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.923  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libopus_mlow.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.963  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libar-bundle2.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:00.986  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libsimplejni.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.004  5991  5991 I DIAGMON_SDK[605054]: DiagMonAgent type: 2
+07-10 10:08:01.004  5991  5991 I DIAGMON_SDK[605054][999-399-549750] : generated SR object
+07-10 10:08:01.026  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libgraphutil.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.044  1129  1129 E sehhealth-service: Could not open /sys/class/power_supply/battery/lrp
+07-10 10:08:01.059  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libgraphstorecerealutil.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.076  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libxplat_third-party_zstd__zstd.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.097  3713  3734 I DMASA[D][999-399-549750]: [DiagmonProvider]Received msg based on provider : true / anr_logging
+07-10 10:08:01.101 11502 11502 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.libs.gmscorelogger.service.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentDirectBootAwareApiService }
+07-10 10:08:01.106  3713  3734 I DMASA[D][999-399-549750]: [DiagmonProvider]Signature Check Success
+07-10 10:08:01.127  5991  6016 I DIAGMON_SDK[605054][999-399-549750] : Results : Success
+07-10 10:08:01.130  5958  6013 I PlayCore: UID: [10297]  PID: [5958] SplitInstallListenerRegistry : registerListener
+07-10 10:08:01.132  1468  2041 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 10297; state: DISABLED
+07-10 10:08:01.152  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libwhatsappmerged.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.174  5958  6005 D WM-PackageManagerHelper: Skipping component enablement for androidx.work.impl.background.systemjob.SystemJobService
+07-10 10:08:01.174  5958  6005 D WM-Schedulers: Created SystemJobScheduler and enabled SystemJobService
+07-10 10:08:01.184  5958  6027 D WM-ForceStopRunnable: Is default app process = true
+07-10 10:08:01.185  5958  6027 D WM-ForceStopRunnable: Performing cleanup operations.
+07-10 10:08:01.188   616   616 W keymaster_tee: [WRN]begin req PARAMS: A32 B2 P64 
+07-10 10:08:01.210   615   628 I keystore2: keystore2::security_level: In create_operation. Success to create IKeystoreOperation. 1000, None
+07-10 10:08:01.231  5958  5981 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libwhatsapp.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.240  1468  2041 I GenerationRegistry: mBackingStore.isClosed() : false
+07-10 10:08:01.266  5958  6027 D WM-SystemJobScheduler: Reconciling jobs
+07-10 10:08:01.313  5958  6030 I WhatsAppJni: EnsureThreadAttached: attached current thread to JVM
+07-10 10:08:01.345  5958  6033 I WhatsAppJni: EnsureThreadAttached: attached current thread to JVM
+07-10 10:08:01.348  5958  6032 I WhatsAppJni: EnsureThreadAttached: attached current thread to JVM
+07-10 10:08:01.360  5958  6027 D CompatibilityChangeReporter: Compat change id reported: 160794467; UID 10297; state: ENABLED
+07-10 10:08:01.362  5991  6018 I DQA     : [DQADatabaseOpenHelper]db open success
+07-10 10:08:01.362  5991  5991 W android.dqagent: Long monitor contention with owner Thread-4 (6018) at k.a k.a.e(android.content.Context)(DBManager.java:6) waiters=0 in k.a k.a.e(android.content.Context) for 308ms
+07-10 10:08:01.369  5958  6027 D WM-ForceStopRunnable: Found unfinished work, scheduling it.
+07-10 10:08:01.374  5958  6019 W com.whatsapp: Long monitor contention with owner High Pri Worker #1 (5981) at boolean com.whatsapp.infra.nativelibloader.WhatsAppLibLoader.BKC()(:78) waiters=0 in boolean com.whatsapp.infra.nativelibloader.WhatsAppLibLoader.BKC() for 331ms
+07-10 10:08:01.398  5958  6027 D CompatibilityChangeReporter: Compat change id reported: 194532703; UID 10297; state: ENABLED
+07-10 10:08:01.398  5958  6027 D WM-SystemJobScheduler: Scheduling work ID ec31cb95-c5f6-48c4-a6b2-63c4a94d67d0Job ID 17409
+07-10 10:08:01.399  1468  2321 D CompatibilityChangeReporter: Compat change id reported: 194532703; UID 10297; state: ENABLED
+07-10 10:08:01.403  5958  6027 D WM-SystemJobScheduler: Scheduling work ID 3ce7974c-00f4-4068-bcde-5289db4faedbJob ID 17497
+07-10 10:08:01.411  5958  6027 D WM-SystemJobScheduler: Scheduling work ID 958ffa0a-9cf5-4a0c-b2ef-6dabc34dc2c4Job ID 17499
+07-10 10:08:01.421  5958  6027 D WM-SystemJobScheduler: Scheduling work ID 412cb7e2-7c10-4074-9071-9b2d8e742a56Job ID 17500
+07-10 10:08:01.472  5958  6015 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5469)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5436)] [X.AMq.CON(:30)] [X.0TE.handleMessage(:92)]
+07-10 10:08:01.478  1468  3875 D ConnectivityService: requestNetwork for uid/pid:10297/5958 activeRequest: null callbackRequest: 13080 [NetworkRequest [ REQUEST id=13081, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|UNAVAIL|BLK
+07-10 10:08:01.482  1468  1776 D ConnectivityService:    accepting network in place of null for NetworkRequest [ REQUEST id=13081, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.487  1468  1531 E MARsVersionManager: Package name: com.sec.android.app.shealth cannot be found.android.content.pm.PackageManager$NameNotFoundException: com.sec.android.app.shealth
+07-10 10:08:01.489  1468  1766 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=13081, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.490  1468  1766 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=13081, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.491  1468  1766 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=13081, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.491  1468  1776 D ConnectivityService: Rematched networks [computed 1ms] [applied 7ms] [issued 3]
+07-10 10:08:01.491  1468  1776 D ConnectivityService: NetworkReassignment :
+07-10 10:08:01.491  1468  1776 D ConnectivityService:   13081 : null → 101
+07-10 10:08:01.494  1468  2321 I ActivityManager: Background started FGS: Allowed [callingPackage: com.whatsapp; callingUid: 10297; uidState: SVC ; intent: Intent { cmp=com.whatsapp/.messaging.service.GcmFGService }; code:PUSH_MESSAGING; tempAllowListReason:<broadcast:u0a216:com.google.android.c2dm.intent.RECEIVE,reason:high-prio FCM,reasonCode:PUSH_MESSAGING,duration:20000,callingUid:10216>; targetSdkVersion:36; callerTargetSdkVersion:36; startForegroundCount:0; bindFromPackage:null]
+07-10 10:08:01.497  1468  1491 D SettingsProvider: isChangeAllowed() : name = enabled_notification_listeners
+07-10 10:08:01.497  1468  2321 I ActivityManager: Changes in 10297 10 to 4, 0 to 8
+07-10 10:08:01.500  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:08:01.504 21460 21468 I emkh    : (REDACTED) HDM. appOpsListener %s %s
+07-10 10:08:01.507 21460 21468 I emkh    : (REDACTED) HDM. Ignoring irrelevant audio permission changes for package %s
+07-10 10:08:01.507  5958  6042 D WM-SystemJobScheduler: Scheduling work ID 502fda08-45bc-4844-88dc-438a61a3cdd0Job ID 17502
+07-10 10:08:01.508  1468  1531 E MARsVersionManager: Package name: com.sec.android.app.shealth cannot be found.android.content.pm.PackageManager$NameNotFoundException: com.sec.android.app.shealth
+07-10 10:08:01.514  1468  1531 E MARsVersionManager: Package name: com.sec.android.app.shealth cannot be found.android.content.pm.PackageManager$NameNotFoundException: com.sec.android.app.shealth
+07-10 10:08:01.540  5958  6042 D WM-GreedyScheduler: Starting tracking for 502fda08-45bc-4844-88dc-438a61a3cdd0
+07-10 10:08:01.541  1468  3832 W ActivityManager: Foreground service started from background can not have location/camera/microphone access: service com.whatsapp/.messaging.service.GcmFGService
+07-10 10:08:01.542  1468  3832 E AppOps  : User 0, OP 0 is restricted by 1000
+07-10 10:08:01.542  1468  3832 E AppOps  : User 0, OP 1 is restricted by 1000
+07-10 10:08:01.549  1957  1995 D SecFgsManagerControllerImpl: onForegroundStateChanged: dialogShown:false, isForeground:true, packageName:com.whatsapp , token:android.os.BinderProxy@579b60a, userId:0
+07-10 10:08:01.551  5958  6041 E com.whatsapp: No implementation found for void com.facebook.quicklog.QuickPerformanceLoggerNativeProvider.nativeUpdateQPLInstance() (tried Java_com_facebook_quicklog_QuickPerformanceLoggerNativeProvider_nativeUpdateQPLInstance and Java_com_facebook_quicklog_QuickPerformanceLoggerNativeProvider_nativeUpdateQPLInstance__) - is the library loaded, e.g. System.loadLibrary?
+07-10 10:08:01.551  1468  1531 E MARsVersionManager: Package name: com.sec.android.app.shealth cannot be found.android.content.pm.PackageManager$NameNotFoundException: com.sec.android.app.shealth
+07-10 10:08:01.554  5958  6041 W QPLProvider: QuickPerformanceLoggerProvider failed to update native QPL instance, native library. This is expected during early app initialization
+07-10 10:08:01.555  5958  6019 E msys    : E[ADNSUCTIMH WAJMNSRuntime]WAJContextInitMNSRuntime(446)=>[LogLevel:I] Secondary DNS resolver enabled
+07-10 10:08:01.556  5958  6019 E msys    : E[N WA]_WAJMNSStreamImplMNSTCPStreamCreate(361)=>[LogLevel:I] WAJMNSStream/impl/tcpStreamCreate/MNSStreamRaw/p=0x770cf01d00
+07-10 10:08:01.556  5958  6019 E msys    : E[N WA]WAJMNSStreamImplCreate(421)=>[LogLevel:I] WAJMNSStream/impl/create/p=0x770cf01d00 (mnsConn=0x770cfe4b80)
+07-10 10:08:01.556  5958  6019 E msys    : E[N WA]_WAJMNSStreamCreateMnsIpsFromIpAddressStrings(87)=>[LogLevel:I] no ip addresses provided, using DNS resolution
+07-10 10:08:01.559  5958  6019 E msys    : E[N WA]WAJMNSStreamImplConnect(450)=>[LogLevel:I] WAJMNSStream/impl/connect/p=0x770cf01d00 (endpoint=g.whatsapp.net:5222)(ipAddressCount=0)
+07-10 10:08:01.559  5958  6019 E msys    : E[N WA]_WAJMNSStreamImplUpdateStreamState(230)=>[LogLevel:I] WAJMNSStream/impl/state-changed/p=0x770cf01d00 (initial=>connecting)
+07-10 10:08:01.561  5958  5958 D WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=502fda08-45bc-4844-88dc-438a61a3cdd0, generation=0)
+07-10 10:08:01.561  1468  3832 E MARsVersionManager: Package name: com.sec.android.app.shealth cannot be found.android.content.pm.PackageManager$NameNotFoundException: com.sec.android.app.shealth
+07-10 10:08:01.565  1957  1995 D SecFgsManagerControllerImpl: updateUiControl[com.whatsapp]: -1
+07-10 10:08:01.576  1957  1995 D SecFgsManagerControllerImpl: updateNumberOfVisibleRunningPackagesLocked: 3
+07-10 10:08:01.580  5958  6047 D WM-Processor: GNw: processing WorkGenerationalId(workSpecId=502fda08-45bc-4844-88dc-438a61a3cdd0, generation=0)
+07-10 10:08:01.582  5958  6041 W SoLoader: SoLoader already initialized
+07-10 10:08:01.583  5958  6047 D WM-ConstraintTracker: GO2: initial state = NetworkState(isConnected=true, isValidated=true, isMetered=true, isNotRoaming=true)
+07-10 10:08:01.583  5958  6047 D WM-NetworkStateTracker: Registering network callback
+07-10 10:08:01.586  5958  6041 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libfbsocketthreadlocalscope.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.592  5958  6041 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libfb_sqlite_3500300.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.593  5958  6047 D ConnectivityManager: StackLog: [android.net.ConnectivityManager.sendRequestForNetwork(ConnectivityManager.java:4744)] [android.net.ConnectivityManager.registerDefaultNetworkCallbackForUid(ConnectivityManager.java:5469)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5436)] [android.net.ConnectivityManager.registerDefaultNetworkCallback(ConnectivityManager.java:5410)] [X.GO2.A03(:20)] [X.JCJ.invokeSuspend(:300)] [X.JCJ.invoke(:13)] [X.3Un.A00(:2)] [X.1xh.A00(:58)] [X.3T7.invokeSuspend(:1571)] [X.0Ze.resumeWith(:8)] [X.0aC.run(:89)] [X.GLC.run(:2)] [java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1100)] [java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:624)] [java.lang.Thread.run(Thread.java:1572)]
+07-10 10:08:01.595  1468  3832 D ConnectivityService: requestNetwork for uid/pid:10297/5958 activeRequest: null callbackRequest: 13082 [NetworkRequest [ REQUEST id=13083, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]] callback flags: 0 order: 2147483647 isUidTracked: false declaredMethods: AVAIL|LOST|NC
+07-10 10:08:01.595  2465  2465 I ForegroundServiceUtils: setNumberOfFgs, num : 3
+07-10 10:08:01.595  1468  1776 D ConnectivityService:    accepting network in place of null for NetworkRequest [ REQUEST id=13083, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.597  2465  2465 I FgsManager: onNumberOfFgsChanged: number = [3]
+07-10 10:08:01.598  1468  1776 D ConnectivityService: Rematched networks [computed 1ms] [applied 0ms] [issued 2]
+07-10 10:08:01.598  1468  1776 D ConnectivityService: NetworkReassignment :
+07-10 10:08:01.598  1468  1776 D ConnectivityService:   13083 : null → 101
+07-10 10:08:01.598  1468  1766 D UntrustedWifiNetworkFactory: got request NetworkRequest [ REQUEST id=13083, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.598  1468  1766 D OemPaidWifiNetworkFactory: got request NetworkRequest [ REQUEST id=13083, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.598  1468  1766 D MultiInternetWifiNetworkFactory: got request NetworkRequest [ REQUEST id=13083, [ Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&NOT_VCN_MANAGED Uid: 10297 RequestorUid: 10297 RequestorPkg: com.whatsapp UnderlyingNetworks: Null] ]
+07-10 10:08:01.600  5958  6068 D WM-NetworkStateTracker: Network capabilities changed: [ Transports: CELLULAR|VPN Capabilities: INTERNET&NOT_RESTRICTED&TRUSTED&VALIDATED&NOT_ROAMING&FOREGROUND&NOT_CONGESTED&NOT_SUSPENDED&NOT_VCN_MANAGED LinkUpBandwidth>=11822Kbps LinkDnBandwidth>=43436Kbps TransportInfo: <VpnTransportInfo{type=1, sessionId=null, bypassable=false longLivedTcpConnectionsExpensive=false}> UnderlyingNetworks: Null]
+07-10 10:08:01.602  5958  6041 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libffsingletonmerged.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:01.603  5958  5958 D WM-WorkerWrapper: Starting work for com.whatsapp.xmpp.messaging.XmppLifecycleWorker
+07-10 10:08:01.603  5958  6047 D WM-PackageManagerHelper: Skipping component enablement for androidx.work.impl.background.systemalarm.RescheduleReceiver
+07-10 10:08:01.604  5958  6047 D WM-GreedyScheduler: Constraints met: Scheduling work ID WorkGenerationalId(workSpecId=502fda08-45bc-4844-88dc-438a61a3cdd0, generation=0)
+07-10 10:08:01.605  5958  6047 D WM-Processor: Work WorkGenerationalId(workSpecId=502fda08-45bc-4844-88dc-438a61a3cdd0, generation=0) is already enqueued for processing
+07-10 10:08:01.607  5958  6054 E msys    : E[N mns]_OnResolverSuccess(335)=>Cache refresh succeeded with system DNS resolver. IP count: 1
+07-10 10:08:01.607  1468  1872 D NetdEventListenerService: DNS Requested by : 101, 10297
+07-10 10:08:01.610  1468  3832 I EDMNativeHelperService: isScreenCaptureEnabled
+07-10 10:08:01.614  5958  6054 E msys    : E[N WA]_WAJMNSStreamImplOnMNSReady(259)=>[LogLevel:I] WAJMNSStream/impl/callback/onMNSReady/p=0x770cf01d00
+07-10 10:08:01.614  5958  6054 E msys    : E[N WA]_WAJMNSStreamImplCreateConnectionReport(194)=>[LogLevel:I] WAJMNSStream/impl/report port=5222, connectedIPVersion=4, resolvedIPAddressCount=1, dnsResolutionStartTimeMS=296816830, dnsResolutionEndTimeMS=296816830, dnsCacheHit=Yes, connectStartTimeMS=296816830, connectEndTimeMS=296816884, proxyConnectStartTimeMS=0, proxyConnectEndTimeMS=0
+07-10 10:08:01.614  5958  6054 E msys    : E[N WA]_WAJMNSStreamImplUpdateStreamState(230)=>[LogLevel:I] WAJMNSStream/impl/state-changed/p=0x770cf01d00 (connecting=>connected)
+07-10 10:08:01.642  1468  3832 D RestrictionPolicy: isScreenCaptureEnabled : ret=true userId=0
+07-10 10:08:01.647   616   616 W keymaster_tee: [WRN]begin req PARAMS: A32 B32 P1 
+07-10 10:08:01.650   615  7828 I keystore2: keystore2::security_level: In create_operation. Success to create IKeystoreOperation. 10297, None
+07-10 10:08:01.695  3643 20590 W MediaProvider: isAppCloneUserPair for user 0: false
+07-10 10:08:01.737  5992  5992 W ProcessState: Extra binder thread started, but 0 threads requested. Do not use *startThreadPool when zero threads are requested.
+07-10 10:08:01.738  5958  6066 E msys    : E[N mns:TigonMNS]_OnResolverSuccess(335)=>Cache refresh succeeded with system DNS resolver. IP count: 1
+07-10 10:08:01.738  1468  1872 D NetdEventListenerService: DNS Requested by : 101, 10297
+07-10 10:08:01.741  1468  3832 D SyncManager: userId - 0 auto - true
+07-10 10:08:01.750  1147  1226 W ServiceManager: Permission failure: android.permission.CAPTURE_BLACKOUT_CONTENT from uid=2000 pid=5992
+07-10 10:08:01.750  1147  1226 D PermissionCache: checking android.permission.CAPTURE_BLACKOUT_CONTENT for uid=2000 => denied (1193 us)
+07-10 10:08:01.767  1468  3832 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 10216; state: DISABLED
+07-10 10:08:01.810  1468  3832 W ProcessStats: Tracking association SourceState{b7909d0 system/1000 BTopFgs #574824} whose proc state 2 is better than process ProcessState{4970d1d com.tailscale.ipn/10404 pkg=com.tailscale.ipn} proc state 3 (14 skipped)
+07-10 10:08:01.820   560   560 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@4.0::IMapper/default in either framework or device VINTF manifest.
+07-10 10:08:01.821  5992  6080 I Gralloc4: mapper 4.x is not supported
+07-10 10:08:01.822   560   560 I hwservicemanager: getTransport: Cannot find entry android.hardware.graphics.mapper@3.0::IMapper/default in either framework or device VINTF manifest.
+07-10 10:08:01.822  5992  6080 W Gralloc3: mapper 3.x is not supported
+07-10 10:08:01.869  5992  6080 I gralloc : Arm Module v1.0
+07-10 10:08:01.878  1468  2321 D CompatibilityChangeReporter: Compat change id reported: 171306433; UID 10297; state: ENABLED
+07-10 10:08:01.878  1468  2321 D CompatibilityChangeReporter: Compat change id reported: 226439802; UID 10297; state: DISABLED
+07-10 10:08:01.879  1468  2321 D CompatibilityChangeReporter: Compat change id reported: 218533173; UID 10297; state: ENABLED
+07-10 10:08:01.880 11502  4220 I NetworkScheduler.Stats: (REDACTED) Task %s/%s started execution. cause:%s exec_start_elapsed_seconds: %s
+07-10 10:08:01.933 11502  4220 I NetworkScheduler.Stats: (REDACTED) Task %s/%s finished executing. cause:%s result: %s elapsed_millis: %s uptime_millis: %s exec_start_elapsed_seconds: %s
+07-10 10:08:02.008 11502  5955 I NetworkScheduler.Stats: (REDACTED) Task %s/%s started execution. cause:%s exec_start_elapsed_seconds: %s
+07-10 10:08:02.061 11502  5955 I NetworkScheduler.Stats: (REDACTED) Task %s/%s started execution. cause:%s exec_start_elapsed_seconds: %s
+07-10 10:08:02.078  5871  6254 W ExifInterface: Invalid image: ExifInterface got an unsupported image format file(ExifInterface supports JPEG and some RAW image formats only) or a corrupted JPEG file to ExifInterface.
+07-10 10:08:02.078  5871  6254 W ExifInterface: java.io.IOException: Encountered corrupt PNG file.
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.media.ExifInterface.getPngAttributes(ExifInterface.java:3461)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.media.ExifInterface.loadAttributes(ExifInterface.java:2026)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1641)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.media.ExifInterface.<init>(ExifInterface.java:1592)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at com.samsung.android.providers.media.scan.MediaParser.getDateTimeOriginal(MediaParser.java:390)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at com.samsung.android.providers.media.scan.MediaParser.computeDateMetadata(MediaParser.java:367)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at com.samsung.android.providers.media.sync.MediaSync.createOperation(MediaSync.java:429)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at com.samsung.android.providers.media.sync.MediaSync.loadInternal(MediaSync.java:389)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at com.samsung.android.providers.media.sync.MediaSync.load(MediaSync.java:325)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at com.samsung.android.providers.media.sync.MediaSync.-$$Nest$mload(MediaSync.java:0)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at com.samsung.android.providers.media.sync.MediaSync$SyncTask.run(MediaSync.java:475)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.os.Handler.handleCallback(Handler.java:942)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.os.Handler.dispatchMessage(Handler.java:99)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.os.Looper.loopOnce(Looper.java:226)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.os.Looper.loop(Looper.java:313)
+07-10 10:08:02.078  5871  6254 W ExifInterface: 	at android.os.HandlerThread.run(HandlerThread.java:67)
+07-10 10:08:02.179 11502 11502 D BoundBrokerSvc: onRebind: Intent { act=com.google.android.gms.auth.aang.events.services.START dat=chimera-action:/... cmp=com.google.android.gms/.chimera.PersistentApiService }
+07-10 10:08:02.246  1468  1468 I ActivityManager: com.samsung.android.scs is exempt from freezer by list
+07-10 10:08:02.246  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10097; state: DISABLED
+07-10 10:08:02.246  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10097; state: DISABLED
+07-10 10:08:02.246  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10097; state: DISABLED
+07-10 10:08:02.246  1468  1468 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10097; state: ENABLED
+07-10 10:08:02.247  1468  1500 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10097; state: ENABLED
+07-10 10:08:02.260  1101  1101 D Zygote  : Forked child process 6089
+07-10 10:08:02.262  1468  1500 I ActivityManager: Start proc 6089:com.samsung.android.scs/u0a97 for service {com.samsung.android.scs/androidx.work.impl.background.systemjob.SystemJobService}
+07-10 10:08:02.284  5871  6254 D MediaSync: loaded: 512ms, 1
+07-10 10:08:02.298  6089  6089 I ung.android.scs: Using generational CollectorTypeCC GC.
+07-10 10:08:02.310 32605  4784 I MdiSyncModule: (REDACTED) Dispatching task '%s'...
+07-10 10:08:02.311 32605  4784 I MdiSyncModule: (REDACTED) Running singleton-scoped task '%s'...
+07-10 10:08:02.319  6089  6089 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-10 10:08:02.325  6089  6089 D ActivityThread: setConscryptValidator
+07-10 10:08:02.326  6089  6089 D ActivityThread: setConscryptValidator - put
+07-10 10:08:02.331  1468  3875 I ActivityManager: DSS OFF for com.samsung.android.scs
+07-10 10:08:02.341  6089  6089 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10097; state: ENABLED
+07-10 10:08:02.397   601   601 D io_stats: !@   8,0 r 41979685 849565220 w 7155902 121793240 d 0 0 f 0 0 iot 10096748 0 th 0 0 0 pt 0 inp 0 0 296817.667
+07-10 10:08:02.397   558   558 I lmkd    : cached 3, sandbox(not0) 0
+07-10 10:08:02.399   558   558 I lmkd    : Reclaim 'com.samsung.android.sm.devicesecurity' (5592), uid 5012, oom_score_adj 955, state 19 to free 193480kB rss, 41672kb swap
+07-10 10:08:02.400   558   558 I lmkd    : Reclaimed 235152kB at oom_score_adj 0
+07-10 10:08:02.402  1468  1501 D DmaBufLeakDetector: false, C 0, R false, T 1783670882402, CAM false
+07-10 10:08:02.407  1468  1872 D NetdEventListenerService: DNS Requested by : 101, 10216
+07-10 10:08:02.454   558   558 I lmkd    : 3(delay), 0(swap), 0(freelimit), 0(reentrymode) memory pressure events were skipped after a kill!
+07-10 10:08:02.454  1468  3832 I ActivityManager: Process com.samsung.android.sm.devicesecurity (pid 5592) has died: cch+55 CEM (231,1208)
+07-10 10:08:02.454  1101  1101 I Zygote  : Process 5592 exited due to signal 9 (Killed)
+07-10 10:08:02.455  1468  1501 I libprocessgroup: Successfully killed process cgroup uid 5012 pid 5592 in 0ms
+07-10 10:08:02.459  1468  3832 W ProcessCpusetController: Slowdown: pid 5592 is nonexistent
+07-10 10:08:02.477  6089  6113 I SCS@AiSearch user 0: (AiSearch user 0) [Thread-3] entering in init():  Logger initialization. Path: /data/user/0/com.samsung.android.scs/files/aisearch/log/
+07-10 10:08:02.477  6089  6089 I SCS@AiSearch user 0: (SearchProvider) [main] entering in onCreate():  
+07-10 10:08:02.486  6089  6089 I SCS@AiSearch user 0: (SearchApplication) [main] entering in init():  
+07-10 10:08:02.493  6089  6089 I SCS@AiSearch user 0: (SearchApplication) checkIsUpdated(): sIsUpdate = false
+07-10 10:08:02.503 32605  4784 I MdiSyncModule: (REDACTED) Singleton-scoped task '%s' finished with result '%d'!
+07-10 10:08:02.505 32605  4784 I GmsCoreXrpcWrapper: (REDACTED) Returning a channel provider with trafficStatsTag=%d trafficStatsUid=%d
+07-10 10:08:02.530  1468  3832 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemjob.SystemJobService newState = 1 callingPackage = 10097/com.samsung.android.scs
+07-10 10:08:02.535  1468  3832 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.543  1468  3832 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.548  1468  3832 D CompatibilityChangeReporter: Compat change id reported: 161145287; UID 10097; state: DISABLED
+07-10 10:08:02.550  6089  6089 I SCS@AiSearch user 0: (SearchApplication) [main] leaving from init():  
+07-10 10:08:02.550  6089  6089 I SCS@AiSearch user 0: (SearchProvider) [main] leaving from onCreate():  
+07-10 10:08:02.550  6089  6118 I SCS@AiSearch user 0: (ConfigManager) [pool-3-thread-1] entering in loadConfig():  
+07-10 10:08:02.553  1468  3832 I GenerationRegistry: mBackingStore.isClosed() : false
+07-10 10:08:02.575  6089  6089 I ServiceApplication: process:com.samsung.android.scs version:3.7.00.1 flavor:full
+07-10 10:08:02.576  6089  6089 I SCS@AiSearch user 0: (SearchApplication) [main] entering in init():  
+07-10 10:08:02.585  6089  6089 I SCS@AiSearch user 0: (SearchProvider) onTrimMemory(): 5
+07-10 10:08:02.597  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.sec.android.app.myfiles, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.600  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.samsung.android.app.reminder, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.601  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.samsung.android.calendar.synctasks, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.603  1468  3875 I GenerationRegistry: mBackingStore.isClosed() : false
+07-10 10:08:02.607  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for logs.call, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.607  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.samsung.android.apps, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.608  1468  1872 D NetdEventListenerService: DNS Requested by : 101, 10234
+07-10 10:08:02.609  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.samsung.android.calendar, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.610  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.samsung.android.contacts, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.611  6089  6118 I SCS@AiSearch user 0: (ConfigManager) isAppEnabled(): FloatingFeature :V519, com.google.android.providers.media enabled :true
+07-10 10:08:02.612  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.google.android.providers.media, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.612  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for analogy, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.612  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for synonym, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.613  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.samsung.android.scs.documents, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.613  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for com.android.settings, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.614  6089  6118 I SCS@AiSearch user 0: (ConfigManager) Updating App Enable for correlated, Status: EnabledStatus{mEnabled=true, mDisabledReason=null, mExtra=null}
+07-10 10:08:02.614  6089  6118 I SCS@AiSearch user 0: (ConfigManager) [pool-3-thread-1] leaving from loadConfig():  
+07-10 10:08:02.635  1468  3875 I ActivityManager: Changes in 10049 19 to 5, 0 to 8
+07-10 10:08:02.637  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:08:02.639  6089  6140 I DIAGMON_SDK[605029][4N4-399-535399] : generated SR object
+07-10 10:08:02.657  6089  6149 I SCS@AiSearch user 0: (g) Creating collector for AOSP_MP
+07-10 10:08:02.682  6089  6118 I SemDesktopModeManager: registerListener: n1.e@f014556
+07-10 10:08:02.682  6089  6089 I SCS@AiSearch user 0: (ObserverWorker::AOSP_MP) [main] entering in startWork triggered by [content://media/external/file/1000026837]():  
+07-10 10:08:02.683  6089  6118 I SCS@AiSearch user 0: (HintsHelper) init collect hints and schedule periodic job isImmediate = false
+07-10 10:08:02.683  6089  6089 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) [main] entering in onChange():  
+07-10 10:08:02.684 32605  4784 I MdiSyncModule: (REDACTED) Running account-scoped task '%s'...
+07-10 10:08:02.684  6089  6118 I SCS@AiSearch user 0: (SchedulingManager) UsageScoreIndexingWorker: Result:: androidx.work.impl.utils.futures.SettableFuture@ae460e2[status=PENDING]
+07-10 10:08:02.684  6089  6118 I SCS@AiSearch user 0: (SchedulingManager) scheduleJobServiceLogging
+07-10 10:08:02.686  6089  6161 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) [AOSP_MP-0] entering in collectChanges():  
+07-10 10:08:02.696  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135634846; UID 10046; state: DISABLED
+07-10 10:08:02.696  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 177438394; UID 10046; state: DISABLED
+07-10 10:08:02.696  1468  2321 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10097/com.samsung.android.scs
+07-10 10:08:02.696  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135772972; UID 10046; state: DISABLED
+07-10 10:08:02.696  1468  1499 D CompatibilityChangeReporter: Compat change id reported: 135754954; UID 10046; state: ENABLED
+07-10 10:08:02.698  1468  2321 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.698  1468  1500 D CompatibilityChangeReporter: Compat change id reported: 143937733; UID 10046; state: ENABLED
+07-10 10:08:02.698  1468  2321 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.706  1101  1101 D Zygote  : Forked child process 6162
+07-10 10:08:02.707  1468  1500 I ActivityManager: Start proc 6162:com.sec.android.provider.badge/u0a46 for broadcast {com.sec.android.provider.badge/com.sec.android.provider.badge.BadgeCountReceiver}
+07-10 10:08:02.707  1468  2321 D CompatibilityChangeReporter: Compat change id reported: 194532703; UID 10097; state: ENABLED
+07-10 10:08:02.714  1468  2321 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10097/com.samsung.android.scs
+07-10 10:08:02.715  1468  2321 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.715  1468  2321 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.726  1468  2321 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10097/com.samsung.android.scs
+07-10 10:08:02.727  1468  2321 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.727  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : com.samsung.android.contacts Major Version : 36, Minor Version : 0
+07-10 10:08:02.728  1468  2321 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:02.729  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : com.android.settings Major Version : 4, Minor Version : 0
+07-10 10:08:02.735  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : com.samsung.android.apps Major Version : 33, Minor Version : 0
+07-10 10:08:02.736  6162  6162 I .provider.badge: Using generational CollectorTypeCC GC.
+07-10 10:08:02.739  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : com.samsung.android.calendar Major Version : 23, Minor Version : 0
+07-10 10:08:02.741  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : com.samsung.android.calendar.synctasks Major Version : 8, Minor Version : 0
+07-10 10:08:02.742 32605  4784 I MdiSyncModule: (REDACTED) Task '%s' finished with result '%d'!
+07-10 10:08:02.745  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : com.samsung.android.app.reminder Major Version : 5, Minor Version : 0
+07-10 10:08:02.749  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : logs.call Major Version : 18, Minor Version : 0
+07-10 10:08:02.750  6162  6162 D nativeloader: Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+07-10 10:08:02.751 11502  4220 I NetworkScheduler.Stats: (REDACTED) Task %s/%s finished executing. cause:%s result: %s elapsed_millis: %s uptime_millis: %s exec_start_elapsed_seconds: %s
+07-10 10:08:02.756  6162  6162 D ActivityThread: setConscryptValidator
+07-10 10:08:02.756  6162  6162 D ActivityThread: setConscryptValidator - put
+07-10 10:08:02.759  1468  3832 D CompatibilityChangeReporter: Compat change id reported: 168419799; UID 10046; state: DISABLED
+07-10 10:08:02.759  1468  3832 I ActivityManager: DSS OFF for com.sec.android.provider.badge
+07-10 10:08:02.764  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : com.google.android.providers.media Major Version : 0, Minor Version : 0 Name : aosp_mp Major Version : 19, Minor Version : 0 Name : sec_mp Major Version : 33, Minor Version : 0
+07-10 10:08:02.766  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : analogy Major Version : 13, Minor Version : 0
+07-10 10:08:02.767  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : synonym Major Version : 4, Minor Version : 0
+07-10 10:08:02.768  6162  6162 D CompatibilityChangeReporter: Compat change id reported: 171979766; UID 10046; state: ENABLED
+07-10 10:08:02.768  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : correlated Major Version : 4, Minor Version : 0
+07-10 10:08:02.769  6089  6161 I SCS@AiSearch user 0: (m) Schema Name : ranking Major Version : 1, Minor Version : 0
+07-10 10:08:02.776  1468  2321 D CompatibilityChangeReporter: Compat change id reported: 182734110; UID 10097; state: ENABLED
+07-10 10:08:02.778  5958  6013 D nativeloader: Load /data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/split_config.arm64_v8a.apk!/lib/arm64-v8a/libwamo_graphql_flipper.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:02.812  5958  6041 D CompatibilityChangeReporter: Compat change id reported: 147600208; UID 10297; state: ENABLED
+07-10 10:08:02.814  1468  2041 D CompatibilityChangeReporter: Compat change id reported: 157233955; UID 10297; state: ENABLED
+07-10 10:08:02.822  6162  6162 I BadgeProvider: onCreate
+07-10 10:08:02.822  6162  6162 I BadgeProvider: DatabaseHelper
+07-10 10:08:02.827  6162  6162 I BadgeCountReceiver: badge intent : Intent { act=android.intent.action.BADGE_COUNT_UPDATE flg=0x1000010 cmp=com.sec.android.provider.badge/.BadgeCountReceiver (has extras) }
+07-10 10:08:02.827  6162  6162 I BadgeCountReceiver: packageName: com.whatsapp, className: com.whatsapp.Main, count: 36
+07-10 10:08:02.833  1468  2041 I GenerationRegistry: mBackingStore.isClosed() : false
+07-10 10:08:02.844  1468  2321 D PackageManager: setEnabledSetting : userId = 0 packageName = com.whatsapp cmp = com.whatsapp.contact.ui.picker.ExternalShareAlias newState = 1 callingPackage = 10297/com.whatsapp
+07-10 10:08:02.845  1468  2321 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.whatsapp userId : 0
+07-10 10:08:02.846  1468  2321 D ApplicationPolicy: getApplicationComponentState : pkg = com.whatsapp userId : 0
+07-10 10:08:02.850  3725  4639 I SDHMS:D : SIOP:: AP:384 BAT:308 USB:289 CHG:384 PA:356 WIFI:369 BLK:346 SKIN:377 SKINF:377 SKINB:366 LRP:377 LRF:377 LRB:366 
+07-10 10:08:02.855  6162  6162 I BadgeProvider: onOpen
+07-10 10:08:02.861  6162  6162 I BadgeProvider: sendNotify entered. [uri] : content://com.sec.badge/apps
+07-10 10:08:02.861  6162  6162 I BadgeProvider: sendNotify, [notify] : null
+07-10 10:08:02.861  6162  6162 I BadgeProvider: update, getCallingPackage() : com.sec.android.provider.badge
+07-10 10:08:02.861  6162  6162 I BadgeProvider: update, [uri] : content://com.sec.badge/apps
+07-10 10:08:02.861  6162  6162 I BadgeProvider: update, [uri.query] : null
+07-10 10:08:02.861  6162  6162 I BadgeProvider: update, [BadgeCount] : badgecount=36
+07-10 10:08:02.861  6162  6162 I BadgeProvider: update, [UpdateCount] : 1
+07-10 10:08:02.862  2465  2465 I BadgeCountUpdaterImpl: onChange
+07-10 10:08:02.869  2465  2465 I BadgeCountUpdaterImpl: onChange
+07-10 10:08:02.879  1468  2041 W Telecom : : registerPhoneAccount - attempt to set a group from a non-system caller.: TSI.rPA@WyU
+07-10 10:08:02.882  1468  2041 I Telecom : PhoneAccountRegistrar: Modify account: [ComponentInfo{com.whatsapp/com.whatsapp.calling.telecom.SelfManagedConnectionService}, ***, UserHandle{0}]: TSI.rPA@WyU
+07-10 10:08:02.892  1468  2041 I Telecom : AppLabelProxy: package com.whatsapp: name is WhatsApp: TSI.rPA@WyU
+07-10 10:08:02.900  1468  2041 I Telecom:SamsungPhoneAccountListener: onAccountsChanged - allPhoneAccountsOfCurrentUser : [[[X] PhoneAccount: ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0} Capabilities: CallProvider MultiUser PlaceEmerg SimSub  Audio Routes: BESW Schemes: tel voicemail  Extras: Bundle[{com.samsung.telecom.extra.SUPPORT_VRBT=false, android.telecom.extra.SUPPORTS_VIDEO_CALLING_FALLBACK=true, com.samsung.telecom.extra.SUBSCRIPTION_ID=1, com.samsung.telecom.extra.CAN_COEXIST_ACCOUNT=true, com.samsung.telecom.extra.PHONE_ID=0, com.samsung.telecom.extra.NO_CHECK_IF_VIDEO_CAPABLE=true}] GroupId: ***], [[X] PhoneAccount: ComponentInfo{com.google.android.gm/androidx.core.telecom.internal.JetpackConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video  Audio Routes: BESW Schemes: tel  Extras: Bundle[{isCoreTelecomAccount=true}] GroupId: ***], [[X] PhoneAccount: ComponentInfo{com.google.android.apps.tachyon/androidx.core.telecom.internal.JetpackConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video  Audio Routes: BESW Schemes: tel  Extras: Bundle[{isCoreTelecomAccount=true}] GroupId: ***], [[X] PhoneAccount: ComponentInfo{com.whatsapp/com.whatsapp.calling.telecom.SelfManagedConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video  Audio Routes: BESW Schemes: tel  Extras: Bundle[{android.telecom.extra.LOG_SELF_MANAGED_CALLS=false}] GroupId: ***], [[X] PhoneAccount: ComponentInfo{com.twitter.android/com.twitter.calling.xcall.XCallConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video CallSubject  Audio Routes: BESW Schemes: sip  Extras: null GroupId: ***]]
+07-10 10:08:02.902  1468  2041 I Telecom:SamsungPhoneAccountListener: onAccountsChanged : [[X] PhoneAccount: ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0} Capabilities: CallProvider MultiUser PlaceEmerg SimSub  Audio Routes: BESW Schemes: tel voicemail  Extras: Bundle[{com.samsung.telecom.extra.SUPPORT_VRBT=false, android.telecom.extra.SUPPORTS_VIDEO_CALLING_FALLBACK=true, com.samsung.telecom.extra.SUBSCRIPTION_ID=1, com.samsung.telecom.extra.CAN_COEXIST_ACCOUNT=true, com.samsung.telecom.extra.PHONE_ID=0, com.samsung.telecom.extra.NO_CHECK_IF_VIDEO_CAPABLE=true}] GroupId: ***]
+07-10 10:08:02.902  1468  2041 I Telecom:SamsungPhoneAccountListener: onAccountsChanged : [[X] PhoneAccount: ComponentInfo{com.google.android.gm/androidx.core.telecom.internal.JetpackConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video  Audio Routes: BESW Schemes: tel  Extras: Bundle[{isCoreTelecomAccount=true}] GroupId: ***]
+07-10 10:08:02.902  1468  2041 I Telecom:SamsungPhoneAccountListener: onAccountsChanged : [[X] PhoneAccount: ComponentInfo{com.google.android.apps.tachyon/androidx.core.telecom.internal.JetpackConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video  Audio Routes: BESW Schemes: tel  Extras: Bundle[{isCoreTelecomAccount=true}] GroupId: ***]
+07-10 10:08:02.902  1468  2041 I Telecom:SamsungPhoneAccountListener: onAccountsChanged : [[X] PhoneAccount: ComponentInfo{com.whatsapp/com.whatsapp.calling.telecom.SelfManagedConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video  Audio Routes: BESW Schemes: tel  Extras: Bundle[{android.telecom.extra.LOG_SELF_MANAGED_CALLS=false}] GroupId: ***]
+07-10 10:08:02.902  1468  2041 I Telecom:SamsungPhoneAccountListener: onAccountsChanged : [[X] PhoneAccount: ComponentInfo{com.twitter.android/com.twitter.calling.xcall.XCallConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video CallSubject  Audio Routes: BESW Schemes: sip  Extras: null GroupId: ***]
+07-10 10:08:02.902  1468  2041 I Telecom:SamsungPhoneAccountRegistrarBroadcaster: AccountsChanged : false / UserHandle{0} / ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0} -> ComponentInfo{com.android.phone/com.android.services.telephony.TelephonyConnectionService}, 1, UserHandle{0}
+07-10 10:08:02.903  1468  2041 I Telecom:SamsungPhoneAccountListener: onPhoneAccountChanged - PhoneAccount : ComponentInfo{com.whatsapp/com.whatsapp.calling.telecom.SelfManagedConnectionService}, ***, UserHandle{0}
+07-10 10:08:02.906  1468  2041 I Telecom : CallsManager: handlePhoneAccountChanged: phoneAccount=[[X] PhoneAccount: ComponentInfo{com.whatsapp/com.whatsapp.calling.telecom.SelfManagedConnectionService}, ***, UserHandle{0} Capabilities: SelfManaged SuppVideo Video  Audio Routes: BESW Schemes: tel  Extras: Bundle[{android.telecom.extra.LOG_SELF_MANAGED_CALLS=false}] GroupId: ***]: TSI.rPA@WyU
+07-10 10:08:02.951  5958  6150 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libdav1d.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:02.958  5958  6150 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libwzav1.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:02.963  5958  6150 D nativeloader: Load /data/data/com.whatsapp/files/decompressed/libs.spo/libwzav1_v2.so using class loader ns clns-6 (caller=/data/app/~~_quhtLSBa2rDi7LQoqk-5Q==/com.whatsapp-9sChrUY0PoGQEkCQzSsqjg==/base.apk): ok
+07-10 10:08:03.049   558   558 I lmkd    : 0(delay), 0(swap), 50(freelimit), 0(reentrymode) memory pressure events were skipped after a kill!
+07-10 10:08:03.071  2465  2785 I BadgeCountUpdaterImpl: reload badge without refresh
+07-10 10:08:03.077  1468  2041 I ActivityManager: Changes in 10046 19 to 5, 0 to 8
+07-10 10:08:03.079  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:08:03.087  6162  6174 I BadgeProvider: query, [selection] : null
+07-10 10:08:03.091  5958  6086 E WakeLockMetricsCollector: Unknown wakelock modified
+07-10 10:08:03.092  5958  6086 E WakeLockMetricsCollector: Unknown wakelock modified
+07-10 10:08:03.106  2465  2785 I BadgeCache: reloadBadge size : 0
+07-10 10:08:03.106  5958  6054 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(35)=>[LogLevel:I] DNS Resolution Successful with 4 IPs, Persistent Cache Hit: 1, secondary resolver used: 0
+07-10 10:08:03.106  5958  6054 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 216.239.35.12
+07-10 10:08:03.106  5958  6054 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 216.239.35.8
+07-10 10:08:03.106  5958  6054 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 216.239.35.0
+07-10 10:08:03.106  5958  6054 E msys    : E[ADNSUCTIMH WAJMNSDNSResolver]_MNSDNSResolutionSuccess(55)=>[LogLevel:I] Resolved IP Address: 216.239.35.4
+07-10 10:08:03.119  5958  6150 I BluetoothAdapter: BluetoothAdapter() : com.whatsapp
+07-10 10:08:03.119  1468  1647 D BluetoothManagerService: mDisableBleCallbacks count 8
+07-10 10:08:03.122  5958  6150 D BluetoothHeadset: BTStateChangeCB is registed by 5958 @ com.whatsapp
+07-10 10:08:03.155  5958  6086 E WakeLockMetricsCollector: Unknown wakelock modified
+07-10 10:08:03.158  6089  6161 I SCS@AiSearch user 0: (IndexSearcherManager) Searcher created successfully for com.google.android.providers.media
+07-10 10:08:03.168  1468  1872 D NetdEventListenerService: DNS Requested by : 101, 10297
+07-10 10:08:03.168  5958  6054 E msys    : E[N mns]_OnResolverSuccess(335)=>Cache refresh succeeded with system DNS resolver. IP count: 4
+07-10 10:08:03.184  6089  6161 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetchInternal values : maxSyncId: 1000026832 indexCount: 798 sourceCount: 798
+07-10 10:08:03.206  6089  6161 I SCS@AiSearch user 0: (IndexManager) [AOSP_MP-0] entering in addIndex():  
+07-10 10:08:03.210  6089  6161 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetch: fetching took  412 ms
+07-10 10:08:03.210  6089  6161 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) fetchChanges: applied 0 items
+07-10 10:08:03.210  6089  6161 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) Collect finished. Result: true
+07-10 10:08:03.211  6089  6117 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=d728c8c1-2ceb-4f5b-8242-29718d57db50, tags={ com.sec.android.app.myfiles, com.samsung.android.scs.ai.search.data.collector.ObserverWorker } ]
+07-10 10:08:03.213  6089  6161 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) enqueue ObserverWorker name: com.sec.android.app.myfiles, policy: APPEND_OR_REPLACE
+07-10 10:08:03.213  1468  1495 E Watchdog: !@Sync: 9883 heap: 106 / 109 FD: 1083 [2026-07-10 10:08:03.213]
+07-10 10:08:03.222  6089  6089 I SCS@AiSearch user 0: (SearchProvider) onTrimMemory(): 60
+07-10 10:08:03.235  1468  2041 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10097/com.samsung.android.scs
+07-10 10:08:03.235  1468  2041 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:03.236  1468  2041 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:03.254   558   558 I lmkd    : cached 3, sandbox(not0) 0
+07-10 10:08:03.256   558   558 I lmkd    : Reclaim 'com.samsung.android.lool' (5866), uid 1000, oom_score_adj 955, state 19 to free 68040kB rss, 37524kb swap
+07-10 10:08:03.257   558   558 I lmkd    : Reclaimed 105564kB at oom_score_adj 0
+07-10 10:08:03.261  1468  1501 D DmaBufLeakDetector: false, C 0, R false, T 1783670883261, CAM false
+07-10 10:08:03.268 11502  5953 I NetworkScheduler.Stats: (REDACTED) Task %s/%s finished executing. cause:%s result: %s elapsed_millis: %s uptime_millis: %s exec_start_elapsed_seconds: %s
+07-10 10:08:03.285  1942  1942 D TelephonyManager: requestModemActivityInfo: Sending result to app: ModemActivityInfo{ mTimestamp=386975151 mSleepTimeMs=183048476 mIdleTimeMs=34966712 mActivityStatsTechSpecificInfo=[{mRat=UNKNOWN,mFrequencyRange=UNKNOWN,mTxTimeMs[]=[3197262, 1134392, 4011933, 5481315, 1397043],mRxTimeMs=168181414}]}
+07-10 10:08:03.290  1468  3832 I ActivityManager: Process com.samsung.android.lool (pid 5866) has died: cch+55 CEM (107,1269)
+07-10 10:08:03.291  1468  1501 I libprocessgroup: Successfully killed process cgroup uid 1000 pid 5866 in 0ms
+07-10 10:08:03.291   558   558 I lmkd    : 3(delay), 0(swap), 0(freelimit), 0(reentrymode) memory pressure events were skipped after a kill!
+07-10 10:08:03.292  1101  1101 I Zygote  : Process 5866 exited due to signal 9 (Killed)
+07-10 10:08:03.297  5662  5662 I Finsky:background: [2] Memory trim requested to level 80
+07-10 10:08:03.691  6089  6186 I SCS@AiSearch user 0: (InitialIndexingWorker) [androidx.work-1] entering in doWork():  
+07-10 10:08:03.692  6089  6186 I SCS@AiSearch user 0: (InitialIndexingWorker) [androidx.work-1] entering in initAllIndexes():  
+07-10 10:08:03.693  1468  1508 W libprocessgroup: Failed to open /dev/blkio//cgroup.procs: No such file or directory
+07-10 10:08:03.695  6089  6186 I SCS@AiSearch user 0: (WorkerUtils) [androidx.work-1] entering in handleLocaleChange():  
+07-10 10:08:03.695  6089  6186 I SCS@AiSearch user 0: (WorkerUtils) [androidx.work-1] leaving from handleLocaleChange():  
+07-10 10:08:03.697  6089  6186 I SCS@AiSearch user 0: (ANALOGY) initIndexImpl: took 2 ms
+07-10 10:08:03.699  6089  6186 W SCS@AiSearch user 0: (SynonymIndexer) The resource for the current locale is not found : res/values-fr-FR/synonyms.xml
+07-10 10:08:03.702  6089  6186 I SCS@AiSearch user 0: (SYNONYM) initIndexImpl: took 4 ms
+07-10 10:08:03.702  6089  6186 I SCS@AiSearch user 0: (g) Creating collector for CONTACTS
+07-10 10:08:03.704  6089  6186 I SCS@AiSearch user 0: (ContactsRelation) initRelationDataFromContactsProvider called
+07-10 10:08:03.708 30336 30368 I ReactNativeJNI: Memory warning (pressure level: TRIM_MEMORY_MODERATE) received by JS VM, running a GC
+07-10 10:08:03.711  6089  6186 I SCS@AiSearch user 0: (CORRELATED) initIndexImpl: took 0 ms
+07-10 10:08:03.711  6089  6186 I SCS@AiSearch user 0: (CONTACTS) initIndexImpl: took 0 ms
+07-10 10:08:03.711  6089  6186 I SCS@AiSearch user 0: (CALLLOG) initIndexImpl: took 0 ms
+07-10 10:08:03.711  6089  6186 I SCS@AiSearch user 0: (CALENDAR) initIndexImpl: took 0 ms
+07-10 10:08:03.711  6089  6186 I SCS@AiSearch user 0: (TASKS) initIndexImpl: took 0 ms
+07-10 10:08:03.712  6089  6186 I SCS@AiSearch user 0: (REMINDER) initIndexImpl: took 0 ms
+07-10 10:08:03.713  6089  6186 I SCS@AiSearch user 0: (AppsDataObserver) scheduling worker CMD_SCAN
+07-10 10:08:03.716  6089  6186 I SCS@AiSearch user 0: (APPLICATIONS) initIndexImpl: took 4 ms
+07-10 10:08:03.717  6089  6186 I SCS@AiSearch user 0: (AOSP_MP) initIndexImpl: took 0 ms
+07-10 10:08:03.717  6089  6186 I SCS@AiSearch user 0: (IMAGES) initIndexImpl: took 0 ms
+07-10 10:08:03.717  1468  3834 D PackageManager: setEnabledSetting : userId = 0 packageName = com.samsung.android.scs cmp = androidx.work.impl.background.systemalarm.RescheduleReceiver newState = 1 callingPackage = 10097/com.samsung.android.scs
+07-10 10:08:03.717  6089  6186 I SCS@AiSearch user 0: (SchedulingManager) scheduleSaLogging: Result:: androidx.work.impl.utils.futures.SettableFuture@ac0e411[status=PENDING]
+07-10 10:08:03.717  6089  6186 I SCS@AiSearch user 0: (InitialIndexingWorker) [androidx.work-1] leaving from initAllIndexes():  
+07-10 10:08:03.718  1468  3834 D ApplicationPolicy: getApplicationStateEnabled : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:03.718  6089  6186 I SCS@AiSearch user 0: (BaseCollector::CONTACTS) enqueue ObserverWorker name: CONTACTS policy: KEEP
+07-10 10:08:03.718  6089  6186 I SCS@AiSearch user 0: (g) Creating collector for CALLLOG
+07-10 10:08:03.718  1468  3834 D ApplicationPolicy: getApplicationComponentState : pkg = com.samsung.android.scs userId : 0
+07-10 10:08:03.719  6089  6186 I SCS@AiSearch user 0: (BaseCollector::CALLLOG) enqueue ObserverWorker name: CALLLOG policy: KEEP
+07-10 10:08:03.719  6089  6186 I SCS@AiSearch user 0: (g) Creating collector for CALENDAR
+07-10 10:08:03.719  6089  6186 I SCS@AiSearch user 0: (BaseCollector::CALENDAR) enqueue ObserverWorker name: CALENDAR policy: KEEP
+07-10 10:08:03.719  6089  6186 I SCS@AiSearch user 0: (g) Creating collector for TASKS
+07-10 10:08:03.724  6089  6186 I SCS@AiSearch user 0: (BaseCollector::TASKS) enqueue ObserverWorker name: TASKS policy: KEEP
+07-10 10:08:03.725  6089  6186 I SCS@AiSearch user 0: (g) Creating collector for REMINDER
+07-10 10:08:03.726  6089  6186 I SCS@AiSearch user 0: (BaseCollector::REMINDER) enqueue ObserverWorker name: REMINDER policy: KEEP
+07-10 10:08:03.726  6089  6186 I SCS@AiSearch user 0: (BaseCollector::AOSP_MP) enqueue ObserverWorker name: AOSP_MP policy: KEEP
+07-10 10:08:03.726  6089  6186 I SCS@AiSearch user 0: (g) Creating collector for GALLERY
+07-10 10:08:03.727  6089  6186 I SCS@AiSearch user 0: (BaseCollector::GALLERY) Initial CMH info, last synced CMH SecMediaId=2147497353, TimeStamp=1783622567315
+07-10 10:08:03.728  6089  6186 I SCS@AiSearch user 0: (BaseCollector::GALLERY) enqueue ObserverWorker name: GALLERY policy: KEEP
+07-10 10:08:03.728  6089  6186 I SCS@AiSearch user 0: (g) Creating collector for DOCUMENTS
+07-10 10:08:03.728  6089  6186 I SCS@AiSearch user 0: (InitialIndexingWorker) Indexing time: 0.036seconds
+07-10 10:08:03.733  6089  6149 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=381d1fbc-2a41-4992-9731-be89c03c8233, tags={ com.samsung.android.scs.ai.search.scheduling.workers.InitialIndexingWorker, InitialIndexingWorker } ]
+07-10 10:08:03.744  6089  6187 I SCS@AiSearch user 0: (AppsDataWorker) [androidx.work-2] entering in doWork():  
+07-10 10:08:03.745  6089  6187 I SCS@AiSearch user 0: (AppsDataObserver) [androidx.work-2] entering in execute():  
+07-10 10:08:03.745  6089  6187 I SCS@AiSearch user 0: (AppsDataObserver-CMD_SCAN) Scanning applications for indexing...
+07-10 10:08:03.805  6089  6187 I SCS@AiSearch user 0: (IndexSearcherManager) Searcher created successfully for com.samsung.android.apps
+07-10 10:08:03.910   558   558 I lmkd    : 0(delay), 0(swap), 50(freelimit), 0(reentrymode) memory pressure events were skipped after a kill!
+07-10 10:08:03.926  6089  6187 I SCS@AiSearch user 0: (AppsDataObserver) [androidx.work-2] leaving from execute():  result is true
+07-10 10:08:03.926  6089  6187 I SCS@AiSearch user 0: (AppsDataWorker) [androidx.work-2] leaving from doWork():  
+07-10 10:08:03.927  6089  6117 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=1247154f-5b7f-4d06-86c2-270da02f789b, tags={ com.samsung.android.scs.ai.search.scheduling.workers.AppsDataWorker, CMD_SCAN } ]
+07-10 10:08:03.927  5958  5962 I com.whatsapp: Background concurrent copying GC freed 32MB AllocSpace bytes, 212(5948KB) LOS objects, 49% free, 10MB/20MB, paused 135us,79us total 172.928ms
+07-10 10:08:03.932  1468  3824 W JobScheduler: Job didn't exist in JobStore: 4cd6d5d #u0a97/52608 com.samsung.android.scs/androidx.work.impl.background.systemjob.SystemJobService
+07-10 10:08:03.934  6089  6089 I SCS@AiSearch user 0: (SearchProvider) onTrimMemory(): 60
+07-10 10:08:04.167  3643  3643 I MediaServiceV2: Creating work for intent Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaServiceV2 }
+07-10 10:08:04.177  3643  3643 I MediaServiceV2: Work enqueued for intent: Intent { act=android.intent.action.MEDIA_SCANNER_SCAN_FILE dat=file:///... flg=0x1400010 cmp=com.google.android.providers.media.module/com.android.providers.media.MediaServiceV2 }
+07-10 10:08:04.260  3643  4137 D WM-SystemJobScheduler: Scheduling work ID 06e963ba-472f-406d-bc55-4714da202673Job ID 6874
+07-10 10:08:04.277  3643  4137 D WM-GreedyScheduler: Ignoring {WorkSpec: 1be04481-6528-4783-9b35-dc330bfc825d}. Requires device idle.
+07-10 10:08:04.278  3643  3643 D WM-SystemJobService: onStartJob for WorkGenerationalId(workSpecId=06e963ba-472f-406d-bc55-4714da202673, generation=0)
+07-10 10:08:04.278  3643  4137 D WM-GreedyScheduler: Ignoring {WorkSpec: 2c90540f-974d-4e19-b6a5-547dcaaae2ce}. Requires device idle.
+07-10 10:08:04.278  3643  4137 D WM-GreedyScheduler: Starting work for 06e963ba-472f-406d-bc55-4714da202673
+07-10 10:08:04.283 24409 24409 I adbd    : adbd service requested 'sync:'
+07-10 10:08:04.292  3643  4137 D WM-Processor: Processor: processing WorkGenerationalId(workSpecId=06e963ba-472f-406d-bc55-4714da202673, generation=0)
+07-10 10:08:04.298  3643  4137 D WM-Processor: Work WorkGenerationalId(workSpecId=06e963ba-472f-406d-bc55-4714da202673, generation=0) is already enqueued for processing
+07-10 10:08:04.310  3643  3643 D WM-WorkerWrapper: Starting work for com.android.providers.media.MediaServiceV2
+07-10 10:08:04.314  3643  6193 I MediaServiceV2: Work initiated for action [ android.intent.action.MEDIA_SCANNER_SCAN_FILE ]
+07-10 10:08:04.381 24409 24409 I adbd    : adbd service requested 'shell,v2,TERM=xterm-256color:export ANDROID_LOG_TAGS=''; exec logcat '-d' '-t' '1000''
+07-10 10:08:04.399   601   601 D io_stats: !@ 179,0 r 2655 109822 w 571 22905 d 0 0 f 0 0 iot 16160 0 th 0 0 0 pt 0 inp 0 0 296819.669
+07-10 10:08:04.399   601   601 D io_stats: !@   8,0 r 41984504 849666996 w 7156724 121801772 d 0 0 f 0 0 iot 10097772 0 th 0 0 0 pt 0 inp 0 5 296819.669
+07-10 10:08:04.401  1468  3824 D SyncManager: userId - 0 auto - true
+07-10 10:08:04.408  3643  6193 I MediaServiceV2: Work ended for action [ android.intent.action.MEDIA_SCANNER_SCAN_FILE ]
+07-10 10:08:04.415  3643  3968 I WM-WorkerWrapper: Worker result SUCCESS for Work [ id=06e963ba-472f-406d-bc55-4714da202673, tags={ com.android.providers.media.MediaServiceV2 } ]
+07-10 10:08:04.422  3643  3643 D WM-Processor: Processor 06e963ba-472f-406d-bc55-4714da202673 executed; reschedule = false
+07-10 10:08:04.422  3643  3643 D WM-SystemJobService: 06e963ba-472f-406d-bc55-4714da202673 executed on JobScheduler
+07-10 10:08:04.428  3643  4158 D WM-GreedyScheduler: Cancelling work ID 06e963ba-472f-406d-bc55-4714da202673
+07-10 10:08:04.434  3643  4158 D WM-GreedyScheduler: Ignoring {WorkSpec: 1be04481-6528-4783-9b35-dc330bfc825d}. Requires device idle.
+07-10 10:08:04.434  3643  4158 D WM-GreedyScheduler: Ignoring {WorkSpec: 2c90540f-974d-4e19-b6a5-547dcaaae2ce}. Requires device idle.

@@ -135,6 +135,25 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         </div>
       </div>
 
+      <!-- Oracle Style -->
+      <div>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Style de l'Oracle</p>
+        <div class="relative p-4 rounded-xl bg-cosmic-bg border border-cosmic-border group">
+          <select
+            id="oracle-style"
+            class="w-full px-3 py-2 rounded-lg border border-cosmic-border bg-cosmic-void text-xs text-cosmic-text focus:border-cosmic-gold focus:outline-none transition-colors appearance-none"
+            disabled
+          >
+            <option value="chirurgical">Chirurgical (Direct & sans filtre)</option>
+            <option value="bienveillant">Bienveillant (Doux & encourageant)</option>
+            <option value="expert">Expert (Avec aspects & transits techniques)</option>
+          </select>
+          <div id="oracle-style-lock" class="absolute inset-0 z-10 flex items-center justify-end pr-6 cursor-pointer bg-black/20 rounded-xl" title="Passer à Pro pour changer de style">
+            <span class="text-cosmic-gold text-xs font-display flex items-center gap-1 bg-cosmic-void px-2 py-1 rounded border border-cosmic-gold/30">🔒 PRO</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Testeurs / IA -->
       <div>
         <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.local_ai">Expérimental (Testeurs)</p>
@@ -231,7 +250,8 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         // Update plan display if available
         const planSection = document.getElementById('settings-plan-section');
         if (planSection && data.profile.plan) {
-          const isPro = data.profile.plan === 'pro';
+          const planStr = (data.profile.plan || '').toLowerCase();
+          const isPro = planStr === 'pro' || planStr === 'premium';
           planSection.innerHTML = `
             <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">${i18n.t('settings.plan')}</p>
             <div class="p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
@@ -244,6 +264,32 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
               </div>
             </div>
           `;
+          
+          // Update Oracle Style Lock
+          const oracleSelect = document.getElementById('oracle-style') as HTMLSelectElement;
+          const oracleLock = document.getElementById('oracle-style-lock');
+          if (oracleSelect && oracleLock) {
+            if (isPro) {
+              oracleSelect.disabled = false;
+              oracleLock.style.display = 'none';
+            } else {
+              oracleSelect.disabled = true;
+              oracleSelect.value = 'chirurgical';
+              oracleLock.style.display = 'flex';
+              
+              // Force update in local storage to chirurgical if it was previously set to something else
+              try {
+                const stored = localStorage.getItem('karmic_ai_settings');
+                if (stored) {
+                  const settings = JSON.parse(stored);
+                  if (settings.oracleStyle !== 'chirurgical') {
+                    settings.oracleStyle = 'chirurgical';
+                    localStorage.setItem('karmic_ai_settings', JSON.stringify(settings));
+                  }
+                }
+              } catch (e) {}
+            }
+          }
         }
       }
     } catch {
@@ -312,6 +358,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
   // ── IA Locale Selection ──
   const modeSelect = document.getElementById('local-ai-mode') as HTMLSelectElement;
+  const oracleStyleSelect = document.getElementById('oracle-style') as HTMLSelectElement;
   const configDiv = document.getElementById('local-network-config')!;
   const hostInput = document.getElementById('local-ai-host') as HTMLInputElement;
   const modelInput = document.getElementById('local-ai-model-name') as HTMLInputElement;
@@ -330,6 +377,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         
         if (settings.networkHost) hostInput.value = settings.networkHost;
         if (settings.networkModel) modelInput.value = settings.networkModel;
+        if (settings.oracleStyle && oracleStyleSelect) oracleStyleSelect.value = settings.oracleStyle;
         
         toggleConfigVisibility(modeSelect.value);
       } catch (e) {}
@@ -352,7 +400,8 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         localMode: mode,
         useLocal: mode !== 'cloud',
         networkHost: host,
-        networkModel: model
+        networkModel: model,
+        oracleStyle: oracleStyleSelect ? oracleStyleSelect.value : 'chirurgical'
       };
       localStorage.setItem('karmic_ai_settings', JSON.stringify(settings));
     }
@@ -361,6 +410,17 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
       toggleConfigVisibility(modeSelect.value);
       saveSettings();
     });
+
+    if (oracleStyleSelect) {
+      oracleStyleSelect.addEventListener('change', saveSettings);
+    }
+    
+    const oracleLock = document.getElementById('oracle-style-lock');
+    if (oracleLock) {
+      oracleLock.addEventListener('click', () => {
+        window.location.href = '/app/index.html?upgrade=true';
+      });
+    }
 
     hostInput.addEventListener('input', saveSettings);
     modelInput.addEventListener('input', saveSettings);
