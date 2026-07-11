@@ -100,7 +100,11 @@
             <div style="flex: 1; min-width: 300px; max-width: 350px; display: flex; justify-content: center; position: relative; margin-top: 20px;">
                 <!-- Screenshot de l'application -->
                 <div style="position: relative; width: 280px; max-width: 100%; border-radius: 2.5rem; box-shadow: 0 0 50px rgba(201,168,76,0.15); overflow: hidden; border: 8px solid #2a2a26; background: #0a0a08;">
-                  <img src="/static/app_chat_screenshot.png" alt="Interface du Chat Karmique" style="width: 100%; height: auto; display: block;" />
+                  <video autoplay loop muted playsinline style="width: 100%; height: auto; display: block; border-radius: inherit; object-fit: cover; max-height: 560px;">
+                      <source src="{{ url_for('static', filename='img/demo_app_' ~ lang.code ~ '.mp4') }}" type="video/mp4">
+                      <!-- Fallback -->
+                      <img src="/static/app_chat_screenshot.png" alt="Interface du Chat Karmique" style="width: 100%; height: auto; display: block;" />
+                  </video>
                   
                   <!-- Reflet brillant -->
                   <div style="position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top right, transparent, rgba(255,255,255,0.08), transparent); border-radius: 2rem;"></div>
