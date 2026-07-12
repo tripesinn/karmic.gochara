@@ -20,9 +20,6 @@ export const i18n = {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('karmic_lang');
       if (stored && translations[stored]) return stored;
-      
-      const navLang = navigator.language.split('-')[0].toLowerCase();
-      if (translations[navLang]) return navLang;
     }
     return 'fr';
   },

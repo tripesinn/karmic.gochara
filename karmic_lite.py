@@ -122,8 +122,19 @@ def generate_prompt(data, natal_info=None, rich=False):
     aspects_str = ""
     for a in doc_aspects:
         orb = a.get("orb", 0)
+        
+        # Classification de l'intensité par script
+        if orb <= 1.0:
+            intensite = "[🔥 IMMINENT / CRISE AIGUË]"
+        elif orb <= 3.0:
+            intensite = "[🌊 PROCESSUS ACTIF]"
+        else:
+            intensite = "[🌱 TRAVAIL DE FOND]"
+            
+        phase = "[↗ APPLIQUANT (tension croissante)]" if a.get("applying", True) else "[↘ SÉPARANT (intégration, dénouement)]"
+            
         aspects_str += (
-            f"  • {a['transit_planet']} {a['transit_display']} "
+            f"  • {intensite} {phase} {a['transit_planet']} {a['transit_display']} "
             f"{a['aspect']} natal {a['natal_planet']} {a['natal_display']} "
             f"(orbe {orb:.2f}°)\n"
         )
@@ -131,25 +142,23 @@ def generate_prompt(data, natal_info=None, rich=False):
     if rich:
         mission_content = """MISSION POUR L'IA :
 
-Tu es l'intelligence siderealAstro13, experte en Doctrine Évolutive Synthétique.
+Tu es l'intelligence siderealAstro13. Tu pratiques la "Doctrine Évolutive Synthétique", un système karmique unique dont voici les concepts clés :
+- Ketu (Nœud Sud) = ROM (Read-Only Memory) : le réflexe de survie, la zone de confort obsolète des vies passées.
+- Rahu (Nœud Nord) = DHARMA : l'évolution, le risque nécessaire, la destination de l'âme.
+- Porte Invisible (PI) = La prison inconsciente, le mécanisme d'autosabotage et de fuite.
+- Porte Visible (PV) = La Scène, la réalisation souveraine, là où l'âme doit oser exister.
+- Chiron = RAM (Random Access Memory) : la clé d'ouverture, la blessure qui, une fois acceptée, permet de passer de la PI à la PV.
+- Lilith = La friction : l'épreuve karmique qui déchire les illusions pour propulser vers le Dharma.
+
 Analyse ces données en 4 blocs :
 
-1. DIAGNOSTIC ROM (Ketu) : Quel schéma de vie antérieure est activé en ce moment ?
-   Quel automatisme défensif est à l'œuvre ?
+1. DIAGNOSTIC ROM (L'Automatisme) : Quel schéma de confort (Ketu) te paralyse face aux transits actuels ?
+2. DE LA PRISON À LA SCÈNE : Comment les transits fracturent ta Porte Invisible (refuge) et comment la clé Chiron t'oblige à marcher vers ta Porte Visible (Scène) ?
+3. L'ÉPREUVE LILITH : Quelle friction (Lilith) vient t'arracher à tes illusions pour te pousser vers ton Dharma (Rahu) ?
+4. L'ALTERNATIVE DE CONSCIENCE : L'insight chirurgical et actionnable que l'âme doit intégrer MAINTENANT pour basculer.
 
-2. PORTE INVISIBLE → PORTE VISIBLE : Quels transits activent la prison inconsciente ?
-   Comment Chiron (RAM) peut-il ouvrir le passage vers la Scène ?
-
-3. ÉPREUVE LILITH : Quelle friction karmique est en cours ?
-   Comment Lilith propulse-t-elle vers le Dharma (Rahu) ?
-
-4. ALTERNATIVE DE CONSCIENCE : Formule l'insight transformateur précis,
-   chirurgical, actionnable — ce que l'âme doit comprendre MAINTENANT
-   pour avancer vers sa Scène.
-
-Style : direct, technique, non-astro-jargon dans les conclusions. Tutoiement direct ("tu").
-Longueur : 400-600 mots MINIMUM. Pas de généralités. Chaque phrase = une vérité chirurgicale. Chaque bloc doit être développé : pas de liste à puces, 
-prose continue avec enchaînement logique interne."""
+Style : psychologique, implacable, bienveillant mais sans complaisance. AUCUN jargon astrologique dans la réponse (ne cite pas les planètes, signes ou aspects). Tutoiement direct ("tu").
+Longueur : 400-600 mots. Prose continue, pas de listes à puces. Chaque phrase est une radiographie de l'inconscient."""
     else:
         mission_content = """MISSION POUR L'IA :
 Base-toi sur ces données astrologiques exactes.

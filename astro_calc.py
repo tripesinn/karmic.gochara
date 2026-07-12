@@ -567,6 +567,15 @@ def calculate_transits(natal: dict, transit_loc: dict,
             for asp_name, asp_angle in ASPECTS.items():
                 orb_actual = abs(diff - asp_angle)
                 if orb_actual <= ORB:
+                    # Déterminer si l'aspect est appliquant ou séparant (approche ou s'éloigne)
+                    t_speed = t_data.get("speed", 0.0)
+                    t_lon_next = (t_lon + t_speed * 0.1) % 360 # projection sur une fraction de jour
+                    diff_next = abs(t_lon_next - n_lon) % 360
+                    if diff_next > 180:
+                        diff_next = 360 - diff_next
+                    orb_next = abs(diff_next - asp_angle)
+                    is_applying = orb_next < orb_actual
+
                     aspects.append({
                         "transit_planet":  t_name,
                         "transit_display": t_data["display"],
@@ -578,6 +587,7 @@ def calculate_transits(natal: dict, transit_loc: dict,
                         "aspect":          asp_name,
                         "orb":             round(orb_actual, 2),
                         "retrograde":      t_data["retrograde"],
+                        "applying":        is_applying,
                     })
 
     aspects.sort(key=lambda x: x["orb"])

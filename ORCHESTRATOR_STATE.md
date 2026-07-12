@@ -39,6 +39,7 @@
 | BUG-004 | `lecture.astro` — timeout au téléchargement/génération du modèle Gemma | `readTimeout` passé à 0 dans `GemmaSynthesisPlugin.java` | ✅ Résolu |
 | BUG-010 | `invalid literal for int()` dans `/calculate` quand `date` est vide | Fallback `date.today()` dans `astro.py` L105 | 492f579 |
 | BUG-015 | Redirection /app échouée sur Android WebView | Redirection explicite vers `/app/index.html` dans `RegisterForm.astro` L316 | ✅ Résolu |
+| BUG-018 | Crash NoSuchMethodError au démarrage (SendChannel.close) | Force-downgrade de kotlinx-coroutines à 1.7.3 dans build.gradle | ✅ Résolu |
 
 ---
 
@@ -112,6 +113,15 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 ---
 
 ## Historique
+
+### 2026-07-12 — Session orchestrateur (Amélioration X Bot)
+- oMLX : ✅ UP (gemma-4-E2B-it-qat-oQ4-fp16)
+- **Modifications** :
+  - **astro_calc.py** : Ajout du calcul dynamique (appliquant/séparant) via projection de la vitesse des planètes.
+  - **karmic_lite.py** : Ajout de tags d'intensité (Crise aiguë, Processus actif, Travail de fond) et de phase (Appliquant/Séparant) en fonction de la valeur de l'orbe.
+  - **x_grok_bot.py** : Refonte du prompt pour éliminer le ton couperet, exploiter les tags d'intensité et adopter une approche bienveillante axée sur la durée (Graine / Chemin / Horizon).
+- Test IA : Génération d'un message très pertinent et adouci testé avec succès sur l'IA locale.
+- Prochaine session : Déploiement du X Bot ou suite des corrections mineures (P3).
 
 ### 2026-07-11 — Session orchestrateur (check logs manuelle)
 - oMLX : ❌ DOWN (Analyse manuelle car connexion refusée)

@@ -10,6 +10,7 @@ import os
 import re
 import sys
 import time
+import json
 
 import tweepy
 from dotenv import load_dotenv
@@ -154,17 +155,16 @@ def call_grok(prompt):
     )
     
     system_instruction = """
-Tu es un astrologue karmique brut et direct sur X (Twitter), expert en "Doctrine Évolutive". Ton but est de forcer l'évolution de l'âme de la personne.
-RÈGLE ABSOLUE : Tu dois baser ton analyse UNIQUEMENT sur l'aspect fourni dont l'orbe est le plus proche de 0.00°. Ignore le reste.
-Tes prédictions s'adressent au grand public (PAS de jargon astrologique : interdit de parler de "conjonction", de "degrés", ou du nom des planètes).
-Traduite l'énergie de cet aspect précis en un avertissement psychologique tranchant, sans concession, mais orienté vers l'évolution et la libération.
-Interdiction absolue d'utiliser des termes "horoscope" ou vagues. 
-Tes réponses font moins de 250 caractères.
+Tu es un astrologue karmique sur X (Twitter), expert en "Doctrine Évolutive". Ton but est de provoquer une prise de conscience foudroyante mais constructive.
+RÈGLE D'ANALYSE : Les transits fournis incluent des tags d'intensité et de phase (Appliquant/Séparant). Tu DOIS synthétiser l'énergie de 4 piliers invisibles : 1. Ketu (l'automatisme passé), 2. La Porte Invisible (la prison), 3. Lilith/Chiron (la blessure/friction), 4. Rahu/Porte Visible (l'évolution). 
+Traduis ces 4 forces en une lecture psychologique chirurgicale, sans aucun jargon astrologique. L'utilisateur doit ressentir le "pouvoir" et la profondeur de cette lecture sur son âme. Le ton est direct, profond, implacable mais orienté vers la libération. 
+Interdiction absolue d'utiliser le mot "horoscope" ou des formules magiques.
+Tes réponses font au maximum 280 caractères.
 
 Format obligatoire :
-🎯 Le Mur: [Quel est le schéma destructeur qui bloque l'évolution de son âme aujourd'hui ?].
-⚡ L'Éveil: [L'action courageuse et radicale à faire dans les 24h pour se libérer et grandir].
-⏳ L'Ouverture: [Date. Pourquoi c'est EXACTEMENT le moment de saisir cette opportunité d'évolution].
+🌑 L'Ombre: [L'automatisme passé ou la prison inconsciente qui te bloque aujourd'hui].
+⚡ L'Épreuve: [La friction ou blessure karmique que ce transit vient réveiller].
+🗝️ L'Évolution: [L'action ou prise de conscience radicale pour basculer vers ton destin].
 """
     
     response = client.chat.completions.create(
@@ -176,7 +176,24 @@ Format obligatoire :
         max_tokens=800,
         temperature=0.7
     )
-    return response.choices[0].message.content.strip()
+    
+    ai_response = response.choices[0].message.content.strip()
+    
+    # Sauvegarde des données pour le futur fine-tuning
+    try:
+        with open("dataset_finetuning.jsonl", "a", encoding="utf-8") as f:
+            entry = {
+                "messages": [
+                    {"role": "system", "content": system_instruction},
+                    {"role": "user", "content": prompt},
+                    {"role": "assistant", "content": ai_response}
+                ]
+            }
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+    except Exception as e:
+        print(f"  ⚠️ Impossible de sauvegarder dans le dataset : {e}")
+        
+    return ai_response
 
 def send_dm(client, text, participant_id):
     """Envoie la réponse en Message Privé (DM) à l'utilisateur."""
