@@ -43,5 +43,19 @@
   "lecture.title": "🌟 Gochara",
   "lecture.subtitle": "Sua leitura kármica e trânsitos diários",
   "lecture.generate": "Gerar leitura",
-  "lecture.generating": "Gerando..."
+  "lecture.generating": "Gerando...",
+  "settings.oracle_style": "Estilo do Oráculo",
+  "settings.oracle_style.chirurgical": "Cirúrgico (Direto e sem filtro)",
+  "settings.oracle_style.bienveillant": "Benevolente (Suave e encorajador)",
+  "settings.oracle_style.expert": "Especialista (Com aspectos técnicos e trânsitos)",
+  "settings.oracle_style.pro_only": "🔒 PRO",
+  "settings.local_ai_mode": "Modo de interpretação de IA",
+  "settings.local_ai_mode.cloud": "Desativado (IA na nuvem por padrão)",
+  "settings.local_ai_mode.native": "IA interna móvel (Gemma no dispositivo)",
+  "settings.local_ai_mode.network": "Servidor de IA de rede (Ollama, oMLX...)",
+  "settings.local_ai_host": "Endereço e porta do servidor",
+  "settings.local_ai_model_name": "Nome do modelo",
+  "settings.import_model": "📁 Importar um modelo (.litertlm)",
+  "settings.download_model": "⬇️ Baixar modelo oficial (2.58 GB)",
+  "settings.downloading": "Baixando..."
 }

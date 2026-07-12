@@ -43,5 +43,19 @@
   "lecture.title": "🌟 Gochara",
   "lecture.subtitle": "Deine tägliche karmische Lesung und Transite",
   "lecture.generate": "Lesung generieren",
-  "lecture.generating": "Wird generiert..."
+  "lecture.generating": "Wird generiert...",
+  "settings.oracle_style": "Stil des Orakels",
+  "settings.oracle_style.chirurgical": "Chirurgisch (Direkt & ungefiltert)",
+  "settings.oracle_style.bienveillant": "Wohlwollend (Sanft & ermutigend)",
+  "settings.oracle_style.expert": "Experte (Mit technischen Aspekten & Transiten)",
+  "settings.oracle_style.pro_only": "🔒 PRO",
+  "settings.local_ai_mode": "KI-Interpretationsmodus",
+  "settings.local_ai_mode.cloud": "Deaktiviert (Standard-Cloud-KI)",
+  "settings.local_ai_mode.native": "Interne mobile KI (Gemma auf dem Gerät)",
+  "settings.local_ai_mode.network": "Netzwerk-KI-Server (Ollama, oMLX...)",
+  "settings.local_ai_host": "Serveradresse & Port",
+  "settings.local_ai_model_name": "Modellname",
+  "settings.import_model": "📁 Modell importieren (.litertlm)",
+  "settings.download_model": "⬇️ Offizielles Modell herunterladen (2.58 GB)",
+  "settings.downloading": "Herunterladen..."
 }

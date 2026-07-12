@@ -137,19 +137,19 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
 
       <!-- Oracle Style -->
       <div>
-        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3">Style de l'Oracle</p>
+        <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.oracle_style">Style de l'Oracle</p>
         <div class="relative p-4 rounded-xl bg-cosmic-bg border border-cosmic-border group">
           <select
             id="oracle-style"
             class="w-full px-3 py-2 rounded-lg border border-cosmic-border bg-cosmic-void text-xs text-cosmic-text focus:border-cosmic-gold focus:outline-none transition-colors appearance-none"
             disabled
           >
-            <option value="chirurgical">Chirurgical (Direct & sans filtre)</option>
-            <option value="bienveillant">Bienveillant (Doux & encourageant)</option>
-            <option value="expert">Expert (Avec aspects & transits techniques)</option>
+            <option value="chirurgical" data-i18n="settings.oracle_style.chirurgical">Chirurgical (Direct & sans filtre)</option>
+            <option value="bienveillant" data-i18n="settings.oracle_style.bienveillant">Bienveillant (Doux & encourageant)</option>
+            <option value="expert" data-i18n="settings.oracle_style.expert">Expert (Avec aspects & transits techniques)</option>
           </select>
           <div id="oracle-style-lock" class="absolute inset-0 z-10 flex items-center justify-end pr-6 cursor-pointer bg-black/20 rounded-xl" title="Passer à Pro pour changer de style">
-            <span class="text-cosmic-gold text-xs font-display flex items-center gap-1 bg-cosmic-void px-2 py-1 rounded border border-cosmic-gold/30">🔒 PRO</span>
+            <span class="text-cosmic-gold text-xs font-display flex items-center gap-1 bg-cosmic-void px-2 py-1 rounded border border-cosmic-gold/30" data-i18n="settings.oracle_style.pro_only">🔒 PRO</span>
           </div>
         </div>
       </div>
@@ -159,23 +159,23 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
         <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.local_ai">Expérimental (Testeurs)</p>
         <div class="space-y-4 p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
           <div>
-            <label for="local-ai-mode" class="block font-body text-xs text-cosmic-text-dim mb-1.5">
+            <label for="local-ai-mode" class="block font-body text-xs text-cosmic-text-dim mb-1.5" data-i18n="settings.local_ai_mode">
               Mode d'interprétation IA
             </label>
             <select
               id="local-ai-mode"
               class="w-full px-3 py-2 rounded-lg border border-cosmic-border bg-cosmic-void text-xs text-cosmic-text focus:border-cosmic-gold focus:outline-none transition-colors"
             >
-              <option value="cloud">Désactivé (IA Cloud par défaut)</option>
-              <option value="native">IA Interne Mobile (Gemma sur l'appareil)</option>
-              <option value="network">Serveur IA Réseau (Ollama, oMLX...)</option>
+              <option value="cloud" data-i18n="settings.local_ai_mode.cloud">Désactivé (IA Cloud par défaut)</option>
+              <option value="native" data-i18n="settings.local_ai_mode.native">IA Interne Mobile (Gemma sur l'appareil)</option>
+              <option value="network" data-i18n="settings.local_ai_mode.network">Serveur IA Réseau (Ollama, oMLX...)</option>
             </select>
           </div>
 
           <!-- Configuration Réseau Locale -->
           <div id="local-network-config" class="hidden space-y-3 pt-3 border-t border-cosmic-border/30">
             <div>
-              <label for="local-ai-host" class="block font-body text-[10px] text-cosmic-text-dim tracking-wider uppercase mb-1">
+              <label for="local-ai-host" class="block font-body text-[10px] text-cosmic-text-dim tracking-wider uppercase mb-1" data-i18n="settings.local_ai_host">
                 Adresse & Port du Serveur
               </label>
               <input
@@ -186,7 +186,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
               />
             </div>
             <div>
-              <label for="local-ai-model-name" class="block font-body text-[10px] text-cosmic-text-dim tracking-wider uppercase mb-1">
+              <label for="local-ai-model-name" class="block font-body text-[10px] text-cosmic-text-dim tracking-wider uppercase mb-1" data-i18n="settings.local_ai_model_name">
                 Nom du Modèle
               </label>
               <input
@@ -203,18 +203,20 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
             <button
               id="settings-select-local-model-btn"
               class="w-full py-2 font-display text-xs tracking-wider rounded-lg border border-cosmic-gold/50 text-cosmic-gold bg-cosmic-gold/10 hover:bg-cosmic-gold hover:text-cosmic-bg transition-all"
+              data-i18n="settings.import_model"
             >
               📁 Importer un modèle (.litertlm)
             </button>
             <button
               id="settings-download-model-btn"
               class="w-full py-2 font-display text-xs tracking-wider rounded-lg border border-cosmic-border text-cosmic-text-dim bg-cosmic-void/20 hover:border-cosmic-gold hover:text-cosmic-gold hover:bg-cosmic-gold/5 transition-all"
+              data-i18n="settings.download_model"
             >
               ⬇️ Télécharger le modèle officiel (2.58 Go)
             </button>
             <div id="settings-download-progress-container" class="hidden space-y-2 mt-2">
               <div class="flex justify-between text-xs text-cosmic-text-dim">
-                <span>Téléchargement...</span>
+                <span data-i18n="settings.downloading">Téléchargement...</span>
                 <span id="settings-download-percentage">0%</span>
               </div>
               <div class="w-full bg-cosmic-bg/60 rounded-full h-2 overflow-hidden border border-cosmic-border/30">

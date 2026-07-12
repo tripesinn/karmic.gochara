@@ -43,5 +43,19 @@
   "lecture.title": "🌟 Gochara",
   "lecture.subtitle": "Je dagelijkse karmische lezing en transits",
   "lecture.generate": "Lezing genereren",
-  "lecture.generating": "Genereren..."
+  "lecture.generating": "Genereren...",
+  "settings.oracle_style": "Stijl van het Orakel",
+  "settings.oracle_style.chirurgical": "Chirurgisch (Direct & ongefilterd)",
+  "settings.oracle_style.bienveillant": "Welwillend (Zacht & aanmoedigend)",
+  "settings.oracle_style.expert": "Expert (Met technische aspecten & transits)",
+  "settings.oracle_style.pro_only": "🔒 PRO",
+  "settings.local_ai_mode": "IA-interpretatiemodus",
+  "settings.local_ai_mode.cloud": "Uitgeschakeld (Standaard Cloud IA)",
+  "settings.local_ai_mode.native": "Mobiele interne IA (Gemma op het apparaat)",
+  "settings.local_ai_mode.network": "Netwerk IA-server (Ollama, oMLX...)",
+  "settings.local_ai_host": "Serveradres & poort",
+  "settings.local_ai_model_name": "Modelnaam",
+  "settings.import_model": "📁 Importeer een model (.litertlm)",
+  "settings.download_model": "⬇️ Download officieel model (2.58 GB)",
+  "settings.downloading": "Downloaden..."
 }
