@@ -215,6 +215,21 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
     }
 
     async function checkModelAvailability() {
+      let localMode = 'cloud';
+      try {
+        const storedSettings = localStorage.getItem('karmic_ai_settings');
+        if (storedSettings) {
+          const settings = JSON.parse(storedSettings);
+          localMode = settings.localMode || 'cloud';
+        }
+      } catch (e) {}
+
+      if (localMode !== 'native') {
+        document.getElementById('model-download-card')?.classList.add('hidden');
+        document.getElementById('main-reading-card')?.classList.remove('hidden');
+        return true;
+      }
+
       if (!capacitorBridge.isNative()) return true;
 
       try {

@@ -16,7 +16,29 @@ const isEmulator = import.meta.env.PUBLIC_FIREBASE_EMULATOR === 'true';
       <span data-i18n="login.google">Continuer avec Google</span>
     </button>
 
-
+    {isEmulator && (
+      <>
+        <div class="my-4 flex items-center gap-2">
+          <div class="flex-1 h-px bg-white/10"></div>
+          <span class="text-xs text-white/30 uppercase tracking-widest">Mode Test</span>
+          <div class="flex-1 h-px bg-white/10"></div>
+        </div>
+        <button
+          id="test-new-user-btn"
+          type="button"
+          class="w-full flex items-center justify-center gap-2 py-3 px-6 text-sm font-semibold rounded-xl bg-amber-500/20 text-amber-300 border border-amber-500/30 transition-all duration-300 hover:bg-amber-500/30 active:scale-[0.98]"
+        >
+          🧪 Test : Nouvel Utilisateur
+        </button>
+        <button
+          id="test-existing-user-btn"
+          type="button"
+          class="w-full flex items-center justify-center gap-2 py-2 px-6 text-xs font-medium rounded-xl bg-white/5 text-white/40 border border-white/10 transition-all duration-300 hover:bg-white/10 mt-2"
+        >
+          🔁 Test : User Existant (test-fixed@karmic.dev)
+        </button>
+      </>
+    )}
 
     <div id="login-message" class="text-sm min-h-5 mt-4 transition-all duration-300" role="alert"></div>
   </div>
@@ -97,7 +119,6 @@ const isEmulator = import.meta.env.PUBLIC_FIREBASE_EMULATOR === 'true';
     });
 
     // Boutons de test émulateur
-    /*
     if (isEmulator && testNewBtn) {
       testNewBtn.addEventListener('click', async () => {
         testNewBtn.disabled = true;
@@ -119,7 +140,6 @@ const isEmulator = import.meta.env.PUBLIC_FIREBASE_EMULATOR === 'true';
         }
       });
     }
-    */
 
     if (isEmulator && testExistingBtn) {
       testExistingBtn.addEventListener('click', async () => {

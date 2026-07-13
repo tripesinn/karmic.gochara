@@ -10,18 +10,19 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-09T18:41 (Session en cours, oMLX UP)
-**Build Astro** : ✅ OK (www/ à jour)
+**Dernière mise à jour** : 2026-07-12T22:50 (Session en cours, oMLX UP)
+**Build Astro** : ✅ OK (www/ à jour et resynchronisé Capacitor)
 **Environnement** :
 - **Node.js** : `v20.12.2` (via NVM)
 - **Firebase CLI** : `v13.6.0`
 - **Android Studio** : SDK Platform-Tools installés (adb fonctionnel)
 - **IA Locale** : ✅ UP (oMLX port 8889)
-- **Modèle Local configuré** : `gemma-4-E2B-it-qat-oQ4-fp16` (port 8888)
+- **Modèle Local configuré** : `gemma-4-E2B-it-qat-oQ4-fp16` (port 8889)
 - **Émulateur Firebase** : ✅ Actif (9099, 8080)
-- **Serveur Flask (API)** : ✅ Actif (5001)
-- **ADB Reverse** : ✅ Actif (5001, 8080, 9099)
-**Pixel 10 ADB** : ✅ Connecté (55161FDCH0004E)
+- **Serveur Flask (API)** : ✅ Actif (5001, relancé dans .venv)
+- **ADB Reverse** : ✅ Actif (5001, 8080, 9099, 8889)
+- **Pixel 10 ADB** : ✅ Connecté (55161FDCH0004E)
+- **Huawei ADB** : ✅ Connecté (22X7N19504005360)
 
 ---
 
@@ -40,6 +41,8 @@
 | BUG-010 | `invalid literal for int()` dans `/calculate` quand `date` est vide | Fallback `date.today()` dans `astro.py` L105 | 492f579 |
 | BUG-015 | Redirection /app échouée sur Android WebView | Redirection explicite vers `/app/index.html` dans `RegisterForm.astro` L316 | ✅ Résolu |
 | BUG-018 | Crash NoSuchMethodError au démarrage (SendChannel.close) | Force-downgrade de kotlinx-coroutines à 1.7.3 dans build.gradle | ✅ Résolu |
+| BUG-019 | Signature de sauvegarde incompatible | Clean uninstall / reinstall sur le Pixel 10 | ✅ Résolu |
+| BUG-020 | Blocage de l'app par la carte de téléchargement locale | Bypass si localMode est cloud ou non native | ✅ Résolu |
 
 ---
 
@@ -53,6 +56,7 @@
 | BUG-014 | P3 | Spanner: `No data was found...` | ⚠️ Ignorable (Warning Google Play Services) |
 | BUG-016 | P2 | DNS: `Failed to resolve using system DNS resolver` | ⚠️ Ignorable (Pas d'internet) |
 | BUG-017 | P3 | Permission: `UID 10074 has no location permission` (`com.huawei.hwid`) | ⚠️ Ignorable (Warning système Huawei, pas de localisation requise) |
+| BUG-021 | P2 | FileUtils: `android.system.ErrnoException` dans les logs | ⚠️ En cours d'analyse |
 
 
 ---
@@ -267,4 +271,29 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 - Phase 1 : Restauration de `chat.astro` depuis l'historique git.
 - Phase 2 : Build Astro & Sync Capacitor (OK, `chat` est bien présent dans `www/app/`).
 
-**IA Locale** : ❌ DOWN
+**IA Locale** : ✅ UP (port 8889)
+
+### 2026-07-12 — Session Restauration après Crash (Conversation 34af16e0)
+- **IA Locale (oMLX)** : ✅ UP (Modèle: `gemma-4-E2B-it-qat-oQ4-fp16` sur port 8889 testé avec succès).
+- **Nettoyage de fichiers** :
+  - Suppression de tous les anciens logs volumineux dans `scratch/`.
+  - Nettoyage des captures d'écran et médias de la conversation plantée `34af16e0` (55 Mo libérés).
+- **Services locaux** :
+  - Relance réussie de l'API Flask sur le port 5001 (exécuté dans l'environnement virtuel `.venv`).
+  - Validation du bon fonctionnement des émulateurs Firebase (Auth et Firestore sur 9099 / 8080).
+  - Setup des redirections de ports ADB (`adb reverse`) pour le Pixel 10 et le Huawei.
+- **Frontend** :
+  - Recompilation complète d'Astro et synchronisation Capacitor effectuée (`npm run sync:capacitor`).
+  - Lancement réussi de l'application sur le Pixel 10 (MainActivity démarrée, aucun crash).
+
+### 2026-07-13 — Session de Résolution de Bugs (Bypass IA Locale & Test Buttons)
+- **IA Locale (oMLX)** : ✅ UP (port 8889)
+- **Modifications** :
+  - **LoginCard.astro** : Restauration des boutons de "Mode Test" en mode émulateur pour permettre l'authentification hors-ligne sans nécessiter de comptes Google actifs sur l'appareil.
+  - **lecture.astro** : Correction du bug de blocage de l'application natif par la carte de téléchargement du modèle local Gemma 4 (2.58 Go). Désormais, si l'IA locale n'est pas configurée en mode `native` (le mode par défaut étant `cloud`), l'utilisateur accède directement à la page de génération de lectures quotidiennes via l'API réseau/Cloud.
+- **Déploiement et Validation** :
+  - Exécuté `npm run sync:emulator` pour compiler l'application en mode émulateur et synchroniser les ressources de Capacitor.
+  - Désinstallé l'ancienne version défectueuse (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) et installé proprement le nouvel APK via gradle sur le Pixel 10 Pro.
+  - Effectué un reverse des ports adb (5001, 8080, 9099, 8889) pour s'assurer que le Pixel 10 Pro communique correctement avec les émulateurs locaux et l'API Flask.
+  - Testé visuellement via ADB le flux complet : création d'un compte test, connexion instantanée, et affichage réussi de la lecture du jour sans blocage.
+
