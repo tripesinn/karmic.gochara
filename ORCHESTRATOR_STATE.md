@@ -10,7 +10,7 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-13T21:58 (Modèles locaux restructurés)
+**Dernière mise à jour** : 2026-07-14T23:15 (Alignement prompt X-Bot & AAB v1.9.0)
 **Build Astro** : ✅ OK (www/ à jour et resynchronisé Capacitor)
 **Environnement & Modèles** :
 - **Node.js** : `v20.12.2` (via NVM)
@@ -18,14 +18,13 @@
 - **Android Studio** : SDK Platform-Tools installés (adb fonctionnel)
 - **IA Locale** : ✅ UP (oMLX port 8889)
 - **Architecture Modèles** :
-  - **Hermes (Agent)** : Principal + délégation = `Hermes-3` local (non-reasoning) → 0 cloud pour le bulk.
-  - **agy-cli** : Gemini primaire + `Qwen3.5-9B-4bit` local fallback (`base_url = http://127.0.0.1:8889/v1` avec `enable_thinking = false` pour éliminer le thinking-leak).
-  - **R1 (DeepSeek)** : Démonté/désactivé partout (thinking-leak & raisonnement excessif inadapté aux subagents).
+  - **Grok (xAI)** : Intégré en production pour le Soul Debug quotidien de l'application (Option B / orbe minimal).
+  - **Gemma / LiteRT** : Corrigé en local via Proguard keeps.
 - **Émulateur Firebase** : ✅ Actif (9099, 8080)
 - **Serveur Flask (API)** : ✅ Actif (5001, relancé dans .venv)
 - **ADB Reverse** : ✅ Actif (5001, 8080, 9099, 8889)
 - **Pixel 10 ADB** : ✅ Connecté (55161FDCH0004E)
-- **Huawei ADB** : ✅ Connecté (22X7N19504005360)
+- **Tablette SM-T575 ADB** : ✅ Connecté (R52R903LVWD)
 
 ---
 
@@ -47,6 +46,9 @@
 | BUG-019 | Signature de sauvegarde incompatible | Clean uninstall / reinstall sur le Pixel 10 | ✅ Résolu |
 | BUG-020 | Blocage de l'app par la carte de téléchargement locale | Bypass si localMode est cloud ou non native | ✅ Résolu |
 | BUG-022 | Blocage de la lecture quotidienne (SSE) sous Capacitor | Désactivation de global CapacitorHttp dans `capacitor.config.json` | ✅ Résolu |
+| BUG-023 | Google Sign-In de prod KO après release Play Store | Injection des clés SHA-1 et SHA-256 du certificat de déploiement | ✅ Résolu |
+| BUG-024 | Impossible de zoomer sur l'app native | Activation de `setBuiltInZoomControls(true)` sur la WebView | ✅ Résolu |
+| BUG-025 | Crash SIGABRT LiteRT local (R8 minification) | Ajout des règles `-keep class com.google.ai.edge.litertlm.**` | ad08e97 |
 
 ---
 
@@ -311,5 +313,16 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
   - Désinstallé l'ancienne version incompatible sur le Pixel 10 puis réinstallé proprement le nouvel APK compilé.
   - Testé de bout en bout via ADB : connexion avec le compte test, navigation vers le dashboard, clic sur l'onglet Gochara.
   - **Résultat** : La lecture quotidienne s'affiche et se met à jour en temps réel par streaming SSE sur l'écran du Pixel sans blocage.
+
+### 2026-07-14 — Version 1.9.0 (Alignement X-Bot, Soul Debug, Proguard & Zoom)
+- **Modifications** :
+  - **blueprints/api.py** : Ajout de la route `/api/soul_debug` pour générer le "Soul Debug" via l'API Grok (avec cache session par date et gestion multilingue).
+  - **index.astro** : Création du widget "Miroir de l'âme du Jour" visible gratuitement pour tous les utilisateurs connectés.
+  - **MainActivity.java** : Activation du pinch-to-zoom sur la WebView.
+  - **proguard-rules.pro** : Fix du crash LiteRT local en gardant les classes JNI (`com.google.ai.edge.litertlm.**`).
+- **Déploiement et Validation** :
+  - Recompilation Astro, synchronisation Capacitor et commit/push de la web app.
+  - Compilation réussie du bundle Release Android (`app-release.aab`) en injectant le JDK d'Android Studio.
+
 
 
