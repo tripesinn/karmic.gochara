@@ -35,6 +35,17 @@ import { api } from '../../lib/api';
       </p>
     </section>
 
+    <!-- Soul Debug du Jour (X-Bot Equivalent) -->
+    <section id="soul-debug-card" class="border border-cosmic-border bg-cosmic-void/80 rounded-xl p-6 sm:p-8 space-y-4 max-w-2xl mx-auto text-center hidden">
+      <h2 class="text-lg font-display text-cosmic-gold flex items-center justify-center gap-2">
+        <span>🗝️</span> <span>Miroir de l'âme du Jour</span>
+      </h2>
+      <div id="soul-debug-content" class="text-sm italic text-cosmic-text leading-relaxed">
+        Chargement de ton miroir céleste…
+      </div>
+      <p class="text-[10px] text-cosmic-text-dim/60">Généré par Grok (xAI) • Option B point chaud</p>
+    </section>
+
     <!-- Quick actions -->
     <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <a
@@ -153,6 +164,22 @@ import { api } from '../../lib/api';
           const pseudo = "Lysa"; // Demo hardcode
           document.getElementById('welcome-pseudo')!.textContent =
             `${i18n.t('welcome.subtitle')} ${pseudo}`;
+
+          // Charger le Soul Debug
+          const debugCard = document.getElementById('soul-debug-card')!;
+          const debugContent = document.getElementById('soul-debug-content')!;
+          debugCard.classList.remove('hidden');
+          
+          api.soulDebug().then(res => {
+            if (res.ok && res.soul_debug) {
+              debugContent.textContent = res.soul_debug;
+            } else {
+              debugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
+            }
+          }).catch(() => {
+            debugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
+          });
+
 
           // Change button to Edit Profile
           const editLink = document.querySelector('a[href="/register/index.html"]');

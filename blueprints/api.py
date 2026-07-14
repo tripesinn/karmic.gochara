@@ -537,7 +537,7 @@ def get_calendar_ics(pseudo):
                 ])
         except Exception as e:
             current_app.logger.warning("Erreur calendar date %s : %s", current_date, e)
-            
+             
         current_date += timedelta(days=1)
 
     ics_lines.append("END:VCALENDAR")
@@ -547,3 +547,119 @@ def get_calendar_ics(pseudo):
         mimetype="text/calendar",
         headers={"Content-Disposition": f"attachment; filename={pseudo}_gochara.ics"}
     )
+
+
+@api_bp.route("/soul_debug")
+def api_soul_debug():
+    """Génère le Soul Debug quotidien pour l'utilisateur en utilisant Grok (Option B)."""
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"ok": False, "error": "Non authentifié"}), 401
+    
+    today_str = date.today().isoformat()
+    session_key = f"soul_debug_{today_str}"
+    if session_key in session:
+        return jsonify({"ok": True, "soul_debug": session[session_key]})
+        
+    try:
+        from datetime import datetime as dt_class
+        from astro_calc import calculate_transits
+        from prompt_xbot_v2 import (
+            cl_house,
+            build_nakshatra_hints,
+            build_ton_posture,
+            build_system_instruction,
+            validate_response,
+            _sade_sati,
+        )
+        from openai import OpenAI
+
+        # 1. Calculs des transits
+        _tz = _safe_tz(profile.get("tz"))
+        natal = {
+            "name":   profile.get("name", ""),
+            "year":   int(profile.get("year", 1990)),
+            "month":  int(profile.get("month", 1)),
+            "day":    int(profile.get("day", 1)),
+            "hour":   int(profile.get("hour", 12)),
+            "minute": int(profile.get("minute", 0)),
+            "lat":    float(profile.get("lat", 48.8566)),
+            "lon":    float(profile.get("lon", 2.3522)),
+            "tz":     _tz,
+            "city":   profile.get("city", ""),
+        }
+        
+        now_local = dt_class.now(pytz.timezone(_tz))
+        transit_loc = {
+            "city": profile.get("city", ""),
+            "lat":  float(profile.get("lat", 48.8566)),
+            "lon":  float(profile.get("lon", 2.3522)),
+            "tz":   _tz,
+        }
+
+        data = calculate_transits(natal, transit_loc,
+                                  now_local.year, now_local.month, now_local.day,
+                                  now_local.hour, now_local.minute)
+
+        # 2. Extraction du transit le plus tendu (Option B)
+        moon_nak = data["natal"].get("Lune ☽", {}).get("nakshatra", "")
+        moon_disp = data["natal"].get("Lune ☽", {}).get("display", "")
+        aspects = data.get("aspects", [])
+        
+        # Orbe minimal
+        aspects_sorted = sorted(aspects, key=lambda a: a.get("orb", 999))
+        top = aspects_sorted[0] if aspects_sorted else None
+        
+        transit_nak = top.get("transit_nak", "") if top else ""
+        transit_house = cl_house(top.get("transit_display", ""), moon_disp) if top else ""
+        sat_nak = data["transits"].get("Saturne ♄", {}).get("nakshatra", "")
+        sade_sati = _sade_sati(moon_nak, sat_nak)
+        
+        dasha_lord = ""
+        for d in data.get("dashas", []):
+            try:
+                if dt_class.strptime(d.get("end_date", ""), "%d/%m/%Y") >= now_local.replace(tzinfo=None):
+                    dasha_lord = d.get("lord", "")
+                    break
+            except Exception:
+                pass
+
+        # 3. Préparer le prompt system
+        ton_hint = build_ton_posture(dasha_lord, sade_sati)
+        moon_hint, transit_hint = build_nakshatra_hints(moon_nak, transit_nak, transit_house)
+        system_instruction = build_system_instruction(moon_hint, transit_hint, ton_hint)
+
+        # Forcer la langue selon les préférences (par défaut français sur le site)
+        lang = request.args.get("lang", "fr").lower()
+        if "fr" in lang:
+            system_instruction += "\n\nMANDATORY LANGUAGE INSTRUCTION: You MUST output the sentence in French. The prefix must be exactly '🗝️ Miroir de l'âme : '."
+        else:
+            system_instruction += "\n\nMANDATORY LANGUAGE INSTRUCTION: You MUST output the sentence in English. The prefix must be exactly '🗝️ Soul Debug : '."
+
+        # 4. Requête Grok API
+        api_key = os.getenv("XAI_API_KEY") or os.getenv("GROK_API_KEY")
+        if not api_key:
+            return jsonify({"ok": False, "error": "Serveur non configuré avec Grok API"}), 500
+        
+        client = OpenAI(api_key=api_key, base_url="https://api.x.ai/v1")
+        prompt = f"Génère le Soul Debug du jour pour un consultant né sous le nakshatra {moon_nak}."
+
+        response = client.chat.completions.create(
+            model="grok-2",
+            messages=[
+                {"role": "system", "content": system_instruction},
+                {"role": "user", "content": prompt},
+            ],
+            max_tokens=250,
+            temperature=0.5,
+        )
+        ai_response = response.choices[0].message.content.strip()
+            
+        session[session_key] = ai_response
+        session.modified = True
+        return jsonify({"ok": True, "soul_debug": ai_response})
+
+    except Exception as e:
+        current_app.logger.error("Erreur api_soul_debug : %s", e)
+        return jsonify({"ok": False, "error": str(e)}), 500
+

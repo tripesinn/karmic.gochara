@@ -246,6 +246,11 @@ export const api = {
     return request<{ ok: boolean; biorhythm?: any[] }>(`/api/biorhythm${query}`);
   },
 
+  soulDebug() {
+    return request<{ ok: boolean; soul_debug?: string }>('/api/soul_debug');
+  },
+
+
   calculate(body: { pseudo: string; transit_date: string; transit_time: string; transit_location?: string; reading_type?: 'daily' | 'full' }) {
     return streamingRequest('/v2/calculate', body);
   },
