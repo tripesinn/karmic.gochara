@@ -10,7 +10,7 @@
       "serverClientId": "732214018947-ee5v5hi70fer05edbti3hjig22knngb8.apps.googleusercontent.com"
     },
     "CapacitorHttp": {
-      "enabled": true
+      "enabled": false
     },
     "GoogleAuth": {
       "scopes": ["profile", "email"],

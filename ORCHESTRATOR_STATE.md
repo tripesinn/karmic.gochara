@@ -46,6 +46,7 @@
 | BUG-018 | Crash NoSuchMethodError au démarrage (SendChannel.close) | Force-downgrade de kotlinx-coroutines à 1.7.3 dans build.gradle | ✅ Résolu |
 | BUG-019 | Signature de sauvegarde incompatible | Clean uninstall / reinstall sur le Pixel 10 | ✅ Résolu |
 | BUG-020 | Blocage de l'app par la carte de téléchargement locale | Bypass si localMode est cloud ou non native | ✅ Résolu |
+| BUG-022 | Blocage de la lecture quotidienne (SSE) sous Capacitor | Désactivation de global CapacitorHttp dans `capacitor.config.json` | ✅ Résolu |
 
 ---
 
@@ -299,4 +300,16 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
   - Désinstallé l'ancienne version défectueuse (`INSTALL_FAILED_UPDATE_INCOMPATIBLE`) et installé proprement le nouvel APK via gradle sur le Pixel 10 Pro.
   - Effectué un reverse des ports adb (5001, 8080, 9099, 8889) pour s'assurer que le Pixel 10 Pro communique correctement avec les émulateurs locaux et l'API Flask.
   - Testé visuellement via ADB le flux complet : création d'un compte test, connexion instantanée, et affichage réussi de la lecture du jour sans blocage.
+
+### 2026-07-14 — Session de Diagnostic & Résolution du Streaming (SSE)
+- **IA Locale (oMLX)** : ✅ UP (port 8889)
+- **Modifications** :
+  - **.env.local** : Changé `PUBLIC_FIREBASE_EMULATOR=true` pour restaurer les boutons de test et l'authentification locale pour l'émulateur sur le Pixel 10.
+  - **capacitor.config.json** : Désactivé le proxy global de `CapacitorHttp` (`enabled: false`) pour empêcher l'interception et le buffering automatique des requêtes de streaming SSE (Server-Sent Events) par le natif, tout en conservant l'usage explicite de `CapacitorHttp.request` pour les appels REST de l'API.
+- **Déploiement et Validation** :
+  - Recompilé le frontend Astro et resynchronisé Capacitor (`npm run sync:capacitor`).
+  - Désinstallé l'ancienne version incompatible sur le Pixel 10 puis réinstallé proprement le nouvel APK compilé.
+  - Testé de bout en bout via ADB : connexion avec le compte test, navigation vers le dashboard, clic sur l'onglet Gochara.
+  - **Résultat** : La lecture quotidienne s'affiche et se met à jour en temps réel par streaming SSE sur l'écran du Pixel sans blocage.
+
 

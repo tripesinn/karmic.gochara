@@ -95,7 +95,7 @@ def assetlinks():
             "namespace": "android_app",
             "package_name": "com.karmicgochara.app",
             "sha256_cert_fingerprints": [
-                "93:2B:A1:79:9C:2E:D7:BF:86:B2:2F:86:46:09:56:80:A8:5C:AD:56:D0:27:4D:DE:6F:53:C9:02:00:A1:DF:FE"
+                "06:E5:4A:A8:5B:5F:58:D7:EA:27:6F:71:AF:18:CC:83:43:78:B4:52:4E:49:25:E9:E2:FC:06:E8:BE:CD:D1:EF"
             ]
         }
     }]
