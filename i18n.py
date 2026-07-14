@@ -86,7 +86,7 @@ LANGS = {
         "feat_biorhythm": "Biorythme Lunaire (Intensité)",
         "biorhythm_showcase_title": "Chandra Lagna — Le Biorythme Lunaire",
         "biorhythm_showcase_subtitle": "Visualise tes cycles de réceptivité spirituelle et émotionnelle",
-        "biorhythm_showcase_desc": "En astrologie védique, la Lune transitaire active les planètes et points clés de ton thème de naissance. Cette courbe de 90 jours calcule la densité de tes transits et identifie tes pics d'intensité pour optimiser tes phases d'action et d'introspection.",
+        "biorhythm_showcase_desc": "En astrologie védique, la Lune transitante active les planètes et points clés de ton thème de naissance. Cette courbe de 90 jours calcule la densité de tes transits et identifie tes pics d'intensité pour optimiser tes phases d'action et d'introspection.",
         "section_natal": "✦ Lecture natale",
         "section_signal": "◆ Daily Reading",
         "loading_aspects": "Lecture des aspects…",

@@ -13,7 +13,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
       </div>
       <h1 class="text-3xl sm:text-4xl font-display text-cosmic-gold">Mon Biorythme Lunaire</h1>
       <p class="text-cosmic-text-dim text-sm max-w-lg mx-auto">
-        Suis l'évolution de ta sensibilité céleste. Cette courbe de 90 jours affiche la <strong>densité d'aspects</strong> formés par la Lune transitaire sur tes placements natals (Chandra Lagna).
+        Suis l'évolution de ta sensibilité céleste. Cette courbe de 90 jours affiche la <strong>densité d'aspects</strong> formés par la Lune transitante sur tes placements natals (Chandra Lagna).
       </p>
     </header>
 
@@ -24,14 +24,14 @@ import AppLayout from '../../layouts/AppLayout.astro';
       <section class="lg:col-span-2 border border-cosmic-border rounded-2xl bg-cosmic-void/60 p-4 sm:p-6 space-y-4">
         <div class="flex items-center justify-between border-b border-cosmic-border/30 pb-3">
           <h2 class="font-display text-cosmic-gold text-lg flex items-center gap-2">
-            <span>✦</span> Graphique de Densité
+            <span>✦</span> Cycle de 90 jours
           </h2>
           <div class="flex gap-2">
             <span class="inline-flex items-center gap-1 text-xs text-cosmic-text-dim">
-              <span class="w-3.5 h-3.5 rounded-full bg-[#d29922] opacity-80"></span> Densité
+              <span class="text-[#d29922]">●</span> Densité
             </span>
             <span class="inline-flex items-center gap-1 text-xs text-cosmic-text-dim">
-              <span class="inline-block text-[#f85149] font-bold">◆</span> Nœud actif
+              <span class="text-[#f85149]">◆</span> Alignement Rahu
             </span>
           </div>
         </div>
@@ -54,7 +54,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
             <div>Maison Lunaire : <span id="tooltip-house" class="font-medium text-white"></span></div>
             <div>Nakshatra : <span id="tooltip-nakshatra" class="font-medium text-white"></span></div>
             <div>Densité : <span id="tooltip-density" class="font-bold text-cosmic-gold"></span> aspects</div>
-            <div id="tooltip-node" class="text-xs text-red-400 font-bold hidden">◆ Nœud Rahu/Ketu actif</div>
+            <div id="tooltip-node" class="text-xs text-red-400 font-bold hidden">◆ Alignement Rahu ACTIF</div>
           </div>
         </div>
       </section>
@@ -86,7 +86,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
               <span id="detail-density" class="text-xs font-bold text-cosmic-gold">-</span>
             </div>
             <div id="detail-node-warning" class="hidden p-2 rounded bg-red-950/30 border border-red-500/20 text-center text-xs text-red-400 font-bold">
-              ⚠️ Alerte Nœud : Alignement karmique majeur
+              -
             </div>
           </div>
 
@@ -122,12 +122,12 @@ import AppLayout from '../../layouts/AppLayout.astro';
             <span class="text-[#d29922]">●</span> Les pics de densité
           </h3>
           <p>
-            Plus la densité est élevée, plus la Lune transitaire active de points clés de ton thème natal par conjonction, trigone ou carré. Ces journées correspondent à des moments d'activation émotionnelle, de clarté spirituelle ou de tension productive. Idéal pour agir ou méditer.
+            Plus la densité est élevée, plus la Lune transitante active de points clés de ton thème natal par conjonction, trigone ou carré. Ces journées correspondent à des moments d'activation émotionnelle, de clarté spirituelle ou de tension productive. Idéal pour agir ou méditer.
           </p>
         </div>
         <div class="space-y-2">
           <h3 class="font-bold text-white flex items-center gap-1.5">
-            <span class="text-[#f85149]">◆</span> Les alignements aux Nœuds (Rahu/Ketu)
+            <span class="text-[#f85149]">◆</span> Les alignements Rahu
           </h3>
           <p>
             Les points marqués d'un losange rouge représentent des conjonctions ou aspects directs aux nœuds lunaires natals. Ce sont des fenêtres de synchronicité ou d'événements marquants sur le plan de la destinée karmique.
@@ -392,6 +392,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
 
       const warn = document.getElementById('detail-node-warning')!;
       if (p.has_node) {
+        warn.textContent = `◆ Alignement Rahu ACTIF — DENSITÉ ${p.natal_density}`;
         warn.classList.remove('hidden');
       } else {
         warn.classList.add('hidden');
@@ -413,7 +414,7 @@ import AppLayout from '../../layouts/AppLayout.astro';
             item.className += ' text-white';
           }
           
-          item.innerHTML = `<span>${icon}</span> <span>Lune transitaire ☌ ${c} natal</span>`;
+          item.innerHTML = `<span>${icon}</span> <span>Lune transitante ☌ ${c} natal</span>`;
           aspectsList.appendChild(item);
         });
       } else {
@@ -473,9 +474,9 @@ import AppLayout from '../../layouts/AppLayout.astro';
       const dateObj = new Date(peak.date);
       const dateStr = dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'long' });
       
-      let html = `Le <strong>${dateStr}</strong> (Maison ${peak.house}, Nakshatra ${peak.nakshatra}). `;
+      let html = `Sommet Céleste : <strong>${dateStr}</strong> (Maison ${peak.house}, Nakshatra ${peak.nakshatra}). `;
       if (peak.has_node) {
-        html += `Ce jour présente un <strong>alignement aux Nœuds Lunaires (Rahu/Ketu)</strong> avec une densité de ${peak.natal_density} aspects. C'est une journée clé pour la méditation et les choix importants.`;
+        html += `Ce jour présente un <strong>Alignement Rahu</strong> avec une densité de ${peak.natal_density} aspects. C'est une journée clé pour la méditation et les choix importants.`;
       } else {
         html += `Intensité maximale de ${peak.natal_density} aspects actifs. Moment parfait pour concrétiser des projets ou observer tes émotions.`;
       }

@@ -81,6 +81,24 @@ KALAPURUSHA = ("MATRICE KĀLAPURUSHA (référentiel des thèmes de vie par maiso
                "11: gains collectifs, réseaux, aspirations communes. "
                "12: dissolution, solitude, libération (Moksha).")
 
+# Thèmes de maison (EN, digéré) — injectés à la place du mot "house" (jargon
+# interdit en output). Ancre les 50% de la pondération sur le THÈME de vie, pas
+# sur le numéro de maison. Clé = "1".."12".
+HOUSE_THEME = {
+    "1": "vital drive, raw identity, head",
+    "2": "values, subsistence, material resources",
+    "3": "communication, courage, local action",
+    "4": "inner comfort, roots, home, security",
+    "5": "creativity, intelligence, self-expression",
+    "6": "service, obstacles, purification, health",
+    "7": "relational mirror, contracts, balance",
+    "8": "metamorphosis, crises, the hidden",
+    "9": "wisdom, truth, spiritual guide, deeper meaning",
+    "10": "public realization, structure, career",
+    "11": "collective contribution, networks, cooperation",
+    "12": "fertile solitude, dissolution, liberation",
+}
+
 
 # ─── DICTIONNAIRE DE POLARITÉ DES 27 NAKSHATRAS (thèmes-only, sans seigneurs) ──
 # Chaque Nakshatra : versant Inertie (boucle automatique / fuite / cristallisation)
@@ -124,7 +142,7 @@ def build_nakshatra_hints(moon_nak, transit_nak, transit_house=""):
     tran_part = (f"NAKSHATRA DU TRANSIT ({transit_nak}) : {NAKSHATRA_RULES[transit_nak]}"
                  if transit_nak in NAKSHATRA_RULES else "")
     if transit_house:
-        tran_part += f" MAISON DU TRANSIT (où agit la planète) : MAISON {transit_house}."
+        tran_part += f" FIELD OF LIFE IN PLAY: {HOUSE_THEME.get(transit_house, '')}."
     return moon_part, tran_part
 
 
