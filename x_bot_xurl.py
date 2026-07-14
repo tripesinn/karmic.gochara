@@ -111,6 +111,9 @@ def save_last_seen_id(tweet_id):
 
 # ─── parse + geocode + thème (identique bot tweepy) ───────────────────────
 def parse_user_request(text):
+    # Format A (standard) : @handle MM/DD/YYYY HH:MM Ville
+    # Format B (intuitif Jérôme) : @handle MM/DD/YYYY HH:MM Ville MoisJour
+    #   -> le jour cible biorythme en fin doit être STRIP de la ville.
     pattern = r"(?P<month>\d{1,2})/(?P<day>\d{1,2})/(?P<year>\d{4})\s+(?P<hour>\d{1,2}):(?P<minute>\d{2})\s+(?P<city>.+)"
     m = re.search(pattern, text)
     if not m:
@@ -121,6 +124,15 @@ def parse_user_request(text):
         hour, minute = int(d["hour"]), int(d["minute"])
         city = d["city"].strip()
         if not (1 <= month <= 12 and 1 <= day <= 31 and 1900 <= year <= 2100):
+            return None
+        # Strip du jour cible biorythme en fin de ville (mois FR/EN + chiffre,
+        # quel que soit l'ordre). Ex: "PARIS July 21" OU "PARIS 21 juillet"
+        # -> ville "PARIS", le reste va au parse_target_date.
+        _M = r"(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec|january|february|march|april|june|july|august|september|october|november|december)"
+        _strip = re.search(rf"\b(?:\d{{1,2}}\s+{_M}|{_M}(?:\s+\d{{1,2}})?)\b", city, re.IGNORECASE)
+        if _strip:
+            city = city[:_strip.start()].strip()
+        if not city:
             return None
         return {"month": month, "day": day, "year": year,
                 "hour": hour, "minute": minute, "location": city}

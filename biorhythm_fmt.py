@@ -14,8 +14,13 @@ from datetime import date, timedelta
 _FR = ["janvier","février","mars","avril","mai","juin","juillet","août",
        "septembre","octobre","novembre","décembre"]
 _EN = ["jan","feb","mar","apr","may","jun","jul","aug","sep","oct","nov","dec"]
+_EN_FULL = ["january","february","march","april","may","june","july","august",
+            "september","october","november","december"]
 MONTHS = {m: i+1 for i, m in enumerate(_FR)}
 MONTHS.update({m: i+1 for i, m in enumerate(_EN)})
+MONTHS.update({m: i+1 for i, m in enumerate(_EN_FULL)})
+# Alternation des noms de mois (FR + EN abrégé + EN complet) pour le parsing.
+_MONTH_ALT = "|".join(_FR + _EN + _EN_FULL)
 
 _SIGN = "@siderealAstro13"
 _APP = "https://karmicgochara.app"
@@ -30,10 +35,10 @@ def parse_target_date(text: str, now: date | None = None) -> date | None:
         return None
     now = now or date.today()
     low = text.lower()
-    # pattern : chiffre (1-2) + mois  OU  mois + chiffre
-    m = re.search(r"\b(\d{1,2})\s+(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\b", low)
+    # chiffre + mois  OU  mois + chiffre  (FR + EN abrégé + EN complet)
+    m = re.search(rf"\b(\d{{1,2}})\s+({_MONTH_ALT})\b", low)
     if not m:
-        m = re.search(r"\b(janvier|février|mars|avril|mai|juin|juillet|août|septembre|octobre|novembre|décembre|jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2})\b", low)
+        m = re.search(rf"\b({_MONTH_ALT})\s+(\d{{1,2}})\b", low)
         if not m:
             return None
         mo, dd = m.group(1), int(m.group(2))
@@ -51,27 +56,41 @@ def parse_target_date(text: str, now: date | None = None) -> date | None:
     return d
 
 
+def _phase_short(e: dict) -> str:
+    """Phase courte du jour pour le label tweet (EN, cohérent avec le hint)."""
+    if e.get("has_node"):
+        return "introspection"
+    d = e.get("natal_density", 0) or 0
+    if d >= 5:
+        return "peak"
+    if d >= 3:
+        return "action"
+    if d == 2:
+        return "build"
+    return "rest"
+
+
 def _label(e: dict) -> str:
-    """Libelle court d'un point de biorythme."""
+    """Libelle court d'un point de biorythme (EN)."""
     node = " ◆" if e.get("has_node") else ""
-    return f"{e['date'][5:]} (H{e['house']}, d{e['natal_density']}{node})"
+    return f"{e['date'][5:]} (H{e['house']}, d{e['natal_density']}{node} · {_phase_short(e)})"
 
 
 def build_biorhythm_tweet(biorhythm: list[dict], now: date | None = None,
                           n_pics: int = 3) -> str:
-    """Tweet public 280c : signe les pics + lien app.
+    """Tweet public 280c (EN) : signe les pics + lien app.
     biorhythm = courbe brute (tous jours) de transit_alerts.chandra_biorhythm."""
     now = now or date.today()
     future = [e for e in biorhythm if e["date"] >= now.isoformat()]
     if not future:
-        return f"Ton biorythme lunaire est calme. Reviens bientôt ⌁ {_SIGN} {_APP} {_TAGS}"
+        return f"Your lunar biorhythm is calm. Check back soon ⌁ {_SIGN} {_APP} {_TAGS}"
     # sommets : has_node d'abord, puis density
     future.sort(key=lambda e: (not e["has_node"], -e["natal_density"], e["date"]))
     pics = future[:n_pics]
     pic_txt = " · ".join(_label(e) for e in pics)
-    head = "Ton biorythme lunaire :"
-    body = f"Prochains pics -> {pic_txt}"
-    tail = f"Courbe complete -> {_APP} {_TAGS}"
+    head = "Your lunar biorhythm:"
+    body = f"Next peaks -> {pic_txt}"
+    tail = f"Full curve -> {_APP} {_TAGS}"
     tweet = f"{head}\n{body}\n{tail}"
     # tronque si depasse 280 (rare : 3 pics max, labels courts)
     if len(tweet) > 280:
@@ -132,10 +151,71 @@ def build_biorhythm_image(biorhythm: list[dict], out_path: str = _OUT,
 
 def build_biorhythm_hint(point: dict | None) -> str:
     """Hint pour le DM Soul Debug : le jour choisi (ou None -> sommet auto).
-    Texte court, injecte dans transit_hint du system prompt (pas du DM brut)."""
+    Texte court EN (colle au system prompt Grok), 1 ligne condensée : phase du
+    jour + sig maison + digest EN du Nakshatra du jour (ni FR, ni dict brut)."""
     if not point:
         return ""
-    node = " (nœud Rahu/Ketu actif)" if point.get("has_node") else ""
-    return (f"Biorythme: le {point['date']}, Lune en H{point['house']} "
-            f"({point['nakshatra']}), densite {point['natal_density']}{node}. "
-            f"Cible ce jour-ci.")
+    house = str(point.get("house", ""))
+    nak = point.get("nakshatra", "")
+    density = point.get("natal_density", 0) or 0
+    has_node = bool(point.get("has_node", False))
+    node = " (Rahu/Ketu node active)" if has_node else ""
+    # Phase — bandes fines calées sur l'échelle 0-7 + seuil perso min_density=2.
+    if has_node:
+        phase = "INTROSPECTION (karmic node window)"
+    elif density >= 5:
+        phase = "PEAK ACTION (maximum activation)"
+    elif density >= 3:
+        phase = "ACTION (building momentum)"
+    elif density == 2:
+        phase = "BUILD (personal-relevance threshold)"
+    else:
+        phase = "REST / OBSERVE (low density)"
+    # Signification de maison (Chandra Lagna) — EN pour coller au system prompt.
+    HOUSE_SIG = {
+        "1": "vital drive & new beginning", "2": "resources & stability",
+        "3": "courage & communication", "4": "home & inner peace",
+        "5": "creativity & joy", "6": "challenges & health",
+        "7": "relationships & partnerships", "8": "transformation & intuition",
+        "9": "wisdom & luck", "10": "career & alignment",
+        "11": "gains & network", "12": "letting go & dreams",
+    }
+    sig = HOUSE_SIG.get(house, "general sensitivity")
+    # Règle Nakshatra DIGÉRÉE en EN (1 phrase, pas le dict FR brut) — coherent
+    # avec STYLE_NO_VERBATIM du system prompt (Grok doit assimiler, pas recopier).
+    NAK_EN = {
+        "Ashwini": "initiative healing vs reflexive rush to dodge depth",
+        "Bharani": "creative rebirth vs guilt-driven control",
+        "Krittika": "clear vision vs harsh rejection",
+        "Rohini": "conscious abundance vs possessive clinging",
+        "Mrigashira": "focused curiosity vs restless fleeing",
+        "Ardra": "resilience after storm vs crisis-seeking",
+        "Punarvasu": "cyclic renewal vs nostalgic withdrawal",
+        "Pushya": "balanced care vs worn-out self-sacrifice",
+        "Ashlesha": "lucid trust vs controlling distrust",
+        "Magha": "humble leadership vs ancestral-power ego",
+        "Purva Phalguni": "sacred creativity vs addictive seduction",
+        "Uttara Phalguni": "stable service vs approval-seeking",
+        "Hasta": "creative mastery vs paralyzing perfectionism",
+        "Chitra": "architecture of meaning vs surface beauty",
+        "Swati": "shared freedom vs flight from commitment",
+        "Vishakha": "ethical focus vs win-at-all-costs",
+        "Anuradha": "soul loyalty vs blind devotion",
+        "Jyeshtha": "wise protection vs lonely control",
+        "Mula": "spiritual rooting vs destructive unraveling",
+        "Purva Ashadha": "inner invincibility vs sterile strife",
+        "Uttara Ashadha": "collective leadership vs isolated delay",
+        "Shravana": "active listening vs silent invisibility",
+        "Dhanishtha": "shared prosperity vs defensive hoarding",
+        "Shatabhisha": "collective soul-medicine vs isolated healing",
+        "Purva Bhadrapada": "channeled idealism vs bitter fanaticism",
+        "Uttara Bhadrapada": "embodied wisdom vs passive dissolution",
+        "Revati": "protective guidance vs abandonment-solving sacrifice",
+    }
+    nak_part = f" Nakshatra theme of the day ({nak}): {NAK_EN[nak]}." if nak in NAK_EN else ""
+    return (
+        f"BIORYTHM TARGET DAY: {point['date']}, transiting Moon in Chandra Lagna "
+        f"House {house} ({sig}), Nakshatra {nak}, density {density}{node}. "
+        f"Phase: {phase}.{nak_part} Speak to THIS specific day as the active window "
+        f"of the Soul Debug."
+    )
