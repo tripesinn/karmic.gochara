@@ -79,3 +79,32 @@ Pour chaque scénario de test d'interface ou de flux utilisateur :
 5. Testez en boucle jusqu'à ce que le correctif soit intégralement prouvé visuellement. Ne retournez à l'utilisateur QUE lorsque le problème initial est 100% résolu (ou si une erreur fatale inédite bloque techniquement l'ADB).
 </RULE[autonomous_ondevice_testing]>
 
+<RULE[make_aab]>
+## Commande Raccourci "fais le .aab"
+
+Dès que l'utilisateur demande de "faire le .aab" (ou une formule équivalente de release), l'agent doit exécuter automatiquement cette procédure sans demander de précisions :
+
+1. **Incrémentation des versions** :
+   - Lire `android/app/build.gradle` et incrémenter de `+1` la valeur de `versionCode` (ex: de 25 à 26) et mettre à jour la valeur de `versionName` (ex: de "1.9.6" à "1.9.7").
+   - Lire `astro/package.json` et mettre à jour la valeur de `"version"` pour correspondre à celle de `versionName`.
+
+2. **Synchronisation Capacitor** :
+   - Exécuter la build Astro et la synchronisation Capacitor :
+     ```bash
+     cd astro && npm run sync:capacitor
+     ```
+
+3. **Compilation avec JDK Android Studio** :
+   - Lancer la compilation du bundle release AAB en injectant le chemin du JDK d'Android Studio :
+     ```bash
+     cd android && export JAVA_HOME="/Applications/Android Studio.app/Contents/jbr/Contents/Home" && ./gradlew bundleRelease
+     ```
+
+4. **Génération des Notes de Version** :
+   - Rédiger un fichier de notes de version bilingue (FR/EN) résumant les modifications apportées depuis le dernier commit et l'afficher dans la réponse.
+
+5. **Déploiement Git** :
+   - Commiter les fichiers de configuration modifiés (`build.gradle`, `package.json`, `www/`) et pousser sur `main`.
+</RULE[make_aab]>
+
+
