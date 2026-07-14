@@ -19,3 +19,8 @@
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
 -renamesourcefileattribute SourceFile
+
+# Keep LiteRT-LM library classes and members to prevent JNI crash (mid == null)
+-keep class com.google.ai.edge.litertlm.** { *; }
+-keep interface com.google.ai.edge.litertlm.** { *; }
+
