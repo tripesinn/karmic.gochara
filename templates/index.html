@@ -142,6 +142,86 @@
             </div>
         </div>
 
+        <!-- ── Biorhythm Showcase ────────────────────────────────────────────── -->
+        <div style="max-width: 900px; margin: 4rem auto 4rem; padding: 0 20px; text-align: center;">
+            <div class="gold-rule" style="margin-bottom: 2rem;"></div>
+            <div style="font-family: var(--mono); font-size: 0.65rem; letter-spacing: 0.22em; text-transform: uppercase; color: var(--gold-dim); margin-bottom: 1rem;">
+                {{ lang.biorhythm_showcase_title if lang.biorhythm_showcase_title else 'Chandra Lagna — Le Biorythme Lunaire' }}
+            </div>
+            <h2 style="font-family: var(--display); font-size: 1.8rem; color: var(--text); font-weight: normal; margin-bottom: 1.5rem; line-height: 1.3;">
+                {{ lang.biorhythm_showcase_subtitle if lang.biorhythm_showcase_subtitle else 'Visualise tes cycles de réceptivité spirituelle et émotionnelle' }}
+            </h2>
+            <p style="font-size: 1rem; color: var(--text-dim); max-width: 680px; margin: 0 auto 2.5rem; line-height: 1.6; font-style: italic;">
+                {{ lang.biorhythm_showcase_desc if lang.biorhythm_showcase_desc else 'En astrologie védique, la Lune transitaire active les planètes et points clés de ton thème de naissance. Cette courbe de 90 jours calcule la densité de tes transits et identifie tes pics d\'intensité pour optimiser tes phases d\'action et d\'introspection.' }}
+            </p>
+
+            <!-- Dynamic-looking SVG Biorhythm Curve Representation -->
+            <div style="background: rgba(20, 16, 12, 0.4); border: 1px solid var(--border); border-radius: 12px; padding: 2rem 1.5rem; position: relative; max-width: 700px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);">
+                <!-- Header of chart mockup -->
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; border-bottom: 1px solid rgba(201,168,76,0.1); padding-bottom: 0.8rem;">
+                    <div style="display: flex; align-items: center; gap: 8px; font-family: var(--display); font-size: 0.8rem; color: var(--gold);">
+                        <span>✦</span> <span>Cycle de 90 Jours</span>
+                    </div>
+                    <div style="display: flex; gap: 12px; font-family: var(--mono); font-size: 0.65rem; color: var(--text-dim);">
+                        <span style="display: flex; align-items: center; gap: 4px;"><span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--gold);"></span> Densité</span>
+                        <span style="display: flex; align-items: center; gap: 4px;"><span style="color: #f85149; font-weight: bold;">◆</span> Alignement Nœud</span>
+                    </div>
+                </div>
+
+                <svg viewBox="0 0 800 220" style="width: 100%; height: auto; display: block;" preserveAspectRatio="xMidYMid meet">
+                    <!-- Grid Lines -->
+                    <line x1="40" y1="30" x2="760" y2="30" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,4" />
+                    <line x1="40" y1="75" x2="760" y2="75" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,4" />
+                    <line x1="40" y1="120" x2="760" y2="120" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,4" />
+                    <line x1="40" y1="165" x2="760" y2="165" stroke="rgba(255,255,255,0.04)" stroke-dasharray="4,4" />
+
+                    <!-- Y-Axis labels -->
+                    <text x="25" y="34" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="end">6</text>
+                    <text x="25" y="79" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="end">4</text>
+                    <text x="25" y="124" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="end">2</text>
+                    <text x="25" y="169" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="end">0</text>
+
+                    <!-- X-Axis Labels -->
+                    <text x="100" y="195" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="middle">14 Juil</text>
+                    <text x="260" y="195" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="middle">02 Aoû</text>
+                    <text x="420" y="195" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="middle">20 Aoû</text>
+                    <text x="580" y="195" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="middle">07 Sep</text>
+                    <text x="700" y="195" fill="rgba(255,255,255,0.2)" font-size="9" font-family="var(--mono)" text-anchor="middle">22 Sep</text>
+
+                    <!-- Gradient Definition -->
+                    <defs>
+                        <linearGradient id="landing-chart-grad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="0%" stop-color="#c9a84c" stop-opacity="0.3" />
+                            <stop offset="100%" stop-color="#c9a84c" stop-opacity="0.0" />
+                        </linearGradient>
+                    </defs>
+
+                    <!-- Shaded area under curve -->
+                    <path d="M 40 165 C 100 130, 160 50, 220 75 C 280 100, 340 160, 400 120 C 460 80, 520 160, 580 90 C 640 20, 700 70, 760 165 Z L 760 165 L 40 165 Z" fill="url(#landing-chart-grad)" />
+
+                    <!-- Main Curve Line -->
+                    <path d="M 40 165 C 100 130, 160 50, 220 75 C 280 100, 340 160, 400 120 C 460 80, 520 160, 580 90 C 640 20, 700 70, 760 165" fill="none" stroke="#c9a84c" stroke-width="2.5" stroke-linecap="round" />
+
+                    <!-- Node Points (Diamond) -->
+                    <polygon points="220,68 227,75 220,82 213,75" fill="#f85149" stroke="#0c0a08" stroke-width="1.5" />
+                    <polygon points="640,13 647,20 640,27 633,20" fill="#f85149" stroke="#0c0a08" stroke-width="1.5" />
+
+                    <!-- Peak highlighting circle -->
+                    <circle cx="640" cy="20" r="5" fill="#c9a84c" stroke="#0c0a08" stroke-width="1.5" />
+                </svg>
+
+                <!-- Details panel -->
+                <div style="margin-top: 1rem; padding: 0.8rem 1.2rem; background: rgba(0, 0, 0, 0.5); border: 1px solid rgba(201,168,76,0.15); border-radius: 8px; text-align: left; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 10px;">
+                    <div style="font-family: var(--body); font-size: 0.85rem; color: var(--text);">
+                        <strong style="color: var(--gold);">Sommet Céleste :</strong> 22 Septembre (Maison 1, Nakshatra Swati)
+                    </div>
+                    <div style="font-family: var(--mono); font-size: 0.7rem; color: #f85149; font-weight: bold;">
+                        ◆ ALIGNEMENT RAHU ACTIF (DENSITÉ 6)
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- ── Pricing public ────────────────────────────────────────────────── -->
         <div id="pricing-section" style="max-width: 520px; margin: 0 auto 4rem; padding: 0 20px;">
             <div
@@ -242,6 +322,17 @@
                         <td
                             style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
                             {{ lang.feat_edge_ia }}</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
+                            —</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
+                    </tr>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            {{ lang.feat_biorhythm if lang.feat_biorhythm else 'Biorythme Lunaire' }}</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:rgba(255,255,255,0.2);">
                             —</td>

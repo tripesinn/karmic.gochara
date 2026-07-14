@@ -239,6 +239,54 @@ def send_dm(handle, text):
     xurl("dm", h, text)
 
 
+# ─── Feedback → dataset fine-tune ────────────────────────────────────────
+FEEDBACK_STATE = "feedback_state.json"
+DATASET = "dataset_finetuning.jsonl"
+
+
+def _load_feedback_state():
+    try:
+        with open(FEEDBACK_STATE) as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+
+def _save_feedback_state(st):
+    try:
+        with open(FEEDBACK_STATE, "w") as f:
+            json.dump(st, f)
+    except Exception as e:
+        print(f"  ⚠️ feedback state save: {e}")
+
+
+def log_feedback(user_id, rating, soul_debug):
+    """Ajoute une entrée feedback au dataset fine-tune + upload GCS.
+    rating: +1 (👍) / -1 (👎). Ne crash jamais (best-effort)."""
+    try:
+        entry = {"user_id": str(user_id), "rating": rating,
+                 "soul_debug": soul_debug, "ts": datetime.datetime.now().isoformat()}
+        line = json.dumps(entry, ensure_ascii=False)
+        with open(DATASET, "a", encoding="utf-8") as f:
+            f.write(line + "\n")
+        # upload GCS si bucket configuré
+        if GCS_PUBLIC_BUCKET:
+            upload_to_gcs(DATASET, "dataset_finetuning.jsonl")
+        print(f"  ✓ Feedback {rating:+d} loggé -> {DATASET}")
+    except Exception as e:
+        print(f"  ⚠️ log_feedback: {e}")
+
+
+def parse_feedback(text):
+    """Retourne +1 (👍/up), -1 (👎/down), ou 0 (pas un feedback)."""
+    t = (text or "").lower()
+    if any(k in t for k in ["👍", "up", "good", "yes", "👌", "❤️", "🔥"]):
+        return 1
+    if any(k in t for k in ["👎", "down", "bad", "no", "fix", "meh"]):
+        return -1
+    return 0
+
+
 def process_mentions(my_handle):
     print(f"[{datetime.datetime.now():%H:%M:%S}] Vérification des mentions...")
     last_id = get_last_seen_id()
@@ -258,6 +306,19 @@ def process_mentions(my_handle):
         if last_id and int(mid) <= int(last_id):
             continue  # déjà traité
         print(f"\n📩 Mention {mid} de {m.get('author_id')}: {m.get('text')}")
+        # Feedback 👍/👎 ? (reply courte mentionnant le handle + emoji)
+        fb = parse_feedback(m.get("text", ""))
+        if fb != 0 and my_handle.lower() in m.get("text", "").lower():
+            st = _load_feedback_state()
+            soul_debug = st.get(str(m["author_id"]), "")
+            if soul_debug:
+                log_feedback(m["author_id"], fb, soul_debug)
+                # on confirme poliment (reply courte, unguarded 280c)
+                try:
+                    xurl("reply", mid, "Thanks for the feedback! 🙏" if fb > 0 else "Noted — I'll sharpen it 🔧")
+                except Exception:
+                    pass
+                continue
         ud = parse_user_request(m.get("text", ""))
         if not ud:
             print("  ! Format invalide ignoré.")
@@ -318,6 +379,7 @@ def process_mentions(my_handle):
             xurl("reply", mid,
                  "Your karmic Soul Debug just landed in your DMs 🌌✨\n\n"
                  f"Your next shift peaks {shift_txt} — DM me your city+time that day for a fresh one.\n\n"
+                 "Did this land? 👍 or 👎 @siderealAstro13\n\n"
                  "Full app + live transits → https://karmicgochara.app\n\n"
                  "#KarmicGochara #VedicAstrology #SiderealAstro")
             print("  ✓ Réponse publique postée.")
@@ -334,6 +396,10 @@ def process_mentions(my_handle):
                 raise ValueError(f"username introuvable pour {m['author_id']}")
             send_dm(handle, ai_response)
             print("  ✓ DM envoyé.")
+            # on stocke la Soul Debug pour matcher un futur 👍/👎 de cet user
+            st = _load_feedback_state()
+            st[str(m["author_id"])] = ai_response
+            _save_feedback_state(st)
         except Exception as e:
             print(f"  ⚠️ DM ÉCHEC (MP fermés ?): {type(e).__name__}: {e}")
             traceback.print_exc()
