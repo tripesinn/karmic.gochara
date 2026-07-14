@@ -113,7 +113,7 @@ scratch/              → gitignored ✅ (contient modèles >100MB)
 - [x] Dashboard : pseudo affiché, 3 cartes visibles
 - [ ] Lecture plan free : erreur 429 + bouton Stripe visible
 - [ ] Lecture plan payant : texte généré, bouton copier actif
-- [ ] Chat : question → réponse reçue
+- [x] Chat : question → réponse reçue
 - [x] Carte Astrale : tableau planètes + SVG chargés
 - [ ] Agenda : lien iCal disponible si plan payant
 

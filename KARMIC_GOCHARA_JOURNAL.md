@@ -499,3 +499,23 @@ Validation Grok réelle à chaque étape ; portage prod sur GO explicite de Jér
 
 **Prochaine étape (ouverte) :** cron quotidien `--tweet-biorhythm` (Hermes cron 2min ou matin) si Jérôme veut automatiser ; sinon flux manuel prêt.
 
+## 🗓️ 14 Juillet 2026 (suite) — BUG X-BOT : silence total des mentions (crash plomberie)
+
+**Symptôme :** une mention valide `@lovesNhappiness → @siderealAstro13 10/31/1974 08:25 PARIS` n'a déclenché AUCUNE génération (ni DM ni reply). `last_seen_id.txt` bloqué à `999` (jamais écrasé par un vrai ID 20 chiffres) → preuve que `save_last_seen_id` (dernière ligne) n'était jamais atteinte.
+
+**Cause racine (plomberie, PAS le prompt) :** `main()` appelait `process_mentions(None)`. Or `process_mentions` fait `if fb != 0 and my_handle.lower() in ...` (ligne 311) → `my_handle` = `None` → `AttributeError: 'NoneType' object has no attribute 'lower'`. Le bot lit les mentions à l'envers (anciennes d'abord) ; dès qu'une mention-bruit contenait un mot-clé feedback (`up`/`no`/`good`/`yes`/`bad`/`fix`/`meh` + emojis) → `fb != 0` → court-circuit désactivé → crash **avant** d'atteindre la mention valide.
+
+**Pourquoi l'E2E du 13 juil avait passé :** le harness/test ne contenait pas de mot-clé feedback → le crash ne se déclenchait pas. En prod (cron `every 2m` sur le flux réel) n'importe quelle mention « good/no/up » tuait le bot à chaque tick.
+
+**Fix (2 endroits, lint OK) :**
+- `process_mentions(my_handle)` : `my_handle = (my_handle or "").lower()` en garde défensif (début de fonction).
+- `main()` : `uname = setup_x()` puis `process_mentions(uname)` (les 2 appels : `--once` + boucle `while`).
+
+**Vérifié en réel :** run `--once` a traité faria + 3 autres mentions `10/31/1974 08:25 PARIS` → chacune a reçu DM 🗝️ Soul Debug (148–193 chars, GUARD VALIDE) + reply publique. `last_seen_id.txt` = `2076968066265542728` (vrai ID). Cron `9c9f30bbaad8` relancé (pause le temps du debug pour éviter double-envoi).
+
+**AD-HOC vérif (tempfile `hermes-verify-*.py`, écrit+run+nettoyé, pas de suite CI) :** PASS — `py_compile` clean ; source asserts (guard + `process_mentions(uname)`) ; intégration `process_mentions(None)` sans crash, mention `good stuff` skipée, mention `10/31/1974 08:25 Paris` → DM+reply ; marker `🗝️ Soul Debug : ` confirmé.
+
+**Garde-fous respectés :** prompt single-source NON touché (edge Jérôme intact) ; fix plomberie uniquement ; cron sain.
+
+**Note parallèle :** l'agent site (web app `karmicgochara.app`) est en train d'implémenter le biorythme lunaire côté app — convergence du même axe (Chandra Lagna) entre le bot X (tweet + DM ciblé jour) et l'app (courbe + calendrier transit). À garder en tête pour la cohérence des libellés / URL `/biorhythm/<file>` brandées déjà en place.
+

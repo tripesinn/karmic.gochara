@@ -19,7 +19,7 @@ MONTHS.update({m: i+1 for i, m in enumerate(_EN)})
 
 _SIGN = "@siderealAstro13"
 _APP = "https://karmicgochara.app"
-_TAGS = "#KarmicGochara #VedicAstrology #SiderealAstro"
+_TAGS = "#ChandraLagna #SiderealAstrology #KarmicAstrology #karma #astrology"
 _OUT = "/tmp/karmic_biorhythm.png"
 
 

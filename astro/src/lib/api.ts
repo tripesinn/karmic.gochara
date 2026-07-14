@@ -184,6 +184,21 @@ async function* streamingRequest(path: string, body: Record<string, unknown>) {
 }
 
 export const api = {
+  chat(chatId: string, message: string) {
+    return request<{ ok: boolean; reply?: string; answer?: string; remaining?: number; error?: string }>(
+      '/chat/ask',
+      {
+        method: 'POST',
+        body: JSON.stringify({ chat_id: chatId, message })
+      }
+    ).then(res => {
+      if (res && res.answer && !res.reply) {
+        res.reply = res.answer;
+      }
+      return res;
+    });
+  },
+
   setLang(lang: string) {
     return request<{ ok: boolean; lang: string }>('/set_lang', {
       method: 'POST',

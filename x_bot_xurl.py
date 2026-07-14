@@ -288,6 +288,7 @@ def parse_feedback(text):
 
 
 def process_mentions(my_handle):
+    my_handle = (my_handle or "").lower()  # garde défensif : main() passe None sans crash
     print(f"[{datetime.datetime.now():%H:%M:%S}] Vérification des mentions...")
     last_id = get_last_seen_id()
     try:
@@ -381,7 +382,7 @@ def process_mentions(my_handle):
                  f"Your next shift peaks {shift_txt} — DM me your city+time that day for a fresh one.\n\n"
                  "Did this land? 👍 or 👎 @siderealAstro13\n\n"
                  "Full app + live transits → https://karmicgochara.app\n\n"
-                 "#KarmicGochara #VedicAstrology #SiderealAstro")
+                 "#ChandraLagna #SiderealAstrology #KarmicAstrology #karma #astrology")
             print("  ✓ Réponse publique postée.")
         except Exception as e:
             # duplicate content (déjà répondu) ou autre -> on loggue, on tente quand meme le DM
@@ -457,20 +458,20 @@ def main():
     args = p.parse_args()
 
     print("=== Démarrage Bot X.com (xurl) Karmic Gochara ===")
-    setup_x()
+    uname = setup_x()
     if args.tweet_biorhythm:
         tweet_biorhythm()
         print("=== Fin tweet biorythme ===")
         return
     if args.once:
         print("\nMode one-shot (1 poll)...")
-        process_mentions(None)
+        process_mentions(uname)
         print("=== Fin du poll unique ===")
         return
     print("\nÉcoute en cours... (Ctrl+C pour arrêter)")
     try:
         while True:
-            process_mentions(None)
+            process_mentions(uname)
             time.sleep(120)
     except KeyboardInterrupt:
         print("\nArrêt du bot.")
