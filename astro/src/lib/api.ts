@@ -226,6 +226,11 @@ export const api = {
     });
   },
 
+  biorhythm(days?: number) {
+    const query = days ? `?days=${days}` : '';
+    return request<{ ok: boolean; biorhythm?: any[] }>(`/api/biorhythm${query}`);
+  },
+
   calculate(body: { pseudo: string; transit_date: string; transit_time: string; transit_location?: string; reading_type?: 'daily' | 'full' }) {
     return streamingRequest('/v2/calculate', body);
   },

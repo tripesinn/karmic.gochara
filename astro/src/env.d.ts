@@ -1,10 +1,12 @@
 // src/env.d.ts
 
-/// <reference types="astro/client" />
-/// <reference types="astro/build" />
+// Astro ambient declarations
+declare module 'astro/types';
 
-declare namespace Environment {
-  interface ProcessEnv {
-    readonly PUBLIC_API_URL: string;
-  }
+// Define the environment variable type
+declare namespace App {
+  /**
+   * The public API URL for external services.
+   */
+  export const PUBLIC_API_URL: string;
 }

@@ -1,4 +1,3 @@
-astro/package.json
 ```json
 {
   "name": "karmic-gochara-astro",
@@ -11,19 +10,19 @@ astro/package.json
   },
   "dependencies": {
     "astro": "latest",
-    "tailwindcss": "^3.0.0",
-    "typescript": "^5.0.0"
+    "tailwindcss": "latest",
+    "typescript": "latest"
   },
   "devDependencies": {
-    "@types/node": "^20.0.0",
-    "astro-tailwind": "^1.0.0"
+    "@types/node": "latest",
+    "typescript": "latest"
   }
 }
 ```
 
-astro/.env.example
-```
+```env
 PUBLIC_API_URL=https://gochara-api-drln4gv4fa-ew.a.run.app
 PUBLIC_CAPACITOR_API_URL=https://gochara-api-drln4gv4fa-ew.a.run.app
+
 # Local dev default = /api (same origin)
 ```

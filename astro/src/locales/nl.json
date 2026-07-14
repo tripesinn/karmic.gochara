@@ -57,5 +57,13 @@
   "settings.local_ai_model_name": "Modelnaam",
   "settings.import_model": "📁 Importeer een model (.litertlm)",
   "settings.download_model": "⬇️ Download officieel model (2.58 GB)",
-  "settings.downloading": "Downloaden..."
+  "settings.downloading": "Downloaden...",
+  "settings.alert.import_native_only": "Modelimport is alleen beschikbaar op de mobiele app.",
+  "settings.alert.import_success": "Model succesvol geïmporteerd.",
+  "settings.alert.import_failed": "Import geannuleerd of mislukt.",
+  "settings.alert.import_error": "Importfout: ",
+  "settings.alert.download_native_only": "Downloaden is alleen beschikbaar op de mobiele app.",
+  "settings.alert.download_success": "Model gedownload en klaar.",
+  "settings.alert.download_failed": "Downloaden van het lokale model mislukt.",
+  "settings.alert.download_error": "Fout: "
 }

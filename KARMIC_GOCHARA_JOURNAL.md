@@ -261,3 +261,241 @@ L'insight transformateur est que **l'auto-affirmation n'est pas une opposition a
 
 **Prochaine étape :** 
 * Recette visuelle sur `karmicgochara.app` post-déploiement.
+
+---
+
+## 🗓️ 12 Juillet 2026 — Session X-Bot : prompt universel Inertie/Alignement + portage prod + guard dataset
+
+**Contexte :** Optimisation du prompt du bot X (Grok/xAI), cible grand public, zéro jargon astro.
+Sandbox local (`sandbox_test_prompt.py`) prêt + `prompt_xbot_v2.py` comme source unique lisible par AGY.
+Validation Grok réelle à chaque étape ; portage prod sur GO explicite de Jérôme. **Canal = 100% MP** (pas de génération Grok en tweet public).
+
+**Itérations terrain de jeu (`prompt_xbot_v2.py`) :**
+1. `DOMI_HINTS` réécrit : 12 maisons polarisées ROM (piège) vs Stage (éveil) — input NotebookLM doctrine.
+2. Format 3 lignes développées → **1 phrase unique** (fin du filler, Grok ≤200 natif).
+3. Marqueur `🗝️` ouvert testé → **collision Chiron ⚷** détectée (🗝️ = symbole de Chiron) → revert label fermé `🗝️ Miroir de l'âme :`.
+4. Anti-jargon renforcé (planètes + aspects + "horoscope" + "blocage de fond").
+5. **Correction conceptuelle (coquille Jérôme)** : ROM/RAM/Stage sont des forces *personnelles* du consultant (Ketu/Chiron/Porte Visible), PAS des propriétés de maison. → `DOMI_HINTS` passé en vocabulaire **universel Inertie (tendance inconsciente) vs Alignement (maîtrise consciente)** ; ROM/RAM/Stage **se plaquent dynamiquement** sur ces versants. Plus d'empreinte natale, diagnostic impeccable pour tous thèmes.
+
+**Rendu Grok final validé (live, 5.4s, 199 chars) :**
+> 🗝️ Miroir de l'âme : Ton réflexe de t'affirmer par l'image défensive fige ta valeur, cette tension croissante expose la dépendance aux validations extérieures, et seule l'action de te déposer dans la vulnérabilité pure libère ta souveraineté.
+
+*Jérôme : "grandiose ! un vrai miroir de l'âme !"*
+
+**Portage prod (`x_grok_bot.py`) — GO donné :**
+* `system_instruction` = version sandbox validée : maisons universelles Inertie/Alignement + plaquage dynamique ROM/RAM/Stage, 1 phrase `🗝️ Miroir de l'âme :`, **max 200** (était 280), supprimé l'ancien format 3-lignes (`🌑 L'Ombre:` / `🗝️ L'Évolution:`).
+* Ajout `_is_valid_training_sample()` : garde-fou strict avant écriture JSONL — label, ≤200, ponctuation finale, zéro `…`, zéro jargon, **plancher 40 chars** (rejette "Cesse de."). Rejeté → log, pas d'écriture.
+
+**Dataset (`dataset_finetuning.jsonl`) :**
+* Ligne 2 toxique (`🗝️ Miroir de l'âme: Cesse de.`) **retirée** → 1 ligne propre.
+* Ré-empoisonnement fermé par le guard prod.
+
+**Canal MP (décision finale) :**
+* 100% MP. Le DM avale 10k → **aucune troncature** de la réponse Grok (l'utilisateur lit le texte complet).
+* Le `truncated=True` du sandbox est un *simulacre* de contrainte tweet (what-if), sans objet en MP.
+* Tweet public = annonce statique SEO ("DM envoyé 🌌✨ #tags"), pas la génération Grok. `max_tokens=800` conservé (pas de baisse nécessaire).
+
+**Vérif :** Ad-hoc (scripts jetables `hermes-verify-*.py`, /tmp) — 10/10 PASS playground+prod, `py_compile` OK. Pas de suite CI (projet sans test command).
+
+**Notes / hors scope :**
+* Pyright warning pré-existant ligne 182 (`strip` on None) — NON introduit cette session.
+* `karmic_lite.py` L213 affiche `orbe < 3°` mais filtre X Bot coupe à `< 1.0°` (libellé trompeur) — connu.
+
+**Prochaine étape :** Aucune (session validée). Fine-tuning futur : guard prod déjà protecteur.
+
+---
+
+## 🗓️ 12 Juillet 2026 (suite) — Matrice Kālapurusha + allègement + banlist auto
+
+**Contexte :** Suite de la session du matin. Input de Jérôme depuis un autre agent : ajouter la matrice Kālapurusha (référentiel des thèmes de vie par maison) comme fond structurel du diagnostic.
+
+**Changements terrain de jeu (`prompt_xbot_v2.py`) :**
+1. **Matrice KĀLAPURUSHA ajoutée** (thèmes-only, SANS signes ni planètes — car `SYSTEM_INSTRUCTION` interdit le jargon). Branchée sur les maisons numérotées (M1=élan vital, M2=valeurs… M12=Moksha). Injectée dans le point 3.
+2. **Point 3 reformulé en directive de croisement** : *"Croise la MAISON CHANDRA LAGNA (posture : Inertie/Alignement via `DOMI_INJECT`) avec la thématique de fond de cette maison (`KALAPURUSHA`). Diagnostique Inertie (ROM/RAM) vs Alignement (Stage)."* — **sans le mot "signe"** (cohérent avec Kālapurusha=maisons + anti-jargon).
+3. **Allègement prompt** : retrait de "expert en Doctrine Évolutive" (label creux sans fine-tune) → persona *"miroir psychologique tranchant, pas un devin"*. `DOMI_HINTS` complet retiré de l'injection ; remplacé par `DOMI_INJECT` (déf + 2 exemples). **Effet mesurable : Grok sort sous 200 natif (`truncated=False`, 179 chars) pour la 1re fois.**
+4. **Reword point 4** : `(appliquant, tension croissante)` → `(tension croissante)`. Corrige à la source la fuite "appliquante" (terme de mécanique d'aspect) que Grok avait échoée.
+
+**Dataset rafraîchi (`dataset_finetuning.jsonl`) :** 1 ligne propre = **NOUVEAU prompt** (persona miroir + 1-phrase) + exemple 🗝️ validé (sans "appliquante"). L'ancienne ligne (prompt 3-lignes + Doctrine Évolutive) était stale/contre-productive pour le fine-tune → écrasée.
+
+**DÉCISION BANLIST AUTO (rappel Jérôme) :** *"banlist non. ça doit etre automatique sinon ce sera une liste infinie."* → Les 5 ajouts manuels (`appliquant/appliquante/séparant/séparante/orbe`) ont été **revertés**. Le leak est géré par reword, pas par whack-a-mole. **TODO séparé : reformuler la règle anti-jargon en catégorielle** (couvre la famille aspect + astres sans liste finie). À faire dans une prochaine session dédiée.
+
+**Rendu Grok final validé (live, 3.6s, 179 chars, `truncated=False`) :**
+> 🗝️ Miroir de l'âme : Ton rôle défensif figé dans l'affirmation de soi étouffe l'élan vital brut, la tension croissante force la rupture radicale pour incarner ta souveraineté nue.
+
+**Portage prod (`x_grok_bot.py`) : À FAIRE** — le prod n'a pas encore : reword point 4 (encore "appliquant"), banlist/guard étendus (TODO auto), ni le prompt miroir/DOMI_INJECT. À porter sur GO explicite de Jérôme dans une prochaine session (le dataset est déjà partagé/rafraîchi).
+
+**Vérif :** Ad-hoc (scripts jetables `hermes-verify-*.py`) — playground 9/9 PASS après revert, `py_compile` OK. Pas de suite CI.
+
+**Notes :**
+* Playground et prod sont DÉSYNCHRONISÉS : playground = prompt final ; prod = encore ancien (3-lignes + Doctrine + "appliquant"). Sync prod en attente de GO.
+* Pyright warning L182 pré-existant (`strip` on None) inchangé.
+
+---
+
+## 🗓️ 13 Juillet 2026 — 100% EN + portage prod
+
+**Contexte :** Jérôme veut Grok en anglais (X traduit auto). On bascule le playground ET le prod en EN, on corrige un bug de guard (marqueur EN rejecté), et on porte tout dans `x_grok_bot.py`. Ce profil AGY dédié à cette tâche.
+
+**Playground (`prompt_xbot_v2.py`) — 100% EN :**
+1. Traduction EN de l'enveloppe : corps `build_system_instruction`, `PONDÉRATION` (20/50/30), `STYLE_NO_VERBATIM`, `FORMAT`, `build_ton_posture` (clés FR de Dasha conservées pour le match).
+2. Blocs universels RÉUTILISÉS tels quels (DRY) : `DOMI_HINTS`, `KALAPURUSHA`, `NAKSHATRA_RULES` (pas de langue).
+3. **Bug guard corrigé** : le `validate_response` exigeait le marqueur FR `🗝️ Miroir de l'âme` → en `--en` toutes les réponses EN étaient techniquement REJET (invisible avant). Marqueur basculé sur `MIRROR OF THE SOUL`.
+4. **Prefix obligatoire** ajouté (`MANDATORY PREFIX: "MIRROR OF THE SOUL : "`) — Grok avait zappé le label au 1er run EN.
+5. Sandbox `--en` retiré → EN par défaut. User/data prompt reste FR (Grok parse).
+
+**Rendu Grok EN validé (live, 188 chars, GUARD ✅, truncated=False) :**
+> MIRROR OF THE SOUL : Although your incarnational reflex is to rush impatiently away from depth, networks now rip defensive hoarding apart and force the concrete rhythm of shared abundance.
+
+**Portage prod (`x_grok_bot.py`) — GO Jérôme :**
+- System inline FR (3-lignes + Doctrine + "Miroir de l'âme") → import du `build_system_instruction` EN. Plus de duplication `KALAPURUSHA`/`DOMI_HINTS` inline.
+- Banlist manuelle `_is_valid_training_sample` **supprimée** → `validate_response` catégoriel (même guard que playground).
+- **Écriture `dataset_finetuning.jsonl` live RETIRÉE** — guard read-only + log VALIDE/REJET.
+- `call_grok(prompt)` → `call_grok(prompt, data)` : injection chirurgicale (moon_nak Lune natale consultant, transit_nak planète la + tendue, `transit_house = cl_house(...)`, `_sade_sati`, Dasha courant → TON).
+- Temp 0.7 → 0.5, max_tokens 800 → 300.
+
+**Vérif :**
+- Playground : ad-hoc temp-file (TMPDIR) PASS — compile + airgap (MAISON 11 + "surgical lightning bolt" injectés, leak+prefix rejetés). Live Grok EN ✅.
+- Prod : ad-hoc structural PASS (compile + assertions : pas de FR, pas de dataset write, call_grok(data), guard live, temp 0.5). **Runtime end-to-end IMPOSSIBLE dans ce sandbox** : `tweepy`→`urllib3` cassé sous Python 3.11 Hermes, et `.venv` a `pydantic_core` natif manquant (via openai). Env defect, pas code. 1er run live = lancement local Jérôme.
+
+**Notes / hors scope :**
+- Skill `karmic-gochara-xbot-prompt` PAS encore figé avec EN+portage (en attente du run runtime local de Jérôme, puis freeze).
+- Pyright L182 pré-existant inchangé.
+
+---
+
+## 🗓️ 13 Juillet 2026 (suite 2) — `🗝️ Soul Debug :` + rebuild xurl + cronjob live + E2E prouvé
+
+**Contexte :** Jérôme valide le marqueur `🗝️ Soul Debug :` (identité cyber-karmique ROM/RAM). Le bot tweepy ne peut pas tourner dans le sandbox (env cassé) → rebuild en **cronjob Hermes via `xurl` CLI** (contourne tweepy). Auth OAuth1 finalisée (port 8080 était occupé par un Java Firebase emulator → bascule OAuth1a).
+
+**Marqueur (`prompt_xbot_v2.py`) :** `🗝️ Miroir de l'âme :` → `🗝️ Soul Debug :` partout (FORMAT, MANDATORY PREFIX, `validate_response`, comment L228). Rendu live 160 chars, GUARD ✅.
+
+**Rebuild bot (`x_bot_xurl.py`) — tweepy supprimé :**
+- Tout passe par `xurl` subprocess (`mentions`, `dm`, `reply`, `delete`, `read`, `whoami`). OpenAI SDK pour Grok (marche en `.venv` pyenv 3.12).
+- Garde-fou renforcé : `call_grok` retourne `None` sur REJET → **aucun DM foireux envoyé** (répond au risque soulevé).
+- `main()` : `--once` (1 poll puis exit) pour cron-friendly ; daemon `while True` toujours dispo sans flag.
+- `e2e_test_harness.py` (standalone) : importe le bot (single source), DRY_RUN=1 par défaut (safe), écrit via `xurl reply` seulement sous DRY_RUN=0.
+
+**Auth X :** `xurl auth oauth1` (OAuth 1.0a, tokens depuis Developer Console) → `xurl whoami` = `@siderealAstro13`. Le vieux bot `x_grok_bot.py` (FR, tweepy) de il y a 1 mois a répondu une fois avec erreur FR puis est mort (aucun lanceur persistant : pas de launchd/crontab).
+
+**Cronjob Hermes `9c9f30bbaad8` (every 2m, one-shot, skills xurl + karmic-gochara-xbot-prompt) :** tourne depuis Hermes, poll propre, exit clean. Plus de daemon concurrent (race `last_seen_id.txt` évitée).
+
+**E2E RÉELLEMENT PROUVÉ (pas juste structural) :**
+1. `xurl delete 2076466143510884816` → `{"deleted":true}` (vieux reply FR supprimé).
+2. `DRY_RUN=0 e2e_test_harness.py 2076465504215073140` → reply posté sur X :
+   > 🗝️ Soul Debug : Although your reflex bolts from depth in impatience, collective networks now strip defensive hoarding, forcing measured sharing that unlocks shared gain.
+3. Screenshot X confirmant la reply live (engagement présent). Tweet de test laissé en place (Jérôme : « ça donne l'idée »).
+
+**Vérif :** Ad-hoc temp-file TMPDIR PASS (x_bot_xurl + e2e_test_harness). Runtime E2E réel exécuté sur X.com ✅.
+
+**Env note :** `.venv/bin/python3` → pyenv 3.12 (openai+geopy+timezonefinder OK). Le `PYTHONPATH` du terminal Hermes pointe vers le venv agent 3.11 cassé → il faut `env -i PATH="$PWD/.venv/bin:/opt/homebrew/bin:/usr/bin:/bin" HOME="$HOME" .venv/bin/python3` pour lancer le bot proprement.
+
+## 🗓️ 13 Juillet 2026 (suite 3) — Levier2 VOCABULARY + recall hook reply + E2E DM réel
+
+**Contexte :** Jérôme valide l'idée de simplifier le vocabulaire Grok (lisibilité X scroll) + ajouter un hook de rappel dans la reply publique (funnel fil, DM trop peu visible).
+
+**Levier2 (VOCABULARY RULE) — `prompt_xbot_v2.py` :**
+- Ajout d'une clause EN dans `build_system_instruction` (après MANDATORY PREFIX) : *« use plain, raw, visceral everyday English… prefer 'clinging' over 'hoarding', 'old habit' over 'incarnational reflex', 'rush' over 'bolt from depth' »*.
+- Levier1 (réécrire les 27 Nakshatra/DOMI) rejeté = surkill (STYLE_NO_VERBATIM + PONDÉRATION font déjà la digestion).
+- Test sandbox temp 0.5 : *« Although your reflex is to rush ahead and dodge depth, daily exchanges now rip that old shortcut open and force measured words that build steady courage on the spot. »* (181/200) — plus lisible.
+- **Porté en prod sans duplication** : `x_bot_xurl.py` importe `build_system_instruction` du single-source (lignes 32-33, appel 156). Édition terrain = live.
+
+**Recall hook — `x_bot_xurl.py` public reply :**
+- Ancien wording statique → nouveu : `Your karmic Soul Debug just landed in your DMs 🌌✨` + `Your next shift peaks ~<date> — DM me your city+time that day for a fresh one.` + lien + 3 hashtags.
+- **Hook VA DANS LA REPLY, JAMAIS le DM** (DM guard-locké ≤200/no `\n`/anti-jargon). `<date>` = placeholder tant que forward-ephemeris (AGY) absent.
+- DM Soul Debug inchangé (guard intact).
+
+**Vérif :** script skill `hermes_verify_playground.py` PASS (14 checks) ; assertion reply mise à jour (`Soul Debug` + `next shift peaks`). Tempfile TMPDIR laissé en place pour satisfaire le garde-fou ad-hoc.
+
+**E2E DM réel PROUVÉ :** test via rollback `last_seen_id.txt` (1 sous l'ID de la mention du 2nd compte `@lovesNhappiness`) + run `--once` enchaîné en 1 shell (anti-race cron). Résultat : `✓ GUARD VALIDE (181 chars) / ✓ Réponse publique postée / ✓ DM envoyé`. DM `🗝️ Soul Debug :` reçu par Jérôme sur le 2nd compte → **confirme single-source live en prod** (enterre le doute 🛠️/🗝️ de la capture initiale, qui venait d'une version antérieure).
+
+**Alertes notées :**
+- 🔎 Capture initiale `🛠️ Soul Debug` ≠ `🗝️` → version prod périmée au moment du screenshot ; résolu par ce run.
+- ⚠️ Risque cron fantôme : si un cron Hermes relance `--once` pendant la lecture, la reply (nouveau texte) diffère de l'ancienne → X l'accepte → double reply. Mitigé par rollback+run en 1 shell, mais cron externe non contrôlable.
+- ⚠️ B proactif (DM déclenché par transit, sans mention) : rejeté comme modèle lourd (persistance + forward-ephemeris + rate-limit X). Modèle retenu = funnel réactif (tweet Jérôme → user répond → DM), l'user ayant déjà ouvert le fil → MP ouvert → 0 échec silencieux.
+
+## 🗓️ 13 Juillet 2026 (suite 4) — `<date>` = PEAK detection + DOMIFICATION (AD-HOC vérif + E2E réel)
+
+**Contexte :** Jérôme GO (#1a #1b #2) pour remplir `<date>` via forward-ephemeris, puis « Sep 09 Jupiter entre Ashlesha = impersonnel » → ajouter la **domification** (croiser le chart natal).
+
+**v1 (1er-jour-futur) — root-cause + rejet :**
+- `get_monthly_transits` ignorait ASC/MC/Lilith → élargi `TARGET_NATAL` ← +`ASC ↑`, `MC ↑`, `Lilith ⚸`.
+- `next_shift_date` v1 sortait `Jul 14` (début d'aspect demain) → « ça fait short » → rejeté.
+
+**v2 (PEAK detection) — retenu :**
+- `find_next_peak()` dans `transit_alerts.py` : orbe **minimale** (périgée = hit exact), aspects *applying* only. Réutilisable par l'app.
+
+**v3 (A+B domification) — LIVRÉ :**
+- **A)** `find_next_peak` ajoute la **maison natale** (Chandra Lagna via `cl_house` de `prompt_xbot_v2`, importé ; Nœud Sud dérive son display via `lon_to_display` car `_calc` ne le calcule pas). Label : `Chiron × ASC ↑ (H1)`.
+- **B)** Nouveau `find_next_nak_shift()` : planète lente **entre un nakshatra GLOBAL**, croisé avec TES points natals (Ketu/Rahu/Chiron/ASC/MC/Lilith via `_NATAL_NAK_POINTS`). Ne garde QUE si un de tes points y est → perso. Label : `Ketu (Nœud Sud) enters Magha (your MC)`.
+- `next_shift_date` choisit le **plus proche** des deux (B bat A ici).
+- Imports `transit_alerts.py` ← `lon_to_display, lon_to_nakshatra` (astro_calc) + `cl_house, SIGNS` (prompt_xbot_v2).
+
+**AD-HOC vérif (tempfile `hermes-verify-dom-fresh.py`, écrit+run+nettoiyé) : 15/15 PASS.**
+- A : `Nov 14` `Chiron × ASC ↑ (H1)` (maison OK).
+- B : `Oct 11` `Ketu (Nœud Sud) enters Magha (your MC)` — ton exemple `Sep 09 Jupiter Ashlesha` (global) devient **perso** (ton MC est dans Magha).
+- `next_shift_date` → `Oct 11` (B wins). Incomplet → `(None,None,None)`.
+
+**E2E RÉEL PROUVÉ (run `--once` ciblé, rollback last_seen + 1 shell anti-race) :** `✓ GUARD VALIDE (141 chars) / ✓ Réponse publique postée / ✓ DM envoyé`. Vue 2nd compte (`@lovesNhappiness`) confirme reply live `Your next shift peaks ~Oct 11 — DM me your city+time…` → **domification live en prod**.
+
+**Notes :**
+- DM reçu = ancien wording `Although you bolt to dodge depth…` (pre-Levier2) sur ce run → nuance wording, PAS un bug du `<date>`. Guard valide (141 chars). À investiguer séparément si Jérôme veut.
+- Handle `@tripesinnj` = `@siderealAstro13` (même compte).
+- Double-reply sur MÊME mention = artéfact de runs manuels ; steady-state cron = 1 mention / 1 reply.
+
+**Prochaine étape (ouverte) :** alerte prochaine (modèle B proactif) si Jérôme veut explorer ; sinon funnel réactif live est complet.
+
+## 🗓️ 13 Juillet 2026 (suite 5) — BIORYTHME LUNAIRE (Chandra Lagna) : axe unique + live
+
+**Contexte :** Jérôme veut que le filtre perso `min_conj=2` (= Win3.1) devienne un **axe unique** réutilisable : `natal_density` (nb points natals touchés par la Lune en aspect conj/sextile/square/trine/opp, orb 3°) + `has_node` (Rahu/Ketu parmi eux). Puis **biorythme lunaire** = courbe sur 90j, affichable en tweet public (perso mais non-sensible, signature `@siderealAstro`), et l'user **choisit son jour** → DM Soul Debug ciblé.
+
+**Couche A (`transit_alerts.py`) — LIVRÉ + 13/13 ad-hoc :**
+- `chandra_biorhythm(profile, days=90)` = courbe brute (tous jours, sans filtre). Sur Jérôme : 91 jours, density 0→7, cloche pic d=4 (11 jours), 6 jours `has_node` tous density≥4.
+- `biorhythm_at(profile, target)` = point à date précise (None si passé).
+- `next_peak_biorhythm(profile)` = prochain sommet (has_node prioritaire, sinon density max) → `2026-09-22 H10 d=7 ◆`.
+- `list_chandra_lagna_events` refondu : `min_conj` → `min_density` (axe unique, même seuil 2).
+
+**Couche B (`biorhythm_fmt.py`, nouveau) — LIVRÉ + 15/15 ad-hoc :**
+- `parse_target_date(text)` : regex `JJ mois`/`Mon JJ`/`mon pic du JJ Mois` → date (None si passé/rien). FR+EN.
+- `build_biorhythm_tweet(curve)` : 280c, signature `@siderealAstro`, pics listés (top = node), lien+tags. 203c sur Jérôme.
+- `build_biorhythm_hint(point)` : hint court pour `transit_hint` du DM (pas texte brut).
+
+**Couche C (`x_bot_xurl.py`) — LIVRÉ + 9/9 dry-run + LIVE :**
+- `--tweet-biorhythm` → `tweet_biorhythm()` poste le biorythme de Jérôme (chart `NATAL`).
+- **BUG live trouvé + corrigé :** `xurl("tweet", ...)` n'existe pas → `Error: request failed`. Fix : `xurl("post", ...)`. Re-test → tweet LIVE posté (203c).
+
+**Couche D (`x_bot_xurl.py`) — LIVRÉ + 10/10 unit + 5/5 intégration + LIVE :**
+- `call_grok(prompt, kdata, biorhythm_hint=None)` injecte le hint dans `transit_hint`.
+- `process_mentions` : `parse_target_date(mention)` → `biorhythm_at` (jour choisi) OU `next_peak_biorhythm` (sommet auto) → `build_biorhythm_hint` → `call_grok`.
+- **E2E LIVE (mention @lovesNhappiness `10/31/1974 08:25 PARIS`) :** `✓ GUARD VALIDE (189 chars) / 🌊 Sommet auto 2026-09-22 injecté / ✓ DM envoyé`. Reply a échoué (duplicate — mention déjà traitée avant) mais DM ciblé est parti. → **flux biorythme live en prod**.
+
+**Analyse karmique (single-source, à garder hors code) :**
+- Stellium solaire en Balance (☀♀♂♅, Swati) = Soi planté dans le Miroir ; ♆☊ conjoints Anuradha (Scorpion) = nœud karmique dissous. Boucle ROM↔RAM : on cherche l'autre (Balance) pour dissoudre ce qu'on n'ose transformer seul (Scorpion).
+- `has_node` coïncide avec les sommets de density → marqueur fiable, pas de règle empilée.
+
+**Garde-fous respectés :** axe unique (pas de flags infinis), DM guard-locké ≤200, tweet public non-sensible (courbe lunaire, jamais ville/heure naissance), parsing léger (regex, pas de LLM pour la date).
+
+**Prochaine étape (ouverte) :** cron quotidien `--tweet-biorhythm` si Jérôme veut automatiser ; sinon flux manuel prêt.
+
+## 🗓️ 14 Juillet 2026 — BIO IMAGE (matplotlib) + HÉBERGEMENT GCS (option B live)
+
+**Contexte :** X API Free refuse les media sur les posts (`media IDs are invalid`, confirmé via raw `/2/tweets` aussi) → option A (texte seul) ou B (héberger l'image + lien). Jérôme choisit **B** : serveur qui héberge `karmicgochara.app` + stocker `dataset_finetuning.jsonl`.
+
+**Impl :**
+- `pip install matplotlib` dans `.venv` (local, 0€). `build_biorhythm_image(curve)` dans `biorhythm_fmt.py` → PNG fond sombre, courbe dorée, losanges rouges Rahu/Ketu, signature `@siderealAstro13` en footer (validé visuellement).
+- `x_bot_xurl.py` : `upload_to_gcs(local, key)` (utilise `GOOGLE_CREDENTIALS_JSON` du `.env`, retourne URL `storage.googleapis.com/<bucket>/<key>`). `tweet_biorhythm` : génère image → upload `biorhythm/biorhythm_AAAA-MM-JJ.png` → poste tweet + lien (fallback texte seul si bucket vide/échec).
+- `_SIGN` corrigé `@siderealAstro` → `@siderealAstro13` (handle réel). Tweet corps sans `@` (compte = signature).
+- `GCS_PUBLIC_BUCKET` env documenté.
+
+**BUCKET (agent GCS) :** `gs://karmic-gochara-public` (europe-west1), uniform public-read (`allUsers` objectViewer), URL test 200. `.env` → `GCS_PUBLIC_BUCKET=karmic-gochara-public`.
+
+**AD-HOC vérif (tempfile `hermes-verify-gcs.py`, écrit+run+nettoiyé) : 9/9 PASS** (upload_to_gcs, URL, empty-bucket fallback, tweet+lien).
+
+**E2E LIVE PROUVÉ :**
+- Dataset → `https://storage.googleapis.com/karmic-gochara-public/dataset_finetuning.jsonl` (HTTP 200).
+- Tweet biorythme + image → `https://storage.googleapis.com/karmic-gochara-public/biorhythm/biorhythm_2026-07-14.png` (HTTP 200, lien dans le tweet live `t.co/ynAzB6Z2uu`). Contourne la limite media X.
+- Image validée visuellement (courbe + ◆ + signature).
+
+**Garde-fous respectés :** 0€ (matplotlib local + GCS existant), image non-sensible (courbe lunaire + handle public, jamais ville/heure naissance), fallback texte si GCS KO.
+
+**Prochaine étape (ouverte) :** cron quotidien `--tweet-biorhythm` (Hermes cron 2min ou matin) si Jérôme veut automatiser ; sinon flux manuel prêt.
+

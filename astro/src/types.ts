@@ -4,20 +4,21 @@ export type User = {
   id: string;
   pseudo: string;
   plan: 'free' | 'pro';
+  // Add other potential user fields here if known
 };
 
 export type SynthesisResponse = {
   ok: boolean;
   synthesis: string;
   fullText: string;
+  // Add other potential response fields here
 };
 
 export type LoginResponse = {
   ok: boolean;
-  pseudo?: string;
-  profile?: any;
-  hook_natal?: string;
-  hook_engine?: string;
+  access_token: string;
+  refresh_token: string;
+  // Add other potential login fields here
 };
 
 export type RegisterData = {
@@ -36,7 +37,7 @@ export type RegisterData = {
 
 export type CalculateBody = {
   pseudo: string;
-  transit_date: string;
-  transit_time: string;
+  transit_date: string; // e.g., ISO date string
+  transit_time: string; // e.g., HH:mm
   transit_location: string;
 };

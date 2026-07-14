@@ -1,0 +1,168 @@
+{
+  "data":[
+    {
+      "created_at":"2025-11-13T03:11:20.000Z",
+      "description":"Je construis https://t.co/bmPwHGebOL -  Expert du buildIn Public Sauvage et SideQuester invétéré - Hermès te veux du bien #Automatisation",
+      "id":"1988806608047206489",
+      "name":"Thib · octolinks.fr 🏴‍☠️",
+      "public_metrics":{
+        "followers_count":503,
+        "following_count":380,
+        "like_count":1124,
+        "listed_count":3,
+        "media_count":186,
+        "tweet_count":1263
+      },
+      "username":"sidequestforevr",
+      "verified":false
+    },
+    {
+      "created_at":"2026-05-25T12:51:42.000Z",
+      "description":"⚡ Late night build culture\n\n💻 AI\n🛠️ Automation\n🚀 Experimental tech\n👾 Real builders",
+      "id":"2058893545323339776",
+      "name":"Compile And Push",
+      "public_metrics":{
+        "followers_count":252,
+        "following_count":66,
+        "like_count":11465,
+        "listed_count":1,
+        "media_count":4,
+        "tweet_count":12694
+      },
+      "username":"compileandpush",
+      "verified":false
+    },
+    {
+      "created_at":"2009-11-28T03:56:21.000Z",
+      "description":"Flux de news du site https://t.co/0kITkZ1tsJ (ici : https://t.co/tw9uTVkkZz)",
+      "id":"93114300",
+      "name":"KORBEN",
+      "public_metrics":{
+        "followers_count":14511,
+        "following_count":1,
+        "like_count":29,
+        "listed_count":542,
+        "media_count":90,
+        "tweet_count":15148
+      },
+      "username":"korben_rss",
+      "verified":false
+    },
+    {
+      "created_at":"2007-05-11T20:49:49.000Z",
+      "description":"Blogueur tech depuis 2004. Cybersécurité, Linux, vie privée, IA, open source et masse de bidouilles. Fondateur de https://t.co/njss2QtUM7, le blog tech \u0026 geek de référence.",
+      "id":"5973812",
+      "name":"Korben",
+      "public_metrics":{
+        "followers_count":127123,
+        "following_count":11,
+        "like_count":2299,
+        "listed_count":3087,
+        "media_count":7,
+        "tweet_count":301
+      },
+      "username":"Korben",
+      "verified":false
+    },
+    {
+      "created_at":"2018-04-12T17:23:20.000Z",
+      "description":"F-Droid is an installable catalogue of FOSS (Free and Open Source Software) apps for Android.\n\nFor support see https://t.co/a7m4jjP4tB.",
+      "id":"984482110785425408",
+      "name":"F-Droid (@fdroidorg@floss.social)",
+      "public_metrics":{
+        "followers_count":14262,
+        "following_count":0,
+        "like_count":108,
+        "listed_count":198,
+        "media_count":4,
+        "tweet_count":105
+      },
+      "username":"fdroidorg",
+      "verified":false
+    },
+    {
+      "created_at":"2025-02-20T18:22:46.000Z",
+      "description":"🔮 Vedic Astrology \u0026 Tarot\nAI-powered content • Personal readings by me\nBirth charts • Love • Career\n💫 book: https://t.co/8c6a2AY3oG | DM for questions",
+      "id":"1892641035278548992",
+      "name":"missastroglow",
+      "public_metrics":{
+        "followers_count":15,
+        "following_count":17,
+        "like_count":401,
+        "listed_count":0,
+        "media_count":6,
+        "tweet_count":85
+      },
+      "username":"missastroglow",
+      "verified":false
+    },
+    {
+      "created_at":"2024-11-18T20:24:58.000Z",
+      "description":"🔮 Vedic Astrologer\n✨ Daily Astrology forecasts\n💫 Studying the stars 40+ years\n💡 Signup to learn Vedic Astrology + get my newsletter ⬇️",
+      "id":"1858607297301225472",
+      "name":"Joni Patry",
+      "public_metrics":{
+        "followers_count":2746,
+        "following_count":1,
+        "like_count":1,
+        "listed_count":7,
+        "media_count":1082,
+        "tweet_count":1084
+      },
+      "username":"joni_patry",
+      "verified":false
+    },
+    {
+      "created_at":"2013-01-23T22:11:38.000Z",
+      "description":"I analyze the past to predict the future.",
+      "id":"1115395026",
+      "name":"Jiang Xueqin",
+      "public_metrics":{
+        "followers_count":193937,
+        "following_count":367,
+        "like_count":324,
+        "listed_count":710,
+        "media_count":717,
+        "tweet_count":2470
+      },
+      "username":"xueqinjiang",
+      "verified":false
+    },
+    {
+      "created_at":"2022-11-14T10:37:00.000Z",
+      "description":"Votre éditeur santé depuis plus de 30 ans.",
+      "id":"1592104248279535617",
+      "name":"Editions marco pietteur",
+      "public_metrics":{
+        "followers_count":2861,
+        "following_count":536,
+        "like_count":3057,
+        "listed_count":5,
+        "media_count":768,
+        "tweet_count":1526
+      },
+      "username":"MarcoEditions",
+      "verified":false
+    },
+    {
+      "created_at":"2022-11-01T21:11:02.000Z",
+      "description":"https://t.co/h8HEGEqO7t\nhttps://t.co/kUvJanTjEe",
+      "id":"1587552679076708355",
+      "name":"Laurent Guyénot",
+      "public_metrics":{
+        "followers_count":8529,
+        "following_count":150,
+        "like_count":2962,
+        "listed_count":38,
+        "media_count":291,
+        "tweet_count":3265
+      },
+      "username":"Laurent_Guyenot",
+      "verified":false
+    }
+  ],
+  "meta":{
+    "next_token":"CV8ICKOGBHK1IZZZ",
+    "result_count":10
+  }
+}

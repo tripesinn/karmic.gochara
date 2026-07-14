@@ -152,6 +152,22 @@
     const errorEl   = $("reg-error");
     const submitBtn = $("reg-submit-btn");
 
+    // Select text on focus for numeric fields to prevent appending numbers (e.g. 2500)
+    [day, month, year, hour, minute].forEach(input => {
+      if (input) {
+        input.addEventListener("focus", () => {
+          setTimeout(() => {
+            if (typeof input.select === 'function') {
+              input.select();
+            }
+            if (typeof input.setSelectionRange === 'function') {
+              input.setSelectionRange(0, input.value.length);
+            }
+          }, 50);
+        });
+      }
+    });
+
     // ─── URL Params & API: Pre-fill ──────────────────────────
     (async function prefill() {
       const urlParams = new URLSearchParams(window.location.search);

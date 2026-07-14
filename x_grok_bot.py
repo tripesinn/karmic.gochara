@@ -21,7 +21,11 @@ from timezonefinder import TimezoneFinder
 # Importer la logique existante
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from astro_calc import calculate_transits
-from karmic_lite import TRANSIT_LOC, generate_prompt
+from karmic_lite import TRANSIT_LOC, generate_prompt, NATAL
+from prompt_xbot_v2 import (SYSTEM_INSTRUCTION, DOMI_HINTS, cl_house, sign_of,
+                            MAX_CHARS, build_system_instruction,
+                            build_nakshatra_hints, PONDÉRATION,
+                            validate_response, build_ton_posture, _sade_sati)
 
 # Charger les variables d'environnement
 load_dotenv()
@@ -141,59 +145,70 @@ def generate_karmic_data(user_data):
         now.year, now.month, now.day,
         now.hour, now.minute
     )
-    return generate_prompt(data, natal_info=natal_info)
+    return generate_prompt(data, natal_info=natal_info), data
 
-def call_grok(prompt):
-    """Envoie le prompt à Grok pour générer le fil de discussion."""
+def call_grok(prompt, data=None):
+    """Envoie le prompt à Grok (EN, 100% — X traduit auto). Injection chirurgicale
+    Playground v2.2 + garde-fou catégoriel read-only. AUCUNE écriture dataset live
+    (le fine-tuning est géré séparément avec un guard corrigé)."""
     if not XAI_API_KEY:
         print("❌ Erreur : Clé XAI_API_KEY manquante.")
         sys.exit(1)
-        
+
     client = OpenAI(
         api_key=XAI_API_KEY,
         base_url="https://api.x.ai/v1",
     )
-    
-    system_instruction = """
-Tu es un astrologue karmique sur X (Twitter), expert en "Doctrine Évolutive". Ton but est de provoquer une prise de conscience foudroyante mais constructive.
-RÈGLE D'ANALYSE : Les transits fournis incluent des tags d'intensité et de phase (Appliquant/Séparant). Tu DOIS synthétiser l'énergie de 4 piliers invisibles : 1. Ketu (l'automatisme passé), 2. La Porte Invisible (la prison), 3. Lilith/Chiron (la blessure/friction), 4. Rahu/Porte Visible (l'évolution). 
-Traduis ces 4 forces en une lecture psychologique chirurgicale, sans aucun jargon astrologique. L'utilisateur doit ressentir le "pouvoir" et la profondeur de cette lecture sur son âme. Le ton est direct, profond, implacable mais orienté vers la libération. 
-Interdiction absolue d'utiliser le mot "horoscope" ou des formules magiques.
-Tes réponses font au maximum 280 caractères.
 
-Format obligatoire :
-🌑 L'Ombre: [L'automatisme passé ou la prison inconsciente qui te bloque aujourd'hui].
-⚡ L'Épreuve: [La friction ou blessure karmique que ce transit vient réveiller].
-🗝️ L'Évolution: [L'action ou prise de conscience radicale pour basculer vers ton destin].
-"""
-    
+    # ─── INJECTION CHIRURGICALE (Playground v2.2 EN) ────────────────────
+    # moon_nak = Lune natale du CONSULTANT (Chandra Lagna) = filtre d'incarnation.
+    # transit_nak = NAKSHATRA DE LA PLANETE LA PLUS TENDUE (orbe min, applying).
+    # transit_house = cl_house de cette planète (Option B+, ancre la maison 50%).
+    moon_nak = data["natal"].get("Lune ☽", {}).get("nakshatra", "") if data else ""
+    moon_disp = data["natal"].get("Lune ☽", {}).get("display", "") if data else ""
+    aspects = data.get("aspects", []) if data else []
+    tense = [a for a in aspects if a.get("applying")] or aspects
+    top = tense[0] if tense else None  # déjà trié par orb croissant dans astro_calc
+    transit_nak = top.get("transit_nak", "") if top else ""
+    transit_house = cl_house(top.get("transit_display", ""), moon_disp) if top else ""
+    # Sade Sati : Saturne transit dans le Nakshatra lunaire ±1 (catégoriel)
+    sat_nak = data["transits"].get("Saturne ♄", {}).get("nakshatra", "") if data else ""
+    sade_sati = _sade_sati(moon_nak, sat_nak)
+    # Dasha courant (Pilier 5) -> posture
+    dasha_lord = ""
+    now = datetime.datetime.now()
+    for d in (data.get("dashas", []) if data else []):
+        try:
+            if datetime.datetime.strptime(d.get("end_date", ""), "%d/%m/%Y") >= now:
+                dasha_lord = d.get("lord", ""); break
+        except ValueError:
+            pass
+    ton_hint = build_ton_posture(dasha_lord, sade_sati)
+    moon_hint, transit_hint = build_nakshatra_hints(moon_nak, transit_nak, transit_house)
+    system_instruction = build_system_instruction(moon_hint, transit_hint, ton_hint)
+
     response = client.chat.completions.create(
         model="grok-4.3",
         messages=[
             {"role": "system", "content": system_instruction},
             {"role": "user", "content": prompt},
         ],
-        max_tokens=800,
-        temperature=0.7
+        max_tokens=300,
+        temperature=0.5,
     )
-    
+
     ai_response = response.choices[0].message.content.strip()
-    
-    # Sauvegarde des données pour le futur fine-tuning
-    try:
-        with open("dataset_finetuning.jsonl", "a", encoding="utf-8") as f:
-            entry = {
-                "messages": [
-                    {"role": "system", "content": system_instruction},
-                    {"role": "user", "content": prompt},
-                    {"role": "assistant", "content": ai_response}
-                ]
-            }
-            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
-    except Exception as e:
-        print(f"  ⚠️ Impossible de sauvegarder dans le dataset : {e}")
-        
+
+    # GUARD read-only (catégoriel) — AURUNE écriture dataset live.
+    ok, reasons = validate_response(ai_response, prompt)
+    if ok:
+        print(f"  ✓ GUARD VALIDE ({len(ai_response)} chars)")
+    else:
+        print(f"  ⚠️ GUARD REJET → {' ; '.join(reasons)} (réponse non publiée au dataset)")
     return ai_response
+
+
+# (garde-fou catégoriel désormais dans prompt_xbot_v2.validate_response)
 
 def send_dm(client, text, participant_id):
     """Envoie la réponse en Message Privé (DM) à l'utilisateur."""
@@ -230,9 +245,9 @@ def process_mentions(client, my_user_id):
             if user_data:
                 print(f"  ✓ Format valide détecté : {user_data}")
                 try:
-                    prompt = generate_karmic_data(user_data)
+                    prompt, data = generate_karmic_data(user_data)
                     print("  ✓ Thème calculé, appel à Grok...")
-                    ai_response = call_grok(prompt)
+                    ai_response = call_grok(prompt, data)
                     send_dm(client, ai_response, mention.author_id)
                     
                     # Tweet public pour le référencement (SEO Twitter)

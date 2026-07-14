@@ -15,7 +15,14 @@ from urllib.parse import quote
 
 import requests as req
 
-from astro_calc import NAKSHATRA_LORDS, NAKSHATRAS, ORB, _calc_positions, get_julian_day
+from astro_calc import (NAKSHATRA_LORDS, NAKSHATRAS, ORB, _calc_positions,
+                          get_julian_day, lon_to_display, lon_to_nakshatra)
+from prompt_xbot_v2 import cl_house, SIGNS
+
+# Nakshatras natals de l'user a croiser avec les entrees de nakshatra globales (B)
+_NATAL_NAK_POINTS = {"Ketu": "Nœud Sud ☋", "Rahu": "Nœud Nord ☊",
+                      "Chiron": "Chiron ⚷", "ASC": "ASC ↑", "MC": "MC ↑",
+                      "Lilith": "Lilith ⚸"}
 
 # Planètes lentes en transit — celles qui déclenchent des alertes
 SLOW_PLANETS = {
@@ -27,9 +34,12 @@ SLOW_PLANETS = {
 TARGET_NATAL = {
     "Nœud Sud ☋",   # Ketu — ROM — Mémoire karmique
     "Chiron ⚷",     # RAM — Porte Invisible
-    "Nœud Nord ☊",  # Rahu — Stage
+    "Nœud Nord ☊",  # Rahu — Stage / Dharma
     "Soleil ☀",
     "Lune ☽",
+    "ASC ↑",         # Ascendant — maisons / corps physique
+    "MC ↑",          # Milieu du Ciel — vocation / visibilité
+    "Lilith ⚸",      # Lilith — épreuve / refus structurel
 }
 
 # Labels lisibles pour l'email
@@ -289,6 +299,282 @@ def _positions_for_day(profile: dict, target_date: date) -> tuple[dict, dict]:
     natal_pos   = _add_south_node(_calc_positions(natal_jd,   nat_lat, nat_lon))
     transit_pos = _add_south_node(_calc_positions(transit_jd, tr_lat,  tr_lon))
     return natal_pos, transit_pos
+
+
+def find_next_peak(profile: dict, horizon_days: int = 124) -> tuple[date | None, str, float]:
+    """
+    Prochain PIC de transit (périgée de l'aspect = orbe minimale / hit exact)
+    pour un couple planète lente × point natal, dans l'horizon donné.
+
+    Ne retient QUE les aspects qui se RESSERRENT après la 1re vue (applying),
+    pas ceux déjà au périgée puis séparants. Retourne (peak_date, label, orb_min).
+    None si aucun pic à venir dans l'horizon.
+
+    Réutilisable par l'app (transit_alerts est importé par le frontend).
+    """
+    now = date.today()
+    # (t, n) -> [first_off, first_orb, min_orb, min_off]
+    seen: dict[tuple, list] = {}
+    try:
+        for off in range(1, horizon_days + 1):
+            d = now + timedelta(days=off)
+            natal_pos, transit_pos = _positions_for_day(profile, d)
+            for t, td in transit_pos.items():
+                if td is None or t not in SLOW_PLANETS:
+                    continue
+                for n, nd in natal_pos.items():
+                    if nd is None or n not in TARGET_NATAL:
+                        continue
+                    diff = abs(td["lon"] - nd["lon"]) % 360
+                    if diff > 180:
+                        diff = 360 - diff
+                    if diff <= ORB:
+                        k = (t, n)
+                        if k not in seen:
+                            seen[k] = [off, diff, diff, off]
+                        elif diff < seen[k][2]:
+                            seen[k][2] = diff
+                            seen[k][3] = off
+    except Exception:
+        return None, "", 0.0
+
+    # ne garder que les pics qui se resserrent APRES la 1re vue (applying)
+    cands = []
+    for (t, n), s in seen.items():
+        first_off, _, min_orb, min_off = s
+        if min_off > first_off:          # se resserre -> pic a venir
+            cands.append((min_off, t, n, min_orb))
+    if not cands:
+        return None, "", 0.0
+
+    cands.sort(key=lambda x: x[0])     # prochain pic le plus tot
+    min_off, t, n, orb = cands[0]
+    peak = now + timedelta(days=min_off)
+    # A) domification : maison natale (Chandra Lagna) du point touche
+    natal_pos, _ = _positions_for_day(profile, now)   # signes natals stable dans l'horizon
+    moon_disp = natal_pos.get("Lune ☽", {}).get("display", "")
+    n_data = natal_pos.get(n)
+    n_disp = n_data.get("display", "") if n_data else ""
+    if not n_disp and n == "Nœud Sud ☋" and n_data:
+        n_disp = lon_to_display(n_data["lon"])   # derive display (pas calcule par _calc)
+    house = cl_house(n_disp, moon_disp) if (n_disp and moon_disp) else ""
+    label = f"{PLANET_LABELS.get(t, t)} × {n}"
+    if house:
+        label += f" (H{house})"
+    return peak, label, orb
+
+
+def find_next_nak_shift(profile: dict, horizon_days: int = 124) -> tuple[date | None, str, str]:
+    """
+    B) Entree de nakshatra GLOBALE (planete lente change de nakshatra),
+    croisee avec TON chart natal : ne garde QUE si un de tes points
+    natals (Ketu/Rahu/Chiron/ASC/MC/Lilith) vit DANS ce nakshatra.
+    Retourne (peak_date, label_perso, nak_name). None si rien ne te touche.
+    """
+    now = date.today()
+    # nakshatras natals de l'user (stable dans l'horizon)
+    natal_pos, _ = _positions_for_day(profile, now)
+    my_naks = {}
+    for lord, key in _NATAL_NAK_POINTS.items():
+        d = natal_pos.get(key)
+        if not d:
+            continue
+        nak = d.get("nakshatra")
+        if nak:
+            my_naks[lord] = nak
+    if not my_naks:
+        return None, "", ""
+
+    # (planet, nak) -> [first_off, min_off]
+    seen: dict[tuple, list] = {}
+    try:
+        for off in range(1, horizon_days + 1):
+            d = now + timedelta(days=off)
+            _, transit_pos = _positions_for_day(profile, d)
+            for t, td in transit_pos.items():
+                if td is None or t not in SLOW_PLANETS:
+                    continue
+                nak = lon_to_nakshatra(td["lon"])["nakshatra"]
+                # quel point natal est dans CE nakshatra ?
+                hit = [lord for lord, nk in my_naks.items() if nk == nak]
+                if hit:
+                    k = (t, nak)
+                    if k not in seen:
+                        seen[k] = [off, off]
+                    else:
+                        seen[k][1] = off
+    except Exception:
+        return None, "", ""
+
+    # prochain entrer de nakshatra qui te touche
+    cands = [(s[1], t, nak, hit) for (t, nak), s in seen.items()
+              for hit in [lord for lord, nk in my_naks.items() if nk == nak]]
+    if not cands:
+        return None, "", ""
+    cands.sort(key=lambda x: x[0])
+    min_off, t, nak, _ = cands[0]
+    peak = now + timedelta(days=min_off)
+    lord = NAKSHATRA_LORDS[NAKSHATRAS.index(nak)] if nak in NAKSHATRAS else ""
+    touched = [lord_key for lord_key, nk in my_naks.items() if nk == nak]
+    touched_lbl = "/".join(touched)
+    label = f"{PLANET_LABELS.get(t, t)} enters {nak} (your {touched_lbl})"
+    return peak, label, f"{nak} ({lord})"
+
+_ = None  # placeholder (kept for clarity)
+
+
+_ASPECT_DEG = {"conj": 0.0, "sextile": 60.0, "square": 90.0, "trine": 120.0, "opp": 180.0}
+
+
+_NODE_KEYS = {"Nœud Nord ☊", "Nœud Sud ☋"}
+
+
+def _aspect_hits(mlon: float, natal_pos: dict, aspects: tuple, orb: float) -> list:
+    """Points natals dans un des aspects demandes (conj/sextile/square/trine/opp)."""
+    hits = []
+    for k, v in natal_pos.items():
+        if v is None or k == "Lune ☽":
+            continue
+        diff = abs(mlon - v["lon"]) % 360
+        if diff > 180:
+            diff = 360 - diff
+        for a in aspects:
+            t = _ASPECT_DEG.get(a)
+            if t is None:
+                continue
+            if abs(diff - t) <= orb:
+                hits.append(k)
+                break
+    return hits
+
+
+def list_chandra_lagna_events(profile: dict, n: int = 10, horizon_days: int = 45,
+                              aspects: tuple = ("conj", "sextile", "square", "trine", "opp"),
+                              orb: float = 3.0, min_density: int = 2) -> list[dict]:
+    """
+    Prochains EVENEMENTS CHANDRA LAGNA (Maison-Lune) : la Lune transitante
+    entre dans chaque maison de TON Chandra Lagna (relative a ta Lune natale).
+    Un evenement = ingress de la Lune dans une nouvelle maison H1..H12
+    (la Lune bouge ~13°/j -> 1 maison / ~2.3j).
+    AXE UNIQUE : natal_density = nb de points natals touches par la Lune
+    (conj/sextile/square/trine/opp, orb). has_node = un Rahu/Ketu (Nœud) parmi eux.
+    min_density : seuil de densite pour etre "perso". Reutilisable par l'app.
+    """
+    now = date.today()
+    natal_moon = ""
+    try:
+        natal_pos, _ = _positions_for_day(profile, now)
+        natal_moon = natal_pos.get("Lune ☽", {}).get("display", "")
+    except Exception:
+        return []
+    if not natal_moon:
+        return []
+    out = []
+    prev_house = None
+    try:
+        for off in range(0, horizon_days + 1):
+            d = now + timedelta(days=off)
+            np_, tp = _positions_for_day(profile, d)
+            moon_disp = tp.get("Lune ☽", {}).get("display", "")
+            if not moon_disp:
+                continue
+            house = cl_house(moon_disp, natal_moon)
+            if house and house != prev_house:
+                mlon = tp["Lune ☽"]["lon"]
+                nak = lon_to_nakshatra(mlon)["nakshatra"]
+                conj = _aspect_hits(mlon, np_, aspects, orb)
+                if len(conj) >= min_density:
+                    out.append({"date": d.isoformat(), "house": house,
+                                "nakshatra": nak, "conj": conj,
+                                "natal_density": len(conj),
+                                "has_node": any(c in _NODE_KEYS for c in conj)})
+                prev_house = house
+                if len(out) >= n:
+                    break
+    except Exception:
+        return out
+    return out
+
+
+def chandra_biorhythm(profile: dict, days: int = 90, orb: float = 3.0,
+                       aspects: tuple = ("conj", "sextile", "square", "trine", "opp")) -> list[dict]:
+    """
+    COURBE BRUTE du biorythme lunaire (Chandra Lagna) : tous les jours,
+    SANS filtre min_density. Chaque jour = amplitude natal_density de la Lune
+    transitaire dans ta maison natale. Reutilisable par l'app (graphe).
+    """
+    now = date.today()
+    natal_moon = ""
+    try:
+        natal_pos, _ = _positions_for_day(profile, now)
+        natal_moon = natal_pos.get("Lune ☽", {}).get("display", "")
+    except Exception:
+        return []
+    if not natal_moon:
+        return []
+    out = []
+    try:
+        for off in range(0, days + 1):
+            d = now + timedelta(days=off)
+            np_, tp = _positions_for_day(profile, d)
+            moon_disp = tp.get("Lune ☽", {}).get("display", "")
+            if not moon_disp:
+                continue
+            mlon = tp["Lune ☽"]["lon"]
+            house = cl_house(moon_disp, natal_moon)
+            nak = lon_to_nakshatra(mlon)["nakshatra"]
+            conj = _aspect_hits(mlon, np_, aspects, orb)
+            out.append({"date": d.isoformat(), "house": house,
+                        "nakshatra": nak, "conj": conj,
+                        "natal_density": len(conj),
+                        "has_node": any(c in _NODE_KEYS for c in conj)})
+    except Exception:
+        return out
+    return out
+
+
+def biorhythm_at(profile: dict, target: date, orb: float = 3.0,
+                 aspects: tuple = ("conj", "sextile", "square", "trine", "opp")) -> dict | None:
+    """Point du biorythme a une date precise (ou None si hors fenetre calculee)."""
+    now = date.today()
+    if target < now:
+        return None
+    natal_moon = ""
+    try:
+        natal_pos, _ = _positions_for_day(profile, now)
+        natal_moon = natal_pos.get("Lune ☽", {}).get("display", "")
+    except Exception:
+        return None
+    if not natal_moon:
+        return None
+    try:
+        np_, tp = _positions_for_day(profile, target)
+        moon_disp = tp.get("Lune ☽", {}).get("display", "")
+        if not moon_disp:
+            return None
+        mlon = tp["Lune ☽"]["lon"]
+        house = cl_house(moon_disp, natal_moon)
+        nak = lon_to_nakshatra(mlon)["nakshatra"]
+        conj = _aspect_hits(mlon, np_, aspects, orb)
+        return {"date": target.isoformat(), "house": house,
+                "nakshatra": nak, "conj": conj,
+                "natal_density": len(conj),
+                "has_node": any(c in _NODE_KEYS for c in conj)}
+    except Exception:
+        return None
+
+
+def next_peak_biorhythm(profile: dict, days: int = 90, orb: float = 3.0,
+                        aspects: tuple = ("conj", "sextile", "square", "trine", "opp")) -> dict | None:
+    """Prochain SOMMET du biorythme : priorite has_node, sinon density max,
+    dans la fenetre. None si vide."""
+    curve = chandra_biorhythm(profile, days=days, orb=orb, aspects=aspects)
+    future = [e for e in curve if e["date"] >= date.today().isoformat()]
+    if not future:
+        return None
+    # tri : has_node d'abord, puis density decroissante, puis date
+    future.sort(key=lambda e: (not e["has_node"], -e["natal_density"], e["date"]))
+    return future[0]
 
 
 def detect_transit_events(profile: dict) -> list[dict]:

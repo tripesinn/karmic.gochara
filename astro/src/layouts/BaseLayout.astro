@@ -3,84 +3,77 @@
 import '../styles/global.css';
 
 interface Props {
-	title: string;
-	description?: string;
-	ogImage?: string;
+  title: string;
+  description: string;
 }
 
-const { title, description, ogImage } = Astro.props;
-const siteUrl = 'https://karmicgochara.app';
-const ogTitle = title;
-const ogDescription = description || 'Explore ton thème astrologique karmique — une synthèse unique entre astrologie classique et lecture intuitive.';
-const ogImageUrl = ogImage || `${siteUrl}/static/icons/icon-512.png`;
+const { title, description } = Astro.props;
 ---
 
 <!DOCTYPE html>
 <html lang="fr">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0" />
-		<title>{title}</title>
-		<meta name="description" content={ogDescription} />
-		<meta name="theme-color" content="#0c0a08" />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} | Karmic Gochara</title>
+  <meta name="description" content={description} />
+  <link rel="icon" type="image/png" href="/static/icons/icon-192.png" />
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=DM+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-		<!-- Open Graph / Facebook -->
-		<meta property="og:type" content="website" />
-		<meta property="og:url" content={siteUrl} />
-		<meta property="og:title" content={ogTitle} />
-		<meta property="og:description" content={ogDescription} />
-		<meta property="og:image" content={ogImageUrl} />
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/static/manifest.json">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 
-		<!-- Twitter -->
-		<meta property="twitter:card" content="summary_large_image" />
-		<meta property="twitter:url" content={siteUrl} />
-		<meta property="twitter:title" content={ogTitle} />
-		<meta property="twitter:description" content={ogDescription} />
-		<meta property="twitter:image" content={ogImageUrl} />
+  <!-- Custom Styles -->
+  <style>
+    /* Base styles for layout structure */
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Ensure the custom scrollbar is applied globally */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold);
+      border-radius: 4px;
+    }
 
-		<!-- Google Fonts -->
-		<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;700&family=DM+Mono:wght@400;700&display=swap" rel="stylesheet">
+    /* Animation for content loading */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <slot />
+  </main>
 
-		<!-- PWA Manifest -->
-		<link rel="manifest" href="/static/manifest.json" />
-
-		<!-- Icons -->
-		<link rel="icon" href="/favicon.ico" sizes="any" />
-		<link rel="icon" href="/static/icons/icon-192.png" type="image/png" sizes="192x192" />
-		<link rel="apple-touch-icon" href="/static/icons/icon-192.png" />
-	</head>
-	<body class="bg-cosmic-bg text-cosmic-text font-body min-h-screen overflow-x-hidden">
-		<slot />
-
-		<!-- Error handler for debugging -->
-		<script is:inline>
-			window.addEventListener('error', (event) => {
-				const errDiv = document.createElement('div');
-				errDiv.style = 'position:fixed;top:10px;left:10px;right:10px;background:rgba(255,0,0,0.8);color:white;z-index:9999;padding:10px;font-size:12px;border-radius:4px;font-family:monospace;';
-				errDiv.innerText = 'JS ERR: ' + event.message + '\nAT ' + event.filename + ':' + event.lineno;
-				document.body.appendChild(errDiv);
-			});
-			window.addEventListener('unhandledrejection', (event) => {
-				const errDiv = document.createElement('div');
-				errDiv.style = 'position:fixed;top:80px;left:10px;right:10px;background:rgba(200,0,0,0.8);color:white;z-index:9999;padding:10px;font-size:12px;border-radius:4px;font-family:monospace;';
-				errDiv.innerText = 'PROMISE REJ: ' + (event.reason ? (event.reason.message || event.reason) : 'Unknown reason');
-				document.body.appendChild(errDiv);
-			});
-		</script>
-
-		<!-- Service Worker Registration -->
-		<script>
-			if ('serviceWorker' in navigator) {
-				window.addEventListener('load', () => {
-					navigator.serviceWorker.register('/static/sw.js')
-						.then(registration => {
-							console.log('SW registered: ', registration);
-						})
-						.catch(registrationError => {
-							console.log('SW registration failed: ', registrationError);
-						});
-				});
-			}
-		</script>
-	</body>
+  <!-- Service Worker Registration -->
+  <script src="/static/scripts/service-worker.js" is:inline></script>
+</body>
 </html>

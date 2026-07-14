@@ -155,7 +155,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
       </div>
 
       <!-- Testeurs / IA -->
-      <div>
+      <div id="settings-local-ai-section" class="hidden">
         <p class="font-body text-xs text-cosmic-text-dim tracking-wider uppercase mb-3" data-i18n="settings.local_ai">Expérimental (Testeurs)</p>
         <div class="space-y-4 p-4 rounded-xl bg-cosmic-bg border border-cosmic-border">
           <div>
@@ -247,6 +247,7 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
   import { i18n } from '../lib/i18n';
   import { capacitorBridge } from '../lib/capacitor-bridge';
   import { Capacitor } from '@capacitor/core';
+  import { api } from '../lib/api';
 
   // ── DOM refs ──
   const modal = document.getElementById('settings-modal')!;
@@ -391,6 +392,52 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
   const configDiv = document.getElementById('local-network-config')!;
   const hostInput = document.getElementById('local-ai-host') as HTMLInputElement;
   const modelInput = document.getElementById('local-ai-model-name') as HTMLInputElement;
+  const localAiSection = document.getElementById('settings-local-ai-section');
+
+  // Check if we should show the local AI configuration
+  (async () => {
+    let showConfig = false;
+
+    // 1. Check if we already have local settings configured
+    const stored = localStorage.getItem('karmic_ai_settings');
+    if (stored) {
+      try {
+        const settings = JSON.parse(stored);
+        if (settings.localMode && settings.localMode !== 'cloud') {
+          showConfig = true;
+        }
+      } catch (e) {}
+    }
+
+    // 2. Check if a local AI server is active in the network
+    if (!showConfig) {
+      try {
+        const url = await api.detectLocalAI();
+        if (url) showConfig = true;
+      } catch (e) {}
+    }
+
+    // 3. Check hardware specs
+    if (!showConfig) {
+      if (Capacitor.isNativePlatform()) {
+        try {
+          const { GemmaSynthesis } = Capacitor.Plugins as any;
+          if (GemmaSynthesis) {
+            const mem = await GemmaSynthesis.getDeviceMemory();
+            if (mem && mem.sufficient) showConfig = true;
+          }
+        } catch (e) {}
+      } else {
+        const ram = (navigator as any).deviceMemory;
+        const cores = navigator.hardwareConcurrency;
+        if (ram >= 6 && cores >= 6) showConfig = true;
+      }
+    }
+
+    if (showConfig && localAiSection) {
+      localAiSection.classList.remove('hidden');
+    }
+  })();
 
   if (modeSelect) {
     const nativeConfigDiv = document.getElementById('local-native-config')!;
@@ -485,18 +532,18 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
     if (btnSelectNative) {
       btnSelectNative.addEventListener('click', async () => {
         if (!capacitorBridge.isNative()) {
-          alert("L'importation de modèle n'est disponible que sur l'application mobile native.");
+          alert(i18n.t("settings.alert.import_native_only"));
           return;
         }
         try {
           const res = await capacitorBridge.gemma.selectLocalModel();
           if (res && res.ok) {
-            alert("Modèle importé avec succès.");
+            alert(i18n.t("settings.alert.import_success"));
           } else {
-            alert("Importation annulée ou échouée.");
+            alert(i18n.t("settings.alert.import_failed"));
           }
         } catch (e: any) {
-          alert(`Erreur d'importation : ${e.message || e}`);
+          alert(`${i18n.t("settings.alert.import_error")}${e.message || e}`);
         }
       });
     }
@@ -504,11 +551,11 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
     if (btnDownloadNative) {
       btnDownloadNative.addEventListener('click', async () => {
         if (!capacitorBridge.isNative()) {
-          alert("Le téléchargement n'est disponible que sur l'application mobile native.");
+          alert(i18n.t("settings.alert.download_native_only"));
           return;
         }
         
-        btnDownloadNative.textContent = "Téléchargement initié...";
+        btnDownloadNative.textContent = i18n.t("settings.downloading");
         btnDownloadNative.setAttribute('disabled', 'true');
         if(nativeProgressContainer) nativeProgressContainer.classList.remove('hidden');
 
@@ -517,14 +564,14 @@ const { currentLang = 'fr', currentPlan = 'free' } = Astro.props;
           await capacitorBridge.gemma.requestStoragePermission();
           const res = await capacitorBridge.gemma.prepareModel(false);
           if (res && res.ok) {
-            alert("Modèle téléchargé et prêt.");
+            alert(i18n.t("settings.alert.download_success"));
           } else {
-            alert("Échec du téléchargement du modèle local.");
+            alert(i18n.t("settings.alert.download_failed"));
           }
         } catch (e: any) {
-          alert(`Erreur : ${e.message || e}`);
+          alert(`${i18n.t("settings.alert.download_error")}${e.message || e}`);
         } finally {
-          btnDownloadNative.textContent = "⬇️ Télécharger le modèle officiel (2.58 Go)";
+          btnDownloadNative.textContent = i18n.t("settings.download_model");
           btnDownloadNative.removeAttribute('disabled');
         }
       });

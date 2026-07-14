@@ -179,6 +179,17 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
     """Route la requête vers le provider choisi par l'utilisateur."""
     provider, user_key, model = _enforce_plan_provider(user)
 
+    # Références pour le message d'erreur si la connexion échoue
+    local_url = "http://127.0.0.1:8000/v1/chat/completions"
+    local_model = "phi-4-4bit"
+
+    if user_key and provider == "local":
+        user_key_stripped = user_key.strip()
+        if user_key_stripped.startswith("http"):
+            local_url = f"{user_key_stripped.rstrip('/')}/chat/completions"
+    if model and provider == "local" and not (model.startswith("claude") or model.startswith("gemini")):
+        local_model = model
+
     # Si pas de provider, ou si on a un provider externe mais pas de clé
     if not provider or (not user_key and provider not in ["local", "claude", "gemini"]):
         if model and model.startswith("claude") and _SERVER_ANTHROPIC_KEY:
@@ -213,12 +224,12 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
                     headers["Authorization"] = f"Bearer {user_key}"
             
             # oMLX multi-model : le nom du modèle dans le répertoire ~/.omlx/models/
-            local_model = "phi-4-4bit"
+            local_model_val = "phi-4-4bit"
             if model and not (model.startswith("claude") or model.startswith("gemini")):
-                local_model = model
+                local_model_val = model
                 
             payload = {
-                "model": local_model,
+                "model": local_model_val,
                 "messages": [
                     {"role": "system", "content": system + "\n\nCRITICAL: Never repeat the same phrase or sentence twice. If you have nothing new to say, finish your response immediately."},
                     {"role": "user", "content": prompt}
@@ -279,11 +290,14 @@ def generate_ai(system: str, prompt: str, user: dict, max_tokens: int = 1024) ->
         # on ne fait PAS de repli sur l'API payante du serveur afin de protéger les quotas de facturation !
         if provider == "local":
             return (
-                "✦ **Impossible de se connecter à votre IA Locale (MLX).**\n\n"
+                "✦ **Impossible de se connecter à votre serveur d'IA externe.**\n\n"
+                "Détails de la tentative :\n"
+                f"- **Adresse** : `{local_url}`\n"
+                f"- **Modèle** : `{local_model}`\n\n"
                 "Pour corriger cela :\n"
-                "1. Assurez-vous que votre serveur local MLX est bien démarré sur votre machine (port 8888).\n"
-                "2. Si vous êtes sur le Web Cloud (karmicgochara.app), configurez votre URL de tunnel public ngrok dans les Paramètres (rouage en haut à droite).\n"
-                "3. Vous pouvez également sélectionner un autre fournisseur (Gemini, Claude, Groq) dans les Paramètres et renseigner votre propre clé d'API personnelle pour utiliser vos propres jetons (tokens).\n\n"
+                "1. Vérifiez que votre serveur local (Ollama, vLLM, oMLX...) est bien démarré à l'adresse indiquée ci-dessus.\n"
+                "2. Si vous utilisez l'application mobile, assurez-vous que cette adresse IP est accessible depuis le réseau Wi-Fi de votre téléphone (les adresses `localhost` ou `127.0.0.1` ne fonctionnent pas depuis un appareil mobile externe sans redirection de port/reverse-proxy).\n"
+                "3. Vous pouvez configurer ou modifier l'adresse du serveur et le nom du modèle dans les Paramètres (rouage en haut à droite) ou désactiver l'IA locale pour repasser sur le Cloud.\n\n"
                 "👉 **Nouveau :** Besoin d'aide pour choisir le meilleur moteur ? [Consulter le Comparatif des IA 📊](#open-benchmark)"
             )
         

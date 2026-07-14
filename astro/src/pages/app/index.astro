@@ -30,13 +30,13 @@ import { api } from '../../lib/api';
       </p>
       <p class="mt-4">
         <button id="settings-btn" class="px-4 py-1.5 rounded-full border border-cosmic-border bg-cosmic-void/40 text-xs text-cosmic-text hover:text-cosmic-gold hover:border-cosmic-gold transition-all">
-          ⚙️ Réglages & IA
+          ⚙️ Réglages
         </button>
       </p>
     </section>
 
     <!-- Quick actions -->
-    <section class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+    <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <a
         href="/app/lecture/index.html"
         class="group p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
@@ -56,6 +56,16 @@ import { api } from '../../lib/api';
         <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-500">📊</div>
         <h3 class="font-display text-cosmic-gold text-lg mb-1" data-i18n="nav.chart">Carte Astrale</h3>
         <p class="text-cosmic-text-dim text-sm" data-i18n="nav.chart_desc">Explore tes transits planétaires</p>
+      </a>
+
+      <a
+        href="/app/biorhythm/index.html"
+        class="group p-6 rounded-xl border border-cosmic-border bg-cosmic-void/60
+               hover:border-cosmic-gold/40 transition-all duration-500 text-center"
+      >
+        <div class="text-3xl mb-3 group-hover:scale-110 transition-transform duration-500">⌁</div>
+        <h3 class="font-display text-cosmic-gold text-lg mb-1">Biorythmes</h3>
+        <p class="text-cosmic-text-dim text-sm">Suis tes pics de densité lunaire</p>
       </a>
 
     </section>
@@ -109,6 +119,8 @@ import { api } from '../../lib/api';
         if (url) {
           const banner = document.getElementById('local-ai-banner');
           if (banner) banner.classList.remove('hidden');
+          const settingsBtn = document.getElementById('settings-btn');
+          if (settingsBtn) settingsBtn.textContent = '⚙️ Réglages & IA';
         } else {
           // Afficher la suggestion d'installation d'une IA locale
           // uniquement si le smartphone semble assez puissant
@@ -123,6 +135,8 @@ import { api } from '../../lib/api';
           if (hasEnoughRam && hasEnoughCores) {
             const suggestion = document.getElementById('local-ai-suggestion');
             if (suggestion) suggestion.classList.remove('hidden');
+            const settingsBtn = document.getElementById('settings-btn');
+            if (settingsBtn) settingsBtn.textContent = '⚙️ Réglages & IA';
           }
         }
       });

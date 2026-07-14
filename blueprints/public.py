@@ -102,3 +102,25 @@ def assetlinks():
     resp = make_response(jsonify(data))
     resp.headers["Content-Type"] = "application/json"
     return resp
+
+
+@public_bp.route("/biorhythm/<filename>")
+def public_biorhythm_file(filename):
+    """Proxy pour servir les images du biorythme depuis le bucket GCS public."""
+    # Sécurise le nom de fichier pour éviter les injections de chemin
+    filename = os.path.basename(filename)
+    gcs_url = f"https://storage.googleapis.com/karmic-gochara-public/biorhythm/{filename}"
+    
+    import requests
+    from flask import Response
+    try:
+        resp = requests.get(gcs_url, timeout=5)
+        if resp.status_code == 404:
+            return jsonify({"error": "Fichier non trouvé"}), 404
+        if resp.status_code != 200:
+            return jsonify({"error": f"Erreur GCS: {resp.status_code}"}), resp.status_code
+            
+        content_type = resp.headers.get("Content-Type", "image/png")
+        return Response(resp.content, mimetype=content_type)
+    except requests.RequestException as e:
+        return jsonify({"error": f"Erreur de connexion au stockage : {str(e)}"}), 502

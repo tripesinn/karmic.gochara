@@ -1,0 +1,1 @@
+Correction d'un plantage lors de l'initialisation de l'IA locale (Gemma) et amelioration de la stabilite de l'application.

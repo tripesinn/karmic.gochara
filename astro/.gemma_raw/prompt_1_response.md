@@ -1,9 +1,12 @@
 ```astro
 ---
 // src/layouts/BaseLayout.astro
+import '../styles/global.css';
+import '../scripts/service-worker.js'; // Assuming you have a service worker script
+
 interface Props {
-	title: string;
-	description: string;
+  title: string;
+  description: string;
 }
 
 const { title, description } = Astro.props;
@@ -11,133 +14,163 @@ const { title, description } = Astro.props;
 
 <!DOCTYPE html>
 <html lang="fr">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width" />
-		<title>{title}</title>
-		<meta name="description" content={description} />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title} | Karmic Gochara</title>
+  <meta name="description" content={description} />
+  <link rel="icon" type="image/png" href="/static/icons/icon-192.png" />
+  
+  <!-- Google Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@400;700&family=DM+Mono:wght@400;700&display=swap" rel="stylesheet">
 
-		<!-- Google Fonts -->
-		<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&family=Cormorant+Garamond:wght@300;400;700&family=DM+Mono:wght@400;700&display=swap" rel="stylesheet">
+  <!-- PWA Manifest -->
+  <link rel="manifest" href="/static/manifest.json">
+  
+  <!-- Apple Touch Icon -->
+  <link rel="apple-touch-icon" href="/static/icons/icon-192.png">
 
-		<!-- PWA Manifest -->
-		<link rel="manifest" href="/manifest.json" />
-		<meta name="theme-color" content="#0c0a08" />
+  <!-- Custom Styles -->
+  <style>
+    /* Base styles for layout structure */
+    body {
+      font-family: 'Cormorant Garamond', serif;
+      background-color: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    /* Ensure the custom scrollbar is applied globally */
+    ::-webkit-scrollbar {
+      width: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+      background: var(--bg);
+    }
+    
+    ::-webkit-scrollbar-thumb {
+      background: var(--gold);
+      border-radius: 4px;
+    }
 
-		<!-- Icons -->
-		<link rel="apple-touch-icon" href="/icons/icon-192.png" />
+    /* Animation for content loading */
+    @keyframes fadeUp {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <slot />
+  </main>
 
-		<!-- Global Styles -->
-		<link rel="stylesheet" href="/src/styles/global.css" />
-	</head>
-	<body class="dark-theme">
-		<slot />
-
-		<!-- Service Worker Registration -->
-		<script>
-			if ('serviceWorker' in navigator) {
-				window.addEventListener('load', () => {
-					navigator.serviceWorker.register('/sw.js')
-						.then(registration => {
-							console.log('SW registered: ', registration);
-						})
-						.catch(registrationError => {
-							console.log('SW registration failed: ', registrationError);
-						});
-				});
-			}
-		</script>
-	</body>
+  <!-- Service Worker Registration -->
+  <script src="/static/scripts/service-worker.js"></script>
+</body>
 </html>
 ```
 
 ```css
 /* src/styles/global.css */
 
-/* ----------------------------------- */
-/* 1. Variables & Reset */
-/* ----------------------------------- */
+/* --- Variables --- */
 :root {
-	/* Color Palette */
-	--bg: #0c0a08;
-	--gold: #c9a84c;
-	--text: #f5f0e8;
-	--border: #2a2820;
-	--shadow: rgba(201, 168, 76, 0.1);
+  --bg: #0c0a08;
+  --gold: #c9a84c;
+  --text: #f5f0e8;
+  --border: #2a2820;
 }
 
-/* Minimal Reset */
-*,
-*::before,
-*::after {
-	box-sizing: border-box;
-	margin: 0;
-	padding: 0;
+/* --- Reset & Base Styles --- */
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* Typography Reset */
 body {
-	font-family: 'Cormorant Garamond', serif;
-	color: var(--text);
-	background-color: var(--bg);
-	line-height: 1.6;
-	min-height: 100vh;
-	/* Subtle Gradient Background */
-	background-image: linear-gradient(to bottom, var(--bg) 0%, var(--bg) 80%, rgba(201, 168, 76, 0.06) 100%);
-	transition: background-color 0.5s ease;
+  font-family: 'Cormorant Garamond', serif;
+  background-color: var(--bg);
+  color: var(--text);
+  line-height: 1.6;
+  min-height: 100vh;
+  overflow-x: hidden;
 }
 
+/* --- Typography --- */
 h1, h2, h3, h4, h5, h6 {
-	font-family: 'Cinzel', serif;
-	color: var(--gold);
-	letter-spacing: 0.1em;
-	margin-bottom: 0.5em;
-	text-transform: uppercase;
+  font-family: 'Cinzel', serif;
+  color: var(--gold);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
-h1 { font-size: 3rem; }
-h2 { font-size: 2.5rem; }
-h3 { font-size: 1.8rem; }
-h4 { font-size: 1.4rem; }
-h5 { font-size: 1.1rem; }
-h6 { font-size: 0.9rem; }
+/* --- Background Gradient --- */
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to bottom, transparent 0%, rgba(201, 168, 76, 0.06) 100%);
+  z-index: -1;
+}
 
-/* ----------------------------------- */
-/* 2. Keyframes & Animations */
-/* ----------------------------------- */
+/* --- Scrollbar Customization (Dark Mode) --- */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--bg);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border-radius: 4px;
+  border: 2px solid var(--bg);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #e0c060; /* Slightly lighter gold on hover */
+}
+
+/* --- Keyframes --- */
 @keyframes fadeUp {
-	from {
-		opacity: 0;
-		transform: translateY(20px);
-	}
-	to {
-		opacity: 1;
-		transform: translateY(0);
-	}
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
-.animate-fade-up {
-	animation: fadeUp 1s ease-out forwards;
+/* --- Content Styling Examples --- */
+.card {
+  background-color: var(--border);
+  border: 1px solid var(--border);
+  padding: 20px;
+  margin-bottom: 20px;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
 }
 
-/* ----------------------------------- */
-/* 3. Custom Scrollbar (Webkit) */
-/* ----------------------------------- */
-body::-webkit-scrollbar {
-	width: 12px;
-}
-
-body::-webkit-scrollbar-track {
-	background: var(--bg);
-}
-
-body::-webkit-scrollbar-thumb {
-	background-color: var(--gold);
-	border-radius: 6px;
-	border: 2px solid var(--bg); /* Gives a defined edge */
-}
-
-body::-webkit-scrollbar-thumb:hover {
-	background-color: #e0c560; /* Slightly lighter gold on hover */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
 }
 ```

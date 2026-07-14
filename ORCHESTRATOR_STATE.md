@@ -10,14 +10,17 @@
 
 ## État Actuel
 
-**Dernière mise à jour** : 2026-07-12T22:50 (Session en cours, oMLX UP)
+**Dernière mise à jour** : 2026-07-13T21:58 (Modèles locaux restructurés)
 **Build Astro** : ✅ OK (www/ à jour et resynchronisé Capacitor)
-**Environnement** :
+**Environnement & Modèles** :
 - **Node.js** : `v20.12.2` (via NVM)
 - **Firebase CLI** : `v13.6.0`
 - **Android Studio** : SDK Platform-Tools installés (adb fonctionnel)
 - **IA Locale** : ✅ UP (oMLX port 8889)
-- **Modèle Local configuré** : `gemma-4-E2B-it-qat-oQ4-fp16` (port 8889)
+- **Architecture Modèles** :
+  - **Hermes (Agent)** : Principal + délégation = `Hermes-3` local (non-reasoning) → 0 cloud pour le bulk.
+  - **agy-cli** : Gemini primaire + `Qwen3.5-9B-4bit` local fallback (`base_url = http://127.0.0.1:8889/v1` avec `enable_thinking = false` pour éliminer le thinking-leak).
+  - **R1 (DeepSeek)** : Démonté/désactivé partout (thinking-leak & raisonnement excessif inadapté aux subagents).
 - **Émulateur Firebase** : ✅ Actif (9099, 8080)
 - **Serveur Flask (API)** : ✅ Actif (5001, relancé dans .venv)
 - **ADB Reverse** : ✅ Actif (5001, 8080, 9099, 8889)

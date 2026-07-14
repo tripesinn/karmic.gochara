@@ -20,12 +20,12 @@ import time
 from pathlib import Path
 
 # ── Config ──────────────────────────────────────────────────────────
-GEMMA_API = "http://127.0.0.1:8888/v1/chat/completions"
+GEMMA_PORT = 8889  # Port par défaut, modifiable lors du lancement
 GEMMA_API_KEY = "omlx_12345678910111213abcDEF"
 ASTRO_DIR = Path.home() / "karmic.gochara/astro"
 PROMPTS_FILE = Path.home() / "karmic.gochara/.hermes/prompts/GEMMA-BATCH-SESSION-1.md"
 LOG_FILE = Path.home() / "karmic.gochara/.hermes/gemma_batch_log.json"
-MODEL = "unsloth--gemma-4-E4B-it-UD-MLX-4bit"
+MODEL = "gemma-4-E2B-it-qat-oQ4-fp16"
 MAX_RETRIES = 3
 RETRY_DELAY = 10  # seconds
 
@@ -108,7 +108,7 @@ def call_gemma(prompt_text: str, timeout: int = 300) -> str:
     for attempt in range(MAX_RETRIES):
         try:
             result = subprocess.run(
-                ["curl", "-s", "-X", "POST", GEMMA_API,
+                ["curl", "-s", "-X", "POST", f"http://127.0.0.1:{GEMMA_PORT}/v1/chat/completions",
                  "-H", "Content-Type: application/json",
                  "-H", f"Authorization: Bearer {GEMMA_API_KEY}",
                  "-d", json.dumps(payload)],
@@ -250,7 +250,7 @@ def check_gemma_server() -> bool:
         result = subprocess.run(
             ["curl", "-s", "-o", "/dev/null", "-w", "%{http_code}",
              "-H", f"Authorization: Bearer {GEMMA_API_KEY}",
-             "http://127.0.0.1:8888/v1/models"],
+             f"http://127.0.0.1:{GEMMA_PORT}/v1/models"],
             capture_output=True, text=True, timeout=5
         )
         return result.stdout == "200"
@@ -260,7 +260,7 @@ def check_gemma_server() -> bool:
     # Fallback: essayer models endpoint
     try:
         result = subprocess.run(
-            ["curl", "-s", GEMMA_API.replace("/chat/completions", "/models")],
+            ["curl", "-s", f"http://127.0.0.1:{GEMMA_PORT}/v1/models"],
             capture_output=True, text=True, timeout=5
         )
         return "gemma" in result.stdout.lower()
@@ -305,98 +305,153 @@ def main():
             print("Usage: python3 run_gemma_batch.py [--prompt=N] [--dry-run]")
             return 0
     
-    # Check server
-    print("\n🔍 Vérification du serveur Gemma...")
-    if not check_gemma_server():
-        print("❌ Serveur Gemma (127.0.0.1:8888) ne répond pas.")
-        print("   Lance d'abord : ssh ... ou démarre le serveur local")
+    global GEMMA_PORT
+    try:
+        port_input = input("👉 Port d'écoute du serveur d'inférence (par défaut: 8889) : ").strip()
+        if port_input:
+            GEMMA_PORT = int(port_input)
+    except KeyboardInterrupt:
+        print("\n👋 Abandon.")
         return 1
-    print("✅ Serveur OK")
-    
-    # Parse prompts
-    print("\n📋 Parsing des prompts...")
-    prompts = parse_prompts_from_md(PROMPTS_FILE)
-    print(f"   → {len(prompts)} prompts trouvés")
-    
-    if single_prompt:
-        if single_prompt < 1 or single_prompt > len(prompts):
-            print(f"❌ Prompt {single_prompt} invalide. Prompts disponibles: 1-{len(prompts)}")
-            return 1
-        prompts = [prompts[single_prompt - 1]]
-    
-    if dry_run:
-        print("\n🏃 DRY RUN — Prompts à exécuter :")
-        for i, p in enumerate(prompts, 1):
-            title = p["title"][:60]
-            chars = len(p["text"])
-            print(f"   {i}. {title} ({chars} chars)")
-        return 0
-    
-    # Execute each prompt
-    total = len(prompts)
-    successes = 0
-    
-    for i, prompt in enumerate(prompts, 1):
-        num = single_prompt or i
-        title = prompt["title"]
-        print(f"\n{'='*50}")
-        print(f"📝 Prompt {num}/{total}: {title}")
-        print(f"{'='*50}")
-        
-        log_progress(num, title, "running", "Envoi à Gemma...")
-        
+    except ValueError:
+        print("❌ Port invalide. Utilisation du port par défaut.")
+
+    # Check server
+    print(f"\n🔍 Vérification du serveur Gemma sur 127.0.0.1:{GEMMA_PORT}...")
+    ssh_tunnel_proc = None
+    if not check_gemma_server():
+        print(f"❌ Le serveur Gemma (127.0.0.1:{GEMMA_PORT}) ne répond pas.")
         try:
-            print("   ⏳ Appel Gemma (temps max 5 min)...")
-            start = time.time()
-            response = call_gemma(prompt["text"])
-            elapsed = time.time() - start
-            print(f"   ✅ Réponse reçue ({elapsed:.0f}s, {len(response)} chars)")
+            use_ssh = input("👉 Voulez-vous ouvrir un tunnel SSH automatique vers le serveur ? (y/N) : ").strip().lower()
+        except KeyboardInterrupt:
+            print("\n👋 Abandon.")
+            return 1
             
-            # Sauvegarder la réponse raw
-            raw_dir = ASTRO_DIR / ".gemma_raw"
-            raw_dir.mkdir(parents=True, exist_ok=True)
-            raw_path = raw_dir / f"prompt_{num}_response.md"
-            raw_path.write_text(response)
-            print(f"   💾 Réponse sauvegardée: {raw_path}")
-            
-            # Extraire et sauvegarder les fichiers
-            files = extract_files_from_response(response, prompt_num=num)
-            if files:
-                saved = save_generated_files(files)
-                if saved:
-                    print("   📂 Fichiers créés:")
-                    for s in saved:
-                        print(f"      ✓ {s}")
-                else:
-                    print("   ⚠️ Aucun fichier extrait de la réponse")
+        if use_ssh == 'y':
+            try:
+                whoami = input("👉 Nom d'utilisateur SSH (whoami) : ").strip()
+                server = input("👉 Adresse/IP du serveur distant : ").strip()
+            except KeyboardInterrupt:
+                print("\n👋 Abandon.")
+                return 1
+                
+            if whoami and server:
+                ssh_cmd = f"ssh -N -L {GEMMA_PORT}:127.0.0.1:{GEMMA_PORT} {whoami}@{server}"
+                try:
+                    print(f"🚀 Lancement du tunnel SSH : {ssh_cmd}")
+                    ssh_tunnel_proc = subprocess.Popen(ssh_cmd, shell=True, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+                    print("⏳ Attente de 5 secondes pour que le tunnel SSH s'établisse...")
+                    time.sleep(5)
+                    if check_gemma_server():
+                        print("✅ Serveur Gemma accessible via le tunnel SSH !")
+                    else:
+                        print("❌ Toujours impossible de joindre le serveur Gemma via le tunnel.")
+                        ssh_tunnel_proc.terminate()
+                        return 1
+                except Exception as e:
+                    print(f"❌ Erreur lors du lancement du tunnel : {e}")
+                    return 1
             else:
-                print("   ⚠️ Parsing échoué — sauvegardé raw pour review manuelle")
-            
-            log_progress(num, title, "success", f"{elapsed:.0f}s, {len(response)} chars")
-            successes += 1
-            
-            # Pause entre les prompts pour laisser la RAM refroidir
-            if i < total:
-                pause = min(30, 10 + i * 5)
-                print(f"\n   ⏸️  Pause {pause}s avant prochain prompt (RAM)...")
-                time.sleep(pause)
-            
-        except Exception as e:
-            print(f"   ❌ Erreur: {e}")
-            log_progress(num, title, "error", str(e))
-    
-    # Summary
-    print(f"\n{'='*60}")
-    if successes == total:
-        print(f"✅ Batch terminé: {successes}/{total} prompts réussis")
-        print(f"📂 Fichiers dans {ASTRO_DIR}")
-        print(f"📝 Log: {LOG_FILE}")
-        print("\nProchaine étape: revue Hermes pour valider les fichiers")
+                print("❌ Nom d'utilisateur ou serveur vide. Abandon.")
+                return 1
+        else:
+            return 1
     else:
-        print(f"⚠️ Batch partiel: {successes}/{total} prompts réussis")
-        print(f"   Consulte le log pour les erreurs: {LOG_FILE}")
+        print("✅ Serveur OK")
     
-    return 0 if successes == total else 1
+    try:
+        # Parse prompts
+        print("\n📋 Parsing des prompts...")
+        prompts = parse_prompts_from_md(PROMPTS_FILE)
+        print(f"   → {len(prompts)} prompts trouvés")
+        
+        if single_prompt:
+            if single_prompt < 1 or single_prompt > len(prompts):
+                print(f"❌ Prompt {single_prompt} invalide. Prompts disponibles: 1-{len(prompts)}")
+                return 1
+            prompts = [prompts[single_prompt - 1]]
+        
+        if dry_run:
+            print("\n🏃 DRY RUN — Prompts à exécuter :")
+            for i, p in enumerate(prompts, 1):
+                title = p["title"][:60]
+                chars = len(p["text"])
+                print(f"   {i}. {title} ({chars} chars)")
+            return 0
+        
+        # Execute each prompt
+        total = len(prompts)
+        successes = 0
+        
+        for i, prompt in enumerate(prompts, 1):
+            num = single_prompt or i
+            title = prompt["title"]
+            print(f"\n{'='*50}")
+            print(f"📝 Prompt {num}/{total}: {title}")
+            print(f"{'='*50}")
+            
+            log_progress(num, title, "running", "Envoi à Gemma...")
+            
+            try:
+                print("   ⏳ Appel Gemma (temps max 5 min)...")
+                start = time.time()
+                response = call_gemma(prompt["text"])
+                elapsed = time.time() - start
+                print(f"   ✅ Réponse reçue ({elapsed:.0f}s, {len(response)} chars)")
+                
+                # Sauvegarder la réponse raw
+                raw_dir = ASTRO_DIR / ".gemma_raw"
+                raw_dir.mkdir(parents=True, exist_ok=True)
+                raw_path = raw_dir / f"prompt_{num}_response.md"
+                raw_path.write_text(response)
+                print(f"   💾 Réponse sauvegardée: {raw_path}")
+                
+                # Extraire et sauvegarder les fichiers
+                files = extract_files_from_response(response, prompt_num=num)
+                if files:
+                    saved = save_generated_files(files)
+                    if saved:
+                        print("   📂 Fichiers créés:")
+                        for s in saved:
+                            print(f"      ✓ {s}")
+                    else:
+                        print("   ⚠️ Aucun fichier extrait de la réponse")
+                else:
+                    print("   ⚠️ Parsing échoué — sauvegardé raw pour review manuelle")
+                
+                log_progress(num, title, "success", f"{elapsed:.0f}s, {len(response)} chars")
+                successes += 1
+                
+                # Pause entre les prompts pour laisser la RAM refroidir
+                if i < total:
+                    pause = min(30, 10 + i * 5)
+                    print(f"\n   ⏸️  Pause {pause}s avant prochain prompt (RAM)...")
+                    time.sleep(pause)
+                
+            except Exception as e:
+                print(f"   ❌ Erreur: {e}")
+                log_progress(num, title, "error", str(e))
+        
+        # Summary
+        print(f"\n{'='*60}")
+        if successes == total:
+            print(f"✅ Batch terminé: {successes}/{total} prompts réussis")
+            print(f"📂 Fichiers dans {ASTRO_DIR}")
+            print(f"📝 Log: {LOG_FILE}")
+            print("\nProchaine étape: revue Hermes pour valider les fichiers")
+        else:
+            print(f"⚠️ Batch partiel: {successes}/{total} prompts réussis")
+            print(f"   Consulte le log pour les erreurs: {LOG_FILE}")
+        
+        return 0 if successes == total else 1
+    finally:
+        if ssh_tunnel_proc:
+            print("\n🔌 Fermeture du tunnel SSH...")
+            ssh_tunnel_proc.terminate()
+            try:
+                ssh_tunnel_proc.wait(timeout=3)
+            except subprocess.TimeoutExpired:
+                ssh_tunnel_proc.kill()
 
 
 if __name__ == "__main__":

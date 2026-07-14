@@ -123,10 +123,16 @@ def generate_prompt(data, natal_info=None, rich=False):
     for a in doc_aspects:
         orb = a.get("orb", 0)
         
-        # Classification de l'intensité par script
-        if orb <= 1.0:
+        # Filtres X Bot (non-rich) : Orbe < 1.0° ET Phase Appliquante uniquement
+        if not rich:
+            if orb > 1.0:
+                continue
+            if not a.get("applying", True):
+                continue
+        
+        if orb < 0.5:
             intensite = "[🔥 IMMINENT / CRISE AIGUË]"
-        elif orb <= 3.0:
+        elif orb < 1.5:
             intensite = "[🌊 PROCESSUS ACTIF]"
         else:
             intensite = "[🌱 TRAVAIL DE FOND]"

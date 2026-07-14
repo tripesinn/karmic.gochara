@@ -6,6 +6,7 @@ import com.google.ai.edge.litertlm.Content
 import com.google.ai.edge.litertlm.Conversation
 import android.util.Log
 import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import java.lang.StringBuilder
 
 object GemmaHelper {
@@ -13,11 +14,13 @@ object GemmaHelper {
     fun generateSync(conversation: Conversation, prompt: String): String = runBlocking {
         val sb = StringBuilder()
         try {
-            conversation.sendMessageAsync(prompt).collect { message ->
-                val contentsList = message.contents.contents
-                for (content in contentsList) {
-                    if (content is Content.Text) {
-                        sb.append(content.text)
+            withTimeout(60000) {
+                conversation.sendMessageAsync(prompt).collect { message ->
+                    val contentsList = message.contents.contents
+                    for (content in contentsList) {
+                        if (content is Content.Text) {
+                            sb.append(content.text)
+                        }
                     }
                 }
             }

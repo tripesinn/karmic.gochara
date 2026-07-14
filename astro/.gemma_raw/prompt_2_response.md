@@ -1,7 +1,8 @@
-```mjs
-/** @type {import('tailwindcss').Config} */
-export default {
-  content: ['./src/**/*.{astro,html,js,jsx,ts,tsx}'],
+```javascript
+// tailwind.config.mjs
+import { defineConfig } from 'tailwindcss';
+
+export default defineConfig({
   theme: {
     extend: {
       colors: {
@@ -23,23 +24,24 @@ export default {
     },
   },
   plugins: [],
-}
+});
 ```
 
-```mjs
+```javascript
+// astro.config.mjs
 import { defineConfig } from 'astro/config';
-import tailwind from "@astrojs/tailwind";
+import tailwind from '@astrojs/tailwind';
 
 export default defineConfig({
   output: 'static',
   integrations: [tailwind()],
   vite: {
     define: {
-      'import.meta.env.PUBLIC_API_URL': JSON.stringify('YOUR_API_URL_HERE'),
+      'import.meta.env.PUBLIC_API_URL': 'https://api.example.com', // Placeholder for actual environment variable
     },
   },
   build: {
-    outDir: '../www',
+    outDir: '../www', // For Capacitor sync
   },
 });
 ```

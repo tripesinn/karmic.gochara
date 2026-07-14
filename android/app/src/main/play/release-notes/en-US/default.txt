@@ -1,0 +1,1 @@
+Fixed a crash during local AI (Gemma) initialization and improved overall application stability.

@@ -71,6 +71,26 @@ def api_profile():
     return jsonify({"ok": True, "profile": profile})
 
 
+@api_bp.route("/biorhythm")
+def api_biorhythm():
+    """Retourne la courbe du biorythme lunaire Chandra Lagna sur 90 jours."""
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"ok": False, "error": "Non authentifié"}), 401
+    
+    days = request.args.get("days", default=90, type=int)
+    if days < 7 or days > 365:
+        days = 90
+        
+    try:
+        from transit_alerts import chandra_biorhythm
+        curve = chandra_biorhythm(profile, days=days)
+        return jsonify({"ok": True, "biorhythm": curve})
+    except Exception as e:
+        current_app.logger.error("Erreur calcul biorhythm : %s", e)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 @api_bp.route("/plan_check", methods=["POST"])
 def api_plan_check():
     """

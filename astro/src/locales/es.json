@@ -57,5 +57,13 @@
   "settings.local_ai_model_name": "Nombre del modelo",
   "settings.import_model": "📁 Importar un modelo (.litertlm)",
   "settings.download_model": "⬇️ Descargar modelo oficial (2.58 GB)",
-  "settings.downloading": "Descargando..."
+  "settings.downloading": "Descargando...",
+  "settings.alert.import_native_only": "La importación de modelos solo está disponible en la aplicación móvil nativa.",
+  "settings.alert.import_success": "Modelo importado con éxito.",
+  "settings.alert.import_failed": "Importación cancelada o fallida.",
+  "settings.alert.import_error": "Error de importación: ",
+  "settings.alert.download_native_only": "La descarga solo está disponible en la aplicación móvil nativa.",
+  "settings.alert.download_success": "Modelo descargado y listo.",
+  "settings.alert.download_failed": "Error al descargar el modelo local.",
+  "settings.alert.download_error": "Error: "
 }

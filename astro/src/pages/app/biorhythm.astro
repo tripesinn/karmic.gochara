@@ -1,0 +1,489 @@
+---
+// src/pages/app/biorhythm.astro — Page Biorythme Lunaire (Chandra Lagna)
+import AppLayout from '../../layouts/AppLayout.astro';
+---
+
+<AppLayout title="Mon Biorythme Lunaire — Chandra Lagna">
+  <div class="max-w-4xl mx-auto px-4 py-8 space-y-8">
+    
+    <!-- En-tête -->
+    <header class="text-center space-y-2">
+      <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-cosmic-gold/10 text-cosmic-gold text-3xl mb-2 animate-pulse">
+        ⌁
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-display text-cosmic-gold">Mon Biorythme Lunaire</h1>
+      <p class="text-cosmic-text-dim text-sm max-w-lg mx-auto">
+        Suis l'évolution de ta sensibilité céleste. Cette courbe de 90 jours affiche la <strong>densité d'aspects</strong> formés par la Lune transitaire sur tes placements natals (Chandra Lagna).
+      </p>
+    </header>
+
+    <!-- Zone de Graphique & Détails -->
+    <main class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      
+      <!-- Graphique SVG Interactif -->
+      <section class="lg:col-span-2 border border-cosmic-border rounded-2xl bg-cosmic-void/60 p-4 sm:p-6 space-y-4">
+        <div class="flex items-center justify-between border-b border-cosmic-border/30 pb-3">
+          <h2 class="font-display text-cosmic-gold text-lg flex items-center gap-2">
+            <span>✦</span> Graphique de Densité
+          </h2>
+          <div class="flex gap-2">
+            <span class="inline-flex items-center gap-1 text-xs text-cosmic-text-dim">
+              <span class="w-3.5 h-3.5 rounded-full bg-[#d29922] opacity-80"></span> Densité
+            </span>
+            <span class="inline-flex items-center gap-1 text-xs text-cosmic-text-dim">
+              <span class="inline-block text-[#f85149] font-bold">◆</span> Nœud actif
+            </span>
+          </div>
+        </div>
+
+        <!-- Placeholder chargement -->
+        <div id="chart-loader" class="flex flex-col items-center justify-center h-64 text-cosmic-text-dim italic">
+          <span class="animate-spin text-2xl mb-2">✦</span>
+          Calcul des transits lunaires...
+        </div>
+
+        <!-- Conteneur SVG -->
+        <div id="chart-container" class="hidden relative w-full h-72">
+          <svg id="biorhythm-svg" viewBox="0 0 800 250" class="w-full h-full select-none" preserveAspectRatio="none">
+            <!-- Grid Lines et Courbes seront injectées en JS -->
+          </svg>
+          
+          <!-- Infobulle dynamique au survol -->
+          <div id="chart-tooltip" class="absolute pointer-events-none opacity-0 scale-95 transition-all bg-[#0d1117] border border-cosmic-border rounded-lg p-3 text-xs text-cosmic-text shadow-2xl z-20 space-y-1 w-48">
+            <div id="tooltip-date" class="font-bold text-cosmic-gold border-b border-cosmic-border/30 pb-1 mb-1"></div>
+            <div>Maison Lunaire : <span id="tooltip-house" class="font-medium text-white"></span></div>
+            <div>Nakshatra : <span id="tooltip-nakshatra" class="font-medium text-white"></span></div>
+            <div>Densité : <span id="tooltip-density" class="font-bold text-cosmic-gold"></span> aspects</div>
+            <div id="tooltip-node" class="text-xs text-red-400 font-bold hidden">◆ Nœud Rahu/Ketu actif</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Panneau Latéral Détails & Conseils -->
+      <section class="border border-cosmic-border rounded-2xl bg-cosmic-void/60 p-6 space-y-6">
+        <h2 class="font-display text-cosmic-gold text-lg border-b border-cosmic-border/30 pb-3 flex items-center gap-2">
+          <span>🗝️</span> Analyse du Point sélectionné
+        </h2>
+
+        <!-- Point sélectionné (par défaut aujourd'hui) -->
+        <div id="point-details" class="space-y-4">
+          <div class="flex items-center justify-between">
+            <span class="text-sm text-cosmic-text-dim">Date sélectionnée</span>
+            <span id="detail-date" class="font-bold text-white">-</span>
+          </div>
+          
+          <div class="p-4 rounded-xl bg-cosmic-void/80 border border-cosmic-border/40 space-y-3">
+            <div class="flex justify-between">
+              <span class="text-xs text-cosmic-text-dim">Maison Chandra Lagna</span>
+              <span id="detail-house" class="text-xs font-bold text-cosmic-gold">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs text-cosmic-text-dim">Nakshatra</span>
+              <span id="detail-nakshatra" class="text-xs font-medium text-white">-</span>
+            </div>
+            <div class="flex justify-between">
+              <span class="text-xs text-cosmic-text-dim">Densité Astronomique</span>
+              <span id="detail-density" class="text-xs font-bold text-cosmic-gold">-</span>
+            </div>
+            <div id="detail-node-warning" class="hidden p-2 rounded bg-red-950/30 border border-red-500/20 text-center text-xs text-red-400 font-bold">
+              ⚠️ Alerte Nœud : Alignement karmique majeur
+            </div>
+          </div>
+
+          <div class="space-y-2">
+            <h3 class="text-xs font-bold text-cosmic-gold uppercase tracking-wider">Aspects Actifs</h3>
+            <div id="detail-aspects" class="text-xs text-cosmic-text-dim leading-relaxed space-y-1 max-h-24 overflow-y-auto pr-1">
+              -
+            </div>
+          </div>
+        </div>
+
+        <!-- Prochain Pic -->
+        <div class="pt-4 border-t border-cosmic-border/30 space-y-2">
+          <h3 class="font-display text-cosmic-gold text-sm flex items-center gap-1.5">
+            <span>⚡</span> Prochain Pic d'Intensité
+          </h3>
+          <p id="next-peak-desc" class="text-xs text-cosmic-text-dim leading-relaxed">
+            Recherche du prochain pic...
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- Guide d'usage -->
+    <section class="border border-cosmic-border/40 rounded-2xl bg-cosmic-void/40 p-6 space-y-4">
+      <h2 class="font-display text-cosmic-gold text-lg flex items-center gap-2">
+        <span>📖</span> Comment lire ma courbe de biorythme ?
+      </h2>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-sm text-cosmic-text-dim leading-relaxed">
+        <div class="space-y-2">
+          <h3 class="font-bold text-white flex items-center gap-1.5">
+            <span class="text-[#d29922]">●</span> Les pics de densité
+          </h3>
+          <p>
+            Plus la densité est élevée, plus la Lune transitaire active de points clés de ton thème natal par conjonction, trigone ou carré. Ces journées correspondent à des moments d'activation émotionnelle, de clarté spirituelle ou de tension productive. Idéal pour agir ou méditer.
+          </p>
+        </div>
+        <div class="space-y-2">
+          <h3 class="font-bold text-white flex items-center gap-1.5">
+            <span class="text-[#f85149]">◆</span> Les alignements aux Nœuds (Rahu/Ketu)
+          </h3>
+          <p>
+            Les points marqués d'un losange rouge représentent des conjonctions ou aspects directs aux nœuds lunaires natals. Ce sont des fenêtres de synchronicité ou d'événements marquants sur le plan de la destinée karmique.
+          </p>
+        </div>
+      </div>
+      <div class="pt-4 text-center">
+        <a href="/app/index.html" class="inline-flex items-center gap-2 px-5 py-2.5 rounded-full border border-cosmic-border hover:border-cosmic-gold hover:text-cosmic-gold transition-all text-xs font-display">
+          ← Retour au Tableau de Bord
+        </a>
+      </div>
+    </section>
+
+  </div>
+
+  <script>
+    import { api } from '../../lib/api';
+    import { i18n } from '../../lib/i18n';
+
+    let curveData: any[] = [];
+    const svg = document.getElementById('biorhythm-svg') as unknown as SVGSVGElement;
+    const loader = document.getElementById('chart-loader');
+    const container = document.getElementById('chart-container');
+    const tooltip = document.getElementById('chart-tooltip');
+
+    async function init() {
+      try {
+        const resp = await api.biorhythm(90);
+        if (resp.ok && resp.biorhythm && resp.biorhythm.length > 0) {
+          curveData = resp.biorhythm;
+          
+          if (loader) loader.classList.add('hidden');
+          if (container) container.classList.remove('hidden');
+
+          renderChart(curveData);
+          updateNextPeak(curveData);
+
+          // Sélectionner le point d'aujourd'hui par défaut
+          const todayStr = new Date().toISOString().split('T')[0];
+          const todayIndex = curveData.findIndex(p => p.date === todayStr);
+          selectPoint(todayIndex !== -1 ? todayIndex : 0);
+        } else {
+          showError("Impossible de récupérer les données du biorythme.");
+        }
+      } catch (err: any) {
+        console.error(err);
+        showError(err.message || "Erreur de connexion au serveur.");
+      }
+    }
+
+    function showError(msg: string) {
+      if (loader) {
+        loader.innerHTML = `<span class="text-red-400 font-bold">⚠️ ${msg}</span>`;
+      }
+    }
+
+    function renderChart(data: any[]) {
+      if (!svg) return;
+      svg.innerHTML = ''; // Clear prior content
+
+      const width = 800;
+      const height = 250;
+      const paddingLeft = 40;
+      const paddingRight = 40;
+      const paddingTop = 30;
+      const paddingBottom = 40;
+
+      const chartWidth = width - paddingLeft - paddingRight;
+      const chartHeight = height - paddingTop - paddingBottom;
+
+      // Calcul des extremums
+      const maxDensity = Math.max(...data.map(d => d.natal_density), 4); // Min échelle 4
+
+      // X scale: index du jour (0 à N-1)
+      const getX = (idx: number) => paddingLeft + (idx / (data.length - 1)) * chartWidth;
+      // Y scale: inversée (0 est en bas de l'écran, soit à height - paddingBottom)
+      const getY = (val: number) => height - paddingBottom - (val / maxDensity) * chartHeight;
+
+      // 1. Grid lines horizontales
+      for (let i = 0; i <= maxDensity; i += 2) {
+        const y = getY(i);
+        
+        // Ligne
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', paddingLeft.toString());
+        line.setAttribute('y1', y.toString());
+        line.setAttribute('x2', (width - paddingRight).toString());
+        line.setAttribute('y2', y.toString());
+        line.setAttribute('stroke', '#30363d');
+        line.setAttribute('stroke-dasharray', '4,4');
+        line.setAttribute('stroke-width', '1');
+        svg.appendChild(line);
+
+        // Texte légende Y
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', (paddingLeft - 10).toString());
+        text.setAttribute('y', (y + 4).toString());
+        text.setAttribute('fill', '#8b949e');
+        text.setAttribute('font-size', '10');
+        text.setAttribute('text-anchor', 'end');
+        text.textContent = i.toString();
+        svg.appendChild(text);
+      }
+
+      // 2. Légende X (toutes les 2 semaines environ)
+      const interval = Math.ceil(data.length / 6);
+      for (let i = 0; i < data.length; i += interval) {
+        const x = getX(i);
+        const dateObj = new Date(data[i].date);
+        const label = dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'short' });
+
+        // Ligne verticale grid
+        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        line.setAttribute('x1', x.toString());
+        line.setAttribute('y1', paddingTop.toString());
+        line.setAttribute('x2', x.toString());
+        line.setAttribute('y2', (height - paddingBottom).toString());
+        line.setAttribute('stroke', '#21262d');
+        line.setAttribute('stroke-width', '1');
+        svg.appendChild(line);
+
+        // Texte légende X
+        const text = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        text.setAttribute('x', x.toString());
+        text.setAttribute('y', (height - paddingBottom + 20).toString());
+        text.setAttribute('fill', '#8b949e');
+        text.setAttribute('font-size', '10');
+        text.setAttribute('text-anchor', 'middle');
+        text.textContent = label;
+        svg.appendChild(text);
+      }
+
+      // 3. Tracé de la ligne de courbe
+      let pathD = `M ${getX(0)} ${getY(data[0].natal_density)}`;
+      for (let i = 1; i < data.length; i++) {
+        pathD += ` L ${getX(i)} ${getY(data[i].natal_density)}`;
+      }
+
+      // Chemin avec fond rempli (gradient)
+      const fillD = `${pathD} L ${getX(data.length - 1)} ${height - paddingBottom} L ${getX(0)} ${height - paddingBottom} Z`;
+      
+      // Ajout du dégradé linéaire dans defs
+      const defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      const grad = document.createElementNS('http://www.w3.org/2000/svg', 'linearGradient');
+      grad.setAttribute('id', 'chart-grad');
+      grad.setAttribute('x1', '0');
+      grad.setAttribute('y1', '0');
+      grad.setAttribute('x2', '0');
+      grad.setAttribute('y2', '1');
+      
+      const stop1 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop1.setAttribute('offset', '0%');
+      stop1.setAttribute('stop-color', '#d29922');
+      stop1.setAttribute('stop-opacity', '0.25');
+      
+      const stop2 = document.createElementNS('http://www.w3.org/2000/svg', 'stop');
+      stop2.setAttribute('offset', '100%');
+      stop2.setAttribute('stop-color', '#d29922');
+      stop2.setAttribute('stop-opacity', '0.0');
+
+      grad.appendChild(stop1);
+      grad.appendChild(stop2);
+      defs.appendChild(grad);
+      svg.appendChild(defs);
+
+      const pathFill = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathFill.setAttribute('d', fillD);
+      pathFill.setAttribute('fill', 'url(#chart-grad)');
+      svg.appendChild(pathFill);
+
+      const pathStroke = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+      pathStroke.setAttribute('d', pathD);
+      pathStroke.setAttribute('fill', 'none');
+      pathStroke.setAttribute('stroke', '#d29922');
+      pathStroke.setAttribute('stroke-width', '2');
+      svg.appendChild(pathStroke);
+
+      // 4. Points d'interaction invisibles et nœuds visibles (losanges rouges)
+      data.forEach((p, idx) => {
+        const x = getX(idx);
+        const y = getY(p.natal_density);
+
+        // Si c'est un nœud, dessiner un losange ◆ rouge visible
+        if (p.has_node) {
+          const size = 5;
+          const poly = document.createElementNS('http://www.w3.org/2000/svg', 'polygon');
+          const points = `${x},${y - size} ${x + size},${y} ${x},${y + size} ${x - size},${y}`;
+          poly.setAttribute('points', points);
+          poly.setAttribute('fill', '#f85149');
+          poly.setAttribute('stroke', '#0d1117');
+          poly.setAttribute('stroke-width', '1');
+          poly.setAttribute('class', 'cursor-pointer hover:scale-125 transition-transform');
+          svg.appendChild(poly);
+        }
+
+        // Zone circulaire interactive (invisible) pour le survol
+        const circle = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        circle.setAttribute('cx', x.toString());
+        circle.setAttribute('cy', y.toString());
+        circle.setAttribute('r', '8');
+        circle.setAttribute('fill', 'transparent');
+        circle.setAttribute('class', 'cursor-pointer');
+        
+        circle.addEventListener('mouseenter', (e) => showTooltip(e, p, x, y));
+        circle.addEventListener('mouseleave', hideTooltip);
+        circle.addEventListener('click', () => selectPoint(idx));
+
+        svg.appendChild(circle);
+      });
+    }
+
+    function showTooltip(e: MouseEvent, p: any, x: number, y: number) {
+      if (!tooltip || !container) return;
+      
+      const dateObj = new Date(p.date);
+      const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+
+      document.getElementById('tooltip-date')!.textContent = dateStr;
+      document.getElementById('tooltip-house')!.textContent = `Maison ${p.house}`;
+      document.getElementById('tooltip-nakshatra')!.textContent = p.nakshatra;
+      document.getElementById('tooltip-density')!.textContent = p.natal_density;
+
+      const nodeTip = document.getElementById('tooltip-node')!;
+      if (p.has_node) {
+        nodeTip.classList.remove('hidden');
+      } else {
+        nodeTip.classList.add('hidden');
+      }
+
+      // Positionnement de l'infobulle
+      const containerRect = container.getBoundingClientRect();
+      const svgRatioWidth = containerRect.width / 800;
+      const svgRatioHeight = containerRect.height / 250;
+
+      const left = x * svgRatioWidth - 96; // Centré (192px/2 = 96px)
+      const top = y * svgRatioHeight - 130; // Au-dessus du point
+
+      tooltip.style.left = `${Math.max(10, Math.min(containerRect.width - 200, left))}px`;
+      tooltip.style.top = `${Math.max(10, top)}px`;
+      tooltip.style.opacity = '1';
+      tooltip.style.transform = 'scale(1)';
+    }
+
+    function hideTooltip() {
+      if (!tooltip) return;
+      tooltip.style.opacity = '0';
+      tooltip.style.transform = 'scale(0.95)';
+    }
+
+    function selectPoint(idx: number) {
+      const p = curveData[idx];
+      if (!p) return;
+
+      const dateObj = new Date(p.date);
+      const dateStr = dateObj.toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+
+      // Mettre à jour le panneau latéral
+      document.getElementById('detail-date')!.textContent = dateStr;
+      document.getElementById('detail-house')!.textContent = `Maison ${p.house} (${getHouseSignificance(p.house)})`;
+      document.getElementById('detail-nakshatra')!.textContent = p.nakshatra;
+      document.getElementById('detail-density')!.textContent = `${p.natal_density} aspect(s)`;
+
+      const warn = document.getElementById('detail-node-warning')!;
+      if (p.has_node) {
+        warn.classList.remove('hidden');
+      } else {
+        warn.classList.add('hidden');
+      }
+
+      // Lister les conjonctions/aspects
+      const aspectsList = document.getElementById('detail-aspects')!;
+      aspectsList.innerHTML = '';
+      if (p.conj && p.conj.length > 0) {
+        p.conj.forEach((c: string) => {
+          const item = document.createElement('div');
+          item.className = 'flex items-center gap-2 py-0.5 border-b border-cosmic-border/20 last:border-0';
+          
+          let icon = '✦';
+          if (c.includes('Rahu') || c.includes('Ketu')) {
+            icon = '◆';
+            item.className += ' text-red-400 font-bold';
+          } else {
+            item.className += ' text-white';
+          }
+          
+          item.innerHTML = `<span>${icon}</span> <span>Lune transitaire ☌ ${c} natal</span>`;
+          aspectsList.appendChild(item);
+        });
+      } else {
+        aspectsList.innerHTML = '<div class="text-cosmic-text-dim italic">Aucun aspect majeur ce jour-ci. Sensibilité calme.</div>';
+      }
+
+      // Highlight visuel sur le SVG (dessiner un indicateur de sélection)
+      let indicator = document.getElementById('selection-indicator');
+      if (!indicator) {
+        indicator = document.createElementNS('http://www.w3.org/2000/svg', 'circle') as any;
+        indicator!.setAttribute('id', 'selection-indicator');
+        indicator!.setAttribute('r', '5');
+        indicator!.setAttribute('fill', '#cosmic-gold');
+        indicator!.setAttribute('stroke', '#d29922');
+        indicator!.setAttribute('stroke-width', '2');
+        svg.appendChild(indicator!);
+      }
+
+      const getX = (i: number) => 40 + (i / (curveData.length - 1)) * (800 - 80);
+      const maxDensity = Math.max(...curveData.map(d => d.natal_density), 4);
+      const getY = (val: number) => 250 - 40 - (val / maxDensity) * (250 - 70);
+
+      indicator!.setAttribute('cx', getX(idx).toString());
+      indicator!.setAttribute('cy', getY(p.natal_density).toString());
+    }
+
+    function getHouseSignificance(h: number): string {
+      const descriptions: Record<number, string> = {
+        1: 'Vitalité & Nouveau départ',
+        2: 'Ressources & Stabilité',
+        3: 'Courage & Communication',
+        4: 'Foyer & Paix intérieure',
+        5: 'Créativité & Joie',
+        6: 'Défis & Santé',
+        7: 'Relations & Partenariats',
+        8: 'Transformation & Intuition',
+        9: 'Sagesse & Chance',
+        10: 'Carrière & Alignement',
+        11: 'Gains & Réseau',
+        12: 'Lâcher-prise & Rêves'
+      };
+      return descriptions[h] || 'Sensibilité générale';
+    }
+
+    function updateNextPeak(data: any[]) {
+      const future = data.filter(p => p.date >= new Date().toISOString().split('T')[0]);
+      if (future.length === 0) return;
+
+      // Tri : has_node d'abord, puis densité max, puis date la plus proche
+      const sorted = [...future].sort((a, b) => {
+        if (a.has_node !== b.has_node) return a.has_node ? -1 : 1;
+        if (a.natal_density !== b.natal_density) return b.natal_density - a.natal_density;
+        return a.date.localeCompare(b.date);
+      });
+
+      const peak = sorted[0];
+      const dateObj = new Date(peak.date);
+      const dateStr = dateObj.toLocaleDateString(undefined, { day: 'numeric', month: 'long' });
+      
+      let html = `Le <strong>${dateStr}</strong> (Maison ${peak.house}, Nakshatra ${peak.nakshatra}). `;
+      if (peak.has_node) {
+        html += `Ce jour présente un <strong>alignement aux Nœuds Lunaires (Rahu/Ketu)</strong> avec une densité de ${peak.natal_density} aspects. C'est une journée clé pour la méditation et les choix importants.`;
+      } else {
+        html += `Intensité maximale de ${peak.natal_density} aspects actifs. Moment parfait pour concrétiser des projets ou observer tes émotions.`;
+      }
+
+      document.getElementById('next-peak-desc')!.innerHTML = html;
+    }
+
+    // Démarrage
+    init();
+  </script>
+</AppLayout>
