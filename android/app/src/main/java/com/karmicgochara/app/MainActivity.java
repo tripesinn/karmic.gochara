@@ -22,5 +22,18 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(AstroCalcPlugin.class);
 
         super.onCreate(savedInstanceState);
+
+        // Activer le zoom (pinch-to-zoom) sur tablette/mobile
+        try {
+            android.webkit.WebView webView = this.bridge.getWebView();
+            if (webView != null) {
+                android.webkit.WebSettings settings = webView.getSettings();
+                settings.setBuiltInZoomControls(true);
+                settings.setDisplayZoomControls(false); // Masque les boutons +/- inesthétiques
+                settings.setSupportZoom(true);
+            }
+        } catch (Exception e) {
+            android.util.Log.e("MainActivity", "Erreur configuration zoom WebView", e);
+        }
     }
 }
