@@ -746,6 +746,62 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
                 }
             }
 
+            // Charger le Soul Debug du jour (Miroir de l'âme) pour le web
+            const soulDebugBox = document.getElementById('soul-debug-box');
+            const soulDebugContent = document.getElementById('soul-debug-content-web');
+            const sdRatingWeb = document.getElementById('soul-debug-rating-web');
+            const sdRatingStatus = document.getElementById('sd-rating-status-web');
+            const btnSdUp = document.getElementById('btn-sd-up-web');
+            const btnSdDown = document.getElementById('btn-sd-down-web');
+
+            if (soulDebugBox && window.SERVER_DATA && window.SERVER_DATA.session_user) {
+                soulDebugBox.style.display = 'block';
+                fetch('/api/soul_debug')
+                    .then(r => r.json())
+                    .then(data => {
+                        if (data.ok && data.soul_debug) {
+                            soulDebugContent.textContent = data.soul_debug;
+                            if (sdRatingWeb) sdRatingWeb.style.display = 'flex';
+                            
+                            const handleSdRate = (rating) => {
+                                if (sdRatingStatus) sdRatingStatus.textContent = "Envoi du feedback...";
+                                if (btnSdUp) btnSdUp.disabled = true;
+                                if (btnSdDown) btnSdDown.disabled = true;
+                                
+                                fetch('/api/rate_soul_debug', {
+                                    method: 'POST',
+                                    headers: { 'Content-Type': 'application/json' },
+                                    body: JSON.stringify({ rating, soul_debug: data.soul_debug })
+                                })
+                                .then(r => r.json())
+                                .then(rateData => {
+                                    if (rateData.ok) {
+                                        if (sdRatingStatus) sdRatingStatus.textContent = rating === 1 ? "Merci pour ton retour! 👍" : "Retour enregistré 🔧";
+                                    } else {
+                                        if (sdRatingStatus) sdRatingStatus.textContent = "Erreur de transmission.";
+                                        if (btnSdUp) btnSdUp.disabled = false;
+                                        if (btnSdDown) btnSdDown.disabled = false;
+                                    }
+                                })
+                                .catch(() => {
+                                    if (sdRatingStatus) sdRatingStatus.textContent = "Erreur réseau.";
+                                    if (btnSdUp) btnSdUp.disabled = false;
+                                    if (btnSdDown) btnSdDown.disabled = false;
+                                });
+                            };
+                            
+                            if (btnSdUp) btnSdUp.onclick = () => handleSdRate(1);
+                            if (btnSdDown) btnSdDown.onclick = () => handleSdRate(-1);
+                        } else {
+                            soulDebugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
+                        }
+                    })
+                    .catch(() => {
+                        soulDebugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
+                    });
+            }
+
+
             // Restauration depuis le Store
             const saved = KarmicStore.get();
             const currentTransitDate = document.getElementById('transit-date')?.value;

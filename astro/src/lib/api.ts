@@ -250,6 +250,14 @@ export const api = {
     return request<{ ok: boolean; soul_debug?: string }>('/api/soul_debug');
   },
 
+  rateSoulDebug(rating: number, soulDebug: string) {
+    return request<{ ok: boolean; error?: string }>('/api/rate_soul_debug', {
+      method: 'POST',
+      body: JSON.stringify({ rating, soul_debug: soulDebug })
+    });
+  },
+
+
 
   calculate(body: { pseudo: string; transit_date: string; transit_time: string; transit_location?: string; reading_type?: 'daily' | 'full' }) {
     return streamingRequest('/v2/calculate', body);

@@ -273,14 +273,27 @@
                     <tr>
                         <td
                             style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
-                            {{ lang.feat_signal }}</td>
+                            Miroir de l'âme (Soul Debug)</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
-                            1/jour</td>
+                            ✓</td>
                         <td
                             style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
                             ✓</td>
                     </tr>
+                    <tr>
+                        <td
+                            style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
+                            {{ lang.feat_signal }}</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a;">
+                            ✓</td>
+                        <td
+                            style="text-align:center; padding:0.55rem 0.6rem; border-bottom:1px solid rgba(255,255,255,0.04); color:#6ab56a; background:rgba(201,168,76,0.04);">
+                            ✓</td>
+                    </tr>
+
+
                     <tr>
                         <td
                             style="padding:0.55rem 0.6rem; color:var(--text-dim); border-bottom:1px solid rgba(255,255,255,0.04);">
@@ -419,6 +432,22 @@
         {% endif %}
 
         <div id="view-gochara">
+            <!-- Soul Debug / Miroir de l'âme du Jour -->
+            <div id="soul-debug-box" style="display:none; max-width:600px; margin:0 auto 2rem; padding:0 20px;">
+                <div style="border-top:2px solid var(--gold); padding:2rem 1.8rem; background:rgba(12, 10, 8, 0.85); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border-radius: 6px; border: 1px solid rgba(255,255,255,0.03); box-shadow: 0 12px 40px rgba(0,0,0,0.6); text-align: center;">
+                    <div style="font-family:var(--display); font-size:0.8rem; letter-spacing:0.25em; color:var(--gold); margin-bottom:1.2rem; text-transform:uppercase;">
+                        🗝️ Miroir de l'âme du Jour</div>
+                    <div id="soul-debug-content-web" style="font-family: 'Georgia', serif; font-size:1.1rem; line-height:1.8; color:rgba(245,240,232,0.92); margin-bottom: 1rem; font-style: italic;">
+                        Chargement de ton miroir céleste…
+                    </div>
+                    <div id="soul-debug-rating-web" style="display:flex; justify-content:center; gap:12px; margin-top:1rem; margin-bottom:0.5rem;">
+                        <button id="btn-sd-up-web" class="btn-rate" style="padding:4px 12px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:4px; cursor:pointer;">👍</button>
+                        <button id="btn-sd-down-web" class="btn-rate" style="padding:4px 12px; background:rgba(255,255,255,0.05); border:1px solid var(--border); border-radius:4px; cursor:pointer;">👎</button>
+                    </div>
+                    <span id="sd-rating-status-web" style="font-size: 0.75rem; color: var(--text-dim); display:block; margin-top:5px;"></span>
+                </div>
+            </div>
+
             {% if session_profile and session_profile.get('plan', 'free') != 'free' %}
             <!-- Hook natal -->
             <div id="hook-natal-box" style="display:none; max-width:600px; margin:0 auto 2.5rem; padding:0 20px;">

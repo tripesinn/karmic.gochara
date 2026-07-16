@@ -43,8 +43,14 @@ import { api } from '../../lib/api';
       <div id="soul-debug-content" class="text-sm italic text-cosmic-text leading-relaxed">
         Chargement de ton miroir céleste…
       </div>
+      <div id="soul-debug-rating" class="flex justify-center gap-4 pt-2 hidden">
+        <button id="btn-sd-up" class="px-3 py-1 bg-cosmic-void/40 border border-cosmic-border rounded hover:border-emerald-500 hover:text-emerald-400 transition-all">👍</button>
+        <button id="btn-sd-down" class="px-3 py-1 bg-cosmic-void/40 border border-cosmic-border rounded hover:border-rose-500 hover:text-rose-400 transition-all">👎</button>
+      </div>
+      <span id="sd-rating-status" class="text-[10px] text-cosmic-text-dim block mt-1"></span>
       <p class="text-[10px] text-cosmic-text-dim/60">Généré par Grok (xAI) • Option B point chaud</p>
     </section>
+
 
     <!-- Quick actions -->
     <section class="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -168,11 +174,39 @@ import { api } from '../../lib/api';
           // Charger le Soul Debug
           const debugCard = document.getElementById('soul-debug-card')!;
           const debugContent = document.getElementById('soul-debug-content')!;
+          const ratingDiv = document.getElementById('soul-debug-rating')!;
+          const ratingStatus = document.getElementById('sd-rating-status')!;
+          const btnUp = document.getElementById('btn-sd-up')!;
+          const btnDown = document.getElementById('btn-sd-down')!;
           debugCard.classList.remove('hidden');
           
           api.soulDebug().then(res => {
             if (res.ok && res.soul_debug) {
               debugContent.textContent = res.soul_debug;
+              ratingDiv.classList.remove('hidden');
+              
+              const handleRate = async (rating: number) => {
+                ratingStatus.textContent = "Envoi du feedback...";
+                btnUp.setAttribute('disabled', 'true');
+                btnDown.setAttribute('disabled', 'true');
+                try {
+                  const rateRes = await api.rateSoulDebug(rating, res.soul_debug!);
+                  if (rateRes.ok) {
+                    ratingStatus.textContent = rating === 1 ? "Merci pour ton retour! 👍" : "Retour enregistré 🔧";
+                  } else {
+                    ratingStatus.textContent = "Erreur lors de l'enregistrement.";
+                    btnUp.removeAttribute('disabled');
+                    btnDown.removeAttribute('disabled');
+                  }
+                } catch {
+                  ratingStatus.textContent = "Erreur réseau.";
+                  btnUp.removeAttribute('disabled');
+                  btnDown.removeAttribute('disabled');
+                }
+              };
+              
+              btnUp.onclick = () => handleRate(1);
+              btnDown.onclick = () => handleRate(-1);
             } else {
               debugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
             }

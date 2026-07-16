@@ -663,3 +663,59 @@ def api_soul_debug():
         current_app.logger.error("Erreur api_soul_debug : %s", e)
         return jsonify({"ok": False, "error": str(e)}), 500
 
+
+@api_bp.route("/rate_soul_debug", methods=["POST"])
+def rate_soul_debug():
+    """
+    Collecte le feedback utilisateur sur un Soul Debug quotidien.
+    """
+    import json
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"ok": False, "error": "Non authentifié"}), 401
+
+    data = request.get_json() or {}
+    rating = int(data.get("rating", 0))
+    soul_debug = (data.get("soul_debug") or "").strip()
+
+    if rating not in (1, -1):
+        return jsonify({"ok": False, "error": "Rating invalide"}), 400
+
+    if not soul_debug:
+        return jsonify({"ok": False, "error": "Contenu vide"}), 400
+
+    try:
+        root_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        dataset_path = os.path.join(root_dir, "dataset_finetuning.jsonl")
+        
+        entry = {
+            "user_id": str(profile.get("pseudo", "anonymous")),
+            "rating": rating,
+            "soul_debug": soul_debug,
+            "ts": datetime.now().isoformat()
+        }
+        
+        with open(dataset_path, "a", encoding="utf-8") as f:
+            f.write(json.dumps(entry, ensure_ascii=False) + "\n")
+            
+        current_app.logger.info("Soul Debug rating loggé : pseudo=%s rating=%s", profile.get("pseudo"), rating)
+        
+        bucket = os.getenv("GCS_PUBLIC_BUCKET", "")
+        if bucket:
+            try:
+                import subprocess
+                env = dict(os.environ)
+                creds = os.getenv("GOOGLE_CREDENTIALS_JSON", "")
+                if creds:
+                    env["GOOGLE_CREDENTIALS_JSON"] = creds
+                dst = f"gs://{bucket}/dataset_finetuning.jsonl"
+                subprocess.run(["gsutil", "-q", "cp", dataset_path, dst], env=env)
+            except Exception as gcs_err:
+                current_app.logger.warning("Soul Debug rating GCS upload failed: %s", gcs_err)
+                
+        return jsonify({"ok": True})
+    except Exception as e:
+        current_app.logger.error("Erreur rate_soul_debug : %s", e)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
