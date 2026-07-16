@@ -4,14 +4,14 @@ import os
 from jinja2 import Environment, FileSystemLoader
 
 # Path to the files
-APP_PY_PATH = 'app.py'
+I18N_PY_PATH = 'i18n.py'
 TEMPLATE_PATH = 'templates'
 INDEX_TEMPLATE = 'index.html'
 OUTPUT_PATH = 'www/index.html'
 
 def get_langs_from_app():
-    """Extract LANGS dictionary from app.py using AST."""
-    with open(APP_PY_PATH, encoding='utf-8') as f:
+    """Extract LANGS dictionary from i18n.py using AST."""
+    with open(I18N_PY_PATH, encoding='utf-8') as f:
         tree = ast.parse(f.read())
     
     for node in tree.body:
@@ -19,9 +19,10 @@ def get_langs_from_app():
             for target in node.targets:
                 if isinstance(target, ast.Name) and target.id == 'LANGS':
                     # This is the line. We need to evaluate the value safely.
-                    # Since it's a literal dict in app.py, ast.literal_eval works.
+                    # Since it's a literal dict in i18n.py, ast.literal_eval works.
                     return ast.literal_eval(node.value)
     return {}
+
 
 def render():
     langs = get_langs_from_app()
@@ -38,6 +39,13 @@ def render():
     env = Environment(loader=FileSystemLoader(TEMPLATE_PATH))
     template = env.get_template(INDEX_TEMPLATE)
     
+    # Mock Flask functions
+    def mock_url_for(endpoint, **values):
+        filename = values.get('filename', '')
+        if endpoint == 'static':
+            return f"static/{filename}"
+        return f"/{endpoint}"
+
     # Render with defaults
     rendered = template.render(
         lang=lang_fr,
@@ -45,8 +53,11 @@ def render():
         session_user='', # Not logged in by default
         session_profile={}, # Empty dict to avoid .get() UndefinedError
         user={}, # Empty dict to avoid UndefinedError
-        today_iso='' 
+        today_iso='',
+        url_for=mock_url_for,
+        get_flashed_messages=lambda: []
     )
+
     
     # Fix asset paths: /static/ -> static/
     # Handled carefully to not break paths that are already relative if any

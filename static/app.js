@@ -754,51 +754,67 @@ const API_BASE = window.Capacitor?.isNative ? 'https://gochara-api-732214018947.
             const btnSdUp = document.getElementById('btn-sd-up-web');
             const btnSdDown = document.getElementById('btn-sd-down-web');
 
-            if (soulDebugBox && window.SERVER_DATA && window.SERVER_DATA.session_user) {
+            if (soulDebugBox && window.SERVER_DATA) {
                 soulDebugBox.style.display = 'block';
-                fetch('/api/soul_debug')
-                    .then(r => r.json())
-                    .then(data => {
-                        if (data.ok && data.soul_debug) {
-                            soulDebugContent.textContent = data.soul_debug;
-                            if (sdRatingWeb) sdRatingWeb.style.display = 'flex';
-                            
-                            const handleSdRate = (rating) => {
-                                if (sdRatingStatus) sdRatingStatus.textContent = "Envoi du feedback...";
-                                if (btnSdUp) btnSdUp.disabled = true;
-                                if (btnSdDown) btnSdDown.disabled = true;
+                if (window.SERVER_DATA.session_user) {
+                    fetch('/api/soul_debug')
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.ok && data.soul_debug) {
+                                soulDebugContent.textContent = data.soul_debug;
+                                if (sdRatingWeb) sdRatingWeb.style.display = 'flex';
                                 
-                                fetch('/api/rate_soul_debug', {
-                                    method: 'POST',
-                                    headers: { 'Content-Type': 'application/json' },
-                                    body: JSON.stringify({ rating, soul_debug: data.soul_debug })
-                                })
-                                .then(r => r.json())
-                                .then(rateData => {
-                                    if (rateData.ok) {
-                                        if (sdRatingStatus) sdRatingStatus.textContent = rating === 1 ? "Merci pour ton retour! 👍" : "Retour enregistré 🔧";
-                                    } else {
-                                        if (sdRatingStatus) sdRatingStatus.textContent = "Erreur de transmission.";
+                                const handleSdRate = (rating) => {
+                                    if (sdRatingStatus) sdRatingStatus.textContent = "Envoi du feedback...";
+                                    if (btnSdUp) btnSdUp.disabled = true;
+                                    if (btnSdDown) btnSdDown.disabled = true;
+                                    
+                                    fetch('/api/rate_soul_debug', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ rating, soul_debug: data.soul_debug })
+                                    })
+                                    .then(r => r.json())
+                                    .then(rateData => {
+                                        if (rateData.ok) {
+                                            if (sdRatingStatus) sdRatingStatus.textContent = rating === 1 ? "Merci pour ton retour! 👍" : "Retour enregistré 🔧";
+                                        } else {
+                                            if (sdRatingStatus) sdRatingStatus.textContent = "Erreur de transmission.";
+                                            if (btnSdUp) btnSdUp.disabled = false;
+                                            if (btnSdDown) btnSdDown.disabled = false;
+                                        }
+                                    })
+                                    .catch(() => {
+                                        if (sdRatingStatus) sdRatingStatus.textContent = "Erreur réseau.";
                                         if (btnSdUp) btnSdUp.disabled = false;
                                         if (btnSdDown) btnSdDown.disabled = false;
-                                    }
-                                })
-                                .catch(() => {
-                                    if (sdRatingStatus) sdRatingStatus.textContent = "Erreur réseau.";
-                                    if (btnSdUp) btnSdUp.disabled = false;
-                                    if (btnSdDown) btnSdDown.disabled = false;
-                                });
-                            };
-                            
-                            if (btnSdUp) btnSdUp.onclick = () => handleSdRate(1);
-                            if (btnSdDown) btnSdDown.onclick = () => handleSdRate(-1);
-                        } else {
-                            soulDebugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
-                        }
-                    })
-                    .catch(() => {
-                        soulDebugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
-                    });
+                                    });
+                                };
+                                
+                                if (btnSdUp) btnSdUp.onclick = () => handleSdRate(1);
+                                if (btnSdDown) btnSdDown.onclick = () => handleSdRate(-1);
+                            } else {
+                                soulDebugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
+                            }
+                        })
+                        .catch(() => {
+                            soulDebugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
+                        });
+                } else {
+                    // Hook / Teaser pour inciter à s'inscrire / se connecter gratuitement
+                    soulDebugContent.innerHTML = `
+                        🗝️ Découvre ton Miroir de l'âme (Soul Debug) personnalisé aujourd'hui.<br>
+                        <span style="font-size:0.95rem; color:var(--text-dim); display:block; margin-top:0.5rem; font-style:normal;">
+                            Inscris-toi ou connecte-toi pour révéler tes influences karmiques du jour. C'est 100% gratuit !
+                        </span>
+                        <div style="margin-top:1.2rem;">
+                            <a href="/login" class="btn" style="padding: 8px 20px; font-size:0.85rem; border-radius:20px; font-family:var(--display); letter-spacing:0.1em; display:inline-block; border:1px solid var(--gold); color:var(--gold); text-decoration:none; transition:all 0.3s;" onmouseover="this.style.background='var(--gold)'; this.style.color='var(--bg)'" onmouseout="this.style.background='none'; this.style.color='var(--gold)'">
+                                🗝️ Révéler mon Soul Debug (Gratuit)
+                            </a>
+                        </div>
+                    `;
+                    if (sdRatingWeb) sdRatingWeb.style.display = 'none';
+                }
             }
 
 
