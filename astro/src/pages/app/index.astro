@@ -167,7 +167,7 @@ import { api } from '../../lib/api';
         }
         const resp = await api.profile();
         if (resp.ok && resp.profile?.pseudo) {
-          const pseudo = "Lysa"; // Demo hardcode
+          const pseudo = resp.profile.pseudo;
           document.getElementById('welcome-pseudo')!.textContent =
             `${i18n.t('welcome.subtitle')} ${pseudo}`;
 

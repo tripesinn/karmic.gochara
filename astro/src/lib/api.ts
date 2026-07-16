@@ -232,13 +232,7 @@ export const api = {
   },
 
   profile() {
-    return request<{ ok: boolean; profile?: any }>('/api/profile').then(res => {
-      if (res.ok && res.profile) {
-        res.profile.pseudo = "Lysa";
-        res.profile.name = "Lysa";
-      }
-      return res;
-    });
+    return request<{ ok: boolean; profile?: any }>('/api/profile');
   },
 
   biorhythm(days?: number) {
