@@ -210,8 +210,32 @@ import { api } from '../../lib/api';
             } else {
               debugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
             }
-          }).catch(() => {
-            debugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
+          }).catch(async () => {
+            // ── Fallback local (Gemma natif) UNIQUEMENT si l'utilisateur a choisi le mode native ──
+            const storedSettings = localStorage.getItem('karmic_ai_settings');
+            let localMode = 'cloud';
+            try { if (storedSettings) localMode = (JSON.parse(storedSettings).localMode) || 'cloud'; } catch (e) {}
+            if (localMode === 'native' && capacitorBridge.isNative()) {
+              try {
+                debugContent.textContent = "Invocation de l'Oracle local (Gemma)…";
+                const lang = i18n.detect();
+                const promptRes = await fetch(`/api/soul_debug_prompt?lang=${encodeURIComponent(lang)}`, { credentials: 'include' });
+                const promptData = await promptRes.json();
+                if (!promptRes.ok || !promptData.ok) throw new Error(promptData.error || 'prompt local indisponible');
+                await capacitorBridge.gemma.prepareModel(false);
+                const localText = await capacitorBridge.gemma.generate(promptData.system, promptData.user, 'soul_debug', lang, {});
+                if (localText) {
+                  debugContent.textContent = localText;
+                  ratingDiv.classList.remove('hidden');
+                  return;
+                }
+                throw new Error('Gemma sans reponse');
+              } catch (e: any) {
+                debugContent.textContent = "Erreur de connexion au serveur d'Oracle. (fallback local impossible : " + (e.message || e) + ")";
+              }
+            } else {
+              debugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
+            }
           });
 
 

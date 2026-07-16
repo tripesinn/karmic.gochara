@@ -549,9 +549,105 @@ def get_calendar_ics(pseudo):
     )
 
 
+@api_bp.route("/soul_debug_prompt")
+def api_soul_debug_prompt():
+    """
+    Renvoie UNIQUEMENT le prompt (system_instruction + user + lang) du Soul Debug du jour,
+    calcule exactement comme api_soul_debug (transits, posture, nakshatra) MAIS sans appeler
+    Grok. Permet au fallback local (Gemma natif sur l'appareil) d'utiliser le MEME prompt
+    que Grok — parite de doctrine. Condition sine qua non : reseau vers le serveur Flask
+    (calcul des transits), pas vers Grok.
+    """
+    profile = session.get("profile")
+    if not profile:
+        return jsonify({"ok": False, "error": "Non authentifie"}), 401
+
+    try:
+        from astro_calc import calculate_transits
+        from prompt_xbot_v2 import (
+            cl_house,
+            build_nakshatra_hints,
+            build_ton_posture,
+            build_system_instruction,
+            _sade_sati,
+        )
+
+        # 1. Calculs des transits (identique a api_soul_debug)
+        _tz = _safe_tz(profile.get("tz"))
+        natal = {
+            "name":   profile.get("name", ""),
+            "year":   int(profile.get("year", 1990)),
+            "month":  int(profile.get("month", 1)),
+            "day":    int(profile.get("day", 1)),
+            "hour":   int(profile.get("hour", 12)),
+            "minute": int(profile.get("minute", 0)),
+            "lat":    float(profile.get("lat", 48.8566)),
+            "lon":    float(profile.get("lon", 2.3522)),
+            "tz":     _tz,
+            "city":   profile.get("city", ""),
+        }
+
+        from datetime import datetime as dt_class
+        now_local = dt_class.now(pytz.timezone(_tz))
+        transit_loc = {
+            "city": profile.get("city", ""),
+            "lat":  float(profile.get("lat", 48.8566)),
+            "lon":  float(profile.get("lon", 2.3522)),
+            "tz":   _tz,
+        }
+
+        data = calculate_transits(natal, transit_loc,
+                                  now_local.year, now_local.month, now_local.day,
+                                  now_local.hour, now_local.minute)
+
+        # 2. Extraction du transit le plus tendu (Option B)
+        moon_nak = data["natal"].get("Lune ☽", {}).get("nakshatra", "")
+        moon_disp = data["natal"].get("Lune ☽", {}).get("display", "")
+        aspects = data.get("aspects", [])
+        aspects_sorted = sorted(aspects, key=lambda a: a.get("orb", 999))
+        top = aspects_sorted[0] if aspects_sorted else None
+        transit_nak = top.get("transit_nak", "") if top else ""
+        transit_house = cl_house(top.get("transit_display", ""), moon_disp) if top else ""
+        sat_nak = data["transits"].get("Saturne ♄", {}).get("nakshatra", "")
+        sade_sati = _sade_sati(moon_nak, sat_nak)
+
+        dasha_lord = ""
+        for d in data.get("dashas", []):
+            try:
+                if dt_class.strptime(d.get("end_date", ""), "%d/%m/%Y") >= now_local.replace(tzinfo=None):
+                    dasha_lord = d.get("lord", "")
+                    break
+            except Exception:
+                pass
+
+        # 3. Preparer le system_instruction (identique a api_soul_debug)
+        ton_hint = build_ton_posture(dasha_lord, sade_sati)
+        moon_hint, transit_hint = build_nakshatra_hints(moon_nak, transit_nak, transit_house)
+        system_instruction = build_system_instruction(moon_hint, transit_hint, ton_hint)
+
+        lang = request.args.get("lang", "fr").lower()
+        if "fr" in lang:
+            system_instruction += "\n\nMANDATORY LANGUAGE INSTRUCTION: You MUST output the sentence in French. The prefix must be exactly '🗝️ Miroir de l'âme : '."
+        else:
+            system_instruction += "\n\nMANDATORY LANGUAGE INSTRUCTION: You MUST output the sentence in English. The prefix must be exactly '🗝️ Soul Debug : '."
+
+        user_prompt = f"Genere le Soul Debug du jour pour un consultant ne sous le nakshatra {moon_nak}."
+
+        return jsonify({
+            "ok": True,
+            "system": system_instruction,
+            "user": user_prompt,
+            "lang": lang,
+            "moon_nak": moon_nak,
+        })
+    except Exception as e:
+        current_app.logger.error("Erreur api_soul_debug_prompt : %s", e)
+        return jsonify({"ok": False, "error": str(e)}), 500
+
+
 @api_bp.route("/soul_debug")
 def api_soul_debug():
-    """Génère le Soul Debug quotidien pour l'utilisateur en utilisant Grok (Option B)."""
+    """Genere le Soul Debug quotidien pour l'utilisateur en utilisant Grok (Option B)."""
     profile = session.get("profile")
     if not profile:
         return jsonify({"ok": False, "error": "Non authentifié"}), 401
