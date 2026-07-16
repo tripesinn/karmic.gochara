@@ -1,6 +1,6 @@
 {
   "name": "karmic-gochara-astro",
-  "version": "1.9.7",
+  "version": "1.9.8",
   "type": "module",
   "scripts": {
     "dev": "astro dev",
