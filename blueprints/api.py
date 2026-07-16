@@ -572,7 +572,7 @@ def api_soul_debug():
             validate_response,
             _sade_sati,
         )
-        from openai import OpenAI
+        import ai_interpret
 
         # 1. Calculs des transits
         _tz = _safe_tz(profile.get("tz"))
@@ -636,43 +636,31 @@ def api_soul_debug():
         else:
             system_instruction += "\n\nMANDATORY LANGUAGE INSTRUCTION: You MUST output the sentence in English. The prefix must be exactly '🗝️ Soul Debug : '."
 
-        # 4. Requête Grok API avec Fallback Gemini
-        api_key = os.getenv("XAI_API_KEY") or os.getenv("GROK_API_KEY")
-        ai_response = None
+        # 4. Soul Debug = Grok via OpenRouter (funnel). Pas de bascule silencieuse
+        #    sur un autre modèle : le funnel doit rester Grok.
         prompt = f"Génère le Soul Debug du jour pour un consultant né sous le nakshatra {moon_nak}."
 
-        if api_key:
-            try:
-                current_app.logger.info("Tentative de génération Soul Debug avec Grok...")
-                client = OpenAI(api_key=api_key, base_url="https://api.x.ai/v1")
-                response = client.chat.completions.create(
-                    model="grok-2",
-                    messages=[
-                        {"role": "system", "content": system_instruction},
-                        {"role": "user", "content": prompt},
-                    ],
-                    max_tokens=250,
-                    temperature=0.5,
-                )
-                ai_response = response.choices[0].message.content.strip()
-                current_app.logger.info("Soul Debug généré avec succès par Grok")
-            except Exception as e:
-                current_app.logger.warning("Échec de la génération avec Grok, bascule sur Gemini : %s", e)
+        # Force Grok comme funnel, via le routeur central (OpenRouter déjà configuré).
+        sd_user = dict(profile)
+        sd_user["user_provider"] = "openrouter"
+        sd_user["user_key"] = os.getenv("OPENROUTER_API_KEY", "")
+        sd_user["user_model"] = "xai/grok-4.3"
 
-        if not ai_response:
-            try:
-                current_app.logger.info("Génération du Soul Debug avec le provider habituel (Gemini)...")
-                import gemini_api
-                ai_response = gemini_api.generate(
-                    system=system_instruction,
-                    prompt=prompt,
-                    max_tokens=250
-                ).strip()
-                current_app.logger.info("Soul Debug généré avec succès par Gemini")
-            except Exception as e:
-                current_app.logger.error("Échec complet de la génération du Soul Debug : %s", e)
-                return jsonify({"ok": False, "error": f"Erreur génération : {str(e)}"}), 500
-            
+        try:
+            current_app.logger.info("Génération Soul Debug via Grok (OpenRouter)...")
+            ai_response = ai_interpret.generate_ai(
+                system_instruction, prompt, user=sd_user, max_tokens=250
+            ).strip()
+            current_app.logger.info("Soul Debug généré avec succès par Grok")
+        except Exception as e:
+            current_app.logger.error("Échec génération Soul Debug (Grok/OpenRouter) : %s", e)
+            return jsonify({"ok": False, "error": f"Erreur génération Grok : {str(e)}"}), 502
+
+        # generate_ai() peut retourner une string d'erreur au lieu de lever → on la détecte
+        if not ai_response or ai_response.lower().startswith(("erreur", "✦")):
+            current_app.logger.error("Soul Debug : réponse d'erreur du routeur : %s", ai_response)
+            return jsonify({"ok": False, "error": "Grok indisponible (funnel)"}), 502
+
         session[session_key] = ai_response
         session.modified = True
         return jsonify({"ok": True, "soul_debug": ai_response})
