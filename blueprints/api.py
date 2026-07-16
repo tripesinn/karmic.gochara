@@ -644,7 +644,7 @@ def api_soul_debug():
         sd_user = dict(profile)
         sd_user["user_provider"] = "openrouter"
         sd_user["user_key"] = os.getenv("OPENROUTER_API_KEY", "")
-        sd_user["user_model"] = "xai/grok-4.3"
+        sd_user["user_model"] = "x-ai/grok-4.5"
 
         try:
             current_app.logger.info("Génération Soul Debug via Grok (OpenRouter)...")
