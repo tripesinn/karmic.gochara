@@ -636,24 +636,42 @@ def api_soul_debug():
         else:
             system_instruction += "\n\nMANDATORY LANGUAGE INSTRUCTION: You MUST output the sentence in English. The prefix must be exactly '🗝️ Soul Debug : '."
 
-        # 4. Requête Grok API
+        # 4. Requête Grok API avec Fallback Gemini
         api_key = os.getenv("XAI_API_KEY") or os.getenv("GROK_API_KEY")
-        if not api_key:
-            return jsonify({"ok": False, "error": "Serveur non configuré avec Grok API"}), 500
-        
-        client = OpenAI(api_key=api_key, base_url="https://api.x.ai/v1")
+        ai_response = None
         prompt = f"Génère le Soul Debug du jour pour un consultant né sous le nakshatra {moon_nak}."
 
-        response = client.chat.completions.create(
-            model="grok-2",
-            messages=[
-                {"role": "system", "content": system_instruction},
-                {"role": "user", "content": prompt},
-            ],
-            max_tokens=250,
-            temperature=0.5,
-        )
-        ai_response = response.choices[0].message.content.strip()
+        if api_key:
+            try:
+                current_app.logger.info("Tentative de génération Soul Debug avec Grok...")
+                client = OpenAI(api_key=api_key, base_url="https://api.x.ai/v1")
+                response = client.chat.completions.create(
+                    model="grok-2",
+                    messages=[
+                        {"role": "system", "content": system_instruction},
+                        {"role": "user", "content": prompt},
+                    ],
+                    max_tokens=250,
+                    temperature=0.5,
+                )
+                ai_response = response.choices[0].message.content.strip()
+                current_app.logger.info("Soul Debug généré avec succès par Grok")
+            except Exception as e:
+                current_app.logger.warning("Échec de la génération avec Grok, bascule sur Gemini : %s", e)
+
+        if not ai_response:
+            try:
+                current_app.logger.info("Génération du Soul Debug avec le provider habituel (Gemini)...")
+                import gemini_api
+                ai_response = gemini_api.generate(
+                    system=system_instruction,
+                    prompt=prompt,
+                    max_tokens=250
+                ).strip()
+                current_app.logger.info("Soul Debug généré avec succès par Gemini")
+            except Exception as e:
+                current_app.logger.error("Échec complet de la génération du Soul Debug : %s", e)
+                return jsonify({"ok": False, "error": f"Erreur génération : {str(e)}"}), 500
             
         session[session_key] = ai_response
         session.modified = True
