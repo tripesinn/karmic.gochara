@@ -28,7 +28,7 @@ export const auth = getAuth(app);
 // Mode émulateur — activé uniquement si PUBLIC_FIREBASE_EMULATOR=true
 // Sur Android Pixel (USB), l'émulateur Mac est accessible via ADB reverse :
 //   adb reverse tcp:9099 tcp:9099
-const isEmulator = (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
+const isEmulator = (import.meta as any).env?.DEV === true && (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
 if (isEmulator && typeof window !== 'undefined') {
   // disableWarnings=true supprime le bandeau jaune dans l'UI
   connectAuthEmulator(auth, 'http://127.0.0.1:9099', { disableWarnings: true });

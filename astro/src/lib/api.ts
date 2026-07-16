@@ -21,7 +21,7 @@ function getBaseUrl(): string {
 
   // 🧪 Mode émulateur : Flask local via ADB reverse tcp:5001
   // Prérequis : adb reverse tcp:5001 tcp:5001 && FIREBASE_AUTH_EMULATOR_HOST=localhost:9099
-  const isEmulator = (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
+  const isEmulator = (import.meta as any).env?.DEV === true && (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
   if (isEmulator) {
     return 'http://127.0.0.1:5001';
   }

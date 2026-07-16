@@ -3,7 +3,7 @@ import { Capacitor } from '@capacitor/core';
 import { CapacitorHttp } from '@capacitor/core';
 
 const PROJECT_ID = 'karmic-gochara-cloud';
-const isEmulator = (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
+const isEmulator = (import.meta as any).env?.DEV === true && (import.meta as any).env?.PUBLIC_FIREBASE_EMULATOR === 'true';
 const BASE = isEmulator 
   ? `http://127.0.0.1:8080/v1/projects/${PROJECT_ID}/databases/(default)/documents`
   : `https://firestore.googleapis.com/v1/projects/${PROJECT_ID}/databases/(default)/documents`;
