@@ -26,7 +26,15 @@ import com.google.ai.edge.litertlm.Contents;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ApplicationInfo;
 import android.net.Uri;
+import android.os.Build;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.security.MessageDigest;
 import androidx.activity.result.ActivityResult;
 import com.getcapacitor.annotation.ActivityCallback;
 
@@ -74,6 +82,16 @@ public class GemmaSynthesisPlugin extends Plugin {
     // Gemma 4 E2B It 4‑bit quantisé (LiteRT format) — dynamique via setModel()
     private static String sModelUrl = "https://huggingface.co/litert-community/gemma-4-E2B-it-litert-lm/resolve/main/gemma-4-E2B-it.litertlm";
     private static String sModelFilename = "gemma-4-E2B-it.litertlm";
+
+    // ── Modèle délégué (Google AI Edge Gallery) ──────────────────────────────
+    // L'app réutilise le .litertlm déjà présent sur l'appareil (fourni par Edge Gallery)
+    // plutôt que de re-télécharger 2,58 Go. Hash de référence du fichier hybride INT4.
+    private static final String EXPECTED_MODEL_SHA256 =
+        "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c";
+    private static final long EXPECTED_MODEL_SIZE = 2_588_147_712L;
+    private static final String GALLERY_PKG = "com.google.ai.edge.gallery";
+    private static final String PUBLIC_DOWNLOAD_MODEL =
+        "/storage/emulated/0/Download/gemma-4-E2B-it.litertlm";
 
     // ── Paramètres inférence constants ────────────────────────────────────────
     private static final int   MAX_TOKENS_SYNTHESIS = 2048;
@@ -133,6 +151,141 @@ public class GemmaSynthesisPlugin extends Plugin {
         }
         if (!dir.exists()) dir.mkdirs();
         return new File(dir, sModelFilename);
+    }
+
+    // ── #2 Backend NPU / GPU / CPU (fallback robuste) ────────────────────────
+    // Pixel 10 (Tensor G5) : NPU via dispatch library dir = nativeLibraryDir de l'app.
+    // ══════════════════════════════════════════════════════════════════════════
+    //  Debug fichier (contourne le filtrage logcat)
+    // ══════════════════════════════════════════════════════════════════════════
+    private static final boolean TRY_NPU = false; // gemma-4-E2B non compatible NPU (Tensor G5) -> crash natif ; GPU/CPU safe
+    private void debugLog(String msg) {
+        String line = new java.text.SimpleDateFormat("HH:mm:ss.SSS", java.util.Locale.US).format(new java.util.Date()) + " " + msg;
+        android.util.Log.i("GemmaSynthesis", msg);
+        try {
+            java.io.File f = new java.io.File(getContext().getExternalFilesDir(null), "gemma_debug.log");
+            java.io.FileWriter fw = new java.io.FileWriter(f, true);
+            fw.append(line).append("\n");
+            fw.close();
+        } catch (Throwable ignored) {}
+    }
+
+    // Si NPU échoue (modèle non compatible NPU, .so absents) → GPU → CPU.
+    private Backend createBackend() {
+        // 1. Tentative NPU (Google Tensor / EdgeTPU)
+        try {
+            ApplicationInfo ai = getContext().getApplicationInfo();
+            String libDir = ai.nativeLibraryDir; // ex: /data/app/.../lib/arm64
+            Backend npu = new Backend.NPU(libDir);
+            android.util.Log.i("GemmaSynthesis", "Backend NPU sélectionné (dispatch=" + libDir + ")");
+            return npu;
+        } catch (Throwable t) {
+            android.util.Log.w("GemmaSynthesis", "NPU indisponible, fallback GPU: " + t.getMessage());
+        }
+        // 2. Tentative GPU
+        try {
+            Backend gpu = new Backend.GPU();
+            android.util.Log.i("GemmaSynthesis", "Backend GPU sélectionné");
+            return gpu;
+        } catch (Throwable t) {
+            android.util.Log.w("GemmaSynthesis", "GPU indisponible, fallback CPU: " + t.getMessage());
+        }
+        // 3. CPU (garanti présent)
+        android.util.Log.i("GemmaSynthesis", "Backend CPU sélectionné");
+        return new Backend.CPU();
+    }
+
+    // ── #1 Résolution du modèle : app privé → Download public → Gallery → download ──
+    // Copie silencieuse (aucun toast). Valide taille + sha256 avant utilisation.
+    private String sha256Of(File f) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-256");
+            try (FileInputStream fis = new FileInputStream(f)) {
+                byte[] buf = new byte[8192];
+                int n;
+                while ((n = fis.read(buf)) != -1) md.update(buf, 0, n);
+            }
+            StringBuilder sb = new StringBuilder();
+            for (byte b : md.digest()) sb.append(String.format("%02x", b));
+            return sb.toString();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private boolean isValidModel(File f) {
+        if (f == null || !f.exists() || f.length() != EXPECTED_MODEL_SIZE) return false;
+        String h = sha256Of(f);
+        return h != null && h.equalsIgnoreCase(EXPECTED_MODEL_SHA256);
+    }
+
+    // Cherche le modèle dans Google AI Edge Gallery (contexte du package tiers).
+    // Renvoie le File si présent et de bonne taille, sinon null.
+    private File findGalleryModelFile() {
+        try {
+            Context gctx = getContext().createPackageContext(GALLERY_PKG, Context.CONTEXT_IGNORE_SECURITY);
+            File base = gctx.getExternalFilesDir(null);
+            if (base == null) return null;
+            String[] subs = { "models", "Download", "" };
+            for (String sub : subs) {
+                File cand = sub.isEmpty() ? new File(base, sModelFilename)
+                                          : new File(new File(base, sub), sModelFilename);
+                if (cand.exists() && cand.length() == EXPECTED_MODEL_SIZE) return cand;
+            }
+        } catch (Throwable t) {
+            debugLog("Gallery non accessible: " + t.getMessage());
+        }
+        return null;
+    }
+
+    // Renvoie le chemin d'un modèle valide à utiliser, ou null si aucun local.
+    // Copie silencieusement le modèle délégué (Edge Gallery / Download public) vers le dossier privé.
+    private String resolveModelPathSilently() {
+        debugLog("resolveModelPathSilently: début");
+        File appModel = getModelFile();
+        // 0. Edge Gallery (délégué Google) — cherché EN PREMIER (pas de re-téléchargement)
+        File gallery = findGalleryModelFile();
+        if (gallery != null) {
+            try {
+                if (appModel.exists()) appModel.delete();
+                try (FileInputStream in = new FileInputStream(gallery);
+                     FileOutputStream out = new FileOutputStream(appModel)) {
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = in.read(buf)) != -1) out.write(buf, 0, n);
+                }
+                debugLog("resolveModel: copié depuis Edge Gallery");
+                return appModel.getAbsolutePath();
+            } catch (IOException e) {
+                debugLog("resolveModel: copie Gallery échouée: " + e.getMessage());
+            }
+        }
+        // 1. Déjà présent dans le dossier privé de l'app
+        if (isValidModel(appModel)) {
+            debugLog("resolveModel: app privé OK (" + appModel.length() + " o)");
+            return appModel.getAbsolutePath();
+        }
+        debugLog("resolveModel: app privé invalide (exists=" + appModel.exists() + ", size=" + appModel.length() + ")");
+        // 2. Download public (world-readable) — même hash que Edge Gallery
+        File pubDl = new File(PUBLIC_DOWNLOAD_MODEL);
+        if (isValidModel(pubDl)) {
+            try {
+                if (appModel.exists()) appModel.delete();
+                try (FileInputStream in = new FileInputStream(pubDl);
+                     FileOutputStream out = new FileOutputStream(appModel)) {
+                    byte[] buf = new byte[8192];
+                    int n;
+                    while ((n = in.read(buf)) != -1) out.write(buf, 0, n);
+                }
+                debugLog("resolveModel: copié depuis Download public");
+                return appModel.getAbsolutePath();
+            } catch (IOException e) {
+                debugLog("resolveModel: copie Download public échouée: " + e.getMessage());
+            }
+        }
+        debugLog("resolveModel: aucun local valide -> null (download)");
+        // 4. Aucun local valide → null → l'app téléchargera depuis sModelUrl
+        return null;
     }
 
     private DocumentFile getTreeDocumentFile() {
@@ -499,29 +652,57 @@ public class GemmaSynthesisPlugin extends Plugin {
                 }
                 
                 if (modelPath == null) {
-                    File modelFile = getModelFile();
-                    if (!modelFile.exists() || modelFile.length() == 0) {
-                        if (!downloadModelWithProgress(modelFile)) {
-                            throw new IOException("Modèle absent et impossible d'initialiser le téléchargement.");
+                    // #1 : résolution silencieuse du modèle délégué (Edge Gallery / Download)
+                    modelPath = resolveModelPathSilently();
+                    if (modelPath == null) {
+                        File modelFile = getModelFile();
+                        if (!modelFile.exists() || modelFile.length() == 0) {
+                            if (!downloadModelWithProgress(modelFile)) {
+                                throw new IOException("Modèle absent et impossible d'initialiser le téléchargement.");
+                            }
                         }
+                        modelPath = modelFile.getAbsolutePath();
                     }
-                    modelPath = modelFile.getAbsolutePath();
                 }
 
                 // 2. Construire l'Engine LiteRT-LM
-                // Configuration multimodale explicite pour Gemma 4 (Text + Vision + Audio)
-                EngineConfig modelOpts = new EngineConfig(
-                    modelPath,
-                    new Backend.CPU(), // Text
-                    null,              // Vision (null for text-only model)
-                    null,              // Audio (null for text-only model)
-                    sMaxTokens,        // Tokens
-                    null,              // Max Images
-                    getContext().getCacheDir().getAbsolutePath() // Cache
-                );
-
-                Engine engine = new Engine(modelOpts);
-                engine.initialize();
+                // #2 : fallback NPU (si TRY_NPU) → GPU → CPU.
+                // gemma-4-E2B n'est PAS compatible NPU (Tensor G5) -> essayer NPU = crash natif SIGSEGV.
+                debugLog("prepareModel: modelPath=" + modelPath);
+                Engine engine = null;
+                String[] backendOrder = TRY_NPU ? new String[]{ "NPU", "GPU", "CPU" } : new String[]{ "GPU", "CPU" };
+                for (String choice : backendOrder) {
+                    Backend backend;
+                    if (choice.equals("NPU")) {
+                        try {
+                            backend = new Backend.NPU(getContext().getApplicationInfo().nativeLibraryDir);
+                        } catch (Throwable t) { debugLog("NPU construct échoué: " + t.getMessage()); continue; }
+                    } else if (choice.equals("GPU")) {
+                        backend = new Backend.GPU();
+                    } else {
+                        backend = new Backend.CPU();
+                    }
+                    EngineConfig cfg = new EngineConfig(
+                        modelPath,
+                        backend,
+                        null, null,
+                        sMaxTokens, null,
+                        getContext().getCacheDir().getAbsolutePath()
+                    );
+                    try {
+                        debugLog("prepareModel: tentative Engine backend=" + choice);
+                        Engine tryEngine = new Engine(cfg);
+                        tryEngine.initialize();
+                        engine = tryEngine;
+                        debugLog("prepareModel: Engine OK sur backend " + choice);
+                        break;
+                    } catch (Throwable t) {
+                        debugLog("Backend " + choice + " échoué: " + t.getMessage() + " — fallback suivant");
+                    }
+                }
+                if (engine == null) {
+                    throw new RuntimeException("Aucun backend n'a pu initialiser le moteur.");
+                }
 
                 SamplerConfig samplerOpts = new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0);
                 ConversationConfig conversationOpts = new ConversationConfig(
@@ -639,28 +820,57 @@ public class GemmaSynthesisPlugin extends Plugin {
                         }
                         
                         if (modelPath == null) {
-                            File modelFile = getModelFile();
-                            if (!modelFile.exists() || modelFile.length() == 0) {
-                                downloadModelWithProgress(modelFile);
-                            }
-                            if (modelFile.exists() && modelFile.length() > 0) {
-                                modelPath = modelFile.getAbsolutePath();
+                            // #1 : résolution silencieuse du modèle délégué (Edge Gallery / Download)
+                            modelPath = resolveModelPathSilently();
+                            if (modelPath == null) {
+                                File modelFile = getModelFile();
+                                if (!modelFile.exists() || modelFile.length() == 0) {
+                                    downloadModelWithProgress(modelFile);
+                                }
+                                if (modelFile.exists() && modelFile.length() > 0) {
+                                    modelPath = modelFile.getAbsolutePath();
+                                }
                             }
                         }
 
                         if (modelPath != null) {
 
-                        EngineConfig modelOpts = new EngineConfig(
-                            modelPath,
-                            new Backend.CPU(),
-                            null,
-                            null,
-                            sMaxTokens,
-                            null,
-                            getContext().getCacheDir().getAbsolutePath()
-                        );
-                        Engine engine = new Engine(modelOpts);
-                        engine.initialize();
+                        // #2 : fallback NPU (si TRY_NPU) → GPU → CPU (idem prepareModel)
+                        debugLog("generate: modelPath=" + modelPath);
+                        Engine engine = null;
+                        String[] backendOrder = TRY_NPU ? new String[]{ "NPU", "GPU", "CPU" } : new String[]{ "GPU", "CPU" };
+                        for (String choice : backendOrder) {
+                            Backend backend;
+                            if (choice.equals("NPU")) {
+                                try {
+                                    backend = new Backend.NPU(getContext().getApplicationInfo().nativeLibraryDir);
+                                } catch (Throwable t) { debugLog("NPU construct échoué(g): " + t.getMessage()); continue; }
+                            } else if (choice.equals("GPU")) {
+                                backend = new Backend.GPU();
+                            } else {
+                                backend = new Backend.CPU();
+                            }
+                            EngineConfig cfg = new EngineConfig(
+                                modelPath,
+                                backend,
+                                null, null,
+                                sMaxTokens, null,
+                                getContext().getCacheDir().getAbsolutePath()
+                            );
+                            try {
+                                debugLog("generate: tentative Engine backend=" + choice);
+                                Engine tryEngine = new Engine(cfg);
+                                tryEngine.initialize();
+                                engine = tryEngine;
+                                debugLog("generate: Engine OK sur backend " + choice);
+                                break;
+                            } catch (Throwable t) {
+                                debugLog("Backend " + choice + " échoué (generate): " + t.getMessage());
+                            }
+                        }
+                        if (engine == null) {
+                            throw new RuntimeException("Aucun backend n'a pu initialiser le moteur (generate).");
+                        }
 
                         SamplerConfig samplerOpts = new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0);
                         ConversationConfig conversationOpts = new ConversationConfig(
