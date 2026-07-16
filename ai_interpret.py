@@ -501,8 +501,8 @@ def _load_vault(include_keywords: bool = True, user: dict = None, chart_data: di
 # ══════════════════════════════════════════════════════════════════════════════
 # MODEL ASSIGNMENT — Router par cas d'usage
 # ══════════════════════════════════════════════════════════════════════════════
-HOOK_MODEL = os.environ.get("HOOK_MODEL", "anthropic/claude-3.5-haiku")  # Hook rapide/cheap via OpenRouter (Haiku)
-SYNTHESIS_MODEL = os.environ.get("SYNTHESIS_MODEL", "anthropic/claude-3.5-haiku")  # Synthèse via OpenRouter (Haiku) — une seule facture
+HOOK_MODEL = os.environ.get("HOOK_MODEL", "anthropic/claude-haiku-4.5")  # Hook rapide/cheap via OpenRouter (Haiku)
+SYNTHESIS_MODEL = os.environ.get("SYNTHESIS_MODEL", "anthropic/claude-haiku-4.5")  # Synthèse via OpenRouter (Haiku) — une seule facture
 
 # ══════════════════════════════════════════════════════════════════════════════
 # HOOK PROMPTS — Mirror → Wound → Friction → Open Door
