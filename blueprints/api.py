@@ -560,6 +560,16 @@ def api_soul_debug_prompt():
     """
     profile = session.get("profile")
     if not profile:
+        # Fallback mobile : profil fourni en query string (JWT Firebase côté app)
+        import json as _json
+        prof_b64 = request.args.get("profile")
+        if prof_b64:
+            try:
+                import base64
+                profile = _json.loads(base64.b64decode(prof_b64).decode("utf-8"))
+            except Exception:
+                profile = None
+    if not profile:
         return jsonify({"ok": False, "error": "Non authentifie"}), 401
 
     try:

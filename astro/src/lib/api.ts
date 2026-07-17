@@ -244,6 +244,19 @@ export const api = {
     return request<{ ok: boolean; soul_debug?: string }>('/api/soul_debug');
   },
 
+  soulDebugPrompt(lang: string, profile?: any) {
+    let query = `?lang=${encodeURIComponent(lang)}`;
+    if (profile) {
+      const b64 = typeof btoa !== 'undefined'
+        ? btoa(unescape(encodeURIComponent(JSON.stringify(profile))))
+        : Buffer.from(JSON.stringify(profile)).toString('base64');
+      query += `&profile=${encodeURIComponent(b64)}`;
+    }
+    return request<{ ok: boolean; system?: string; user?: string; lang?: string; error?: string }>(
+      `/api/soul_debug_prompt${query}`
+    );
+  },
+
   rateSoulDebug(rating: number, soulDebug: string) {
     return request<{ ok: boolean; error?: string }>('/api/rate_soul_debug', {
       method: 'POST',

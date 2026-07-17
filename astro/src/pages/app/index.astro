@@ -3,6 +3,7 @@
 import AppLayout from '../../layouts/AppLayout.astro';
 import type { User } from '../../lib/types';
 import { api } from '../../lib/api';
+import { capacitorBridge } from '../../lib/capacitor-bridge';
 
 // SSR check — Astro SSG n'a pas accès aux cookies côté serveur,
 // la vérification réelle se fait côté client dans AppLayout.
@@ -129,6 +130,7 @@ import { api } from '../../lib/api';
     import { api } from '../../lib/api';
     import { i18n } from '../../lib/i18n';
     import { triggerUpgrade } from '../../lib/upgrade';
+    import { capacitorBridge } from '../../lib/capacitor-bridge';
 
     (async () => {
       // Détection IA locale
@@ -180,63 +182,77 @@ import { api } from '../../lib/api';
           const btnDown = document.getElementById('btn-sd-down')!;
           debugCard.classList.remove('hidden');
           
-          api.soulDebug().then(res => {
-            if (res.ok && res.soul_debug) {
-              debugContent.textContent = res.soul_debug;
+          // TEST: forcer le local pour valider le fix natif sur device natif.
+          const wantLocal = true;
+
+          // Fonction de génération locale (Gemma natif)
+          const runLocalSoulDebug = async () => {
+            debugContent.textContent = "Invocation de l'Oracle local (Gemma)…";
+            const lang = i18n.detect();
+            const promptData = await api.soulDebugPrompt(lang, resp.profile);
+            if (!promptData.ok) throw new Error(promptData.error || 'prompt local indisponible');
+            await capacitorBridge.gemma.prepareModel(false);
+            const localText = await capacitorBridge.gemma.generate(promptData.system, promptData.user, 'soul_debug', lang, {});
+            if (localText) {
+              debugContent.textContent = localText;
               ratingDiv.classList.remove('hidden');
-              
-              const handleRate = async (rating: number) => {
-                ratingStatus.textContent = "Envoi du feedback...";
-                btnUp.setAttribute('disabled', 'true');
-                btnDown.setAttribute('disabled', 'true');
-                try {
-                  const rateRes = await api.rateSoulDebug(rating, res.soul_debug!);
-                  if (rateRes.ok) {
-                    ratingStatus.textContent = rating === 1 ? "Merci pour ton retour! 👍" : "Retour enregistré 🔧";
-                  } else {
-                    ratingStatus.textContent = "Erreur lors de l'enregistrement.";
+              return true;
+            }
+            throw new Error('Gemma sans reponse');
+          };
+
+          if (wantLocal) {
+            // Mode local : on va directement au natif (pas de dépendance cloud)
+            try {
+              await runLocalSoulDebug();
+            } catch (e: any) {
+              debugContent.textContent = "Oracle local indisponible : " + (e.message || e);
+            }
+          } else {
+            // Mode cloud : Soul Debug réseau, fallback local si échec
+            api.soulDebug().then(res => {
+              if (res.ok && res.soul_debug) {
+                debugContent.textContent = res.soul_debug;
+                ratingDiv.classList.remove('hidden');
+
+                const handleRate = async (rating: number) => {
+                  ratingStatus.textContent = "Envoi du feedback...";
+                  btnUp.setAttribute('disabled', 'true');
+                  btnDown.setAttribute('disabled', 'true');
+                  try {
+                    const rateRes = await api.rateSoulDebug(rating, res.soul_debug!);
+                    if (rateRes.ok) {
+                      ratingStatus.textContent = rating === 1 ? "Merci pour ton retour! 👍" : "Retour enregistré 🔧";
+                    } else {
+                      ratingStatus.textContent = "Erreur lors de l'enregistrement.";
+                      btnUp.removeAttribute('disabled');
+                      btnDown.removeAttribute('disabled');
+                    }
+                  } catch {
+                    ratingStatus.textContent = "Erreur réseau.";
                     btnUp.removeAttribute('disabled');
                     btnDown.removeAttribute('disabled');
                   }
-                } catch {
-                  ratingStatus.textContent = "Erreur réseau.";
-                  btnUp.removeAttribute('disabled');
-                  btnDown.removeAttribute('disabled');
-                }
-              };
-              
-              btnUp.onclick = () => handleRate(1);
-              btnDown.onclick = () => handleRate(-1);
-            } else {
-              debugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
-            }
-          }).catch(async () => {
-            // ── Fallback local (Gemma natif) UNIQUEMENT si l'utilisateur a choisi le mode native ──
-            const storedSettings = localStorage.getItem('karmic_ai_settings');
-            let localMode = 'cloud';
-            try { if (storedSettings) localMode = (JSON.parse(storedSettings).localMode) || 'cloud'; } catch (e) {}
-            if (localMode === 'native' && capacitorBridge.isNative()) {
-              try {
-                debugContent.textContent = "Invocation de l'Oracle local (Gemma)…";
-                const lang = i18n.detect();
-                const promptRes = await fetch(`/api/soul_debug_prompt?lang=${encodeURIComponent(lang)}`, { credentials: 'include' });
-                const promptData = await promptRes.json();
-                if (!promptRes.ok || !promptData.ok) throw new Error(promptData.error || 'prompt local indisponible');
-                await capacitorBridge.gemma.prepareModel(false);
-                const localText = await capacitorBridge.gemma.generate(promptData.system, promptData.user, 'soul_debug', lang, {});
-                if (localText) {
-                  debugContent.textContent = localText;
-                  ratingDiv.classList.remove('hidden');
-                  return;
-                }
-                throw new Error('Gemma sans reponse');
-              } catch (e: any) {
-                debugContent.textContent = "Erreur de connexion au serveur d'Oracle. (fallback local impossible : " + (e.message || e) + ")";
+                };
+
+                btnUp.onclick = () => handleRate(1);
+                btnDown.onclick = () => handleRate(-1);
+              } else {
+                debugContent.textContent = "Ton miroir de l'âme n'a pas pu être généré aujourd'hui.";
               }
-            } else {
-              debugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
-            }
-          });
+            }).catch(async () => {
+              // Fallback local si le cloud échoue
+              if (capacitorBridge.isNative()) {
+                try {
+                  await runLocalSoulDebug();
+                } catch (e: any) {
+                  debugContent.textContent = "Erreur de connexion au serveur d'Oracle. (fallback local impossible : " + (e.message || e) + ")";
+                }
+              } else {
+                debugContent.textContent = "Erreur de connexion au serveur d'Oracle.";
+              }
+            });
+          }
 
 
           // Change button to Edit Profile

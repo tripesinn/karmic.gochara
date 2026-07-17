@@ -756,6 +756,8 @@ public class GemmaSynthesisPlugin extends Plugin {
         // Priorité au lightPrompt (RAG) s'il est fourni
         final String effectiveUser = (lightPrompt != null && !lightPrompt.isEmpty()) ? lightPrompt : user;
 
+        debugLog("generate: ENTRÉE (effectiveUser vide? " + (effectiveUser == null || effectiveUser.isEmpty()) + ")");
+
         if (effectiveUser == null || effectiveUser.isEmpty()) {
             call.reject("INVALID_PROMPT", "Prompt vide.");
             return;
@@ -916,21 +918,39 @@ public class GemmaSynthesisPlugin extends Plugin {
                 null
             );
 
-            try (Conversation conversation = engine.createConversation(conversationOpts)) {
-                // Inférence synchrone bloquante via le helper Kotlin
-                String response = GemmaHelper.generateSync(conversation, effectiveUser);
+            // IMPORTANT : toujours créer une conversation NEUVE avec le bon system.
+            // Réutiliser sBaseConversationRef (créée dans prepareModel avec system=null)
+            // pour un nouveau sendMessage = deadlock interne du runtime -> hang silencieux.
+            Conversation conversation = engine.createConversation(conversationOpts);
 
-                JSObject result = new JSObject();
-                result.put("ok",        true);
-                result.put("synthesis", response.trim());
-                result.put("local",     true);
-                result.put("loraUsed",  false);
-                result.put("type",      type);
-                call.resolve(result);
-
+            // Inférence synchrone avec TIMEOUT de sécurité sur un thread DÉDIÉ
+            // (pas l'executor partagé) : si sendMessage ne rend pas la main (GPU hang),
+            // le get(180s) expire et on reject -> l'UI reste réactive.
+            final Conversation conv = conversation;
+            java.util.concurrent.FutureTask<String> task = new java.util.concurrent.FutureTask<>(
+                () -> GemmaHelper.generateSync(conv, effectiveUser)
+            );
+            new java.lang.Thread(task, "GemmaGenerate").start();
+            String response;
+            try {
+                response = task.get(180, java.util.concurrent.TimeUnit.SECONDS);
+            } catch (java.util.concurrent.TimeoutException te) {
+                task.cancel(true);
+                debugLog("generate: TIMEOUT 180s — GPU hang détecté, reject pour éviter l'ANR");
+                call.reject("INFERENCE_TIMEOUT", "Génération interrompue (GPU sans réponse > 180s).");
+                return;
             } catch (Exception e) {
                 call.reject("INFERENCE_ERROR", e.getMessage(), e);
+                return;
             }
+
+            JSObject result = new JSObject();
+            result.put("ok",        true);
+            result.put("synthesis", response.trim());
+            result.put("local",     true);
+            result.put("loraUsed",  false);
+            result.put("type",      type);
+            call.resolve(result);
         });
     }
 
