@@ -245,15 +245,11 @@ export const api = {
   },
 
   soulDebugPrompt(lang: string, profile?: any) {
-    let query = `?lang=${encodeURIComponent(lang)}`;
-    if (profile) {
-      const b64 = typeof btoa !== 'undefined'
-        ? btoa(unescape(encodeURIComponent(JSON.stringify(profile))))
-        : Buffer.from(JSON.stringify(profile)).toString('base64');
-      query += `&profile=${encodeURIComponent(b64)}`;
-    }
+    const body: any = { lang };
+    if (profile) body.profile = profile;
     return request<{ ok: boolean; system?: string; user?: string; lang?: string; error?: string }>(
-      `/api/soul_debug_prompt${query}`
+      '/api/soul_debug_prompt',
+      { method: 'POST', body: JSON.stringify(body) }
     );
   },
 
