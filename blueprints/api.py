@@ -549,7 +549,7 @@ def get_calendar_ics(pseudo):
     )
 
 
-@api_bp.route("/soul_debug_prompt")
+@api_bp.route("/soul_debug_prompt", methods=["GET", "POST"])
 def api_soul_debug_prompt():
     """
     Renvoie UNIQUEMENT le prompt (system_instruction + user + lang) du Soul Debug du jour,
