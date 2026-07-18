@@ -10,8 +10,8 @@ android {
         applicationId "com.karmicgochara.app"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 61
-        versionName "1.9.42"
+        versionCode 64
+        versionName "1.9.44"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         aaptOptions {
              // Files and dirs to omit from the packaged assets dir, modified to accommodate modern web apps.
@@ -95,6 +95,9 @@ dependencies {
 
     // ── Google Sign-In legacy (requis par @codetrix-studio/capacitor-google-auth v3) ─
     implementation 'com.google.android.gms:play-services-auth:21.6.0'
+
+    // ── Play Integrity (StandardIntegrityToken posté à /login_firebase) ──
+    implementation 'com.google.android.play:integrity:1.4.0'
 }
 
 apply from: 'capacitor.build.gradle'

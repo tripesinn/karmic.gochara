@@ -20,6 +20,8 @@ public class MainActivity extends BridgeActivity {
         registerPlugin(UnlockPlugin.class);
         // Plugin AstroCalc — moteur Swiss Ephemeris local
         registerPlugin(AstroCalcPlugin.class);
+        // Plugin PlayIntegrity — StandardIntegrityToken posté à /login_firebase
+        registerPlugin(PlayIntegrityPlugin.class);
 
         super.onCreate(savedInstanceState);
 
