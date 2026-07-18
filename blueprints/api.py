@@ -425,6 +425,21 @@ def login_firebase():
         current_app.logger.warning("Hook natal login_firebase échoué : %s", exc)
         session["profile"] = profile
 
+    # ── Play Integrity (server-side) ─────────────────────────────────────────
+    # Flag-protected : PLAY_INTEGRITY_ENABLED (défaut off). Si on -> vérifie le
+    # verdict avant de délivrer un JWT. Fail-closed (token manquant/invalide -> 401).
+    from integrity import check_login_integrity
+    integrity_token = (data.get("integrity_token") or "").strip()
+    integrity_result = check_login_integrity(integrity_token)
+    if not integrity_result["ok"]:
+        current_app.logger.warning(
+            "Play Integrity refusé pour %s : %s", pseudo, integrity_result["reason"]
+        )
+        return jsonify({
+            "ok": False,
+            "error": "Intégrité de l'application non vérifiée"
+        }), 401
+
     from jwt_auth import create_tokens
 
     return jsonify({
