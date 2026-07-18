@@ -28,7 +28,7 @@
 #   python3 finetune_kg.py merge   --base chemin/base.litertlm --adapter lora/doctrine_adapter --out doctrine_adapter_merged.litertlm
 #   python3 finetune_kg.py deploy  --merged doctrine_adapter_merged.litertlm --serial 55161FDCH0004E
 
-import sys, os, json, argparse
+import sys, os, json, argparse, hashlib
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATASET = os.path.join(ROOT, "dataset_finetuning.jsonl")
@@ -149,13 +149,56 @@ def cmd_deploy(args):
     merged = args.merged
     if not os.path.exists(merged):
         sys.exit(f"[deploy] merged introuvable: {merged}")
+
+    # 1) Calcul sha256 + taille du .litertlm mergé (stdlib, pas de déps)
+    sha = hashlib.sha256()
+    size = 0
+    with open(merged, "rb") as fh:
+        for chunk in iter(lambda: fh.read(1 << 20), b""):
+            sha.update(chunk)
+            size += len(chunk)
+    merged_sha = sha.hexdigest()
+    print(f"[deploy] merged: {merged}")
+    print(f"[deploy]   size   = {size} o")
+    print(f"[deploy]   sha256 = {merged_sha}")
+
+    # 2) Patch AUTOMATIQUE de GemmaSynthesisPlugin.java (l'action 'DOIT mettre à jour')
+    #    Remplace les placeholders MERGED_MODEL_SHA256 / MERGED_MODEL_SIZE.
+    plugin = os.path.join(
+        os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+        "android", "app", "src", "main", "java", "com", "karmicgochara", "app",
+        "GemmaSynthesisPlugin.java",
+    )
+    if not os.path.exists(plugin):
+        sys.exit(f"[deploy] plugin introuvable: {plugin}")
+    with open(plugin, "r", encoding="utf-8") as fh:
+        src = fh.read()
+    new_src = src
+    # Remplacer le sha placeholder
+    new_src = new_src.replace(
+        'private static final String MERGED_MODEL_SHA256 = "DEPLOY_FILL_MERGED_SHA256";',
+        f'private static final String MERGED_MODEL_SHA256 = "{merged_sha}";',
+    )
+    # Remplacer la taille placeholder (0L) par la vraie taille
+    new_src = new_src.replace(
+        "private static final long   MERGED_MODEL_SIZE   = 0L;",
+        f"private static final long   MERGED_MODEL_SIZE   = {size}L;",
+    )
+    if new_src == src:
+        sys.exit("[deploy] ERREUR: placeholders non trouvés dans le plugin — patch impossible.")
+    with open(plugin, "w", encoding="utf-8") as fh:
+        fh.write(new_src)
+    print(f"[deploy] GemmaSynthesisPlugin.java patché (MERGED_MODEL_SHA256/SIZE mis à jour).")
+    print(f"[deploy] → N'oublie pas de rebuild l'APK et de commit le plugin.")
+
+    # 3) Push du merged model à la place du base (même chemin résolu par resolveModelPathSilently)
+    #    Si la taille diffère du base, le plugin accepte désormais le merged (isValidModel multi-modèle).
     serial = args.serial
-    # Push du merged model à la place du base (même chemin résolu par resolveModelPathSilently)
     remote = "/sdcard/Android/data/com.karmicgochara.app/files/Download/gemma-4-E2B-it.litertlm"
     print(f"[deploy] adb -s {serial} push {merged} {remote}")
-    print("[deploy] ⚠️  MAJ OBLIGATOIRE dans GemmaSynthesisPlugin:")
-    print("   EXPECTED_MODEL_SHA256 = sha256(<merged>)  (sinon isValidModel le rejette silencieusement)")
-    print("   EXPECTED_MODEL_SIZE   = taille(<merged>)  (si différente de 2588147712)")
+    # Décommenter pour exécuter réellement :
+    # subprocess.run(["adb", "-s", serial, "push", merged, remote], check=True)
+    print("[deploy] DONE — rebuild APK + push + redémarrer l'app.")
 
 
 def main():

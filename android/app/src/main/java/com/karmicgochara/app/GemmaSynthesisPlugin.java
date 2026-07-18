@@ -86,10 +86,15 @@ public class GemmaSynthesisPlugin extends Plugin {
     // ── Modèle délégué (Google AI Edge Gallery) ──────────────────────────────
     // L'app réutilise le .litertlm déjà présent sur l'appareil (fourni par Edge Gallery)
     // plutôt que de re-télécharger 2,58 Go. Hash de référence du fichier hybride INT4.
-    // Hash/taille du fichier hybride INT4 générique (CPU/GPU), 2,58 Go
+    // Base Gemma-4-E2B INT4 (CPU/GPU) — référence (inchangé). Hash/taille du fichier hybride INT4 générique (CPU/GPU), 2,58 Go
     private static final String EXPECTED_MODEL_SHA256 =
         "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c";
     private static final long EXPECTED_MODEL_SIZE = 2_588_147_712L;
+    // Merged fine-tune (LoRA baké offline) — REMPLI AU DEPLOY par scripts/finetune_kg.py (mode deploy).
+    // Placeholders ci-dessous : le pipeline calcule le vrai sha256/taille du .litertlm mergé et patche CE fichier.
+    // Tant que MERGED_MODEL_SIZE == 0L, le merged n'est pas encore déployé (base seule acceptée).
+    private static final String MERGED_MODEL_SHA256 = "DEPLOY_FILL_MERGED_SHA256";
+    private static final long   MERGED_MODEL_SIZE   = 0L;
     // Variant TPU 4 Go (compilé Edge TPU Tensor G5) — backend NPU natif = rapide + tokens
     private static final String TPU_MODEL_FILENAME = "gemma-4-E2B-it_Google_Tensor_G5.litertlm";
     private static final long TPU_MODEL_SIZE = 3_953_110_901L;
@@ -115,10 +120,59 @@ public class GemmaSynthesisPlugin extends Plugin {
     private static boolean             sDownloading = false;
     private static int                 sMaxTokens  = MAX_TOKENS_SYNTHESIS;
 
+    // Serveur HTTP local (endpoint Pixel) — expose le moteur Gemma on-device.
+    private LlmServer sLlmServer = null;
+
     // Utilisation de CachedThreadPool pour éviter le blocage du thread unique en cas d'erreur réseau
     private final ExecutorService executor = Executors.newCachedThreadPool();
 
-    // ── Méthode pour init forcée depuis MainActivity ─────────────────────────
+    // ── Init au boot du plugin (Capacitor appelle load() après registerPlugin) ──
+    @Override
+    public void load() {
+        sInstanceRef.set(this);
+        // Auto-start du serveur HTTP local si flag présent (vérif non-humaine / CI device).
+        // Écrire le flag via : adb shell "echo 1 > /sdcard/Android/data/com.karmicgochara.app/files/llm_server.flag"
+        // puis force-stop + relancer l'app. Le serveur démarre après prepareModel().
+        try {
+            java.io.File flag = new java.io.File(getContext().getExternalFilesDir(null), "llm_server.flag");
+            if (flag.exists()) {
+                android.util.Log.i("GemmaSynthesis", "load: llm_server.flag détecté -> autoStart serveur");
+                autoStartServer();
+            }
+        } catch (Throwable t) {
+            android.util.Log.w("GemmaSynthesis", "load autoStart check: " + t.getMessage());
+        }
+    }
+
+    // Référence d'instance pour appeler les méthodes d'instance depuis contextes statiques
+    private static final java.util.concurrent.atomic.AtomicReference<GemmaSynthesisPlugin> sInstanceRef =
+            new java.util.concurrent.atomic.AtomicReference<>();
+
+    private void autoStartServer() {
+        executor.execute(() -> {
+            try {
+                // 1) préparer le modèle (idempotent : resolveModelPathSilently / download)
+                prepareModelInternal(false, null);
+                // attendre que le moteur soit prêt (préparation asynchrone)
+                for (int i = 0; i < 60; i++) {
+                    if (sEngineRef.get() != null) break;
+                    Thread.sleep(2000);
+                }
+                if (sEngineRef.get() == null) {
+                    android.util.Log.e("LlmServer", "autoStart: moteur non prêt après attente");
+                    return;
+                }
+                // 2) démarrer le serveur
+                if (sLlmServer == null) sLlmServer = new LlmServer(getContext(), this, LlmServer.DEFAULT_PORT);
+                sLlmServer.start();
+                android.util.Log.i("LlmServer", "autoStart: serveur démarré sur port " + LlmServer.DEFAULT_PORT);
+            } catch (Throwable t) {
+                android.util.Log.e("LlmServer", "autoStart échoué: " + t.getMessage());
+            }
+        });
+    }
+
+    // ── Méthode pour init forcée depuis MainActivity (legacy, non utilisée) ──
     public static void forceInit(Context context) {
         android.util.Log.i("GemmaSynthesis", "Init forcée au démarrage...");
     }
@@ -181,6 +235,75 @@ public class GemmaSynthesisPlugin extends Plugin {
     //    adb pull /sdcard/Android/data/com.karmicgochara.app/files/generations.jsonl
     //  Format ALIGNÉ sur dataset_finetuning.jsonl (champ "messages" type chat pour
     //  fine-tune) + métadonnées (type/engine/ts) exploitables par le RAG OKF.
+    // ── Capture server-side (livrable b) : écrit dans llm_server_capture.jsonl ──
+    // Même format que captureGeneration (aligné dataset), mais fichier dédié au endpoint.
+    // Appelé par LlmServer après chaque /v1/generate.
+    java.io.File getCaptureFile() {
+        return new java.io.File(getContext().getExternalFilesDir(null), "llm_server_capture.jsonl");
+    }
+
+    void recordGeneration(String system, String user, String response, String type, String engine) {
+        try {
+            java.io.File f = getCaptureFile();
+            org.json.JSONObject userMsg = new org.json.JSONObject();
+            userMsg.put("role", "user");
+            userMsg.put("content", (user != null ? user : ""));
+            org.json.JSONObject asstMsg = new org.json.JSONObject();
+            asstMsg.put("role", "assistant");
+            asstMsg.put("content", (response != null ? response : ""));
+            org.json.JSONObject rec = new org.json.JSONObject();
+            if (system != null && !system.isEmpty()) {
+                org.json.JSONObject sysMsg = new org.json.JSONObject();
+                sysMsg.put("role", "system");
+                sysMsg.put("content", system);
+                rec.put("messages", new org.json.JSONArray(java.util.Arrays.asList(sysMsg, userMsg, asstMsg)));
+            } else {
+                rec.put("messages", new org.json.JSONArray(java.util.Arrays.asList(userMsg, asstMsg)));
+            }
+            rec.put("type", (type != null ? type : "synthesis"));
+            rec.put("engine", (engine != null ? engine : "unknown"));
+            rec.put("ts", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US).format(new java.util.Date()));
+            try (java.io.FileWriter w = new java.io.FileWriter(f, true)) {
+                w.write(rec.toString() + "\n");
+            }
+            android.util.Log.i("LlmServer", "captureGenerationServer: +1 -> " + f.getAbsolutePath() + " (" + f.length() + " o)");
+        } catch (Throwable t) {
+            android.util.Log.w("LlmServer", "captureGenerationServer échouée: " + t.getMessage());
+        }
+    }
+
+    // ── Génération déclenchée par le serveur HTTP (réutilise le moteur de generate()) ──
+    // Ne passe PAS par le PluginCall (appel synchrone depuis le thread du serveur).
+    // Réutilise GemmaHelper.generateSync (API LiteRT-LM officielle sendMessage) — cohérent
+    // avec generate(). Timeout 180s pour ne pas pendre le client HTTP indéfiniment.
+    String runGenerateForServer(String system, String user, String lang) {
+        try {
+            Conversation conversation = sBaseConversationRef.get();
+            if (conversation == null) throw new RuntimeException("Engine non prêt");
+            // Nouvelle conversation propre (comme generate() recrée la sienne)
+            Conversation fresh = sEngineRef.get().createConversation(buildServerConversationOpts());
+            String response = GemmaHelper.generateSync(fresh, user);
+            if (response == null || response.startsWith("Error:")) {
+                throw new RuntimeException("INFERENCE_FAILED: " + response);
+            }
+            return response;
+        } catch (Throwable t) {
+            android.util.Log.e("LlmServer", "generate error", t);
+            throw new RuntimeException(t);
+        }
+    }
+
+    // Options de conversation pour le serveur (system vide — le prompt système est
+    // injecté côté app via DoctrinePromptBuilder si besoin ; ici on garde le user brut).
+    private ConversationConfig buildServerConversationOpts() {
+        return new ConversationConfig(
+            null, new java.util.ArrayList<>(), new java.util.ArrayList<>(),
+            new SamplerConfig(TOP_K, 1.0, TEMPERATURE, 0), true, null, new java.util.HashMap<>(), null
+        );
+    }
+
+    // ══════════════════════════════════════════════════════════════════════════
+    //  captureGeneration — hook app (filet de sécurité, déclenché par generate())
     //  Chemin = ExternalFilesDir (lisible sans root) → files/generations.jsonl
     // ══════════════════════════════════════════════════════════════════════════
     private void captureGeneration(String system, String user, String response, String type, String engine) {
@@ -273,9 +396,18 @@ public class GemmaSynthesisPlugin extends Plugin {
         long len = f.length();
         // Variant TPU (3,95 Go) : la taille tient lieu de garde-fou (pas de sha256 coûteux).
         if (len == TPU_MODEL_SIZE) return true;
-        if (len != EXPECTED_MODEL_SIZE) return false;
-        String h = sha256Of(f);
-        return h != null && h.equalsIgnoreCase(EXPECTED_MODEL_SHA256);
+        // Base Gemma-4-E2B INT4 (CPU/GPU) — référence.
+        if (len == EXPECTED_MODEL_SIZE) {
+            String h = sha256Of(f);
+            if (h != null && h.equalsIgnoreCase(EXPECTED_MODEL_SHA256)) return true;
+        }
+        // Merged fine-tune (LoRA baké) — accepté SEULEMENT si déployé (MERGED_MODEL_SIZE > 0)
+        // et sha256 correspondant. Tant que le placeholder 0L est présent, jamais accepté.
+        if (MERGED_MODEL_SIZE > 0 && len == MERGED_MODEL_SIZE) {
+            String h = sha256Of(f);
+            if (h != null && h.equalsIgnoreCase(MERGED_MODEL_SHA256)) return true;
+        }
+        return false;
     }
 
     // Cherche le modèle dans Google AI Edge Gallery (contexte du package tiers).
@@ -648,18 +780,34 @@ public class GemmaSynthesisPlugin extends Plugin {
     // ══════════════════════════════════════════════════════════════════════════
     //  prepareModel
     // ══════════════════════════════════════════════════════════════════════════
+    // ── Accès pour LlmServer (endpoint) : le moteur est-il prêt ? ──
+    public boolean isEngineReady() {
+        return sEngineRef.get() != null && sBaseConversationRef.get() != null;
+    }
+
     @PluginMethod
     public void prepareModel(PluginCall call) {
+        sInstanceRef.set(this); // pour forceInit() autoStart serveur depuis contexte static
+        boolean useReport = Boolean.TRUE.equals(call.getBoolean("report", false));
+        prepareModelInternal(useReport, call);
+    }
+
+    /**
+     * Préparation du moteur (idempotente). Si call != null, résout/rejette le PluginCall ;
+     * sinon (autoStart serveur) on se contente de logger. Réutilisée par autoStartServer().
+     */
+    private void prepareModelInternal(boolean useReport, PluginCall call) {
         if (sEngineRef.get() != null && sBaseConversationRef.get() != null) {
-            JSObject result = new JSObject();
-            result.put("ok",       true);
-            result.put("loraUsed", false);
-            result.put("cached",   true);
-            call.resolve(result);
+            if (call != null) {
+                JSObject result = new JSObject();
+                result.put("ok",       true);
+                result.put("loraUsed", false);
+                result.put("cached",   true);
+                call.resolve(result);
+            }
             return;
         }
 
-        boolean useReport = Boolean.TRUE.equals(call.getBoolean("report", false));
         sMaxTokens = useReport ? MAX_TOKENS_REPORT : MAX_TOKENS_SYNTHESIS;
 
         synchronized (GemmaSynthesisPlugin.class) {
@@ -802,7 +950,7 @@ public class GemmaSynthesisPlugin extends Plugin {
                 result.put("ok",       true);
                 result.put("loraUsed", false);
                 result.put("cached",   false);
-                call.resolve(result);
+                if (call != null) call.resolve(result);
 
             } catch (Exception e) {
                 synchronized (GemmaSynthesisPlugin.class) { sPreparing = false; }
@@ -815,7 +963,7 @@ public class GemmaSynthesisPlugin extends Plugin {
                     }
                 }
                 String stackTrace = android.util.Log.getStackTraceString(e);
-                call.reject("PREPARE_ERROR", msg + "\n" + stackTrace);
+                if (call != null) call.reject("PREPARE_ERROR", msg + "\n" + stackTrace);
             }
         });
     }
@@ -1054,6 +1202,45 @@ public class GemmaSynthesisPlugin extends Plugin {
         call.resolve(result);
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    //  llmServer — endpoint HTTP local Pixel (Livrable a+b : serveur + capture)
+    //  start  : démarre le serveur (127.0.0.1:8099) si le moteur est prêt
+    //  stop   : arrête le serveur
+    //  status : renvoie running / modelReady / port
+    // ══════════════════════════════════════════════════════════════════════════
+    @PluginMethod
+    public void llmServer(PluginCall call) {
+        String action = call.getString("action", "status");
+        JSObject result = new JSObject();
+        try {
+            if ("start".equals(action)) {
+                if (sEngineRef.get() == null) {
+                    call.reject("ENGINE_NOT_READY", "prepareModel() doit être appelé avant llmServer(start).");
+                    return;
+                }
+                if (sLlmServer == null) sLlmServer = new LlmServer(getContext(), this, LlmServer.DEFAULT_PORT);
+                sLlmServer.start();
+                result.put("ok", true);
+                result.put("port", LlmServer.DEFAULT_PORT);
+                result.put("running", true);
+                call.resolve(result);
+            } else if ("stop".equals(action)) {
+                if (sLlmServer != null) { sLlmServer.stop(); sLlmServer = null; }
+                result.put("ok", true);
+                result.put("running", false);
+                call.resolve(result);
+            } else { // status
+                result.put("ok", true);
+                result.put("running", sLlmServer != null && sLlmServer.isRunning());
+                result.put("modelReady", sEngineRef.get() != null);
+                result.put("port", LlmServer.DEFAULT_PORT);
+                call.resolve(result);
+            }
+        } catch (Throwable t) {
+            call.reject("LLM_SERVER_ERROR", t.getMessage());
+        }
+    }
+
 
     // ══════════════════════════════════════════════════════════════════════════
     //  getDeviceMemory
@@ -1155,6 +1342,7 @@ public class GemmaSynthesisPlugin extends Plugin {
     @Override
     protected void handleOnDestroy() {
         executor.shutdown();
+        if (sLlmServer != null) { try { sLlmServer.stop(); } catch (Throwable ignored) {} sLlmServer = null; }
         // Ne PAS fermer sModel / sBaseSession ici — static, survit aux recreations d'Activity.
         // Appeler unloadModel() explicitement si besoin de libérer la mémoire.
         super.handleOnDestroy();
