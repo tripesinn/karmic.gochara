@@ -524,6 +524,7 @@ Pas de "travaille sur toi-même" vague.
 Quand la fenêtre se ferme. Pourquoi cette date en fonction du Dasha actuel.
 
 STYLE : Pas de jargon astro externe (pas de noms de signes). Langage direct, tutoiement.
+INTERDIT : aucun titre, en-tête ou préfixe avant le bloc 1 (pas de "HOOK", "# HOOK", "🔴", ni ton nom/prénom). Commence DIRECTEMENT par "**Point chaud:**".
 LONGUEUR : 200 mots max, total.
 """
 
@@ -543,6 +544,7 @@ No vague "work on yourself".
 When the window closes. Why this date based on the current Dasha.
 
 STYLE: No external astro jargon (no zodiac sign names). Direct language.
+FORBIDDEN: no title, header, or prefix before block 1 (no "HOOK", "# HOOK", "🔴", no name). Start DIRECTLY with "**Hotspot (Point chaud):**".
 LENGTH: 200 words max, total.
 """
 
