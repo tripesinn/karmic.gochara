@@ -1,0 +1,13 @@
+KARMIC GOCHARA — Play Store Release Notes (v61 / 1.9.42)
+
+EN (short):
+- On-device AI fully working: Soul Debug, Gochara transits, and chat now run 100% locally (Gemma model, no server needed).
+- Fixed chat falling back to cloud ("server not configured") when local AI was enabled.
+- Removed diagnostic benchmark code.
+- Stability and crash fixes for on-device inference.
+
+FR (court):
+- IA 100% locale fonctionnelle : Soul Debug, transits Gochara et le chat tournent désormais entièrement sur l'appareil (modèle Gemma, aucun serveur requis).
+- Correction du chat basculant vers le cloud (« serveur non configuré ») quand l'IA locale était activée.
+- Suppression du code de diagnostic (bench).
+- Correctifs de stabilité pour l'inférence sur appareil.

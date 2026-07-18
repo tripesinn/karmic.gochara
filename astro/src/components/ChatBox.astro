@@ -131,18 +131,20 @@
       const storedSettings = localStorage.getItem('karmic_ai_settings');
       if (storedSettings) {
         try {
-          useLocalConfig = JSON.parse(storedSettings).useLocal === true;
+          const s = JSON.parse(storedSettings);
+          // Aligné sur lecture.astro : les réglés écrivent localMode ('native'/'network'/'cloud'),
+          // mais useLocal (bool) reste supporté pour compat.
+          const localMode = s.localMode || (s.useLocal ? 'native' : 'cloud');
+          useLocalConfig = localMode !== 'cloud';
         } catch (e) {}
       }
 
       let isLocalAvailable = false;
-      if (capacitorBridge.isNative() && useLocalConfig) {
-        try {
-          const avail = await capacitorBridge.gemma.checkAvailability();
-          if (avail && avail.available) {
-            isLocalAvailable = true;
-          }
-        } catch (e) {}
+      // Tente le natif si on est sur device natif. Le Miroir force wantLocal=true et marche ;
+      // le chat doit faire de même (ne plus dépendre des réglés qui peuvent être inconsistants
+      // entre api.ts useLocal et SettingsModal localMode). prepareModel() gérera le chargement.
+      if (capacitorBridge.isNative()) {
+        isLocalAvailable = true;
       }
 
       if (isLocalAvailable) {

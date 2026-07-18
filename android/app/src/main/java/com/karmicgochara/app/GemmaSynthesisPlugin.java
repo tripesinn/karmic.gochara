@@ -86,9 +86,14 @@ public class GemmaSynthesisPlugin extends Plugin {
     // ── Modèle délégué (Google AI Edge Gallery) ──────────────────────────────
     // L'app réutilise le .litertlm déjà présent sur l'appareil (fourni par Edge Gallery)
     // plutôt que de re-télécharger 2,58 Go. Hash de référence du fichier hybride INT4.
+    // Hash/taille du fichier hybride INT4 générique (CPU/GPU), 2,58 Go
     private static final String EXPECTED_MODEL_SHA256 =
         "181938105e0eefd105961417e8da75903eacda102c4fce9ce90f50b97139a63c";
     private static final long EXPECTED_MODEL_SIZE = 2_588_147_712L;
+    // Variant TPU 4 Go (compilé Edge TPU Tensor G5) — backend NPU natif = rapide + tokens
+    private static final String TPU_MODEL_FILENAME = "gemma-4-E2B-it_Google_Tensor_G5.litertlm";
+    private static final long TPU_MODEL_SIZE = 3_953_110_901L;
+    private static final String TPU_GALLERY_SUBDIR = "Gemma_4_E2B_it_TPU";
     private static final String GALLERY_PKG = "com.google.ai.edge.gallery";
     private static final String PUBLIC_DOWNLOAD_MODEL =
         "/storage/emulated/0/Download/gemma-4-E2B-it.litertlm";
@@ -170,6 +175,56 @@ public class GemmaSynthesisPlugin extends Plugin {
         } catch (Throwable ignored) {}
     }
 
+    // ══════════════════════════════════════════════════════════════════════════
+    //  captureGeneration — persiste CHAQUE génération (prompt + réponse) en jsonl
+    //  pullable via adb :
+    //    adb pull /sdcard/Android/data/com.karmicgochara.app/files/generations.jsonl
+    //  Format ALIGNÉ sur dataset_finetuning.jsonl (champ "messages" type chat pour
+    //  fine-tune) + métadonnées (type/engine/ts) exploitables par le RAG OKF.
+    //  Chemin = ExternalFilesDir (lisible sans root) → files/generations.jsonl
+    // ══════════════════════════════════════════════════════════════════════════
+    private void captureGeneration(String system, String user, String response, String type, String engine) {
+        try {
+            java.io.File dir = getContext().getExternalFilesDir(null);
+            java.io.File f = new java.io.File(dir, "generations.jsonl");
+            org.json.JSONObject userMsg = new org.json.JSONObject();
+            userMsg.put("role", "user");
+            userMsg.put("content", (user != null ? user : ""));
+            org.json.JSONObject asstMsg = new org.json.JSONObject();
+            asstMsg.put("role", "assistant");
+            asstMsg.put("content", (response != null ? response : ""));
+            org.json.JSONObject rec = new org.json.JSONObject();
+            if (system != null && !system.isEmpty()) {
+                org.json.JSONObject sysMsg = new org.json.JSONObject();
+                sysMsg.put("role", "system");
+                sysMsg.put("content", system);
+                rec.put("messages", new org.json.JSONArray(java.util.Arrays.asList(sysMsg, userMsg, asstMsg)));
+            } else {
+                rec.put("messages", new org.json.JSONArray(java.util.Arrays.asList(userMsg, asstMsg)));
+            }
+            rec.put("type", (type != null ? type : "synthesis"));
+            rec.put("engine", (engine != null ? engine : "unknown"));
+            rec.put("ts", new java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US).format(new java.util.Date()));
+            // Rotation anti-ballonnement : garde les 5000 dernières lignes
+            if (f.exists() && f.length() > 50L * 1024 * 1024) {
+                java.util.List<String> lines = new java.util.ArrayList<>();
+                try (java.io.BufferedReader r = new java.io.BufferedReader(new java.io.FileReader(f))) {
+                    String l; while ((l = r.readLine()) != null) lines.add(l);
+                }
+                int start = Math.max(0, lines.size() - 5000);
+                java.lang.StringBuilder sb = new java.lang.StringBuilder();
+                for (int i = start; i < lines.size(); i++) sb.append(lines.get(i)).append("\n");
+                try (java.io.FileWriter w = new java.io.FileWriter(f)) { w.write(sb.toString()); }
+            }
+            try (java.io.FileWriter fw = new java.io.FileWriter(f, true)) {
+                fw.append(rec.toString()).append("\n");
+            }
+            android.util.Log.i("GemmaSynthesis", "captureGeneration: +1 ligne -> " + f.getAbsolutePath() + " (" + f.length() + " o)");
+        } catch (Throwable t) {
+            android.util.Log.w("GemmaSynthesis", "captureGeneration échouée: " + t.getMessage());
+        }
+    }
+
     // Si NPU échoue (modèle non compatible NPU, .so absents) → GPU → CPU.
     private Backend createBackend() {
         // 1. Tentative NPU (Google Tensor / EdgeTPU)
@@ -214,7 +269,11 @@ public class GemmaSynthesisPlugin extends Plugin {
     }
 
     private boolean isValidModel(File f) {
-        if (f == null || !f.exists() || f.length() != EXPECTED_MODEL_SIZE) return false;
+        if (f == null || !f.exists()) return false;
+        long len = f.length();
+        // Variant TPU (3,95 Go) : la taille tient lieu de garde-fou (pas de sha256 coûteux).
+        if (len == TPU_MODEL_SIZE) return true;
+        if (len != EXPECTED_MODEL_SIZE) return false;
         String h = sha256Of(f);
         return h != null && h.equalsIgnoreCase(EXPECTED_MODEL_SHA256);
     }
@@ -226,14 +285,30 @@ public class GemmaSynthesisPlugin extends Plugin {
             Context gctx = getContext().createPackageContext(GALLERY_PKG, Context.CONTEXT_IGNORE_SECURITY);
             File base = gctx.getExternalFilesDir(null);
             if (base == null) return null;
+            // 1. Variant générique (CPU/GPU) — surface
             String[] subs = { "models", "Download", "" };
             for (String sub : subs) {
                 File cand = sub.isEmpty() ? new File(base, sModelFilename)
                                           : new File(new File(base, sub), sModelFilename);
                 if (cand.exists() && cand.length() == EXPECTED_MODEL_SIZE) return cand;
             }
+            // 2. Variant TPU (Edge TPU Tensor G5) — sous-dossier Gemma_4_E2B_it_TPU/<hash>/
+            File tpu = findInSubdirs(new File(base, TPU_GALLERY_SUBDIR), TPU_MODEL_FILENAME, TPU_MODEL_SIZE);
+            if (tpu != null) return tpu;
         } catch (Throwable t) {
             debugLog("Gallery non accessible: " + t.getMessage());
+        }
+        return null;
+    }
+
+    // Cherche <filename> de taille exacte dans les sous-dossiers immédiats de dir.
+    private File findInSubdirs(File dir, String filename, long size) {
+        if (dir == null || !dir.isDirectory()) return null;
+        File[] children = dir.listFiles();
+        if (children == null) return null;
+        for (File child : children) {
+            File cand = new File(child, filename);
+            if (cand.exists() && cand.length() == size) return cand;
         }
         return null;
     }
@@ -666,11 +741,15 @@ public class GemmaSynthesisPlugin extends Plugin {
                 }
 
                 // 2. Construire l'Engine LiteRT-LM
-                // #2 : fallback NPU (si TRY_NPU) → GPU → CPU.
-                // gemma-4-E2B n'est PAS compatible NPU (Tensor G5) -> essayer NPU = crash natif SIGSEGV.
+                // Variant TPU détecté mais LiteRT-LM 0.14.0 NPU delegate crash natif (SIGABRT)
+                // sur Tensor G5 -> on force CPU-first pour tous (seul backend qui rend du texte).
+                // NPU/GPU gardés en fallback mais encapsulés (catch -> reject propre, pas de tombstone).
                 debugLog("prepareModel: modelPath=" + modelPath);
+                boolean isTpu = false;
+                try { File mpf = new File(modelPath); isTpu = mpf.exists() && mpf.length() == TPU_MODEL_SIZE; } catch (Throwable ig) {}
+                debugLog("prepareModel: isTpu=" + isTpu);
                 Engine engine = null;
-                String[] backendOrder = TRY_NPU ? new String[]{ "NPU", "GPU", "CPU" } : new String[]{ "GPU", "CPU" };
+                String[] backendOrder = new String[]{ "CPU", "GPU", "NPU" };
                 for (String choice : backendOrder) {
                     Backend backend;
                     if (choice.equals("NPU")) {
@@ -770,6 +849,8 @@ public class GemmaSynthesisPlugin extends Plugin {
         final org.json.JSONObject finalProfile = profile;
 
         executor.execute(() -> {
+            // Backend effectif du dernier moteur initialisé (pour capture fine-tune/RAG)
+            final String[] selectedBackend = { "?" };
             // Lazy-init : charger le modèle au premier appel si pas déjà fait
             if (sEngineRef.get() == null) {
                 try {
@@ -839,8 +920,10 @@ public class GemmaSynthesisPlugin extends Plugin {
 
                         // #2 : fallback NPU (si TRY_NPU) → GPU → CPU (idem prepareModel)
                         debugLog("generate: modelPath=" + modelPath);
+                        boolean isTpu = false;
+                        try { File mpf = new File(modelPath); isTpu = mpf.exists() && mpf.length() == TPU_MODEL_SIZE; } catch (Throwable ig) {}
                         Engine engine = null;
-                        String[] backendOrder = TRY_NPU ? new String[]{ "NPU", "GPU", "CPU" } : new String[]{ "GPU", "CPU" };
+                        final String[] backendOrder = new String[]{ "CPU", "GPU", "NPU" };
                         for (String choice : backendOrder) {
                             Backend backend;
                             if (choice.equals("NPU")) {
@@ -865,6 +948,7 @@ public class GemmaSynthesisPlugin extends Plugin {
                                 tryEngine.initialize();
                                 engine = tryEngine;
                                 debugLog("generate: Engine OK sur backend " + choice);
+                                selectedBackend[0] = choice;
                                 break;
                             } catch (Throwable t) {
                                 debugLog("Backend " + choice + " échoué (generate): " + t.getMessage());
@@ -934,6 +1018,8 @@ public class GemmaSynthesisPlugin extends Plugin {
             String response;
             try {
                 response = task.get(180, java.util.concurrent.TimeUnit.SECONDS);
+                // ── CAPTURE FINE-TUNE / RAG : persiste prompt + réponse (pullable adb) ──
+                captureGeneration(contextualSystem, effectiveUser, response, type, selectedBackend[0]);
             } catch (java.util.concurrent.TimeoutException te) {
                 task.cancel(true);
                 debugLog("generate: TIMEOUT 180s — GPU hang détecté, reject pour éviter l'ANR");

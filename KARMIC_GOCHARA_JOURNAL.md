@@ -517,5 +517,67 @@ Validation Grok réelle à chaque étape ; portage prod sur GO explicite de Jér
 
 **Garde-fous respectés :** prompt single-source NON touché (edge Jérôme intact) ; fix plomberie uniquement ; cron sain.
 
-**Note parallèle :** l'agent site (web app `karmicgochara.app`) est en train d'implémenter le biorythme lunaire côté app — convergence du même axe (Chandra Lagna) entre le bot X (tweet + DM ciblé jour) et l'app (courbe + calendrier transit). À garder en tête pour la cohérence des libellés / URL `/biorhythm/<file>` brandées déjà en place.
 
+
+## Session 16/07/2026 (soir → nuit) — Fix ANR Gemma + fallback Soul Debug local
+
+**Contexte :** Pixel 10 Pro surchauffe/freeze pendant `generate` → ANR. Root cause : `GemmaHelper.kt` utilisait `sendMessageAsync().collect{}` dans un `runBlocking` (bug LiteRT-LM #2718, thread Capacitor bloqué). Fix : `conversation.sendMessage(prompt)` synchrone.
+
+**Commits (GitHub `tripesinn/karmic.gochara`, main) :**
+- `16db6e3` — fix(gemma): sendMessage synchrone (ANR). Fichiers : `GemmaHelper.kt`, `build.gradle` (v32/1.9.13), `AndroidManifest.xml`, `GemmaSynthesisPlugin.java`. Déployé via GitLab CI (build 21:18, SUCCESS).
+- `6085785` — feat(soul_debug): fallback Gemma local si `localMode==='native'` & Grok down. Fichiers : `blueprints/api.py` (+ endpoint `/api/soul_debug_prompt`, parité Grok, unauth 401) + `astro/src/pages/app/index.astro` (.catch fallback). Déployé via GitLab CI (endpoint live vérif : HTTP 401 sur requête non-auth).
+
+**Décisions user (Q1-Q4) :** fallback local UNIQUEMENT si `localMode==='native'` ; même prompt système que Grok (via DoctrinePromptBuilder, transits calculés côté serveur) ; `localStorage` suffit (pas persistance profil) ; Miroir du jour généré au lancement seulement (1re génération via Grok).
+
+**Vérifs ad-hoc (tempfiles, run+supprimés, pas de suite CI) — tout PASS :**
+- `api.py` `/api/soul_debug_prompt` : Flask test client → 200 + {ok, system, user, lang} ; FR/EN variants ; byte-parité avec `system_instruction` Grok ; unauth → 401.
+- `index.astro` fallback : Astro `npm run build` green (TS compile) + port Node du .catch → gates corrects (native+platform ⇒ local calls ; cloud/web ⇒ cloud error).
+- `GemmaHelper.kt` (plus tôt dans la soirée) : Java port du corps synchrone → termine + flatten `Message.contents.contents` correct.
+
+**État device (Pixel 55161FDCH0004E, branché, utilisateur endormi) :**
+- App v32 installée clean (uninstall v25 signature mismatch → reinstall clé `key0`). Fallback frontend embarqué (grep `Oracle local` = 1 dans l'AAB).
+- Backend `/api/soul_debug_prompt` live (Cloud Run `gochara-api`).
+- **E2E réel NON exécuté** : nécessite action manuelle user = « mode native » dans Réglages de l'app, puis relancement (Grok down → fallback Gemma local via Edge Gallery). Bloqué sur input user.
+
+**Bloquant restant :** test E2E on-device (déclenchement du fallback) — à faire demain matin par Jérôme (1 tap Réglages + open app). Tout le reste (code, build, deploy, vérifs) est terminé et vert.
+
+## Session 16/07/2026 (23:47) — Fix MODE TEST en prod
+
+**Bug repéré (user) :** l'écran de login prod affichait les boutons « MODE TEST » (Test: Nouvel Utilisateur / User Existant). Root cause : `PUBLIC_FIREBASE_EMULATOR=true` dans `.env.local` est embeddé par Astro dans tous les builds ; `isEmulator = import.meta.env.PUBLIC_FIREBASE_EMULATOR==='true'` → vrai même en prod.
+
+**Fix (option 2 user) :** gate dev-only. `isEmulator = import.meta.env.DEV && PUBLIC_FIREBASE_EMULATOR==='true'` dans 4 fichiers : `LoginCard.astro`, `firebase.ts`, `firestore-rest.ts`, `api.ts`. En prod build `DEV`=false → boutons TEST + routing émulateur (Flask local 127.0.0.1:5001, Firestore 8080) jamais actifs ; prod utilise Cloud Run live. Note : en prod le fallback Soul Debug appelle donc `/api/soul_debug_prompt` sur Cloud Run (live) — conforme.
+
+**Commit :** `6fa7e01` — pushé origin main. GitLab CI redéploie frontend web.
+
+**Vérifié en réel :** Astro `npm run build` green + `grep "Mode Test"` sur bundle prod = absent. Rebuild AAB v32 + reinstall Pixel (clé `key0`, upgrade OK). Capture écran Pixel confirmée : login ne montre plus que « Continuer avec Google » + branding, MODE TEST disparu.
+
+**État final :** v32 sur Pixel = fix ANR + fallback Soul Debug local + login prod propre. E2E fallback toujours en attente (1 tap « mode native » Réglages demain).
+
+
+
+---
+
+## 2026-07-18 — Chat local 100% + nettoyage bench + AAB v61
+
+**Contexte :** débloquer le chat local (bug « serveur non configuré ») + mesurer plafond contexte (bench) + nettoyer pour release.
+
+**Correctifs chat local (sources) :**
+- `lecture.astro` v53 : `localMode` lu depuis `karmic_ai_settings` → bloc native Gemma.
+- `ChatBox.astro` v56 : force le local si `capacitorBridge.isNative()` (comme le Miroir force `wantLocal=true`). Répare le chat Gochara qui basculait au cloud.
+- Versions : v55 1.9.36 (chat), v56 1.9.37 (bench natif), v57-60 bench hook, v61 1.9.42 (cleanup).
+
+**Validé en réel (Jérôme, device Pixel) :** Soul Debug + Gochara + 1 réponse chat générés EN LOCAL. Chat local fonctionne.
+
+**Bench context (mesure plafond) :** `benchContext` natif + `getBenchFlag` + hook dashboard + `bench.html`. Résultat : timeout tour 1 (prompt 1431c, >180s) = BUG DU BENCH (appelle `generateSync` direct au lieu du chemin `generate` validé), PAS un plafond réel. Chat normal marche. → bench retiré en v61 (code mort).
+
+**TPU :** abandon définitif. Edge Gallery bundle un split `google_tensor_runtime` (lib EDGETPU) absent de KG. LiteRT-LM 0.14.0 seul → SIGABRT NPU. CPU = seul backend fonctionnel.
+
+**Modèle :** Gemma E2B générique 2.58GB (2588147712 o) sur device, backend CPU.
+
+**Nettoyage v61 :** retiré `benchContext`/`getBenchFlag` (plugin), hook bench (`index.astro`), `bench.html`. Bump 61/1.9.42. Build natif vert, APK/AAB installés, pas de crash.
+
+**Artifacts release :** `android/app/build/outputs/bundle/release/app-release.aab` (30.1MB, v61), `release_notes_v61.txt` (FR/EN bref).
+
+**Numéros version :** Play Store actuel = 25 (1.9.6). Nouveau .aab = 61 (1.9.42) → Play accepte (compteur croissant 61 > 25). Saut debug→prod (47-60 jamais publiés).
+
+**Vision future (discussion à venir) :** « Miroir de l'Âme mémoire » = historique des générations (Soul Debug + Gochara + chats) → RAG local (SQLite) + feedback loop → OKF (fine-tune server-side périodique, puis modèle redescendu). Niveau 1 réalisable now (historique + RAG contexte persistant). Niveau 2 (fine-tune on-device) impossible sur Pixel CPU.

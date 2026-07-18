@@ -220,7 +220,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
         const storedSettings = localStorage.getItem('karmic_ai_settings');
         if (storedSettings) {
           const settings = JSON.parse(storedSettings);
-          localMode = settings.localMode || 'cloud';
+          localMode = settings.localMode || (settings.useLocal ? 'native' : 'cloud');
         }
       } catch (e) {}
 
@@ -325,7 +325,7 @@ import { capacitorBridge } from '../../lib/capacitor-bridge';
       if (storedSettings) {
         try {
           const settings = JSON.parse(storedSettings);
-          localMode = settings.localMode || 'cloud';
+          localMode = settings.localMode || (settings.useLocal ? 'native' : 'cloud');
           useLocalConfig = localMode !== 'cloud';
           networkHost = settings.networkHost || 'http://192.168.1.92:11434';
           networkModel = settings.networkModel || 'gemma';
