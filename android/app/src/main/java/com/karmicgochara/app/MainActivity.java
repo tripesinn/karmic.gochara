@@ -21,7 +21,9 @@ public class MainActivity extends BridgeActivity {
         // Plugin AstroCalc — moteur Swiss Ephemeris local
         registerPlugin(AstroCalcPlugin.class);
         // Plugin PlayIntegrity — StandardIntegrityToken posté à /login_firebase
-        registerPlugin(PlayIntegrityPlugin.class);
+        // EXCLU TEMPORAIREMENT : commit ed812c5 cassé (play-core retiré de Maven,
+        // play-integrity:1.4.0 ne se résout pas). À réparer séparément.
+        // registerPlugin(PlayIntegrityPlugin.class);
 
         super.onCreate(savedInstanceState);
 
