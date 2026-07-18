@@ -1,7 +1,7 @@
 ext {
     minSdkVersion = 26
-    compileSdkVersion = 35        // Version stable Android 15
-    targetSdkVersion = 35         // Version stable Android 15
+    compileSdkVersion = 36        // Android 16 — conformité Play (deadline 31 août 2026)
+    targetSdkVersion = 36         // Android 16 — conformité Play (deadline 31 août 2026)
     androidxActivityVersion = '1.9.3'
     androidxAppCompatVersion = '1.7.0'
     androidxCoordinatorLayoutVersion = '1.3.0'
