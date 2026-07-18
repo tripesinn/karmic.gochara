@@ -213,10 +213,12 @@ export const api = {
     );
   },
 
-  loginFirebase(email: string, idToken: string) {
+  loginFirebase(email: string, idToken: string, integrityToken?: string) {
+    const body: any = { email, idToken };
+    if (integrityToken) body.integrity_token = integrityToken;
     return request<{ ok: boolean; needs_register?: boolean; pseudo?: string; profile?: any; error?: string }>(
       '/api/login_firebase',
-      { method: 'POST', body: JSON.stringify({ email, idToken }) }
+      { method: 'POST', body: JSON.stringify(body) }
     );
   },
 

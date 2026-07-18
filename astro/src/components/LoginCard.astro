@@ -169,7 +169,16 @@ const isEmulator = import.meta.env.DEV && import.meta.env.PUBLIC_FIREBASE_EMULAT
     console.log('📡 [API] Tentative de connexion via Firebase ID Token pour:', user.email);
     try {
       const idToken = await user.getIdToken();
-      const resp = await api.loginFirebase(user.email || '', idToken);
+      // Play Integrity : token natif (vide si non natif / provider absent) — backend ignore si flag off
+      let integrityToken = '';
+      try {
+        const { getIntegrityToken } = await import('../lib/integrity');
+        integrityToken = await getIntegrityToken();
+        console.log('🛡️ [INTEGRITY] token obtenu:', integrityToken ? '(présent)' : '(vide)');
+      } catch (ie) {
+        console.warn('🛡️ [INTEGRITY] skip:', ie);
+      }
+      const resp = await api.loginFirebase(user.email || '', idToken, integrityToken);
       console.log('📡 [API] Réponse reçue:', resp);
 
       const origin = window.location.origin;
