@@ -9,10 +9,11 @@ import com.getcapacitor.PluginCall;
 import com.getcapacitor.PluginMethod;
 import com.getcapacitor.annotation.CapacitorPlugin;
 
+import com.google.android.play.core.integrity.IntegrityManagerFactory;
 import com.google.android.play.core.integrity.StandardIntegrityManager;
-import com.google.android.play.core.integrity.StandardIntegrityToken;
-import com.google.android.play.core.integrity.StandardIntegrityTokenProvider;
-import com.google.android.play.core.integrity.StandardIntegrityTokenRequest;
+import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenProvider;
+import com.google.android.play.core.integrity.StandardIntegrityManager.StandardIntegrityTokenRequest;
+import com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -23,13 +24,27 @@ import java.util.concurrent.atomic.AtomicReference;
  * /login_firebase. Le backend (gochara-api) le décode via decodeIntegrityToken
  * (service account play-integrity-decoder) et refuse la session si invalide.
  *
- * Désactivable : si PLAY_INTEGRITY_DISABLED est vrai (build/test), on renvoie
- * un token vide pour ne pas bloquer le login.
+ * API : com.google.android.play:integrity:1.4.0 (package public
+ * com.google.android.play.core.integrity.*, identique à l'ancien play-core).
+ * Changements vs play-core :
+ *   - StandardIntegrityManager est une INTERFACE ; on l'obtient via
+ *     IntegrityManagerFactory.createStandard(context).
+ *   - prepareIntegrityToken() prend un PrepareIntegrityTokenRequest avec
+ *     setCloudProjectNumber(long) (le project number GCP, plus de nonce).
+ *   - request() prend un StandardIntegrityTokenRequest avec setRequestHash(String)
+ *     (empreinte de la requête à sécuriser, plus de nonce).
+ *
+ * cloudProjectNumber : 732214018947 (karmic-gochara-cloud, depuis google-services.json).
+ *
+ * Désactivable : si provider non prêt (build/test), on renvoie un token vide pour
+ * ne pas bloquer le login (backend ignore si PLAY_INTEGRITY_ENABLED=false).
  */
 @CapacitorPlugin(name = "PlayIntegrity")
 public class PlayIntegrityPlugin extends Plugin {
 
     private static final String TAG = "PlayIntegrity";
+    // GCP cloud project number (karmic-gochara-cloud) — requis par l'API 1.4.0.
+    private static final long CLOUD_PROJECT_NUMBER = 732214018947L;
     private final AtomicReference<StandardIntegrityTokenProvider> providerRef =
             new AtomicReference<>();
 
@@ -37,18 +52,20 @@ public class PlayIntegrityPlugin extends Plugin {
     public void load() {
         try {
             Context ctx = getContext();
-            StandardIntegrityManager manager = new StandardIntegrityManager(ctx);
-            manager.prepareIntegrityToken(
-                    com.google.android.play.core.integrity.StandardIntegrityManager.PrepareIntegrityTokenRequest
-                            .builder()
-                            .setNonce(generateNonce())
-                            .build()
-            ).addOnSuccessListener(provider -> {
-                providerRef.set(provider);
-                Log.i(TAG, "StandardIntegrityTokenProvider prêt");
-            }).addOnFailureListener(e -> {
-                Log.w(TAG, "prepareIntegrityToken échoué: " + e.getMessage());
-            });
+            StandardIntegrityManager manager =
+                    IntegrityManagerFactory.createStandard(ctx);
+            PrepareIntegrityTokenRequest request =
+                    PrepareIntegrityTokenRequest.builder()
+                            .setCloudProjectNumber(CLOUD_PROJECT_NUMBER)
+                            .build();
+            manager.prepareIntegrityToken(request)
+                    .addOnSuccessListener(provider -> {
+                        providerRef.set(provider);
+                        Log.i(TAG, "StandardIntegrityTokenProvider prêt");
+                    })
+                    .addOnFailureListener(e -> {
+                        Log.w(TAG, "prepareIntegrityToken échoué: " + e.getMessage());
+                    });
         } catch (Exception e) {
             Log.w(TAG, "load: impossible d'init Play Integrity: " + e.getMessage());
         }
@@ -66,9 +83,11 @@ public class PlayIntegrityPlugin extends Plugin {
             return;
         }
 
-        String nonce = generateNonce();
+        // requestHash = empreinte opaque de la requête à sécuriser (nonce-style).
+        // On utilise un hash hex aléatoire de 32 octets (recommandé par Google).
+        String requestHash = generateNonce();
         StandardIntegrityTokenRequest request =
-                StandardIntegrityTokenRequest.builder().setNonce(nonce).build();
+                StandardIntegrityTokenRequest.builder().setRequestHash(requestHash).build();
 
         provider.request(request).addOnSuccessListener(token -> {
             JSObject ret = new JSObject();
@@ -84,7 +103,7 @@ public class PlayIntegrityPlugin extends Plugin {
     }
 
     private String generateNonce() {
-        // Nonce = hex aléatoire (min 16 bytes recommandés par Google)
+        // nonce/hash = hex aléatoire (min 16 bytes recommandés par Google)
         java.security.SecureRandom sr = new java.security.SecureRandom();
         byte[] bytes = new byte[32];
         sr.nextBytes(bytes);
