@@ -51,9 +51,27 @@ device (2 générations captées, texte Gemma réel). Il reste à valider le (c)
 
 ---
 
-## Note de coordination
-- Le profil karmic_gochara n'édite PAS le prompt système (domaine astro, single-source).
-- Une fois ta validation reçue, karmic_gochara exécute `train`→`merge`→`deploy` sur GPU box et
-  met à jour le sha256/size du plugin si besoin.
-- Le corpus de capture ne s'évapore plus (capture server-side live) — les nouvelles générations
-  alimenteront le dataset via `pixel_generations_pull.sh`.
+## RÉPONSE AUDIT (2026-07-18, post-transmission astro)
+
+**Correction de fait** : les fichiers EXISTENT sur le Mac (`scripts/finetune_kg.py` 6279o,
+`dataset_train_clean.jsonl` 44→28 lignes) mais n'étaient PAS commités → astro (Cloud Shell/GPU box)
+ne les voyait pas. Poussés sur branche `finetune/dataset-audit` :
+https://github.com/tripesinn/karmic.gochara/tree/finetune/dataset-audit
+
+**Audit réel du dataset (ce qu'astro voulait lire) :**
+- Format source RÉEL : `{messages:[system,user,assistant]}` — **PAS** de `type`/`engine`/`ts`.
+  Sur 45 lignes source, seulement **1** a un de ces champs → le filtre par type du brief est
+  **inapplicable** (corrigé : on garde triplets complets).
+- **16/45 lignes = boilerplates d'identité** (« Je suis siderealAstro13. L'analyse est… ») →
+  exclus du training (ce sont des préfixes système, pas de la voix). Nouveau corpus clean = **28 samples**.
+- Reste (12) : Soul Debug FR/EN, Miroir FR, diagnostics ROM Ketu — contenu valide.
+
+**Les 3 points du handoff initial, revus :**
+1. Voix vs poids → **OK** (system prompt 100% côté app, single-source).
+2. Format dataset → **CORRIGÉ** : exclusion boilerplates + pas de filtre par type (inapplicable).
+   À astro de confirmer que les 28 samples sont auditables (branche ci-dessus).
+3. Taille merged model → en stand-by (dépend validation archi astro, pas de désaccord).
+
+**Action astro** : lire les 28 samples sur la branche et valider la voix. Puis karmic_gochara
+lance train→merge→deploy sur GPU box.
+
