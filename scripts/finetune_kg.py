@@ -52,12 +52,40 @@ def is_valid_messages(obj):
         if r not in ROLES or not isinstance(c, str):
             return False
         roles.add(r)
-    return {"system", "user", "assistant"}.issubset(roles)
+    if not {"system", "user", "assistant"}.issubset(roles):
+        return False
+    # Anti-boilerplate : exclure les réponses qui ne sont que un préfixe d'identité
+    # (ex: "Je suis siderealAstro13. L'analyse est...") — ce sont des préfixes système,
+    # pas de la génération. Voir audit dataset (16/45 lignes source concernées).
+    asst = next((m["content"] for m in msgs if m["role"] == "assistant"), "")
+    if _looks_like_identity_boilerplate(asst):
+        return False
+    return True
+
+
+# Préfixes d'identité à EXCLURE du training (boilerplates, pas de la voix réelle)
+_IDENTITY_MARKERS = (
+    "je suis siderealastro13", "tu es l'intelligence", "je suis l'intelligence",
+    "siderealastro13. l'analyse", "siderealastro13. analyse",
+)
+
+
+def _looks_like_identity_boilerplate(text):
+    t = text.strip().lower()
+    # Si la réponse démarre par un marqueur d'identité -> boilerplate
+    for marker in _IDENTITY_MARKERS:
+        if t.startswith(marker):
+            return True
+    # Si le marqueur apparaît dans les 60 premiers caras -> encore un préfixe
+    if any(marker in t[:60] for marker in _IDENTITY_MARKERS):
+        return True
+    return False
 
 
 def cmd_filter():
     kept = 0
     dropped = 0
+    dropped_boiler = 0
     with open(DATASET, "r", encoding="utf-8") as f, \
          open(CLEAN, "w", encoding="utf-8") as out:
         for line in f:
@@ -73,9 +101,18 @@ def cmd_filter():
                 out.write(json.dumps(obj, ensure_ascii=False) + "\n")
                 kept += 1
             else:
+                # Distinguer boilerplate identité vs rating/incomplet
+                asst = ""
+                try:
+                    asst = next((m["content"] for m in obj.get("messages", []) if m["role"] == "assistant"), "")
+                except Exception:
+                    pass
+                if _looks_like_identity_boilerplate(asst):
+                    dropped_boiler += 1
                 dropped += 1
-    print(f"[filter] {kept} lignes conservées (messages complets) -> {CLEAN}")
-    print(f"[filter] {dropped} lignes ignorées (ratings / incomplets)")
+    print(f"[filter] {kept} lignes conservées (messages complets, sans boilerplate identité) -> {CLEAN}")
+    print(f"[filter] {dropped_boiler} boilerplates identité exclus")
+    print(f"[filter] {dropped - dropped_boiler} autres ignorées (ratings / incomplets)")
 
 
 def _require(module, hint):
